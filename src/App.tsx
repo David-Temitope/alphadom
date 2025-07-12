@@ -27,129 +27,82 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
 import Auth from "./pages/Auth";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1
+    }
+  }
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <CartProvider>
-            <AdminProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  {/* Auth Route */}
-                  <Route path="/auth" element={<Auth />} />
-
-                  {/* Public Routes */}
-                  <Route path="/" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <Index />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-                  <Route path="/products" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <Products />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-                  <Route path="/products/:id" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <ProductDetail />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-                  <Route path="/cart" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <Cart />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-                  <Route path="/checkout" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <Checkout />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-                  <Route path="/orders" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <Orders />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-                  <Route path="/about" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <About />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-                  <Route path="/contact" element={
-                    <div className="min-h-screen flex flex-col">
-                      <Navbar />
-                      <main className="flex-1">
-                        <Contact />
-                      </main>
-                      <Footer />
-                    </div>
-                  } />
-
-                  {/* Admin Routes */}
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin" element={
-                    <AdminProtectedRoute>
-                      <AdminDashboard />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/products" element={
-                    <AdminProtectedRoute>
-                      <AdminProducts />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/orders" element={
-                    <AdminProtectedRoute>
-                      <AdminOrders />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/users" element={
-                    <AdminProtectedRoute>
-                      <AdminUsers />
-                    </AdminProtectedRoute>
-                  } />
-
-                  {/* 404 Route */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </AdminProvider>
-          </CartProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+const Layout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen flex flex-col">
+    <Navbar />
+    <main className="flex-1">{children}</main>
+    <Footer />
+  </div>
 );
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <CartProvider>
+              <AdminProvider>
+                <BrowserRouter>
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
+                    {/* Auth Route */}
+                    <Route path="/auth" element={<Auth />} />
+
+                    {/* Public Routes */}
+                    <Route path="/" element={<Layout><Index /></Layout>} />
+                    <Route path="/products" element={<Layout><Products /></Layout>} />
+                    <Route path="/products/:id" element={<Layout><ProductDetail /></Layout>} />
+                    <Route path="/cart" element={<Layout><Cart /></Layout>} />
+                    <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+                    <Route path="/orders" element={<Layout><Orders /></Layout>} />
+                    <Route path="/about" element={<Layout><About /></Layout>} />
+                    <Route path="/contact" element={<Layout><Contact /></Layout>} />
+
+                    {/* Admin Routes */}
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="/admin" element={
+                      <AdminProtectedRoute>
+                        <AdminDashboard />
+                      </AdminProtectedRoute>
+                    } />
+                    <Route path="/admin/products" element={
+                      <AdminProtectedRoute>
+                        <AdminProducts />
+                      </AdminProtectedRoute>
+                    } />
+                    <Route path="/admin/orders" element={
+                      <AdminProtectedRoute>
+                        <AdminOrders />
+                      </AdminProtectedRoute>
+                    } />
+                    <Route path="/admin/users" element={
+                      <AdminProtectedRoute>
+                        <AdminUsers />
+                      </AdminProtectedRoute>
+                    } />
+
+                    {/* 404 Route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </AdminProvider>
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
