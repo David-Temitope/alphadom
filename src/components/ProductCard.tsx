@@ -1,9 +1,14 @@
 
-import { Link } from "react-router-dom";
-import { ShoppingCart, Heart, Star, Leaf } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/contexts/CartContext";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingCart, Leaf, Star } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { WishlistButton } from './WishlistButton';
+import { LikeButton } from './LikeButton';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
   id: string;
@@ -11,131 +16,103 @@ interface Product {
   price: number;
   image: string;
   category: string;
-  rating: number;
-  reviews: number;
-  sustainabilityScore: number;
-  ecoFeatures: string[];
-  description: string;
+  description?: string;
+  sustainability_score?: number;
+  rating?: number;
+  eco_features?: string[];
 }
 
 interface ProductCardProps {
   product: Product;
 }
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
+  const { toast } = useToast();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      sustainabilityScore: product.sustainabilityScore,
-      category: product.category,
+    addToCart(product);
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
     });
   };
 
-  const getSustainabilityColor = (score: number) => {
-    if (score >= 8) return "bg-green-500";
-    if (score >= 6) return "bg-yellow-500";
-    return "bg-orange-500";
-  };
-
   return (
-    <Link to={`/products/${product.id}`}>
-      <div className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100">
-        <div className="relative">
+    <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-0 shadow-md hover:shadow-xl">
+      <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
+        <div className="relative overflow-hidden rounded-t-lg">
           <img
-            src={product.image}
+            src={product.image || '/placeholder.svg'}
             alt={product.name}
-            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
           />
-          
-          {/* Sustainability Score Badge */}
-          <div className="absolute top-2 left-2">
-            <Badge className={`${getSustainabilityColor(product.sustainabilityScore)} text-white flex items-center space-x-1`}>
-              <Leaf className="h-3 w-3" />
-              <span>{product.sustainabilityScore}/10</span>
-            </Badge>
+          <div className="absolute top-2 right-2 flex gap-1">
+            <WishlistButton productId={product.id} size="sm" />
+            <LikeButton productId={product.id} size="sm" />
           </div>
-
-          {/* Wishlist Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute top-2 right-2 bg-white/80 hover:bg-white group opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            <Heart className="h-4 w-4" />
-          </Button>
+          {product.sustainability_score && product.sustainability_score > 7 && (
+            <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100">
+              <Leaf className="w-3 h-3 mr-1" />
+              Eco-Friendly
+            </Badge>
+          )}
         </div>
-
-        <div className="p-4 space-y-3">
-          <div className="space-y-1">
+        
+        <CardContent className="flex-1 p-4">
+          <div className="flex justify-between items-start mb-2">
             <Badge variant="secondary" className="text-xs">
               {product.category}
             </Badge>
-            <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-2">
-              {product.name}
-            </h3>
-          </div>
-
-          <p className="text-sm text-gray-600 line-clamp-2">
-            {product.description}
-          </p>
-
-          {/* Eco Features */}
-          <div className="flex flex-wrap gap-1">
-            {product.ecoFeatures.slice(0, 2).map((feature, index) => (
-              <Badge key={index} variant="outline" className="text-xs text-green-600 border-green-200">
-                {feature}
-              </Badge>
-            ))}
-            {product.ecoFeatures.length > 2 && (
-              <Badge variant="outline" className="text-xs text-gray-500">
-                +{product.ecoFeatures.length - 2}
-              </Badge>
+            {product.rating && (
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-xs text-muted-foreground">
+                  {product.rating.toFixed(1)}
+                </span>
+              </div>
             )}
           </div>
-
-          {/* Rating */}
-          <div className="flex items-center space-x-1">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-sm text-gray-600">
-              {product.rating} ({product.reviews})
-            </span>
-          </div>
-
-          {/* Price and Add to Cart */}
-          <div className="flex items-center justify-between pt-2">
-            <div className="text-xl font-bold text-green-600">
+          
+          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+            {product.name}
+          </h3>
+          
+          {product.description && (
+            <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+              {product.description}
+            </p>
+          )}
+          
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-bold text-primary">
               ${product.price.toFixed(2)}
-            </div>
-            <Button
-              onClick={handleAddToCart}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center space-x-2"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              <span>Add</span>
-            </Button>
+            </span>
+            {product.sustainability_score && (
+              <div className="flex items-center gap-1">
+                <Leaf className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-medium text-green-600">
+                  {product.sustainability_score}/10
+                </span>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-    </Link>
+        </CardContent>
+      </Link>
+      
+      <CardFooter className="p-4 pt-0">
+        <Button 
+          onClick={handleAddToCart}
+          className="w-full transition-all duration-200 hover:scale-105"
+          size="sm"
+        >
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          Add to Cart
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
