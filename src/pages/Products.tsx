@@ -122,9 +122,8 @@ const Products = () => {
                   image: product.image || '/placeholder.svg',
                   category: product.category,
                   rating: Number(product.rating) || 0,
-                  reviews: product.reviews || 0,
-                  sustainabilityScore: product.sustainability_score || 0,
-                  ecoFeatures: product.eco_features || [],
+                  sustainability_score: product.sustainability_score || 0,
+                  eco_features: product.eco_features || [],
                   description: product.description || ''
                 }}
               />

@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const UserMenu = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   if (!user) return null;
 
@@ -71,7 +71,7 @@ export const UserMenu = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer text-red-600 dark:text-red-400"
-          onClick={logout}
+          onClick={signOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
