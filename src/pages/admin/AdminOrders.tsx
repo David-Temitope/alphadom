@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +30,7 @@ const AdminOrders = () => {
   const { toast } = useToast();
 
   const filteredOrders = orders.filter(order => {
-    const profile = order.profiles as any;
+    const profile = order.profiles;
     const matchesSearch = profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          profile?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -190,7 +189,7 @@ const AdminOrders = () => {
               </TableHeader>
               <TableBody>
                 {filteredOrders.map((order) => {
-                  const profile = order.profiles as any;
+                  const profile = order.profiles;
                   return (
                     <TableRow key={order.id}>
                       <TableCell className="font-medium">#{order.id.slice(0, 8)}</TableCell>

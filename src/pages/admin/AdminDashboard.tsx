@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,7 +92,7 @@ const AdminDashboard = () => {
 
   // Recent orders with profile data
   const recentOrders = orders.slice(0, 4).map(order => {
-    const profile = order.profiles as any;
+    const profile = order.profiles;
     return {
       id: `#${order.id.slice(0, 6)}`,
       customer: profile?.full_name || profile?.email || 'Unknown',

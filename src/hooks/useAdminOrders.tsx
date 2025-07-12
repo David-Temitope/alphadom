@@ -3,7 +3,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 
-type Order = Tables<'orders'>;
+type Order = Tables<'orders'> & {
+  profiles?: {
+    full_name: string | null;
+    email: string;
+  };
+};
 
 export const useAdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
