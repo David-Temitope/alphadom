@@ -7,7 +7,7 @@ type Order = Tables<'orders'> & {
   profiles?: {
     full_name: string | null;
     email: string;
-  };
+  } | null;
 };
 
 export const useAdminOrders = () => {
@@ -51,7 +51,14 @@ export const useAdminOrders = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      
+      // Type the data properly to handle the profiles relationship
+      const typedOrders: Order[] = (data || []).map(order => ({
+        ...order,
+        profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
+      }));
+      
+      setOrders(typedOrders);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Error fetching orders:', err);

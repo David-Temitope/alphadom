@@ -7,6 +7,8 @@ interface CartItem {
   price: number;
   image: string;
   quantity: number;
+  category: string;
+  sustainabilityScore: number;
 }
 
 interface CartContextType {
@@ -16,6 +18,8 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   total: number;
+  totalPrice: number;
+  totalSustainabilityImpact: number;
   itemCount: number;
 }
 
@@ -26,9 +30,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Calculate total price
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = total;
   
   // Calculate total item count
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Calculate total sustainability impact
+  const totalSustainabilityImpact = items.length > 0 
+    ? items.reduce((sum, item) => sum + (item.sustainabilityScore * item.quantity), 0) / itemCount
+    : 0;
 
   const addToCart = (product: any) => {
     setItems(prevItems => {
@@ -40,7 +50,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             : item
         );
       }
-      return [...prevItems, { ...product, quantity: 1 }];
+      return [...prevItems, { 
+        ...product, 
+        quantity: 1,
+        category: product.category || 'General',
+        sustainabilityScore: product.sustainability_score || 0
+      }];
     });
   };
 
@@ -72,6 +87,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateQuantity,
       clearCart,
       total,
+      totalPrice,
+      totalSustainabilityImpact,
       itemCount,
     }}>
       {children}
