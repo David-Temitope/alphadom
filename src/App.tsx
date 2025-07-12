@@ -27,13 +27,15 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
 import Auth from "./pages/Auth";
 
+// Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1
-    }
-  }
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
 });
 
 const Layout = ({ children }: { children: React.ReactNode }) => (
@@ -45,63 +47,67 @@ const Layout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const App = () => {
+  console.log('App component rendering');
+  
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ThemeProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
           <AuthProvider>
             <CartProvider>
               <AdminProvider>
                 <BrowserRouter>
-                  <Toaster />
-                  <Sonner />
-                  <Routes>
-                    {/* Auth Route */}
-                    <Route path="/auth" element={<Auth />} />
+                  <div className="App">
+                    <Toaster />
+                    <Sonner />
+                    <Routes>
+                      {/* Auth Route */}
+                      <Route path="/auth" element={<Auth />} />
 
-                    {/* Public Routes */}
-                    <Route path="/" element={<Layout><Index /></Layout>} />
-                    <Route path="/products" element={<Layout><Products /></Layout>} />
-                    <Route path="/products/:id" element={<Layout><ProductDetail /></Layout>} />
-                    <Route path="/cart" element={<Layout><Cart /></Layout>} />
-                    <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
-                    <Route path="/orders" element={<Layout><Orders /></Layout>} />
-                    <Route path="/about" element={<Layout><About /></Layout>} />
-                    <Route path="/contact" element={<Layout><Contact /></Layout>} />
+                      {/* Public Routes */}
+                      <Route path="/" element={<Layout><Index /></Layout>} />
+                      <Route path="/products" element={<Layout><Products /></Layout>} />
+                      <Route path="/products/:id" element={<Layout><ProductDetail /></Layout>} />
+                      <Route path="/cart" element={<Layout><Cart /></Layout>} />
+                      <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+                      <Route path="/orders" element={<Layout><Orders /></Layout>} />
+                      <Route path="/about" element={<Layout><About /></Layout>} />
+                      <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
-                    {/* Admin Routes */}
-                    <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route path="/admin" element={
-                      <AdminProtectedRoute>
-                        <AdminDashboard />
-                      </AdminProtectedRoute>
-                    } />
-                    <Route path="/admin/products" element={
-                      <AdminProtectedRoute>
-                        <AdminProducts />
-                      </AdminProtectedRoute>
-                    } />
-                    <Route path="/admin/orders" element={
-                      <AdminProtectedRoute>
-                        <AdminOrders />
-                      </AdminProtectedRoute>
-                    } />
-                    <Route path="/admin/users" element={
-                      <AdminProtectedRoute>
-                        <AdminUsers />
-                      </AdminProtectedRoute>
-                    } />
+                      {/* Admin Routes */}
+                      <Route path="/admin/login" element={<AdminLogin />} />
+                      <Route path="/admin" element={
+                        <AdminProtectedRoute>
+                          <AdminDashboard />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/admin/products" element={
+                        <AdminProtectedRoute>
+                          <AdminProducts />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/admin/orders" element={
+                        <AdminProtectedRoute>
+                          <AdminOrders />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/admin/users" element={
+                        <AdminProtectedRoute>
+                          <AdminUsers />
+                        </AdminProtectedRoute>
+                      } />
 
-                    {/* 404 Route */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                      {/* 404 Route */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
                 </BrowserRouter>
               </AdminProvider>
             </CartProvider>
           </AuthProvider>
-        </ThemeProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 };
 
