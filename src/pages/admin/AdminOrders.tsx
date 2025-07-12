@@ -20,72 +20,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Eye, Download } from 'lucide-react';
+import { Search, Eye, Download, Loader2 } from 'lucide-react';
+import { useAdminOrders } from '@/hooks/useAdminOrders';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminOrders = () => {
+  const { orders, loading, updateOrderStatus } = useAdminOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { toast } = useToast();
 
-  const mockOrders = [
-    {
-      id: '#ORD-1001',
-      customer: 'John Doe',
-      email: 'john@example.com',
-      date: '2024-01-15',
-      items: 3,
-      total: 89.99,
-      status: 'completed',
-      paymentStatus: 'paid',
-    },
-    {
-      id: '#ORD-1002',
-      customer: 'Jane Smith',
-      email: 'jane@example.com',
-      date: '2024-01-14',
-      items: 2,
-      total: 124.50,
-      status: 'processing',
-      paymentStatus: 'paid',
-    },
-    {
-      id: '#ORD-1003',
-      customer: 'Bob Johnson',
-      email: 'bob@example.com',
-      date: '2024-01-13',
-      items: 1,
-      total: 67.25,
-      status: 'shipped',
-      paymentStatus: 'paid',
-    },
-    {
-      id: '#ORD-1004',
-      customer: 'Alice Brown',
-      email: 'alice@example.com',
-      date: '2024-01-12',
-      items: 4,
-      total: 156.75,
-      status: 'pending',
-      paymentStatus: 'pending',
-    },
-    {
-      id: '#ORD-1005',
-      customer: 'Charlie Wilson',
-      email: 'charlie@example.com',
-      date: '2024-01-11',
-      items: 2,
-      total: 98.00,
-      status: 'cancelled',
-      paymentStatus: 'refunded',
-    },
-  ];
-
-  const filteredOrders = mockOrders.filter(order => {
-    const matchesSearch = order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredOrders = orders.filter(order => {
+    const profile = order.profiles as any;
+    const matchesSearch = profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         profile?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    const { error } = await updateOrderStatus(orderId, newStatus);
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: `Order status updated to ${newStatus}`,
+      });
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -109,6 +77,16 @@ const AdminOrders = () => {
     return <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{status}</Badge>;
   };
 
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -125,9 +103,50 @@ const AdminOrders = () => {
           </Button>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{orders.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {orders.filter(o => o.status === 'pending').length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completed Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {orders.filter(o => o.status === 'completed').length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                ${orders.reduce((sum, order) => sum + Number(order.total_amount), 0).toFixed(2)}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>Order Management</CardTitle>
+            <CardTitle>Order Management ({orders.length} orders)</CardTitle>
             <CardDescription>
               View and manage all customer orders
             </CardDescription>
@@ -163,7 +182,6 @@ const AdminOrders = () => {
                   <TableHead>Order ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Items</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Order Status</TableHead>
                   <TableHead>Payment</TableHead>
@@ -171,41 +189,46 @@ const AdminOrders = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{order.customer}</p>
-                        <p className="text-sm text-muted-foreground">{order.email}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{order.items} items</TableCell>
-                    <TableCell>${order.total.toFixed(2)}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
-                    <TableCell>{getPaymentBadge(order.paymentStatus)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Select>
-                          <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Update" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="processing">Processing</SelectItem>
-                            <SelectItem value="shipped">Shipped</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredOrders.map((order) => {
+                  const profile = order.profiles as any;
+                  return (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">#{order.id.slice(0, 8)}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{profile?.full_name || 'No name'}</p>
+                          <p className="text-sm text-muted-foreground">{profile?.email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{new Date(order.created_at!).toLocaleDateString()}</TableCell>
+                      <TableCell>${Number(order.total_amount).toFixed(2)}</TableCell>
+                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell>{getPaymentBadge(order.payment_status || 'pending')}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Select 
+                            value={order.status} 
+                            onValueChange={(value) => handleStatusUpdate(order.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="processing">Processing</SelectItem>
+                              <SelectItem value="shipped">Shipped</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>

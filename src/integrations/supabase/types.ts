@@ -63,7 +63,10 @@ export type Database = {
           payment_method: string | null
           payment_status: string | null
           shipping_address: Json | null
+          shipping_cost: number | null
           status: string
+          subtotal: number | null
+          tax_amount: number | null
           total_amount: number
           updated_at: string | null
           user_id: string | null
@@ -74,7 +77,10 @@ export type Database = {
           payment_method?: string | null
           payment_status?: string | null
           shipping_address?: Json | null
+          shipping_cost?: number | null
           status?: string
+          subtotal?: number | null
+          tax_amount?: number | null
           total_amount: number
           updated_at?: string | null
           user_id?: string | null
@@ -85,12 +91,44 @@ export type Database = {
           payment_method?: string | null
           payment_status?: string | null
           shipping_address?: Json | null
+          shipping_cost?: number | null
           status?: string
+          subtotal?: number | null
+          tax_amount?: number | null
           total_amount?: number
           updated_at?: string | null
           user_id?: string | null
         }
         Relationships: []
+      }
+      product_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_likes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -109,6 +147,8 @@ export type Database = {
           specifications: Json | null
           stock_count: number | null
           sustainability_score: number | null
+          total_likes: number | null
+          total_orders: number | null
           updated_at: string | null
         }
         Insert: {
@@ -127,6 +167,8 @@ export type Database = {
           specifications?: Json | null
           stock_count?: number | null
           sustainability_score?: number | null
+          total_likes?: number | null
+          total_orders?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -145,6 +187,8 @@ export type Database = {
           specifications?: Json | null
           stock_count?: number | null
           sustainability_score?: number | null
+          total_likes?: number | null
+          total_orders?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -176,12 +220,48 @@ export type Database = {
         }
         Relationships: []
       }
+      wishlist: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_order_totals: {
+        Args: { subtotal_amount: number; shipping_address: Json }
+        Returns: {
+          shipping_cost: number
+          tax_amount: number
+          total_amount: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

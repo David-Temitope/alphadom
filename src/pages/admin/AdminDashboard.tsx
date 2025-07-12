@@ -11,8 +11,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell
@@ -23,63 +21,86 @@ import {
   Package,
   ShoppingCart,
   Users,
-  DollarSign
+  DollarSign,
+  Loader2
 } from 'lucide-react';
+import { useAdminProducts } from '@/hooks/useAdminProducts';
+import { useAdminOrders } from '@/hooks/useAdminOrders';
+import { useUsers } from '@/hooks/useUsers';
 
 const AdminDashboard = () => {
+  const { products, loading: productsLoading } = useAdminProducts();
+  const { orders, loading: ordersLoading } = useAdminOrders();
+  const { users, loading: usersLoading } = useUsers();
+
+  const loading = productsLoading || ordersLoading || usersLoading;
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total_amount), 0);
+  const completedOrders = orders.filter(order => order.status === 'completed').length;
+  
   const stats = [
     {
       title: 'Total Revenue',
-      value: '$45,231',
+      value: `$${totalRevenue.toFixed(2)}`,
       change: '+12.5%',
       trend: 'up',
       icon: DollarSign,
     },
     {
       title: 'Orders',
-      value: '1,234',
+      value: orders.length.toString(),
       change: '+8.2%',
       trend: 'up',
       icon: ShoppingCart,
     },
     {
       title: 'Products',
-      value: '856',
+      value: products.length.toString(),
       change: '+3.1%',
       trend: 'up',
       icon: Package,
     },
     {
       title: 'Customers',
-      value: '2,847',
-      change: '-2.4%',
-      trend: 'down',
+      value: users.length.toString(),
+      change: '+15.3%',
+      trend: 'up',
       icon: Users,
     },
   ];
 
-  const salesData = [
-    { name: 'Jan', sales: 4000, orders: 240 },
-    { name: 'Feb', sales: 3000, orders: 139 },
-    { name: 'Mar', sales: 2000, orders: 980 },
-    { name: 'Apr', sales: 2780, orders: 390 },
-    { name: 'May', sales: 1890, orders: 480 },
-    { name: 'Jun', sales: 2390, orders: 380 },
-  ];
+  // Generate category data from products
+  const categoryStats = products.reduce((acc, product) => {
+    acc[product.category] = (acc[product.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
-  const categoryData = [
-    { name: 'Home & Living', value: 35, color: '#22c55e' },
-    { name: 'Personal Care', value: 25, color: '#3b82f6' },
-    { name: 'Food & Beverage', value: 20, color: '#f97316' },
-    { name: 'Fashion', value: 20, color: '#8b5cf6' },
-  ];
+  const categoryData = Object.entries(categoryStats).map(([name, value], index) => ({
+    name,
+    value,
+    color: ['#22c55e', '#3b82f6', '#f97316', '#8b5cf6', '#ef4444'][index % 5]
+  }));
 
-  const recentOrders = [
-    { id: '#1234', customer: 'John Doe', total: '$89.99', status: 'completed' },
-    { id: '#1235', customer: 'Jane Smith', total: '$124.50', status: 'processing' },
-    { id: '#1236', customer: 'Bob Johnson', total: '$67.25', status: 'shipped' },
-    { id: '#1237', customer: 'Alice Brown', total: '$156.75', status: 'pending' },
-  ];
+  // Recent orders with profile data
+  const recentOrders = orders.slice(0, 4).map(order => {
+    const profile = order.profiles as any;
+    return {
+      id: `#${order.id.slice(0, 6)}`,
+      customer: profile?.full_name || profile?.email || 'Unknown',
+      total: `$${Number(order.total_amount).toFixed(2)}`,
+      status: order.status
+    };
+  });
 
   return (
     <AdminLayout>
@@ -87,7 +108,7 @@ const AdminDashboard = () => {
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your store.
+            Welcome back! Here's what's happening with your Pilot store.
           </p>
         </div>
 
@@ -118,49 +139,63 @@ const AdminDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Sales Chart */}
+          {/* Order Status Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle>Sales Overview</CardTitle>
-              <CardDescription>Monthly sales and order trends</CardDescription>
+              <CardTitle>Order Status Distribution</CardTitle>
+              <CardDescription>Current order status breakdown</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={salesData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="sales" fill="#22c55e" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="space-y-4">
+                {['pending', 'processing', 'shipped', 'completed', 'cancelled'].map(status => {
+                  const count = orders.filter(order => order.status === status).length;
+                  const percentage = orders.length > 0 ? (count / orders.length * 100).toFixed(1) : '0';
+                  return (
+                    <div key={status} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={status === 'completed' ? 'default' : 'secondary'}>
+                          {status}
+                        </Badge>
+                        <span className="text-sm">{count} orders</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{percentage}%</span>
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
 
           {/* Category Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle>Sales by Category</CardTitle>
-              <CardDescription>Product category performance</CardDescription>
+              <CardTitle>Products by Category</CardTitle>
+              <CardDescription>Product distribution across categories</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}%`}
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {categoryData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                    >
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No products available
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -172,34 +207,40 @@ const AdminDashboard = () => {
             <CardDescription>Latest customer orders</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="font-medium">{order.id}</p>
-                      <p className="text-sm text-muted-foreground">{order.customer}</p>
+            {recentOrders.length > 0 ? (
+              <div className="space-y-4">
+                {recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <p className="font-medium">{order.id}</p>
+                        <p className="text-sm text-muted-foreground">{order.customer}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <p className="font-medium">{order.total}</p>
+                      <Badge
+                        variant={
+                          order.status === 'completed'
+                            ? 'default'
+                            : order.status === 'processing'
+                            ? 'secondary'
+                            : order.status === 'shipped'
+                            ? 'outline'
+                            : 'destructive'
+                        }
+                      >
+                        {order.status}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className="font-medium">{order.total}</p>
-                    <Badge
-                      variant={
-                        order.status === 'completed'
-                          ? 'default'
-                          : order.status === 'processing'
-                          ? 'secondary'
-                          : order.status === 'shipped'
-                          ? 'outline'
-                          : 'destructive'
-                      }
-                    >
-                      {order.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No orders yet
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

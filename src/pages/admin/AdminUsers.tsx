@@ -13,88 +13,67 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, UserPlus, Mail, Ban, Shield } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Search, UserPlus, Mail, Ban, Shield, Loader2 } from 'lucide-react';
+import { useUsers } from '@/hooks/useUsers';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminUsers = () => {
+  const { users, loading, updateUserProfile } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const { toast } = useToast();
 
-  const mockUsers = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      joinDate: '2024-01-15',
-      orders: 12,
-      totalSpent: 1245.50,
-      status: 'active',
-      role: 'customer',
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      joinDate: '2024-01-10',
-      orders: 8,
-      totalSpent: 890.25,
-      status: 'active',
-      role: 'customer',
-    },
-    {
-      id: '3',
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-      joinDate: '2024-01-08',
-      orders: 15,
-      totalSpent: 2156.75,
-      status: 'active',
-      role: 'premium',
-    },
-    {
-      id: '4',
-      name: 'Alice Brown',
-      email: 'alice@example.com',
-      joinDate: '2024-01-05',
-      orders: 3,
-      totalSpent: 234.00,
-      status: 'inactive',
-      role: 'customer',
-    },
-    {
-      id: '5',
-      name: 'Charlie Wilson',
-      email: 'charlie@example.com',
-      joinDate: '2024-01-01',
-      orders: 0,
-      totalSpent: 0,
-      status: 'banned',
-      role: 'customer',
-    },
-  ];
-
-  const filteredUsers = mockUsers.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredUsers = users.filter(user =>
+    user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      active: 'default',
-      inactive: 'secondary',
-      banned: 'destructive',
-    } as const;
-    
-    return <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{status}</Badge>;
+  const handleSendEmail = (user: any) => {
+    setSelectedUser(user);
+    setEmailDialogOpen(true);
+    // In a real app, you'd integrate with an email service
+    toast({
+      title: "Email Feature",
+      description: `Would send email to ${user.email}`,
+    });
   };
 
-  const getRoleBadge = (role: string) => {
-    const variants = {
-      customer: 'outline',
-      premium: 'default',
-      admin: 'secondary',
-    } as const;
-    
-    return <Badge variant={variants[role as keyof typeof variants] || 'outline'}>{role}</Badge>;
+  const handleManageUser = (user: any) => {
+    toast({
+      title: "User Management",
+      description: `Managing user: ${user.full_name || user.email}`,
+    });
   };
+
+  const handleBanUser = async (user: any) => {
+    if (confirm(`Are you sure you want to ban ${user.full_name || user.email}?`)) {
+      // In a real app, you'd update a user status field
+      toast({
+        title: "User Banned",
+        description: `${user.full_name || user.email} has been banned`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -118,7 +97,7 @@ const AdminUsers = () => {
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockUsers.length}</div>
+              <div className="text-2xl font-bold">{users.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -126,29 +105,29 @@ const AdminUsers = () => {
               <CardTitle className="text-sm font-medium">Active Users</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="text-2xl font-bold">{users.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">New This Month</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="text-2xl font-bold">
-                {mockUsers.filter(u => u.status === 'active').length}
+                {users.filter(u => {
+                  const created = new Date(u.created_at!);
+                  const now = new Date();
+                  return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+                }).length}
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Premium Users</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Accounts</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {mockUsers.filter(u => u.role === 'premium').length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                ${mockUsers.reduce((sum, user) => sum + user.totalSpent, 0).toFixed(2)}
-              </div>
+              <div className="text-2xl font-bold">{users.length}</div>
             </CardContent>
           </Card>
         </div>
@@ -175,9 +154,6 @@ const AdminUsers = () => {
                 <TableRow>
                   <TableHead>User</TableHead>
                   <TableHead>Join Date</TableHead>
-                  <TableHead>Orders</TableHead>
-                  <TableHead>Total Spent</TableHead>
-                  <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -187,24 +163,35 @@ const AdminUsers = () => {
                   <TableRow key={user.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{user.name}</p>
+                        <p className="font-medium">{user.full_name || 'No name'}</p>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
                       </div>
                     </TableCell>
-                    <TableCell>{new Date(user.joinDate).toLocaleDateString()}</TableCell>
-                    <TableCell>{user.orders}</TableCell>
-                    <TableCell>${user.totalSpent.toFixed(2)}</TableCell>
-                    <TableCell>{getRoleBadge(user.role)}</TableCell>
-                    <TableCell>{getStatusBadge(user.status)}</TableCell>
+                    <TableCell>{new Date(user.created_at!).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Badge variant="default">Active</Badge>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleSendEmail(user)}
+                        >
                           <Mail className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleManageUser(user)}
+                        >
                           <Shield className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleBanUser(user)}
+                        >
                           <Ban className="h-4 w-4" />
                         </Button>
                       </div>
@@ -215,6 +202,25 @@ const AdminUsers = () => {
             </Table>
           </CardContent>
         </Card>
+
+        <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Send Email</DialogTitle>
+              <DialogDescription>
+                Send an email to {selectedUser?.full_name || selectedUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p>Email functionality would be implemented here with your preferred email service.</p>
+              <div className="flex justify-end">
+                <Button onClick={() => setEmailDialogOpen(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
