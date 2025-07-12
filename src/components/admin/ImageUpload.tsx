@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ImageUploadProps {
@@ -26,21 +26,39 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
       }
 
       const file = event.target.files[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Please select a valid image file');
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image size must be less than 5MB');
+      }
+
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      console.log('Uploading file:', fileName, 'Size:', file.size, 'Type:', file.type);
 
       const { error: uploadError } = await supabase.storage
         .from('product-images')
-        .upload(filePath, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw uploadError;
       }
 
       const { data: { publicUrl } } = supabase.storage
         .from('product-images')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
+
+      console.log('Upload successful, public URL:', publicUrl);
 
       setPreview(publicUrl);
       onImageUploaded(publicUrl);
@@ -50,6 +68,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         description: "Image uploaded successfully!",
       });
     } catch (error) {
+      console.error('Image upload error:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : 'Error uploading image',
@@ -67,45 +86,58 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
 
   return (
     <div className="space-y-4">
-      <Label htmlFor="image">Product Image</Label>
+      <Label htmlFor="image" className="text-sm font-medium text-slate-700">Product Image</Label>
       
       {preview ? (
-        <div className="relative">
-          <img 
-            src={preview} 
-            alt="Preview" 
-            className="w-32 h-32 object-cover rounded-lg border"
-          />
+        <div className="relative group">
+          <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <img 
+              src={preview} 
+              alt="Preview" 
+              className="w-32 h-32 object-cover"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+          </div>
           <Button
             type="button"
             variant="destructive"
             size="sm"
-            className="absolute top-1 right-1"
+            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 shadow-md"
             onClick={removeImage}
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3" />
           </Button>
         </div>
       ) : (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-          <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-          <p className="text-sm text-gray-600 mb-2">Upload product image</p>
+        <div className="relative">
+          <div className="border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+            <div className="flex flex-col items-center space-y-3">
+              <div className="p-3 rounded-full bg-slate-100 group-hover:bg-blue-100 transition-colors duration-200">
+                <Image className="h-6 w-6 text-slate-400 group-hover:text-blue-500 transition-colors duration-200" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-600 group-hover:text-blue-600 transition-colors duration-200">
+                  Upload product image
+                </p>
+                <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP up to 5MB</p>
+              </div>
+            </div>
+          </div>
           <Input
             id="image"
             type="file"
             accept="image/*"
             onChange={uploadImage}
             disabled={uploading}
-            className="hidden"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => document.getElementById('image')?.click()}
-            disabled={uploading}
-          >
-            {uploading ? 'Uploading...' : 'Choose File'}
-          </Button>
+        </div>
+      )}
+      
+      {uploading && (
+        <div className="flex items-center space-x-2 text-sm text-blue-600">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+          <span>Uploading...</span>
         </div>
       )}
     </div>

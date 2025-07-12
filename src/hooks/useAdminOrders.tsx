@@ -42,6 +42,8 @@ export const useAdminOrders = () => {
 
   const fetchOrders = async () => {
     try {
+      console.log('Fetching orders with profiles...');
+      
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -50,7 +52,12 @@ export const useAdminOrders = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching orders:', error);
+        throw error;
+      }
+      
+      console.log('Orders fetched:', data);
       
       // Type the data properly to handle the profiles relationship
       const typedOrders: Order[] = (data || []).map(order => ({
@@ -58,9 +65,11 @@ export const useAdminOrders = () => {
         profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
       }));
       
+      console.log('Typed orders:', typedOrders);
       setOrders(typedOrders);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
       console.error('Error fetching orders:', err);
     } finally {
       setLoading(false);
@@ -69,14 +78,19 @@ export const useAdminOrders = () => {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
+      console.log('Updating order status:', orderId, status);
+      
       const { error } = await supabase
         .from('orders')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', orderId);
 
       if (error) throw error;
+      
+      console.log('Order status updated successfully');
       return { success: true, error: null };
     } catch (err) {
+      console.error('Error updating order status:', err);
       return { success: false, error: err };
     }
   };
