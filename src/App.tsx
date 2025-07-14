@@ -25,6 +25,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSettings from "./pages/admin/AdminSettings";
+import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 
 // Create QueryClient outside of component to prevent recreation
@@ -71,6 +73,7 @@ const App = () => {
                       <Route path="/cart" element={<Layout><Cart /></Layout>} />
                       <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
                       <Route path="/orders" element={<Layout><Orders /></Layout>} />
+                      <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
                       <Route path="/about" element={<Layout><About /></Layout>} />
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
@@ -94,6 +97,11 @@ const App = () => {
                       <Route path="/admin/users" element={
                         <AdminProtectedRoute>
                           <AdminUsers />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/admin/settings" element={
+                        <AdminProtectedRoute>
+                          <AdminSettings />
                         </AdminProtectedRoute>
                       } />
 

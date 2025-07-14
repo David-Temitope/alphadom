@@ -89,12 +89,36 @@ export const useAdminProducts = () => {
 
   const deleteProduct = async (productId: string) => {
     try {
+      // First get the product to check if it has an image
+      const { data: product } = await supabase
+        .from('products')
+        .select('image')
+        .eq('id', productId)
+        .single();
+
+      // Delete the product from database
       const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', productId);
 
       if (error) throw error;
+
+      // If product had an image, try to delete it from storage
+      if (product?.image) {
+        try {
+          const imagePath = product.image.split('/').pop();
+          if (imagePath) {
+            await supabase.storage
+              .from('product-images')
+              .remove([imagePath]);
+          }
+        } catch (storageError) {
+          console.warn('Failed to delete image from storage:', storageError);
+          // Don't fail the whole operation if image deletion fails
+        }
+      }
+
       return { success: true, error: null };
     } catch (err) {
       return { success: false, error: err };

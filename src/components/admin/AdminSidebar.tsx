@@ -15,6 +15,10 @@ import {
 import { useAdmin } from '@/contexts/AdminContext';
 import { Button } from '@/components/ui/button';
 
+interface AdminSidebarProps {
+  onNavigate?: () => void;
+}
+
 const sidebarItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
@@ -24,7 +28,7 @@ const sidebarItems = [
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
-export const AdminSidebar = () => {
+export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavigate }) => {
   const location = useLocation();
   const { logout } = useAdmin();
 
@@ -36,7 +40,7 @@ export const AdminSidebar = () => {
             <Leaf className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="font-semibold">EcoMart</h2>
+            <h2 className="font-semibold">Pilot</h2>
             <p className="text-sm text-muted-foreground">Admin Panel</p>
           </div>
         </div>
@@ -50,6 +54,7 @@ export const AdminSidebar = () => {
               <li key={item.name}>
                 <NavLink
                   to={item.href}
+                  onClick={onNavigate}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                     isActive

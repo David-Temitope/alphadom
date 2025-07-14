@@ -3,9 +3,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Tables } from '@/integrations/supabase/types';
+
+type WishlistItem = Tables<'wishlist'> & {
+  products: Tables<'products'> | null;
+};
 
 export const useWishlist = () => {
-  const [wishlistItems, setWishlistItems] = useState<string[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -15,6 +21,7 @@ export const useWishlist = () => {
       fetchWishlist();
     } else {
       setWishlistItems([]);
+      setWishlistIds([]);
       setLoading(false);
     }
   }, [user]);
@@ -25,11 +32,15 @@ export const useWishlist = () => {
     try {
       const { data, error } = await supabase
         .from('wishlist')
-        .select('product_id')
+        .select(`
+          *,
+          products (*)
+        `)
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setWishlistItems(data?.map(item => item.product_id) || []);
+      setWishlistItems(data || []);
+      setWishlistIds(data?.map(item => item.product_id!) || []);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
     } finally {
@@ -47,7 +58,7 @@ export const useWishlist = () => {
       return;
     }
 
-    const isInWishlist = wishlistItems.includes(productId);
+    const isInWishlist = wishlistIds.includes(productId);
 
     try {
       if (isInWishlist) {
@@ -58,7 +69,8 @@ export const useWishlist = () => {
           .eq('product_id', productId);
 
         if (error) throw error;
-        setWishlistItems(prev => prev.filter(id => id !== productId));
+        setWishlistItems(prev => prev.filter(item => item.product_id !== productId));
+        setWishlistIds(prev => prev.filter(id => id !== productId));
         toast({
           title: "Removed from wishlist",
           description: "Item has been removed from your wishlist.",
@@ -69,7 +81,9 @@ export const useWishlist = () => {
           .insert({ user_id: user.id, product_id: productId });
 
         if (error) throw error;
-        setWishlistItems(prev => [...prev, productId]);
+        setWishlistIds(prev => [...prev, productId]);
+        // Refetch to get the product data
+        fetchWishlist();
         toast({
           title: "Added to wishlist",
           description: "Item has been added to your wishlist.",
@@ -85,10 +99,30 @@ export const useWishlist = () => {
     }
   };
 
+  const removeFromWishlist = async (productId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('wishlist')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('product_id', productId);
+
+      if (error) throw error;
+      setWishlistItems(prev => prev.filter(item => item.product_id !== productId));
+      setWishlistIds(prev => prev.filter(id => id !== productId));
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
+      throw error;
+    }
+  };
+
   return {
     wishlistItems,
     loading,
     toggleWishlist,
-    isInWishlist: (productId: string) => wishlistItems.includes(productId),
+    removeFromWishlist,
+    isInWishlist: (productId: string) => wishlistIds.includes(productId),
   };
 };

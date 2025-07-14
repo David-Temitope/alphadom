@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, LogOut, ShoppingBag, Settings } from 'lucide-react';
+import { User, LogOut, ShoppingBag, Settings, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,6 +62,12 @@ export const UserMenu = () => {
           <Link to="/orders" className="flex items-center">
             <ShoppingBag className="mr-2 h-4 w-4" />
             <span>My Orders</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/wishlist" className="flex items-center">
+            <Heart className="mr-2 h-4 w-4" />
+            <span>My Wishlist</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer">
