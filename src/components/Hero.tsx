@@ -1,10 +1,33 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Leaf, Shield, Recycle } from 'lucide-react';
+import { ArrowRight, Leaf, Shield, Recycle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Hero = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  const heroImages = [
+    "/lovable-uploads/ac61d3f1-910e-4684-9170-ee2679c7ce3b.png",
+    "/lovable-uploads/a8b891ca-80d3-40e7-9e2a-aacfbe0fc861.png",
+    "/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png"
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroImages.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-blue-50 to-slate-50 min-h-[90vh] flex items-center">
       {/* Background Elements */}
@@ -19,20 +42,20 @@ export const Hero = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <div className="inline-flex items-center px-4 py-2 bg-green-100/80 text-green-700 rounded-full text-sm font-medium backdrop-blur-sm border border-green-200/50">
-                <Leaf className="w-4 h-4 mr-2" />
-                Sustainable Living Made Simple
+                <Shield className="w-4 h-4 mr-2" />
+                Premium Quality You Can Trust
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
-                Eco-Friendly
+                Premium
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   Products
                 </span>
-                for a Better Tomorrow
+                for Modern Living
               </h1>
               
               <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                Discover sustainable alternatives that help protect our planet while maintaining the quality you love.
+                Discover high-quality products that combine style, functionality, and reliability for your everyday needs.
               </p>
             </div>
             
@@ -84,12 +107,51 @@ export const Hero = () => {
           </div>
           
           <div className="relative">
-            <div className="relative z-10">
-              <img
-                src="/placeholder.svg"
-                alt="Eco-friendly products showcase"
-                className="w-full h-auto rounded-2xl shadow-2xl"
-              />
+            <div className="relative z-10 h-96 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
+              <div className="relative w-full h-full">
+                {heroImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
+                      index === currentSlide ? 'translate-x-0' : 
+                      index < currentSlide ? '-translate-x-full' : 'translate-x-full'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Hero slide ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+                
+                {/* Navigation Arrows */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
+                >
+                  <ChevronLeft className="w-5 h-5 text-slate-700" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
+                >
+                  <ChevronRight className="w-5 h-5 text-slate-700" />
+                </button>
+                
+                {/* Dots Indicator */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                  {heroImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                        index === currentSlide ? 'bg-white shadow-lg' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="absolute -inset-4 bg-gradient-to-r from-green-200/30 to-blue-200/30 rounded-3xl blur-xl"></div>
           </div>

@@ -23,14 +23,18 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200">
-              <Leaf className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 overflow-hidden">
+              <img 
+                src="/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png" 
+                alt="Pilot Logo" 
+                className="w-8 h-8 object-contain"
+              />
             </div>
             <div className="hidden sm:block">
               <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                EcoStore
+                Pilot
               </span>
-              <div className="text-xs text-slate-500 -mt-1">Sustainable Living</div>
+              <div className="text-xs text-slate-500 -mt-1">Premium Quality Products</div>
             </div>
           </Link>
 

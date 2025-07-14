@@ -10,6 +10,7 @@ export const useNewsletter = () => {
   const subscribe = async (email: string) => {
     setLoading(true);
     try {
+      // First insert into database
       const { error } = await supabase
         .from('newsletter_subscribers')
         .insert([{ email }]);
@@ -24,6 +25,16 @@ export const useNewsletter = () => {
           return { success: false, error: 'Already subscribed' };
         }
         throw error;
+      }
+
+      // Send email notification
+      try {
+        await supabase.functions.invoke('send-newsletter-email', {
+          body: { email }
+        });
+      } catch (emailError) {
+        console.warn('Email notification failed:', emailError);
+        // Don't fail the subscription if email fails
       }
 
       toast({
