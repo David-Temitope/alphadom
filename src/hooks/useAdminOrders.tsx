@@ -43,12 +43,14 @@ export const useAdminOrders = () => {
   const fetchOrders = async () => {
     try {
       console.log('Fetching orders with profiles...');
+      setLoading(true);
+      setError(null);
       
       const { data, error } = await supabase
         .from('orders')
         .select(`
           *,
-          profiles(full_name, email)
+          profiles!orders_user_id_fkey(full_name, email)
         `)
         .order('created_at', { ascending: false });
 
@@ -68,7 +70,7 @@ export const useAdminOrders = () => {
       console.log('Typed orders:', typedOrders);
       setOrders(typedOrders);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load orders';
       setError(errorMessage);
       console.error('Error fetching orders:', err);
     } finally {

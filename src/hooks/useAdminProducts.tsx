@@ -89,62 +89,71 @@ export const useAdminProducts = () => {
 
   const deleteProduct = async (productId: string) => {
     try {
-      console.log('Deleting product:', productId);
+      console.log('Starting product deletion process for:', productId);
       
       // First get the product to check if it has an image
       const { data: product, error: fetchError } = await supabase
         .from('products')
         .select('image')
         .eq('id', productId)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
         console.error('Error fetching product for deletion:', fetchError);
+        throw fetchError;
       }
 
-      // Delete the product from database
-      const { error } = await supabase
+      console.log('Product data before deletion:', product);
+
+      // Delete the product from database first
+      const { error: deleteError } = await supabase
         .from('products')
         .delete()
         .eq('id', productId);
 
-      if (error) {
-        console.error('Error deleting product:', error);
-        throw error;
+      if (deleteError) {
+        console.error('Error deleting product from database:', deleteError);
+        throw deleteError;
       }
 
       console.log('Product deleted successfully from database');
 
       // If product had an image, try to delete it from storage
-      if (product?.image) {
+      if (product?.image && !product.image.includes('placeholder.svg')) {
         try {
-          // Extract filename from URL
-          const imagePath = product.image.split('/').pop();
-          if (imagePath && imagePath !== 'placeholder.svg') {
-            console.log('Deleting image from storage:', imagePath);
+          // Extract filename from URL - handle both full URLs and just filenames
+          let imagePath = product.image;
+          if (imagePath.includes('/')) {
+            imagePath = imagePath.split('/').pop() || '';
+          }
+          
+          if (imagePath && imagePath.trim() !== '') {
+            console.log('Attempting to delete image from storage:', imagePath);
             const { error: storageError } = await supabase.storage
               .from('product-images')
               .remove([imagePath]);
             
             if (storageError) {
               console.warn('Failed to delete image from storage:', storageError);
+              // Don't throw here, storage deletion is not critical
             } else {
               console.log('Image deleted from storage successfully');
             }
           }
         } catch (storageError) {
-          console.warn('Failed to delete image from storage:', storageError);
+          console.warn('Storage deletion error (non-critical):', storageError);
           // Don't fail the whole operation if image deletion fails
         }
       }
 
-      // Refresh the products list
-      fetchProducts();
+      // Refresh the products list to reflect changes
+      await fetchProducts();
       
       return { success: true, error: null };
     } catch (err) {
-      console.error('Error in deleteProduct:', err);
-      return { success: false, error: err };
+      console.error('Critical error in deleteProduct:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete product';
+      return { success: false, error: errorMessage };
     }
   };
 

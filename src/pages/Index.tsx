@@ -6,7 +6,7 @@ import { NewsletterSubscription } from "@/components/NewsletterSubscription";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-background">
       <Hero />
       <FeaturedProducts />
       <About />
