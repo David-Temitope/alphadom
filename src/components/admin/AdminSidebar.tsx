@@ -20,12 +20,12 @@ interface AdminSidebarProps {
 }
 
 const sidebarItems = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Products', href: '/admin/products', icon: Package },
-  { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
-  { name: 'Users', href: '/admin/users', icon: Users },
-  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Dashboard', href: '/appleisgood', icon: LayoutDashboard },
+  { name: 'Products', href: '/appleisgood/products', icon: Package },
+  { name: 'Orders', href: '/appleisgood/orders', icon: ShoppingCart },
+  { name: 'Users', href: '/appleisgood/users', icon: Users },
+  { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3 },
+  { name: 'Settings', href: '/appleisgood/settings', icon: Settings },
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavigate }) => {

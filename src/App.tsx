@@ -26,6 +26,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 
@@ -78,30 +79,35 @@ const App = () => {
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
                       {/* Admin Routes */}
-                      <Route path="/admin/login" element={<AdminLogin />} />
-                      <Route path="/admin" element={
+                      <Route path="/appleisgood/login" element={<AdminLogin />} />
+                      <Route path="/appleisgood" element={
                         <AdminProtectedRoute>
                           <AdminDashboard />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/products" element={
+                      <Route path="/appleisgood/products" element={
                         <AdminProtectedRoute>
                           <AdminProducts />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/orders" element={
+                      <Route path="/appleisgood/orders" element={
                         <AdminProtectedRoute>
                           <AdminOrders />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/users" element={
+                      <Route path="/appleisgood/users" element={
                         <AdminProtectedRoute>
                           <AdminUsers />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/settings" element={
+                      <Route path="/appleisgood/settings" element={
                         <AdminProtectedRoute>
                           <AdminSettings />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/analytics" element={
+                        <AdminProtectedRoute>
+                          <AdminAnalytics />
                         </AdminProtectedRoute>
                       } />
 

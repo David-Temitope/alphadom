@@ -280,17 +280,65 @@ const Checkout = () => {
                   Payment Method
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
                     <SelectItem value="credit_card">Credit Card</SelectItem>
-                    <SelectItem value="paypal">PayPal</SelectItem>
                     <SelectItem value="apple_pay">Apple Pay</SelectItem>
                   </SelectContent>
                 </Select>
+                
+                {paymentMethod === 'bank_transfer' && (
+                  <div className="p-4 bg-muted rounded-lg">
+                    <h4 className="font-semibold mb-2">Bank Transfer Details</h4>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Bank:</strong> First National Bank</p>
+                      <p><strong>Account Name:</strong> Pilot Store</p>
+                      <p><strong>Account Number:</strong> 1234567890</p>
+                      <p><strong>Routing Number:</strong> 021000021</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Please include your order ID in the transfer description
+                    </p>
+                  </div>
+                )}
+                
+                {paymentMethod === 'credit_card' && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="card-number">Card Number</Label>
+                      <Input id="card-number" placeholder="1234 5678 9012 3456" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="expiry">Expiry Date</Label>
+                        <Input id="expiry" placeholder="MM/YY" />
+                      </div>
+                      <div>
+                        <Label htmlFor="cvv">CVV</Label>
+                        <Input id="cvv" placeholder="123" />
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="save-card" />
+                      <Label htmlFor="save-card" className="text-sm">Save card for future purchases</Label>
+                    </div>
+                  </div>
+                )}
+                
+                {paymentMethod === 'apple_pay' && (
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm">You will be redirected to Apple Pay to complete your purchase.</p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <input type="checkbox" id="save-apple-pay" />
+                      <Label htmlFor="save-apple-pay" className="text-sm">Save Apple Pay for future purchases</Label>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

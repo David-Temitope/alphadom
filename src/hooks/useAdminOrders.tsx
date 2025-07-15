@@ -48,7 +48,7 @@ export const useAdminOrders = () => {
         .from('orders')
         .select(`
           *,
-          profiles!inner(full_name, email)
+          profiles(full_name, email)
         `)
         .order('created_at', { ascending: false });
 

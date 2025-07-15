@@ -89,12 +89,18 @@ export const useAdminProducts = () => {
 
   const deleteProduct = async (productId: string) => {
     try {
+      console.log('Deleting product:', productId);
+      
       // First get the product to check if it has an image
-      const { data: product } = await supabase
+      const { data: product, error: fetchError } = await supabase
         .from('products')
         .select('image')
         .eq('id', productId)
         .single();
+
+      if (fetchError) {
+        console.error('Error fetching product for deletion:', fetchError);
+      }
 
       // Delete the product from database
       const { error } = await supabase
@@ -102,16 +108,29 @@ export const useAdminProducts = () => {
         .delete()
         .eq('id', productId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting product:', error);
+        throw error;
+      }
+
+      console.log('Product deleted successfully from database');
 
       // If product had an image, try to delete it from storage
       if (product?.image) {
         try {
+          // Extract filename from URL
           const imagePath = product.image.split('/').pop();
-          if (imagePath) {
-            await supabase.storage
+          if (imagePath && imagePath !== 'placeholder.svg') {
+            console.log('Deleting image from storage:', imagePath);
+            const { error: storageError } = await supabase.storage
               .from('product-images')
               .remove([imagePath]);
+            
+            if (storageError) {
+              console.warn('Failed to delete image from storage:', storageError);
+            } else {
+              console.log('Image deleted from storage successfully');
+            }
           }
         } catch (storageError) {
           console.warn('Failed to delete image from storage:', storageError);
@@ -119,8 +138,12 @@ export const useAdminProducts = () => {
         }
       }
 
+      // Refresh the products list
+      fetchProducts();
+      
       return { success: true, error: null };
     } catch (err) {
+      console.error('Error in deleteProduct:', err);
       return { success: false, error: err };
     }
   };

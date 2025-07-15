@@ -190,7 +190,7 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <Button 
                   onClick={handleAddToCart}
                   className="w-full h-12 text-lg transition-all duration-200 hover:scale-105"
@@ -198,7 +198,7 @@ const ProductDetail = () => {
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart
                 </Button>
-                <div className="flex gap-3 justify-center">
+                <div className="flex gap-4 justify-center">
                   <WishlistButton productId={product.id} size="lg" />
                   <LikeButton productId={product.id} size="lg" />
                 </div>
