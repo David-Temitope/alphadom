@@ -198,7 +198,7 @@ const ProductDetail = () => {
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart
                 </Button>
-                <div className="flex gap-4 justify-center">
+                <div className="flex gap-6 justify-center items-center">
                   <WishlistButton productId={product.id} size="lg" />
                   <LikeButton productId={product.id} size="lg" />
                 </div>

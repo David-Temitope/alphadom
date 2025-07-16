@@ -39,6 +39,8 @@ const AdminProducts = () => {
   const { products, loading, categories, createProduct, updateProduct, deleteProduct } = useAdminProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -115,20 +117,82 @@ const AdminProducts = () => {
     }
   };
 
+  const handleEditProduct = (product: any) => {
+    setEditingProduct({
+      ...product,
+      price: product.price.toString(),
+      stock_count: product.stock_count?.toString() || '',
+      sustainability_score: product.sustainability_score?.toString() || '',
+      eco_features: product.eco_features || [],
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingProduct.name || !editingProduct.price || !editingProduct.category) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error } = await updateProduct(editingProduct.id, {
+        name: editingProduct.name,
+        price: parseFloat(editingProduct.price),
+        category: editingProduct.category,
+        description: editingProduct.description,
+        full_description: editingProduct.full_description,
+        stock_count: parseInt(editingProduct.stock_count) || 0,
+        sustainability_score: parseInt(editingProduct.sustainability_score) || 0,
+        image: editingProduct.image,
+        eco_features: editingProduct.eco_features,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Product updated successfully!",
+      });
+
+      setIsEditDialogOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update product",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleDeleteProduct = async (productId: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      const { error } = await deleteProduct(productId);
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to delete product",
-          variant: "destructive",
-        });
-      } else {
+    if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+      setSubmitting(true);
+      try {
+        const { success, error } = await deleteProduct(productId);
+        if (!success) {
+          throw new Error(error || "Failed to delete product");
+        }
         toast({
           title: "Success",
           description: "Product deleted successfully!",
         });
+      } catch (error) {
+        console.error('Delete error:', error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to delete product",
+          variant: "destructive",
+        });
+      } finally {
+        setSubmitting(false);
       }
     }
   };
@@ -276,6 +340,129 @@ const AdminProducts = () => {
           </Dialog>
         </div>
 
+        {/* Edit Product Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+              <DialogDescription>
+                Update product information
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Product Name *</Label>
+                <Input 
+                  id="edit-name" 
+                  placeholder="Enter product name"
+                  value={editingProduct?.name || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-price">Price *</Label>
+                <Input 
+                  id="edit-price" 
+                  type="number" 
+                  placeholder="0.00"
+                  value={editingProduct?.price || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-category">Category *</Label>
+                <Select 
+                  value={editingProduct?.category || ''} 
+                  onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="Home & Living">Home & Living</SelectItem>
+                    <SelectItem value="Personal Care">Personal Care</SelectItem>
+                    <SelectItem value="Fashion">Fashion</SelectItem>
+                    <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
+                    <SelectItem value="Electronics">Electronics</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-stock">Stock Count</Label>
+                <Input 
+                  id="edit-stock" 
+                  type="number" 
+                  placeholder="0"
+                  value={editingProduct?.stock_count || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, stock_count: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-sustainability">Sustainability Score (1-10)</Label>
+                <Input 
+                  id="edit-sustainability" 
+                  type="number" 
+                  min="1" 
+                  max="10"
+                  placeholder="8"
+                  value={editingProduct?.sustainability_score || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, sustainability_score: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-eco-features">Eco Features (comma separated)</Label>
+                <Input 
+                  id="edit-eco-features" 
+                  placeholder="Biodegradable, BPA-Free"
+                  value={editingProduct?.eco_features?.join(', ') || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, eco_features: e.target.value.split(',').map(f => f.trim())})}
+                />
+              </div>
+              <div className="col-span-2 space-y-2">
+                <ImageUpload 
+                  onImageUploaded={(url) => setEditingProduct({...editingProduct, image: url})}
+                />
+                {editingProduct?.image && (
+                  <div className="mt-2">
+                    <img src={editingProduct.image} alt="Current" className="w-20 h-20 object-cover rounded" />
+                  </div>
+                )}
+              </div>
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea 
+                  id="edit-description" 
+                  placeholder="Product description"
+                  value={editingProduct?.description || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
+                />
+              </div>
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="edit-full-description">Full Description</Label>
+                <Textarea 
+                  id="edit-full-description" 
+                  placeholder="Detailed product description"
+                  value={editingProduct?.full_description || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, full_description: e.target.value})}
+                />
+              </div>
+              <div className="col-span-2 flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdateProduct} disabled={submitting}>
+                  {submitting ? 'Updating...' : 'Update Product'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Card>
           <CardHeader>
             <CardTitle>Product Inventory ({products.length} products)</CardTitle>
@@ -350,13 +537,18 @@ const AdminProducts = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditProduct(product)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
                           onClick={() => handleDeleteProduct(product.id)}
+                          disabled={submitting}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

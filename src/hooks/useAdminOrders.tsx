@@ -50,7 +50,7 @@ export const useAdminOrders = () => {
         .from('orders')
         .select(`
           *,
-          profiles!orders_user_id_fkey(full_name, email)
+          profiles!inner(full_name, email)
         `)
         .order('created_at', { ascending: false });
 
@@ -59,7 +59,7 @@ export const useAdminOrders = () => {
         throw error;
       }
       
-      console.log('Orders fetched:', data);
+      console.log('Orders fetched successfully:', data?.length || 0, 'orders');
       
       // Type the data properly to handle the profiles relationship
       const typedOrders: Order[] = (data || []).map(order => ({
@@ -67,7 +67,6 @@ export const useAdminOrders = () => {
         profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
       }));
       
-      console.log('Typed orders:', typedOrders);
       setOrders(typedOrders);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load orders';
