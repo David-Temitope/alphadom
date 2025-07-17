@@ -42,30 +42,44 @@ export const useAdminOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      console.log('Fetching orders with profiles...');
+      console.log('Fetching orders...');
       setLoading(true);
       setError(null);
       
-      const { data, error } = await supabase
+      // First fetch orders
+      const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
-        .select(`
-          *,
-          profiles!inner(full_name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching orders:', error);
-        throw error;
+      if (ordersError) {
+        console.error('Error fetching orders:', ordersError.message, ordersError);
+        throw ordersError;
       }
       
-      console.log('Orders fetched successfully:', data?.length || 0, 'orders');
+      console.log('Orders fetched successfully:', ordersData?.length || 0, 'orders');
       
-      // Type the data properly to handle the profiles relationship
-      const typedOrders: Order[] = (data || []).map(order => ({
-        ...order,
-        profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
-      }));
+      // Then fetch all profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email');
+        
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError.message);
+        // Continue without profiles data
+      }
+      
+      // Manually join the data
+      const typedOrders: Order[] = (ordersData || []).map(order => {
+        const profile = profilesData?.find(p => p.id === order.user_id);
+        return {
+          ...order,
+          profiles: profile ? {
+            full_name: profile.full_name,
+            email: profile.email
+          } : null
+        };
+      });
       
       setOrders(typedOrders);
     } catch (err) {
