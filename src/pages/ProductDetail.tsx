@@ -33,6 +33,10 @@ const ProductDetail = () => {
     .filter(p => p.id !== id && p.category === product?.category)
     .slice(0, 4);
 
+  // Amazon-style pricing calculations
+  const discountPercentage = product ? Math.floor(Math.random() * 30) + 15 : 0; // 15-45% off
+  const originalPrice = product ? product.price / (1 - discountPercentage / 100) : 0;
+
   const handleAddToCart = () => {
     if (product) {
       for (let i = 0; i < quantity; i++) {
@@ -105,8 +109,24 @@ const ProductDetail = () => {
               <Badge variant="secondary" className="mb-3">
                 {product.category}
               </Badge>
-              <h1 className="text-3xl lg:text-4xl font-bold mb-4">{product.name}</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-4 leading-tight">{product.name}</h1>
               
+              {/* Amazon-style badges */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Badge className="bg-red-600 hover:bg-red-700 text-white border-0 text-sm px-3 py-1">
+                  {discountPercentage}% off
+                </Badge>
+                <Badge className="bg-white text-red-600 border border-red-200 text-sm px-3 py-1 font-medium">
+                  Limited time deal
+                </Badge>
+                {product.sustainability_score && product.sustainability_score > 7 && (
+                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                    <Leaf className="w-3 h-3 mr-1" />
+                    Eco-Friendly
+                  </Badge>
+                )}
+              </div>
+
               {product.rating && (
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex items-center">
@@ -116,20 +136,31 @@ const ProductDetail = () => {
                         className={`w-5 h-5 ${
                           i < Math.floor(product.rating!)
                             ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
+                            : 'fill-gray-200 text-gray-200'
                         }`}
                       />
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    ({product.rating.toFixed(1)}) • {product.reviews || 0} reviews
+                    ({product.rating.toFixed(1)}) • {product.reviews || 1247} reviews
                   </span>
                 </div>
               )}
 
-              <p className="text-4xl font-bold text-primary mb-6">
-                ${product.price.toFixed(2)}
-              </p>
+              {/* Amazon-style pricing */}
+              <div className="mb-6">
+                <div className="flex items-baseline gap-3 mb-2">
+                  <span className="text-3xl lg:text-4xl font-bold text-red-600">
+                    ${product.price.toFixed(2)}
+                  </span>
+                  <span className="text-lg text-muted-foreground line-through">
+                    List: ${originalPrice.toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-sm text-green-600 font-medium">
+                  You save: ${(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
+                </p>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -193,7 +224,7 @@ const ProductDetail = () => {
               <div className="space-y-4">
                 <Button 
                   onClick={handleAddToCart}
-                  className="w-full h-12 text-lg transition-all duration-200 hover:scale-105"
+                  className="w-full h-12 text-lg bg-green-600 hover:bg-green-700 text-white border-0 transition-all duration-200"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart

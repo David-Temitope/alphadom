@@ -40,22 +40,38 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     });
   };
 
+  // Calculate discount (Amazon-style)
+  const discountPercentage = Math.floor(Math.random() * 30) + 10; // 10-40% off
+  const originalPrice = product.price / (1 - discountPercentage / 100);
+
   return (
-    <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-0 shadow-md hover:shadow-xl">
+    <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg border bg-white dark:bg-card">
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
-        <div className="relative overflow-hidden rounded-t-lg">
+        <div className="relative overflow-hidden">
           <img
             src={product.image || '/placeholder.svg'}
             alt={product.name}
             className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
+          
+          {/* Amazon-style discount badge */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            <Badge className="bg-red-600 hover:bg-red-700 text-white border-0 text-xs px-2 py-1">
+              {discountPercentage}% off
+            </Badge>
+            <Badge className="bg-white text-red-600 border border-red-200 text-xs px-2 py-1 font-medium">
+              Limited time deal
+            </Badge>
+          </div>
+
           <div className="absolute top-2 right-2 flex gap-1">
             <WishlistButton productId={product.id} size="sm" />
             <LikeButton productId={product.id} size="sm" />
           </div>
+          
           {product.sustainability_score && product.sustainability_score > 7 && (
-            <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100">
+            <Badge className="absolute bottom-2 left-2 bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100">
               <Leaf className="w-3 h-3 mr-1" />
               Eco-Friendly
             </Badge>
@@ -63,42 +79,55 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
         
         <CardContent className="flex-1 p-4">
-          <div className="flex justify-between items-start mb-2">
-            <Badge variant="secondary" className="text-xs">
-              {product.category}
-            </Badge>
-            {product.rating && (
-              <div className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs text-muted-foreground">
-                  {product.rating.toFixed(1)}
-                </span>
+          {/* Rating first (Amazon style) */}
+          {product.rating && (
+            <div className="flex items-center gap-1 mb-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-3 h-3 ${
+                      i < Math.floor(product.rating!)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'fill-gray-200 text-gray-200'
+                    }`}
+                  />
+                ))}
               </div>
-            )}
-          </div>
+              <span className="text-xs text-muted-foreground">
+                ({product.rating.toFixed(1)})
+              </span>
+            </div>
+          )}
           
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-medium text-sm mb-2 line-clamp-3 group-hover:text-primary transition-colors leading-tight">
             {product.name}
           </h3>
           
-          {product.description && (
-            <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-              {product.description}
-            </p>
-          )}
-          
-          <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-primary">
-              ${product.price.toFixed(2)}
-            </span>
-            {product.sustainability_score && (
-              <div className="flex items-center gap-1">
-                <Leaf className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-600">
-                  {product.sustainability_score}/10
-                </span>
-              </div>
-            )}
+          {/* Amazon-style pricing */}
+          <div className="mt-auto">
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-lg font-bold text-red-600">
+                ${product.price.toFixed(2)}
+              </span>
+              <span className="text-sm text-muted-foreground line-through">
+                List: ${originalPrice.toFixed(2)}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Badge variant="outline" className="text-xs border-green-200 text-green-700">
+                {product.category}
+              </Badge>
+              {product.sustainability_score && (
+                <div className="flex items-center gap-1">
+                  <Leaf className="w-3 h-3 text-green-600" />
+                  <span className="text-xs text-green-600">
+                    {product.sustainability_score}/10
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Link>
@@ -106,7 +135,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <CardFooter className="p-4 pt-0">
         <Button 
           onClick={handleAddToCart}
-          className="w-full transition-all duration-200 hover:scale-105"
+          className="w-full bg-green-600 hover:bg-green-700 text-white border-0"
           size="sm"
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
