@@ -33,9 +33,10 @@ const ProductDetail = () => {
     .filter(p => p.id !== id && p.category === product?.category)
     .slice(0, 4);
 
-  // Amazon-style pricing calculations
-  const discountPercentage = product ? Math.floor(Math.random() * 30) + 15 : 0; // 15-45% off
-  const originalPrice = product ? product.price / (1 - discountPercentage / 100) : 0;
+  // Use admin-set discount if available
+  const hasDiscount = product?.has_discount && product?.discount_percentage && product?.original_price;
+  const discountPercentage = hasDiscount ? product.discount_percentage : 0;
+  const originalPrice = hasDiscount ? product.original_price : 0;
 
   const handleAddToCart = () => {
     if (product) {
@@ -111,14 +112,18 @@ const ProductDetail = () => {
               </Badge>
               <h1 className="text-2xl lg:text-3xl font-bold mb-4 leading-tight">{product.name}</h1>
               
-              {/* Amazon-style badges */}
+              {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge className="bg-red-600 hover:bg-red-700 text-white border-0 text-sm px-3 py-1">
-                  {discountPercentage}% off
-                </Badge>
-                <Badge className="bg-white text-red-600 border border-red-200 text-sm px-3 py-1 font-medium">
-                  Limited time deal
-                </Badge>
+                {hasDiscount && (
+                  <>
+                    <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0 text-sm px-3 py-1">
+                      {discountPercentage}% off
+                    </Badge>
+                    <Badge className="bg-white text-orange-600 border border-orange-200 text-sm px-3 py-1 font-medium">
+                      Special offer
+                    </Badge>
+                  </>
+                )}
                 {product.sustainability_score && product.sustainability_score > 7 && (
                   <Badge className="bg-green-100 text-green-800 border-green-200">
                     <Leaf className="w-3 h-3 mr-1" />
@@ -147,19 +152,23 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              {/* Amazon-style pricing */}
+              {/* Pricing */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-3 mb-2">
-                  <span className="text-3xl lg:text-4xl font-bold text-red-600">
+                  <span className={`text-3xl lg:text-4xl font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
                     ${product.price.toFixed(2)}
                   </span>
-                  <span className="text-lg text-muted-foreground line-through">
-                    List: ${originalPrice.toFixed(2)}
-                  </span>
+                  {hasDiscount && (
+                    <span className="text-lg text-muted-foreground line-through">
+                      ${originalPrice.toFixed(2)}
+                    </span>
+                  )}
                 </div>
-                <p className="text-sm text-green-600 font-medium">
-                  You save: ${(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
-                </p>
+                {hasDiscount && (
+                  <p className="text-sm text-green-600 font-medium">
+                    You save: ${(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
+                  </p>
+                )}
               </div>
             </div>
 

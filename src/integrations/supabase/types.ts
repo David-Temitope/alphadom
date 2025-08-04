@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -180,12 +180,15 @@ export type Database = {
           category: string
           created_at: string | null
           description: string | null
+          discount_percentage: number | null
           eco_features: string[] | null
           full_description: string | null
+          has_discount: boolean | null
           id: string
           image: string | null
           in_stock: boolean | null
           name: string
+          original_price: number | null
           price: number
           rating: number | null
           reviews: number | null
@@ -200,12 +203,15 @@ export type Database = {
           category: string
           created_at?: string | null
           description?: string | null
+          discount_percentage?: number | null
           eco_features?: string[] | null
           full_description?: string | null
+          has_discount?: boolean | null
           id?: string
           image?: string | null
           in_stock?: boolean | null
           name: string
+          original_price?: number | null
           price: number
           rating?: number | null
           reviews?: number | null
@@ -220,12 +226,15 @@ export type Database = {
           category?: string
           created_at?: string | null
           description?: string | null
+          discount_percentage?: number | null
           eco_features?: string[] | null
           full_description?: string | null
+          has_discount?: boolean | null
           id?: string
           image?: string | null
           in_stock?: boolean | null
           name?: string
+          original_price?: number | null
           price?: number
           rating?: number | null
           reviews?: number | null

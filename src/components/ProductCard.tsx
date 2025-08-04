@@ -20,6 +20,9 @@ interface Product {
   sustainability_score?: number;
   rating?: number;
   eco_features?: string[];
+  has_discount?: boolean;
+  discount_percentage?: number;
+  original_price?: number;
 }
 
 interface ProductCardProps {
@@ -40,9 +43,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     });
   };
 
-  // Calculate discount (Amazon-style)
-  const discountPercentage = Math.floor(Math.random() * 30) + 10; // 10-40% off
-  const originalPrice = product.price / (1 - discountPercentage / 100);
+  // Use admin-set discount if available
+  const hasDiscount = product.has_discount && product.discount_percentage && product.original_price;
+  const discountPercentage = hasDiscount ? product.discount_percentage : 0;
+  const originalPrice = hasDiscount ? product.original_price : 0;
 
   return (
     <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg border bg-white dark:bg-card">
@@ -55,15 +59,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             loading="lazy"
           />
           
-          {/* Amazon-style discount badge */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            <Badge className="bg-red-600 hover:bg-red-700 text-white border-0 text-xs px-2 py-1">
-              {discountPercentage}% off
-            </Badge>
-            <Badge className="bg-white text-red-600 border border-red-200 text-xs px-2 py-1 font-medium">
-              Limited time deal
-            </Badge>
-          </div>
+          {/* Discount badges - only show if admin set discount */}
+          {hasDiscount && (
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+              <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0 text-xs px-2 py-1">
+                {discountPercentage}% off
+              </Badge>
+              <Badge className="bg-white text-orange-600 border border-orange-200 text-xs px-2 py-1 font-medium">
+                Special offer
+              </Badge>
+            </div>
+          )}
 
           <div className="absolute top-2 right-2 flex gap-1">
             <WishlistButton productId={product.id} size="sm" />
@@ -104,15 +110,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.name}
           </h3>
           
-          {/* Amazon-style pricing */}
+          {/* Pricing */}
           <div className="mt-auto">
             <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-lg font-bold text-red-600">
+              <span className={`text-lg font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
                 ${product.price.toFixed(2)}
               </span>
-              <span className="text-sm text-muted-foreground line-through">
-                List: ${originalPrice.toFixed(2)}
-              </span>
+              {hasDiscount && (
+                <span className="text-sm text-muted-foreground line-through">
+                  ${originalPrice.toFixed(2)}
+                </span>
+              )}
             </div>
             
             <div className="flex items-center justify-between">

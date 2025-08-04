@@ -1,21 +1,21 @@
-import { Leaf, Recycle, Heart, Award } from "lucide-react";
+import { ShoppingCart, Truck, Shield, Award } from "lucide-react";
 
 export const About = () => {
   const features = [
     {
-      icon: Leaf,
-      title: "Eco-Friendly",
-      description: "Sustainable products that care for our planet"
+      icon: ShoppingCart,
+      title: "Wide Selection",
+      description: "From tech gadgets to sustainable products and everything in between"
     },
     {
-      icon: Recycle,
-      title: "Recyclable",
-      description: "100% recyclable packaging and materials"
+      icon: Truck,
+      title: "Fast Delivery",
+      description: "Quick and reliable shipping to your doorstep"
     },
     {
-      icon: Heart,
-      title: "Ethically Made",
-      description: "Fair trade and ethically sourced products"
+      icon: Shield,
+      title: "Secure Shopping",
+      description: "Safe and secure payment processing with buyer protection"
     },
     {
       icon: Award,
@@ -32,7 +32,7 @@ export const About = () => {
             Why Choose Us
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            We're committed to providing sustainable, high-quality products that make a positive impact on both your life and the environment.
+            We're your one-stop destination for everything from cutting-edge technology to eco-friendly alternatives. Quality, variety, and customer satisfaction are at the heart of everything we do.
           </p>
         </div>
         

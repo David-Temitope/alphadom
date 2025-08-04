@@ -51,6 +51,8 @@ const AdminProducts = () => {
     sustainability_score: '',
     image: '',
     eco_features: [] as string[],
+    discount_percentage: 0,
+    original_price: 0,
   });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -82,6 +84,9 @@ const AdminProducts = () => {
         sustainability_score: parseInt(newProduct.sustainability_score) || 0,
         image: newProduct.image,
         eco_features: newProduct.eco_features,
+        has_discount: newProduct.discount_percentage > 0,
+        discount_percentage: newProduct.discount_percentage,
+        original_price: newProduct.original_price,
         in_stock: true,
         rating: 0,
         reviews: 0,
@@ -105,6 +110,8 @@ const AdminProducts = () => {
         sustainability_score: '',
         image: '',
         eco_features: [],
+        discount_percentage: 0,
+        original_price: 0,
       });
     } catch (error) {
       toast({
@@ -124,6 +131,8 @@ const AdminProducts = () => {
       stock_count: product.stock_count?.toString() || '',
       sustainability_score: product.sustainability_score?.toString() || '',
       eco_features: product.eco_features || [],
+      discount_percentage: product.discount_percentage || 0,
+      original_price: product.original_price || 0,
     });
     setIsEditDialogOpen(true);
   };
@@ -150,6 +159,9 @@ const AdminProducts = () => {
         sustainability_score: parseInt(editingProduct.sustainability_score) || 0,
         image: editingProduct.image,
         eco_features: editingProduct.eco_features,
+        has_discount: editingProduct.discount_percentage > 0,
+        discount_percentage: editingProduct.discount_percentage,
+        original_price: editingProduct.original_price,
       });
 
       if (error) throw error;
@@ -304,6 +316,26 @@ const AdminProducts = () => {
                     onChange={(e) => setNewProduct({...newProduct, eco_features: e.target.value.split(',').map(f => f.trim())})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="discount">Discount %</Label>
+                  <Input 
+                    id="discount" 
+                    type="number" 
+                    min="0" 
+                    max="100"
+                    placeholder="0"
+                    onChange={(e) => setNewProduct({...newProduct, discount_percentage: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="original_price">Original Price (if discounted)</Label>
+                  <Input 
+                    id="original_price" 
+                    type="number" 
+                    placeholder="0.00"
+                    onChange={(e) => setNewProduct({...newProduct, original_price: parseFloat(e.target.value) || 0})}
+                  />
+                </div>
                 <div className="col-span-2 space-y-2">
                   <ImageUpload 
                     onImageUploaded={(url) => setNewProduct({...newProduct, image: url})}
@@ -414,15 +446,37 @@ const AdminProducts = () => {
                   onChange={(e) => setEditingProduct({...editingProduct, sustainability_score: e.target.value})}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-eco-features">Eco Features (comma separated)</Label>
-                <Input 
-                  id="edit-eco-features" 
-                  placeholder="Biodegradable, BPA-Free"
-                  value={editingProduct?.eco_features?.join(', ') || ''}
-                  onChange={(e) => setEditingProduct({...editingProduct, eco_features: e.target.value.split(',').map(f => f.trim())})}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-eco-features">Eco Features (comma separated)</Label>
+                  <Input 
+                    id="edit-eco-features" 
+                    placeholder="Biodegradable, BPA-Free"
+                    value={editingProduct?.eco_features?.join(', ') || ''}
+                    onChange={(e) => setEditingProduct({...editingProduct, eco_features: e.target.value.split(',').map(f => f.trim())})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-discount">Discount %</Label>
+                  <Input 
+                    id="edit-discount" 
+                    type="number" 
+                    min="0" 
+                    max="100"
+                    placeholder="0"
+                    value={editingProduct?.discount_percentage || ''}
+                    onChange={(e) => setEditingProduct({...editingProduct, discount_percentage: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-original-price">Original Price (if discounted)</Label>
+                  <Input 
+                    id="edit-original-price" 
+                    type="number" 
+                    placeholder="0.00"
+                    value={editingProduct?.original_price || ''}
+                    onChange={(e) => setEditingProduct({...editingProduct, original_price: parseFloat(e.target.value) || 0})}
+                  />
+                </div>
               <div className="col-span-2 space-y-2">
                 <ImageUpload 
                   onImageUploaded={(url) => setEditingProduct({...editingProduct, image: url})}
