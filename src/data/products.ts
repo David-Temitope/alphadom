@@ -200,4 +200,8 @@ export const categories = [
   { name: "Personal Care", icon: "🧴", count: products.filter(p => p.category === "Personal Care").length },
   { name: "Food & Beverage", icon: "🍃", count: products.filter(p => p.category === "Food & Beverage").length },
   { name: "Fashion", icon: "👕", count: products.filter(p => p.category === "Fashion").length },
+  { name: "Electronics", icon: "💻", count: products.filter(p => p.category === "Electronics").length },
+  { name: "Tech Accessories", icon: "🔌", count: products.filter(p => p.category === "Tech Accessories").length },
+  { name: "Sports & Fitness", icon: "⚽", count: products.filter(p => p.category === "Sports & Fitness").length },
+  { name: "Books & Media", icon: "📚", count: products.filter(p => p.category === "Books & Media").length },
 ];

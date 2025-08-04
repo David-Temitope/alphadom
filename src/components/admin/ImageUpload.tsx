@@ -86,11 +86,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
 
   return (
     <div className="space-y-4">
-      <Label htmlFor="image" className="text-sm font-medium text-slate-700">Product Image</Label>
+      <Label htmlFor="image" className="text-sm font-medium">Product Image</Label>
       
       {preview ? (
         <div className="relative group">
-          <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm">
             <img 
               src={preview} 
               alt="Preview" 
@@ -110,16 +110,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         </div>
       ) : (
         <div className="relative">
-          <div className="border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <div className="border-2 border-dashed border-border hover:border-primary rounded-xl p-8 text-center bg-muted/50 hover:bg-muted transition-all duration-200 cursor-pointer group">
             <div className="flex flex-col items-center space-y-3">
-              <div className="p-3 rounded-full bg-slate-100 group-hover:bg-blue-100 transition-colors duration-200">
-                <Image className="h-6 w-6 text-slate-400 group-hover:text-blue-500 transition-colors duration-200" />
+              <div className="p-3 rounded-full bg-muted group-hover:bg-primary/10 transition-colors duration-200">
+                <Image className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-600 group-hover:text-blue-600 transition-colors duration-200">
+                <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-200">
                   Upload product image
                 </p>
-                <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP up to 5MB</p>
+                <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP up to 5MB</p>
               </div>
             </div>
           </div>
@@ -135,8 +135,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
       )}
       
       {uploading && (
-        <div className="flex items-center space-x-2 text-sm text-blue-600">
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+        <div className="flex items-center space-x-2 text-sm text-primary">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
           <span>Uploading...</span>
         </div>
       )}

@@ -5,10 +5,10 @@ import { Badge } from "@/components/ui/badge";
 
 const About = () => {
   const stats = [
-    { label: "Products Sold", value: "50K+", icon: "📦" },
-    { label: "Trees Planted", value: "25K+", icon: "🌳" },
-    { label: "CO2 Offset", value: "100T+", icon: "🌍" },
-    { label: "Happy Customers", value: "10K+", icon: "😊" },
+    { label: "Products Sold", value: "50K+" },
+    { label: "Trees Planted", value: "25K+" },
+    { label: "CO2 Offset", value: "100T+" },
+    { label: "Happy Customers", value: "10K+" },
   ];
 
   const values = [
@@ -61,12 +61,12 @@ const About = () => {
       <section className="bg-gradient-to-br from-green-600 to-green-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge className="bg-white/20 text-white mb-4">About EcoMart</Badge>
+            <Badge className="bg-white/20 text-white mb-4">About Pilot</Badge>
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Building a Sustainable Future
+              Curating Quality Products
             </h1>
             <p className="text-xl lg:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
-              We're on a mission to make sustainable living accessible, affordable, and beautiful for everyone.
+              We're on a mission to make quality products accessible, affordable, and beautiful for everyone.
             </p>
           </div>
         </div>
@@ -77,11 +77,10 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {stats.map((stat, index) => (
-              <Card key={index} className="border-green-100">
+              <Card key={index} className="border-primary/20">
                 <CardContent className="p-6">
-                  <div className="text-4xl mb-2">{stat.icon}</div>
-                  <div className="text-3xl font-bold text-green-600 mb-2">{stat.value}</div>
-                  <div className="text-gray-600">{stat.label}</div>
+                  <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
+                  <div className="text-muted-foreground">{stat.label}</div>
                 </CardContent>
               </Card>
             ))}
@@ -97,19 +96,19 @@ const About = () => {
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
               <div className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
-                  EcoMart was born from a simple belief: that sustainable living shouldn't be a luxury. 
-                  Founded in 2020 by environmental scientist Sarah Green, we started as a small collection 
-                  of carefully curated eco-friendly products.
+                  Pilot was born from a simple belief: that quality products shouldn't be hard to find. 
+                  Founded in 2020 by a team of product enthusiasts, we started as a small collection 
+                  of carefully curated items spanning technology, lifestyle, and sustainable goods.
                 </p>
                 <p>
-                  Today, we've grown into a comprehensive platform that connects conscious consumers with 
-                  sustainable brands from around the world. Every product in our catalog is evaluated 
-                  for its environmental impact, social responsibility, and quality standards.
+                  Today, we've grown into a comprehensive platform that connects discerning consumers with 
+                  quality brands from around the world. Every product in our catalog is evaluated 
+                  for its design, functionality, sustainability, and value proposition.
                 </p>
                 <p>
-                  Our unique sustainability scoring system helps customers make informed choices, while 
-                  our carbon-neutral shipping and tree-planting initiatives ensure that every purchase 
-                  contributes to a healthier planet.
+                  Our unique rating system helps customers make informed choices, while 
+                  our fast shipping and customer service initiatives ensure that every purchase 
+                  contributes to a positive shopping experience.
                 </p>
               </div>
             </div>
@@ -190,10 +189,10 @@ const About = () => {
           <Target className="h-12 w-12 mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
           <p className="text-xl leading-relaxed text-green-100 mb-8">
-            To make sustainable living accessible to everyone by providing high-quality, 
-            eco-friendly products that don't compromise on style, function, or affordability. 
-            We believe that small changes in our daily choices can create a massive positive 
-            impact on our planet's future.
+            To make quality products accessible to everyone by providing carefully curated items 
+            that don't compromise on style, function, or value. 
+            We believe that thoughtful product selection can enhance daily life while 
+            supporting innovative brands and sustainable practices.
           </p>
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>

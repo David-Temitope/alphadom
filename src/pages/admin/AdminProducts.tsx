@@ -283,6 +283,9 @@ const AdminProducts = () => {
                       <SelectItem value="Fashion">Fashion</SelectItem>
                       <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
                       <SelectItem value="Electronics">Electronics</SelectItem>
+                      <SelectItem value="Tech Accessories">Tech Accessories</SelectItem>
+                      <SelectItem value="Sports & Fitness">Sports & Fitness</SelectItem>
+                      <SelectItem value="Books & Media">Books & Media</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -421,6 +424,9 @@ const AdminProducts = () => {
                     <SelectItem value="Fashion">Fashion</SelectItem>
                     <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
                     <SelectItem value="Electronics">Electronics</SelectItem>
+                    <SelectItem value="Tech Accessories">Tech Accessories</SelectItem>
+                    <SelectItem value="Sports & Fitness">Sports & Fitness</SelectItem>
+                    <SelectItem value="Books & Media">Books & Media</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
