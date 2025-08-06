@@ -23,6 +23,8 @@ interface Product {
   has_discount?: boolean;
   discount_percentage?: number;
   original_price?: number;
+  stock_count?: number;
+  initial_stock_count?: number;
 }
 
 interface ProductCardProps {
@@ -36,6 +38,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (product.stock_count <= 0) {
+      toast({
+        title: "Out of stock",
+        description: "This product is currently out of stock.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     addToCart(product);
     toast({
       title: "Added to cart",
@@ -143,11 +155,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <CardFooter className="p-4 pt-0">
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-green-600 hover:bg-green-700 text-white border-0"
+          disabled={(product.stock_count || 0) <= 0}
+          className="w-full bg-green-600 hover:bg-green-700 text-white border-0 disabled:opacity-50"
           size="sm"
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
-          Add to Cart
+          {(product.stock_count || 0) <= 0 ? 'Out of Stock' : 'Add to Cart'}
         </Button>
       </CardFooter>
     </Card>

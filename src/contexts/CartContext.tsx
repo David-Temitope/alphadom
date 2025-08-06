@@ -13,9 +13,9 @@ interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: any) => void;
+  addToCart: (product: any, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  updateQuantity: (productId: string, quantity: number, stockCount?: number) => void;
   clearCart: () => void;
   total: number;
   totalPrice: number;
@@ -40,19 +40,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ? items.reduce((sum, item) => sum + (item.sustainabilityScore * item.quantity), 0) / itemCount
     : 0;
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: any, requestedQuantity: number = 1) => {
     setItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
+      const currentQuantity = existingItem ? existingItem.quantity : 0;
+      const totalRequested = currentQuantity + requestedQuantity;
+      
+      // Check stock availability
+      if (product.stock_count < totalRequested) {
+        const maxAvailable = Math.max(0, product.stock_count - currentQuantity);
+        if (maxAvailable === 0) {
+          return prevItems; // Cannot add any more
+        }
+        requestedQuantity = maxAvailable;
+      }
+      
       if (existingItem) {
         return prevItems.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + requestedQuantity }
             : item
         );
       }
       return [...prevItems, { 
         ...product, 
-        quantity: 1,
+        quantity: requestedQuantity,
         category: product.category || 'General',
         sustainabilityScore: product.sustainability_score || 0
       }];
@@ -63,14 +75,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems(prevItems => prevItems.filter(item => item.id !== productId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, stockCount?: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
     }
+    
+    // Enforce stock limits
+    const finalQuantity = stockCount ? Math.min(quantity, stockCount) : quantity;
+    
     setItems(prevItems =>
       prevItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+        item.id === productId ? { ...item, quantity: finalQuantity } : item
       )
     );
   };

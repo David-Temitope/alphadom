@@ -6,8 +6,6 @@ import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { UserMenu } from './UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
-import { ThemeToggle } from './ThemeToggle';
-
 export const Navbar = () => {
   const { items } = useCart();
   const { user } = useAuth();
@@ -88,9 +86,6 @@ export const Navbar = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4">
-              <div className="hidden md:block">
-                <ThemeToggle />
-              </div>
               
               {/* Cart */}
               <Button variant="ghost" size="sm" asChild className="relative hover:bg-accent">
@@ -179,10 +174,6 @@ export const Navbar = () => {
               </div>
 
               <div className="pt-4 border-t border-border">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium">Theme</span>
-                  <ThemeToggle />
-                </div>
                 
                 {user ? (
                   <UserMenu />

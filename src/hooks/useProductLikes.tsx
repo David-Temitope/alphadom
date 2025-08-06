@@ -66,6 +66,12 @@ export const useProductLikes = (productId?: string) => {
 
         if (error) throw error;
         setLikedProducts(prev => [...prev, productId]);
+        
+        // Show success message
+        toast({
+          title: "Product liked!",
+          description: "Thanks for your feedback.",
+        });
       }
     } catch (error) {
       console.error('Error toggling like:', error);

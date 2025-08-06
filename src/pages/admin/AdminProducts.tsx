@@ -30,17 +30,22 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Search, Edit, Trash2, Star, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Star, Loader2, Package, AlertTriangle } from 'lucide-react';
 import { useAdminProducts } from '@/hooks/useAdminProducts';
+import { useStockAlerts } from '@/hooks/useStockAlerts';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminProducts = () => {
   const { products, loading, categories, createProduct, updateProduct, deleteProduct } = useAdminProducts();
+  const { unreadCount } = useStockAlerts();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isRestockDialogOpen, setIsRestockDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [restockingProduct, setRestockingProduct] = useState<any>(null);
+  const [restockQuantity, setRestockQuantity] = useState('');
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -48,6 +53,7 @@ const AdminProducts = () => {
     description: '',
     full_description: '',
     stock_count: '',
+    initial_stock_count: '',
     sustainability_score: '',
     image: '',
     eco_features: [] as string[],
@@ -81,6 +87,7 @@ const AdminProducts = () => {
         description: newProduct.description,
         full_description: newProduct.full_description,
         stock_count: parseInt(newProduct.stock_count) || 0,
+        initial_stock_count: parseInt(newProduct.initial_stock_count) || parseInt(newProduct.stock_count) || 0,
         sustainability_score: parseInt(newProduct.sustainability_score) || 0,
         image: newProduct.image,
         eco_features: newProduct.eco_features,
@@ -107,6 +114,7 @@ const AdminProducts = () => {
         description: '',
         full_description: '',
         stock_count: '',
+        initial_stock_count: '',
         sustainability_score: '',
         image: '',
         eco_features: [],
@@ -209,6 +217,52 @@ const AdminProducts = () => {
     }
   };
 
+  const handleRestockProduct = (product: any) => {
+    setRestockingProduct(product);
+    setRestockQuantity('');
+    setIsRestockDialogOpen(true);
+  };
+
+  const handleConfirmRestock = async () => {
+    if (!restockingProduct || !restockQuantity) {
+      toast({
+        title: "Error",
+        description: "Please enter a restock quantity",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const newStockCount = restockingProduct.stock_count + parseInt(restockQuantity);
+      const { error } = await updateProduct(restockingProduct.id, {
+        stock_count: newStockCount,
+        last_stock_update: new Date().toISOString(),
+        in_stock: newStockCount > 0
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Product restocked! Added ${restockQuantity} units.`,
+      });
+
+      setIsRestockDialogOpen(false);
+      setRestockingProduct(null);
+      setRestockQuantity('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to restock product",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -224,7 +278,14 @@ const AdminProducts = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Products</h1>
+            <h1 className="text-3xl font-bold relative inline-flex items-center">
+              Products
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </h1>
             <p className="text-muted-foreground">
               Manage your product inventory and details
             </p>
@@ -289,16 +350,16 @@ const AdminProducts = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="stock">Stock Count</Label>
-                  <Input 
-                    id="stock" 
-                    type="number" 
-                    placeholder="0"
-                    value={newProduct.stock_count}
-                    onChange={(e) => setNewProduct({...newProduct, stock_count: e.target.value})}
-                  />
-                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="stock">Stock Count</Label>
+                   <Input 
+                     id="stock" 
+                     type="number" 
+                     placeholder="0"
+                     value={newProduct.stock_count}
+                     onChange={(e) => setNewProduct({...newProduct, stock_count: e.target.value, initial_stock_count: e.target.value})}
+                   />
+                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="sustainability">Sustainability Score (1-10)</Label>
                   <Input 
@@ -523,6 +584,45 @@ const AdminProducts = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Restock Product Dialog */}
+        <Dialog open={isRestockDialogOpen} onOpenChange={setIsRestockDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Restock Product</DialogTitle>
+              <DialogDescription>
+                Add stock for {restockingProduct?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span>Current Stock:</span>
+                <Badge variant="outline">
+                  {restockingProduct?.stock_count || 0} units
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="restock-quantity">Quantity to Add</Label>
+                <Input
+                  id="restock-quantity"
+                  type="number"
+                  min="1"
+                  placeholder="Enter quantity"
+                  value={restockQuantity}
+                  onChange={(e) => setRestockQuantity(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsRestockDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmRestock} disabled={submitting}>
+                  {submitting ? 'Restocking...' : 'Restock'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Card>
           <CardHeader>
             <CardTitle>Product Inventory ({products.length} products)</CardTitle>
@@ -574,9 +674,19 @@ const AdminProducts = () => {
                     <TableCell>{product.category}</TableCell>
                     <TableCell>${Number(product.price).toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant={product.stock_count && product.stock_count > 20 ? 'default' : product.stock_count && product.stock_count > 5 ? 'secondary' : 'destructive'}>
-                        {product.stock_count || 0} units
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={product.stock_count && product.stock_count > 20 ? 'default' : product.stock_count && product.stock_count > 5 ? 'secondary' : 'destructive'}>
+                          {product.stock_count || 0} units
+                        </Badge>
+                        {product.initial_stock_count && product.stock_count && 
+                         product.stock_count < (product.initial_stock_count * 0.1) && 
+                         product.stock_count > 0 && (
+                          <AlertTriangle className="h-4 w-4 text-orange-500" />
+                        )}
+                        {product.stock_count === 0 && (
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
@@ -597,6 +707,13 @@ const AdminProducts = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleRestockProduct(product)}
+                        >
+                          <Package className="h-4 w-4" />
+                        </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
