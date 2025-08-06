@@ -38,6 +38,38 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_stock_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          product_id: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          product_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_stock_alerts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscribers: {
         Row: {
           email: string
@@ -187,6 +219,8 @@ export type Database = {
           id: string
           image: string | null
           in_stock: boolean | null
+          initial_stock_count: number | null
+          last_stock_update: string | null
           name: string
           original_price: number | null
           price: number
@@ -210,6 +244,8 @@ export type Database = {
           id?: string
           image?: string | null
           in_stock?: boolean | null
+          initial_stock_count?: number | null
+          last_stock_update?: string | null
           name: string
           original_price?: number | null
           price: number
@@ -233,6 +269,8 @@ export type Database = {
           id?: string
           image?: string | null
           in_stock?: boolean | null
+          initial_stock_count?: number | null
+          last_stock_update?: string | null
           name?: string
           original_price?: number | null
           price?: number
