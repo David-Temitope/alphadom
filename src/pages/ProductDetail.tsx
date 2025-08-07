@@ -10,6 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 import { WishlistButton } from '@/components/WishlistButton';
 import { LikeButton } from '@/components/LikeButton';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductComments } from '@/components/ProductComments';
 import { useToast } from '@/hooks/use-toast';
 import { 
   ShoppingCart, 
@@ -39,13 +40,19 @@ const ProductDetail = () => {
   const originalPrice = hasDiscount ? product.original_price : 0;
 
   const handleAddToCart = () => {
-    if (product) {
+    if (product && (product.stock_count || 0) > 0) {
       for (let i = 0; i < quantity; i++) {
         addToCart(product);
       }
       toast({
         title: "Added to cart",
         description: `${quantity} x ${product.name} added to your cart.`,
+      });
+    } else {
+      toast({
+        title: "Out of stock",
+        description: "This product is currently out of stock.",
+        variant: "destructive",
       });
     }
   };
@@ -233,14 +240,15 @@ const ProductDetail = () => {
               <div className="space-y-4">
                 <Button 
                   onClick={handleAddToCart}
-                  className="w-full h-12 text-lg bg-green-600 hover:bg-green-700 text-white border-0 transition-all duration-200"
+                  disabled={(product.stock_count || 0) <= 0}
+                  className="w-full h-12 text-lg bg-green-600 hover:bg-green-700 text-white border-0 transition-all duration-200 disabled:opacity-50"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  Add to Cart
+                  {(product.stock_count || 0) <= 0 ? 'Out of Stock' : 'Add to Cart'}
                 </Button>
-                <div className="flex gap-6 justify-center items-center">
-                  <WishlistButton productId={product.id} size="lg" />
-                  <LikeButton productId={product.id} size="lg" />
+                <div className="flex gap-3 justify-center">
+                  <WishlistButton productId={product.id} size="lg" className="flex-1 h-11" />
+                  <LikeButton productId={product.id} size="lg" className="flex-1 h-11" />
                 </div>
               </div>
             </div>
@@ -285,9 +293,12 @@ const ProductDetail = () => {
           </Card>
         )}
 
+        {/* Product Comments */}
+        <ProductComments productId={product.id} />
+
         {/* Similar Products */}
         {similarProducts.length > 0 && (
-          <section>
+          <section className="mt-16">
             <h2 className="text-2xl font-bold mb-8">Similar Products</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {similarProducts.map((product) => (

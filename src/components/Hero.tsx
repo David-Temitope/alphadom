@@ -3,29 +3,25 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Leaf, Shield, Recycle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAdminSettings } from '@/hooks/useAdminSettings';
 
 export const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  
-  const heroImages = [
-    "/lovable-uploads/ac61d3f1-910e-4684-9170-ee2679c7ce3b.png",
-    "/lovable-uploads/a8b891ca-80d3-40e7-9e2a-aacfbe0fc861.png",
-    "/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png"
-  ];
+  const { settings } = useAdminSettings();
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+      setCurrentSlide((prev) => (prev + 1) % settings.hero_images.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [heroImages.length]);
+  }, [settings.hero_images.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+    setCurrentSlide((prev) => (prev + 1) % settings.hero_images.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+    setCurrentSlide((prev) => (prev - 1 + settings.hero_images.length) % settings.hero_images.length);
   };
 
   return (
@@ -43,13 +39,13 @@ export const Hero = () => {
             <div className="space-y-4">
               <div className="inline-flex items-center px-4 py-2 bg-green-100/80 text-green-700 rounded-full text-sm font-medium backdrop-blur-sm border border-green-200/50">
                 <Shield className="w-4 h-4 mr-2" />
-                Premium Quality You Can Trust
+                {settings.site_description}
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
-                Premium
+                {settings.site_name}
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                  Products
+                  Store
                 </span>
                 for Modern Living
               </h1>
@@ -109,7 +105,7 @@ export const Hero = () => {
           <div className="relative">
             <div className="relative z-10 h-96 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
               <div className="relative w-full h-full">
-                {heroImages.map((image, index) => (
+                {settings.hero_images.map((image, index) => (
                   <div
                     key={index}
                     className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
@@ -141,7 +137,7 @@ export const Hero = () => {
                 
                 {/* Dots Indicator */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                  {heroImages.map((_, index) => (
+                  {settings.hero_images.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}

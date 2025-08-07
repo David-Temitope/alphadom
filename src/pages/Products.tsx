@@ -114,18 +114,22 @@ const Products = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
-                key={product.id}
-                product={{
-                  id: product.id,
-                  name: product.name,
-                  price: Number(product.price),
-                  image: product.image || '/placeholder.svg',
-                  category: product.category,
-                  rating: Number(product.rating) || 0,
-                  sustainability_score: product.sustainability_score || 0,
-                  eco_features: product.eco_features || [],
-                  description: product.description || ''
-                }}
+                  key={product.id}
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    price: Number(product.price),
+                    image: product.image || '/placeholder.svg',
+                    category: product.category,
+                    rating: Number(product.rating) || 0,
+                    sustainability_score: product.sustainability_score || 0,
+                    eco_features: product.eco_features || [],
+                    description: product.description || '',
+                    stock_count: product.stock_count || 0,
+                    has_discount: product.has_discount,
+                    discount_percentage: product.discount_percentage,
+                    original_price: product.original_price
+                  }}
               />
             ))}
           </div>
