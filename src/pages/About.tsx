@@ -2,8 +2,10 @@
 import { Leaf, Users, Award, Target, Heart, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAdminSettings } from "@/hooks/useAdminSettings";
 
 const About = () => {
+  const { settings } = useAdminSettings();
   const stats = [
     { label: "Products Sold", value: "50K+" },
     { label: "Trees Planted", value: "25K+" },
@@ -61,12 +63,12 @@ const About = () => {
       <section className="bg-gradient-to-br from-green-600 to-green-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge className="bg-white/20 text-white mb-4">About Pilot</Badge>
+            <Badge className="bg-white/20 text-white mb-4">About {settings.site_name}</Badge>
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Curating Quality Products
+              {settings.about_hero_title || "Curating Quality Products"}
             </h1>
             <p className="text-xl lg:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
-              We're on a mission to make quality products accessible, affordable, and beautiful for everyone.
+              {settings.about_hero_subtitle || "We're on a mission to make quality products accessible, affordable, and beautiful for everyone."}
             </p>
           </div>
         </div>
@@ -95,21 +97,27 @@ const About = () => {
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
               <div className="space-y-4 text-gray-700 leading-relaxed">
-                <p>
-                  Pilot was born from a simple belief: that quality products shouldn't be hard to find. 
-                  Founded in 2020 by a team of product enthusiasts, we started as a small collection 
-                  of carefully curated items spanning technology, lifestyle, and sustainable goods.
-                </p>
-                <p>
-                  Today, we've grown into a comprehensive platform that connects discerning consumers with 
-                  quality brands from around the world. Every product in our catalog is evaluated 
-                  for its design, functionality, sustainability, and value proposition.
-                </p>
-                <p>
-                  Our unique rating system helps customers make informed choices, while 
-                  our fast shipping and customer service initiatives ensure that every purchase 
-                  contributes to a positive shopping experience.
-                </p>
+                {settings.about_story ? (
+                  <div className="whitespace-pre-line">{settings.about_story}</div>
+                ) : (
+                  <>
+                    <p>
+                      {settings.site_name} was born from a simple belief: that quality products shouldn't be hard to find. 
+                      Founded in 2020 by a team of product enthusiasts, we started as a small collection 
+                      of carefully curated items spanning technology, lifestyle, and sustainable goods.
+                    </p>
+                    <p>
+                      Today, we've grown into a comprehensive platform that connects discerning consumers with 
+                      quality brands from around the world. Every product in our catalog is evaluated 
+                      for its design, functionality, sustainability, and value proposition.
+                    </p>
+                    <p>
+                      Our unique rating system helps customers make informed choices, while 
+                      our fast shipping and customer service initiatives ensure that every purchase 
+                      contributes to a positive shopping experience.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             <div className="relative">
@@ -189,10 +197,10 @@ const About = () => {
           <Target className="h-12 w-12 mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
           <p className="text-xl leading-relaxed text-green-100 mb-8">
-            To make quality products accessible to everyone by providing carefully curated items 
+            {settings.about_mission || `To make quality products accessible to everyone by providing carefully curated items 
             that don't compromise on style, function, or value. 
             We believe that thoughtful product selection can enhance daily life while 
-            supporting innovative brands and sustainable practices.
+            supporting innovative brands and sustainable practices.`}
           </p>
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>

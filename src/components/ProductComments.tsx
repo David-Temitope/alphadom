@@ -15,6 +15,7 @@ export const ProductComments: React.FC<ProductCommentsProps> = ({ productId }) =
   const { comments, loading, addComment, toggleReaction } = useProductComments(productId);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,53 +68,53 @@ export const ProductComments: React.FC<ProductCommentsProps> = ({ productId }) =
 
         {/* Comments List */}
         {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <div className="text-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
           </div>
         ) : comments.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-4 text-muted-foreground text-sm">
             No reviews yet. Be the first to share your thoughts!
           </div>
         ) : (
-          <div className="space-y-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <Avatar className="w-8 h-8">
+          <div className="space-y-3">
+            {(showAllComments ? comments : comments.slice(0, 3)).map((comment) => (
+              <div key={comment.id} className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <Avatar className="w-6 h-6">
                     <AvatarImage src={comment.profiles?.avatar_url} />
-                    <AvatarFallback>
+                    <AvatarFallback className="text-xs">
                       {comment.profiles?.full_name?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm">
+                      <p className="font-medium text-xs">
                         {comment.profiles?.full_name || 'Anonymous User'}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {formatDate(comment.created_at)}
                       </p>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                       {comment.comment}
                     </p>
                   </div>
                 </div>
 
                 {/* Like/Dislike Buttons */}
-                <div className="flex items-center gap-2 ml-11">
+                <div className="flex items-center gap-1 ml-8">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleReaction(comment.id, true)}
                     className={cn(
-                      "h-8 px-3 text-xs gap-1.5",
+                      "h-6 px-2 text-xs gap-1",
                       comment.user_reaction === 'like' 
                         ? "bg-green-50 text-green-700 hover:bg-green-100" 
                         : "hover:bg-gray-50"
                     )}
                   >
-                    <ThumbsUp className="w-3 h-3" />
+                    <ThumbsUp className="w-2.5 h-2.5" />
                     {comment.likes}
                   </Button>
                   <Button
@@ -121,18 +122,31 @@ export const ProductComments: React.FC<ProductCommentsProps> = ({ productId }) =
                     size="sm"
                     onClick={() => toggleReaction(comment.id, false)}
                     className={cn(
-                      "h-8 px-3 text-xs gap-1.5",
+                      "h-6 px-2 text-xs gap-1",
                       comment.user_reaction === 'dislike' 
                         ? "bg-red-50 text-red-700 hover:bg-red-100" 
                         : "hover:bg-gray-50"
                     )}
                   >
-                    <ThumbsDown className="w-3 h-3" />
+                    <ThumbsDown className="w-2.5 h-2.5" />
                     {comment.dislikes}
                   </Button>
                 </div>
               </div>
             ))}
+            
+            {comments.length > 3 && (
+              <div className="text-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAllComments(!showAllComments)}
+                  className="text-xs"
+                >
+                  {showAllComments ? 'Show Less' : `Show ${comments.length - 3} More Reviews`}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

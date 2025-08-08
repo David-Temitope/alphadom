@@ -43,7 +43,7 @@ export const Hero = () => {
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
-                {settings.site_name}
+                {settings.hero_title || settings.site_name}
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   Store
                 </span>
@@ -51,7 +51,7 @@ export const Hero = () => {
               </h1>
               
               <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                Discover high-quality products that combine style, functionality, and reliability for your everyday needs.
+                {settings.hero_subtitle || "Discover high-quality products that combine style, functionality, and reliability for your everyday needs."}
               </p>
             </div>
             

@@ -6,9 +6,11 @@ import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { UserMenu } from './UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminSettings } from '@/hooks/useAdminSettings';
 export const Navbar = () => {
   const { items } = useCart();
   const { user } = useAuth();
+  const { settings } = useAdminSettings();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -33,18 +35,18 @@ export const Navbar = () => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 overflow-hidden">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 overflow-hidden bg-white">
                 <img 
-                  src="/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png" 
-                  alt="Pilot Logo" 
+                  src={settings.navbar_logo} 
+                  alt={`${settings.site_name} Logo`} 
                   className="w-8 h-8 object-contain"
                 />
               </div>
               <div className="hidden sm:block">
                 <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                  Pilot
+                  {settings.site_name}
                 </span>
-                <div className="text-xs text-muted-foreground -mt-1">Premium Quality Products</div>
+                <div className="text-xs text-muted-foreground -mt-1">{settings.site_description}</div>
               </div>
             </Link>
 
