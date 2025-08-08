@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { ShoppingCart, CreditCard, Truck, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminSettings } from '@/hooks/useAdminSettings';
 
 const Checkout = () => {
   const { items, total, clearCart } = useCart();
@@ -20,6 +21,7 @@ const Checkout = () => {
   const { createOrder } = useOrders();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { settings } = useAdminSettings();
   
   const [shippingInfo, setShippingInfo] = useState({
     street: '',
@@ -288,7 +290,6 @@ const Checkout = () => {
                   <SelectContent>
                     <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
                     <SelectItem value="credit_card">Credit Card</SelectItem>
-                    <SelectItem value="apple_pay">Apple Pay</SelectItem>
                   </SelectContent>
                 </Select>
                 
@@ -296,10 +297,10 @@ const Checkout = () => {
                   <div className="p-4 bg-muted rounded-lg">
                     <h4 className="font-semibold mb-2">Bank Transfer Details</h4>
                     <div className="space-y-1 text-sm">
-                      <p><strong>Bank:</strong> First National Bank</p>
-                      <p><strong>Account Name:</strong> Pilot Store</p>
-                      <p><strong>Account Number:</strong> 1234567890</p>
-                      <p><strong>Routing Number:</strong> 021000021</p>
+                      <p><strong>Bank:</strong> {settings.bank_details.bank_name || 'First National Bank'}</p>
+                      <p><strong>Account Name:</strong> {settings.bank_details.account_name || 'Pilot Store'}</p>
+                      <p><strong>Account Number:</strong> {settings.bank_details.account_number || '1234567890'}</p>
+                      <p><strong>Routing Number:</strong> {settings.bank_details.routing_number || '021000021'}</p>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
                       Please include your order ID in the transfer description
@@ -330,15 +331,6 @@ const Checkout = () => {
                   </div>
                 )}
                 
-                {paymentMethod === 'apple_pay' && (
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm">You will be redirected to Apple Pay to complete your purchase.</p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <input type="checkbox" id="save-apple-pay" />
-                      <Label htmlFor="save-apple-pay" className="text-sm">Save Apple Pay for future purchases</Label>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
 

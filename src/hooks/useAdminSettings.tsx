@@ -18,6 +18,7 @@ interface AdminSettings {
     account_name: string;
     routing_number: string;
   };
+  primary_color: string;
 }
 
 export const useAdminSettings = () => {
@@ -41,7 +42,8 @@ export const useAdminSettings = () => {
       account_number: '',
       account_name: '',
       routing_number: ''
-    }
+    },
+    primary_color: '#059669'
   });
   const [loading, setLoading] = useState(true);
 
@@ -78,7 +80,8 @@ export const useAdminSettings = () => {
           account_number: settingsMap.bank_details?.account_number || '',
           account_name: settingsMap.bank_details?.account_name || '',
           routing_number: settingsMap.bank_details?.routing_number || ''
-        }
+        },
+        primary_color: settingsMap.theme_config?.primary_color || '#059669'
       });
     } catch (error) {
       console.error('Error fetching settings:', error);

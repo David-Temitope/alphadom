@@ -29,6 +29,7 @@ const AdminSettings = () => {
     about_hero_subtitle: '',
     about_story: '',
     about_mission: '',
+    primary_color: '#059669', // Default green color
   });
 
   useEffect(() => {
@@ -63,6 +64,7 @@ const AdminSettings = () => {
         about_hero_subtitle: settingsMap.about_config?.hero_subtitle || '',
         about_story: settingsMap.about_config?.story || '',
         about_mission: settingsMap.about_config?.mission || '',
+        primary_color: settingsMap.theme_config?.primary_color || '#059669',
       });
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -143,6 +145,19 @@ const AdminSettings = () => {
           }
         }, { onConflict: 'setting_key' });
 
+      // Update theme config
+      await supabase
+        .from('admin_settings')
+        .upsert({
+          setting_key: 'theme_config',
+          setting_value: {
+            primary_color: settings.primary_color,
+          }
+        }, { onConflict: 'setting_key' });
+
+      // Update CSS variables
+      updateThemeColors(settings.primary_color);
+
       toast({
         title: "Success",
         description: "Settings updated successfully",
@@ -171,6 +186,53 @@ const AdminSettings = () => {
       ...prev,
       hero_images: prev.hero_images.filter((_, i) => i !== index)
     }));
+  };
+
+  const handleLogoUpload = (imageUrl: string) => {
+    setSettings(prev => ({
+      ...prev,
+      navbar_logo: imageUrl
+    }));
+  };
+
+  const updateThemeColors = (primaryColor: string) => {
+    const hexToHsl = (hex: string) => {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+          default: h = 0;
+        }
+        h /= 6;
+      }
+
+      return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+    };
+
+    const [h, s, l] = hexToHsl(primaryColor);
+    const hslString = `${h} ${s}% ${l}%`;
+    
+    document.documentElement.style.setProperty('--primary', hslString);
+    document.documentElement.style.setProperty('--ring', hslString);
+    document.documentElement.style.setProperty('--chart-1', hslString);
+  };
+
+  const restoreDefaultColors = () => {
+    setSettings(prev => ({ ...prev, primary_color: '#059669' }));
+    updateThemeColors('#059669');
   };
 
   return (
@@ -220,12 +282,10 @@ const AdminSettings = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="navbar_logo">Navbar Logo URL</Label>
-                <Input
-                  id="navbar_logo"
-                  value={settings.navbar_logo}
-                  onChange={(e) => setSettings(prev => ({ ...prev, navbar_logo: e.target.value }))}
-                  placeholder="Enter logo image URL"
+                <Label htmlFor="navbar_logo">Navbar Logo</Label>
+                <ImageUpload 
+                  onImageUploaded={handleLogoUpload}
+                  currentImage={settings.navbar_logo}
                 />
               </div>
             </CardContent>
@@ -367,6 +427,48 @@ const AdminSettings = () => {
                 placeholder="Describe your mission..."
                 rows={4}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Theme Customization */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Theme Customization
+            </CardTitle>
+            <CardDescription>
+              Customize the site's color scheme
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="primary_color">Primary Color</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="primary_color"
+                  type="color"
+                  value={settings.primary_color}
+                  onChange={(e) => {
+                    setSettings(prev => ({ ...prev, primary_color: e.target.value }));
+                    updateThemeColors(e.target.value);
+                  }}
+                  className="w-16 h-10"
+                />
+                <Input
+                  value={settings.primary_color}
+                  onChange={(e) => {
+                    setSettings(prev => ({ ...prev, primary_color: e.target.value }));
+                    updateThemeColors(e.target.value);
+                  }}
+                  placeholder="#059669"
+                  className="flex-1"
+                />
+                <Button onClick={restoreDefaultColors} variant="outline" size="sm">
+                  Restore Default
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
