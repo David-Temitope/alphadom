@@ -78,7 +78,7 @@ const Checkout = () => {
     } catch (error) {
       console.error('Error calculating totals:', error);
       // Fallback calculation
-      const shipping = subtotal >= 50 ? 0 : 5.99;
+      const shipping = subtotal >= 30 ? 0 : subtotal * 0.05;
       const tax = subtotal * 0.08;
       setOrderTotals({
         subtotal,
