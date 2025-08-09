@@ -1,0 +1,280 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useShopApplications } from '@/hooks/useShopApplications';
+import { Store, CreditCard } from 'lucide-react';
+
+interface ShopApplicationFormProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormProps) => {
+  const { submitApplication } = useShopApplications();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    store_name: '',
+    product_category: '',
+    price_range_min: '',
+    price_range_max: '',
+    email: '',
+    business_description: '',
+    contact_phone: '',
+    business_address: '',
+    bank_details: {
+      bank_name: '',
+      account_number: '',
+      account_name: '',
+      routing_number: ''
+    }
+  });
+
+  const categories = [
+    'Electronics', 'Clothing & Fashion', 'Home & Garden', 'Sports & Outdoors',
+    'Books & Media', 'Toys & Games', 'Health & Beauty', 'Automotive',
+    'Food & Beverages', 'Arts & Crafts', 'Jewelry & Accessories', 'Other'
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const applicationData = {
+        ...formData,
+        price_range_min: parseFloat(formData.price_range_min),
+        price_range_max: parseFloat(formData.price_range_max),
+      };
+
+      const { error } = await submitApplication(applicationData);
+      
+      if (!error) {
+        onOpenChange(false);
+        setFormData({
+          store_name: '',
+          product_category: '',
+          price_range_min: '',
+          price_range_max: '',
+          email: '',
+          business_description: '',
+          contact_phone: '',
+          business_address: '',
+          bank_details: {
+            bank_name: '',
+            account_number: '',
+            account_name: '',
+            routing_number: ''
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Store className="h-5 w-5" />
+            Rent a Shop - Application Form
+          </DialogTitle>
+          <DialogDescription>
+            Fill out this form to apply for your own shop on our platform.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Basic Information</h3>
+            
+            <div>
+              <Label htmlFor="store_name">Store Name *</Label>
+              <Input
+                id="store_name"
+                value={formData.store_name}
+                onChange={(e) => setFormData({ ...formData, store_name: e.target.value })}
+                placeholder="Enter your store name"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="product_category">Product Category *</Label>
+              <Select 
+                value={formData.product_category} 
+                onValueChange={(value) => setFormData({ ...formData, product_category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="price_range_min">Minimum Price ($) *</Label>
+                <Input
+                  id="price_range_min"
+                  type="number"
+                  step="0.01"
+                  value={formData.price_range_min}
+                  onChange={(e) => setFormData({ ...formData, price_range_min: e.target.value })}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="price_range_max">Maximum Price ($) *</Label>
+                <Input
+                  id="price_range_max"
+                  type="number"
+                  step="0.01"
+                  value={formData.price_range_max}
+                  onChange={(e) => setFormData({ ...formData, price_range_max: e.target.value })}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="contact_phone">Contact Phone</Label>
+              <Input
+                id="contact_phone"
+                value={formData.contact_phone}
+                onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="business_address">Business Address</Label>
+              <Textarea
+                id="business_address"
+                value={formData.business_address}
+                onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
+                placeholder="Enter your business address"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="business_description">Business Description</Label>
+              <Textarea
+                id="business_description"
+                value={formData.business_description}
+                onChange={(e) => setFormData({ ...formData, business_description: e.target.value })}
+                placeholder="Describe your business and what you plan to sell"
+                rows={4}
+              />
+            </div>
+          </div>
+
+          {/* Bank Details */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Bank Details
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              These details cannot be changed after submission.
+            </p>
+
+            <div>
+              <Label htmlFor="bank_name">Bank Name *</Label>
+              <Input
+                id="bank_name"
+                value={formData.bank_details.bank_name}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  bank_details: { ...formData.bank_details, bank_name: e.target.value }
+                })}
+                placeholder="Enter bank name"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="account_name">Account Name *</Label>
+              <Input
+                id="account_name"
+                value={formData.bank_details.account_name}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  bank_details: { ...formData.bank_details, account_name: e.target.value }
+                })}
+                placeholder="Enter account holder name"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="account_number">Account Number *</Label>
+              <Input
+                id="account_number"
+                value={formData.bank_details.account_number}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  bank_details: { ...formData.bank_details, account_number: e.target.value }
+                })}
+                placeholder="Enter account number"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="routing_number">Routing Number *</Label>
+              <Input
+                id="routing_number"
+                value={formData.bank_details.routing_number}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  bank_details: { ...formData.bank_details, routing_number: e.target.value }
+                })}
+                placeholder="Enter routing number"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading} className="flex-1">
+              {loading ? 'Submitting...' : 'Submit Application'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};

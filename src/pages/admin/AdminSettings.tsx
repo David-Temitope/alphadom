@@ -9,10 +9,13 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
 import { ImageUpload } from '@/components/admin/ImageUpload';
-import { Save, CreditCard, Building2, Image } from 'lucide-react';
+import { Save, CreditCard, Building2, Image, Download } from 'lucide-react';
+import { exportOrdersToPDF } from '@/utils/pdfExport';
+import { useOrders } from '@/hooks/useOrders';
 
 const AdminSettings = () => {
   const { toast } = useToast();
+  const { orders } = useOrders();
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     bank_name: '',
@@ -230,6 +233,26 @@ const AdminSettings = () => {
     document.documentElement.style.setProperty('--chart-1', hslString);
   };
 
+  const handleExportOrders = async () => {
+    try {
+      setLoading(true);
+      await exportOrdersToPDF(orders, {});
+      toast({
+        title: "Success",
+        description: "Orders exported to PDF successfully",
+      });
+    } catch (error) {
+      console.error('Error exporting orders:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export orders",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const restoreDefaultColors = () => {
     setSettings(prev => ({ ...prev, primary_color: '#059669' }));
     updateThemeColors('#059669');
@@ -245,10 +268,16 @@ const AdminSettings = () => {
               Manage your store settings and configuration
             </p>
           </div>
-          <Button onClick={handleSave} disabled={loading}>
-            <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Saving...' : 'Save Settings'}
-          </Button>
+          <div className="flex gap-4">
+            <Button onClick={handleExportOrders} disabled={loading} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              {loading ? 'Exporting...' : 'Export Orders'}
+            </Button>
+            <Button onClick={handleSave} disabled={loading}>
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
