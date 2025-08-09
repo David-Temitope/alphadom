@@ -70,6 +70,56 @@ export type Database = {
           },
         ]
       }
+      approved_vendors: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          product_category: string
+          store_name: string
+          total_orders: number
+          total_products: number
+          total_revenue: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_category: string
+          store_name: string
+          total_orders?: number
+          total_products?: number
+          total_revenue?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_category?: string
+          store_name?: string
+          total_orders?: number
+          total_products?: number
+          total_revenue?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approved_vendors_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "shop_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comment_likes: {
         Row: {
           comment_id: string
@@ -90,6 +140,42 @@ export type Database = {
           created_at?: string
           id?: string
           is_like?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      complaints: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          description: string
+          id: string
+          resolved_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -171,6 +257,7 @@ export type Database = {
           total_amount: number
           updated_at: string | null
           user_id: string | null
+          vendor_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -185,6 +272,7 @@ export type Database = {
           total_amount: number
           updated_at?: string | null
           user_id?: string | null
+          vendor_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -199,8 +287,17 @@ export type Database = {
           total_amount?: number
           updated_at?: string | null
           user_id?: string | null
+          vendor_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_comments: {
         Row: {
@@ -283,6 +380,7 @@ export type Database = {
           total_likes: number | null
           total_orders: number | null
           updated_at: string | null
+          vendor_id: string | null
         }
         Insert: {
           category: string
@@ -308,6 +406,7 @@ export type Database = {
           total_likes?: number | null
           total_orders?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
         Update: {
           category?: string
@@ -333,8 +432,17 @@ export type Database = {
           total_likes?: number | null
           total_orders?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -362,6 +470,146 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      shop_applications: {
+        Row: {
+          admin_notes: string | null
+          approved_at: string | null
+          bank_details: Json
+          business_address: string | null
+          business_description: string | null
+          contact_phone: string | null
+          created_at: string
+          email: string
+          id: string
+          payment_due_date: string | null
+          payment_received_at: string | null
+          price_range_max: number
+          price_range_min: number
+          product_category: string
+          status: string
+          store_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          bank_details: Json
+          business_address?: string | null
+          business_description?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          payment_due_date?: string | null
+          payment_received_at?: string | null
+          price_range_max: number
+          price_range_min: number
+          product_category: string
+          status?: string
+          store_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          bank_details?: Json
+          business_address?: string | null
+          business_description?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          payment_due_date?: string | null
+          payment_received_at?: string | null
+          price_range_max?: number
+          price_range_min?: number
+          product_category?: string
+          status?: string
+          store_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendor_analytics: {
+        Row: {
+          created_at: string
+          customers_count: number
+          date: string
+          id: string
+          orders_count: number
+          products_added: number
+          revenue: number
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customers_count?: number
+          date: string
+          id?: string
+          orders_count?: number
+          products_added?: number
+          revenue?: number
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customers_count?: number
+          date?: string
+          id?: string
+          orders_count?: number
+          products_added?: number
+          revenue?: number
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_analytics_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_products: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wishlist: {
         Row: {
