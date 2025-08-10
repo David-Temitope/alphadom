@@ -23,6 +23,7 @@ const sidebarItems = [
   { name: 'Dashboard', href: '/appleisgood', icon: LayoutDashboard },
   { name: 'Products', href: '/appleisgood/products', icon: Package },
   { name: 'Orders', href: '/appleisgood/orders', icon: ShoppingCart },
+  { name: 'Shop Applications', href: '/appleisgood/applications', icon: Package },
   { name: 'Users', href: '/appleisgood/users', icon: Users },
   { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/appleisgood/settings', icon: Settings },

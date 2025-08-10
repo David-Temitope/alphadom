@@ -28,6 +28,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminShopApplications from "./pages/admin/AdminShopApplications";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 
@@ -110,6 +111,11 @@ const App = () => {
                       <Route path="/appleisgood/analytics" element={
                         <AdminProtectedRoute>
                           <AdminAnalytics />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/applications" element={
+                        <AdminProtectedRoute>
+                          <AdminShopApplications />
                         </AdminProtectedRoute>
                       } />
 
