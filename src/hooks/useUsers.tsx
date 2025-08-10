@@ -60,11 +60,42 @@ export const useUsers = () => {
         .eq('id', userId);
 
       if (error) throw error;
+      await fetchUsers(); // Refresh the users list
       return { success: true, error: null };
     } catch (err) {
       return { success: false, error: err };
     }
   };
 
-  return { users, loading, error, updateUserProfile, refetch: fetchUsers };
+  const banUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_banned: true })
+        .eq('id', userId);
+
+      if (error) throw error;
+      await fetchUsers();
+      return { success: true, error: null };
+    } catch (err) {
+      return { success: false, error: err };
+    }
+  };
+
+  const unbanUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_banned: false })
+        .eq('id', userId);
+
+      if (error) throw error;
+      await fetchUsers();
+      return { success: true, error: null };
+    } catch (err) {
+      return { success: false, error: err };
+    }
+  };
+
+  return { users, loading, error, updateUserProfile, banUser, unbanUser, refetch: fetchUsers };
 };

@@ -26,7 +26,7 @@ import { useUsers } from '@/hooks/useUsers';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminUsers = () => {
-  const { users, loading, updateUserProfile } = useUsers();
+  const { users, loading, banUser, unbanUser } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -55,13 +55,22 @@ const AdminUsers = () => {
   };
 
   const handleBanUser = async (user: any) => {
-    if (confirm(`Are you sure you want to ban ${user.full_name || user.email}?`)) {
-      // In a real app, you'd update a user status field
-      toast({
-        title: "User Banned",
-        description: `${user.full_name || user.email} has been banned`,
-        variant: "destructive",
-      });
+    const action = user.is_banned ? 'unban' : 'ban';
+    if (confirm(`Are you sure you want to ${action} ${user.full_name || user.email}?`)) {
+      const result = user.is_banned ? await unbanUser(user.id) : await banUser(user.id);
+      if (result.success) {
+        toast({
+          title: `User ${action}ned`,
+          description: `${user.full_name || user.email} has been ${action}ned`,
+          variant: user.is_banned ? "default" : "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to ${action} user`,
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -105,7 +114,7 @@ const AdminUsers = () => {
               <CardTitle className="text-sm font-medium">Active Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{users.length}</div>
+              <div className="text-2xl font-bold">{users.filter(u => !u.is_banned).length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -169,7 +178,9 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell>{new Date(user.created_at!).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Badge variant="default">Active</Badge>
+                      <Badge variant={user.is_banned ? "destructive" : "default"}>
+                        {user.is_banned ? "Banned" : "Active"}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -193,6 +204,7 @@ const AdminUsers = () => {
                           onClick={() => handleBanUser(user)}
                         >
                           <Ban className="h-4 w-4" />
+                          {user.is_banned ? "Unban" : "Ban"}
                         </Button>
                       </div>
                     </TableCell>
