@@ -1,6 +1,5 @@
 
 import { Toaster } from "@/components/ui/toaster";
-import { useTheme } from "@/hooks/useTheme";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AdminProtectedRoute } from "@/components/admin/AdminProtectedRoute";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -31,6 +29,8 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminShopApplications from "./pages/admin/AdminShopApplications";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
+import ShopApplicationStatus from "./pages/ShopApplicationStatus";
+import VendorDashboard from "./pages/VendorDashboard";
 
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
@@ -52,21 +52,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const App = () => {
-  useTheme(); // Initialize theme colors
   console.log('App component rendering');
   
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthProvider>
-            <CartProvider>
-              <AdminProvider>
-                <BrowserRouter>
-                  <div className="App">
-                    <Toaster />
-                    <Sonner />
-                    <Routes>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <CartProvider>
+            <AdminProvider>
+              <BrowserRouter>
+                <div className="App">
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
                       {/* Auth Route */}
                       <Route path="/auth" element={<Auth />} />
 
@@ -78,6 +76,8 @@ const App = () => {
                       <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
                       <Route path="/orders" element={<Layout><Orders /></Layout>} />
                       <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
+                      <Route path="/shop-status" element={<Layout><ShopApplicationStatus /></Layout>} />
+                      <Route path="/vendor-dashboard" element={<Layout><VendorDashboard /></Layout>} />
                       <Route path="/about" element={<Layout><About /></Layout>} />
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
@@ -129,7 +129,6 @@ const App = () => {
           </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
-    </ThemeProvider>
   );
 };
 

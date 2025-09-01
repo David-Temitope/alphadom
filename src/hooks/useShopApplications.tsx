@@ -22,6 +22,7 @@ interface ShopApplication {
   approved_at?: string;
   payment_due_date?: string;
   payment_received_at?: string;
+  payment_countdown_expires_at?: string;
 }
 
 export const useShopApplications = () => {
@@ -114,6 +115,7 @@ export const useShopApplications = () => {
       if (status === 'approved') {
         updateData.approved_at = new Date().toISOString();
         updateData.payment_due_date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days from now
+        updateData.payment_countdown_expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days countdown
       }
 
       if (status === 'payment') {

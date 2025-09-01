@@ -57,36 +57,40 @@ const Checkout = () => {
   const calculateTotals = async () => {
     const subtotal = total;
     
-    try {
-      const { data, error } = await supabase
-        .rpc('calculate_order_totals', {
-          subtotal_amount: subtotal,
-          shipping_address: shippingInfo
-        });
-
-      if (error) throw error;
+    // Calculate shipping based on product shipping fees
+    let totalShipping = 0;
+    const shippingGroups = new Map(); // Group by shipping type
+    
+    for (const item of items) {
+      const product = item as any; // Cast to access shipping properties
+      const productPrice = item.price;
+      const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
       
-      if (data && data.length > 0) {
-        const result = data[0];
-        setOrderTotals({
-          subtotal,
-          shipping: Number(result.shipping_cost),
-          tax: Number(result.tax_amount),
-          total: Number(result.total_amount)
-        });
+      if (productPrice >= 10 && shippingFee > 0) {
+        if (product.shipping_type === 'per_product') {
+          totalShipping += shippingFee * item.quantity;
+        } else {
+          // One-time shipping - group by product to avoid duplicates
+          if (!shippingGroups.has(product.id)) {
+            shippingGroups.set(product.id, shippingFee);
+            totalShipping += shippingFee;
+          }
+        }
       }
-    } catch (error) {
-      console.error('Error calculating totals:', error);
-      // Fallback calculation
-      const shipping = subtotal >= 30 ? 0 : subtotal * 0.05;
-      const tax = subtotal * 0.08;
-      setOrderTotals({
-        subtotal,
-        shipping,
-        tax,
-        total: subtotal + shipping + tax
-      });
     }
+    
+    // Add base shipping if no product shipping and subtotal < $30
+    if (totalShipping === 0 && subtotal < 30) {
+      totalShipping = subtotal * 0.05;
+    }
+    
+    const tax = subtotal * 0.08;
+    setOrderTotals({
+      subtotal,
+      shipping: totalShipping,
+      tax,
+      total: subtotal + totalShipping + tax
+    });
   };
 
   const handlePlaceOrder = async () => {
@@ -178,22 +182,35 @@ const Checkout = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                {items.map((item) => {
+                  const product = item as any;
+                  const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
+                  const hasShipping = item.price >= 10 && shippingFee > 0;
+                  
+                  return (
+                    <div key={item.id} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                          <div>
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                        <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
                       </div>
+                      {hasShipping && (
+                        <div className="text-xs text-muted-foreground ml-15">
+                          Shipping: ${shippingFee} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
+                        </div>
+                      )}
                     </div>
-                    <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
-                ))}
+                  );
+                })}
                 
                 <Separator />
                 

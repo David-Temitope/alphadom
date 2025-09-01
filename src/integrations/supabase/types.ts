@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -374,6 +374,8 @@ export type Database = {
           price: number
           rating: number | null
           reviews: number | null
+          shipping_fee: number | null
+          shipping_type: string | null
           specifications: Json | null
           stock_count: number | null
           sustainability_score: number | null
@@ -381,6 +383,7 @@ export type Database = {
           total_orders: number | null
           updated_at: string | null
           vendor_id: string | null
+          vendor_user_id: string | null
         }
         Insert: {
           category: string
@@ -400,6 +403,8 @@ export type Database = {
           price: number
           rating?: number | null
           reviews?: number | null
+          shipping_fee?: number | null
+          shipping_type?: string | null
           specifications?: Json | null
           stock_count?: number | null
           sustainability_score?: number | null
@@ -407,6 +412,7 @@ export type Database = {
           total_orders?: number | null
           updated_at?: string | null
           vendor_id?: string | null
+          vendor_user_id?: string | null
         }
         Update: {
           category?: string
@@ -426,6 +432,8 @@ export type Database = {
           price?: number
           rating?: number | null
           reviews?: number | null
+          shipping_fee?: number | null
+          shipping_type?: string | null
           specifications?: Json | null
           stock_count?: number | null
           sustainability_score?: number | null
@@ -433,6 +441,7 @@ export type Database = {
           total_orders?: number | null
           updated_at?: string | null
           vendor_id?: string | null
+          vendor_user_id?: string | null
         }
         Relationships: [
           {
@@ -485,6 +494,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          payment_countdown_expires_at: string | null
           payment_due_date: string | null
           payment_received_at: string | null
           price_range_max: number
@@ -505,6 +515,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          payment_countdown_expires_at?: string | null
           payment_due_date?: string | null
           payment_received_at?: string | null
           price_range_max: number
@@ -525,6 +536,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          payment_countdown_expires_at?: string | null
           payment_due_date?: string | null
           payment_received_at?: string | null
           price_range_max?: number
@@ -571,6 +583,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "vendor_analytics_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_dashboard_access: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_dashboard_access_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "approved_vendors"
@@ -649,7 +696,7 @@ export type Database = {
     }
     Functions: {
       calculate_order_totals: {
-        Args: { subtotal_amount: number; shipping_address: Json }
+        Args: { shipping_address: Json; subtotal_amount: number }
         Returns: {
           shipping_cost: number
           tax_amount: number

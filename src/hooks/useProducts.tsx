@@ -52,5 +52,11 @@ export const useProducts = () => {
     }
   };
 
-  return { products, loading, error, refetch: fetchProducts };
+  return { 
+    products, 
+    loading, 
+    error, 
+    refetch: fetchProducts,
+    refreshProducts: fetchProducts
+  };
 };
