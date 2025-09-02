@@ -70,6 +70,57 @@ export type Database = {
           },
         ]
       }
+      approved_dispatchers: {
+        Row: {
+          application_id: string
+          created_at: string
+          dispatch_name: string
+          id: string
+          is_active: boolean
+          is_available: boolean
+          phone_number: string
+          rating: number
+          success_rate: number
+          total_deliveries: number
+          total_earnings: number
+          updated_at: string
+          user_id: string
+          vehicle_type: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          dispatch_name: string
+          id?: string
+          is_active?: boolean
+          is_available?: boolean
+          phone_number: string
+          rating?: number
+          success_rate?: number
+          total_deliveries?: number
+          total_earnings?: number
+          updated_at?: string
+          user_id: string
+          vehicle_type: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          dispatch_name?: string
+          id?: string
+          is_active?: boolean
+          is_available?: boolean
+          phone_number?: string
+          rating?: number
+          success_rate?: number
+          total_deliveries?: number
+          total_earnings?: number
+          updated_at?: string
+          user_id?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       approved_vendors: {
         Row: {
           application_id: string
@@ -177,6 +228,147 @@ export type Database = {
           subject?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      delivery_requests: {
+        Row: {
+          accepted_at: string | null
+          delivered_at: string | null
+          delivery_address: Json
+          dispatcher_id: string | null
+          dispatcher_notes: string | null
+          id: string
+          order_id: string
+          pickup_address: Json
+          product_details: Json
+          requested_at: string
+          shipping_fee: number
+          status: string
+          vendor_id: string
+          vendor_notes: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          delivered_at?: string | null
+          delivery_address: Json
+          dispatcher_id?: string | null
+          dispatcher_notes?: string | null
+          id?: string
+          order_id: string
+          pickup_address: Json
+          product_details: Json
+          requested_at?: string
+          shipping_fee: number
+          status?: string
+          vendor_id: string
+          vendor_notes?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          delivered_at?: string | null
+          delivery_address?: Json
+          dispatcher_id?: string | null
+          dispatcher_notes?: string | null
+          id?: string
+          order_id?: string
+          pickup_address?: Json
+          product_details?: Json
+          requested_at?: string
+          shipping_fee?: number
+          status?: string
+          vendor_id?: string
+          vendor_notes?: string | null
+        }
+        Relationships: []
+      }
+      dispatch_activity_logs: {
+        Row: {
+          activity_details: Json | null
+          activity_type: string
+          created_at: string
+          dispatcher_id: string
+          id: string
+        }
+        Insert: {
+          activity_details?: Json | null
+          activity_type: string
+          created_at?: string
+          dispatcher_id: string
+          id?: string
+        }
+        Update: {
+          activity_details?: Json | null
+          activity_type?: string
+          created_at?: string
+          dispatcher_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      dispatch_applications: {
+        Row: {
+          admin_notes: string | null
+          approved_at: string | null
+          availability: string
+          coverage_areas: string[] | null
+          created_at: string
+          dispatch_name: string
+          email: string
+          emergency_contact: string | null
+          experience_years: number | null
+          id: string
+          license_number: string | null
+          payment_countdown_expires_at: string | null
+          payment_due_date: string | null
+          payment_received_at: string | null
+          phone_number: string
+          status: string
+          updated_at: string
+          user_id: string
+          vehicle_type: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          availability: string
+          coverage_areas?: string[] | null
+          created_at?: string
+          dispatch_name: string
+          email: string
+          emergency_contact?: string | null
+          experience_years?: number | null
+          id?: string
+          license_number?: string | null
+          payment_countdown_expires_at?: string | null
+          payment_due_date?: string | null
+          payment_received_at?: string | null
+          phone_number: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          vehicle_type: string
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          availability?: string
+          coverage_areas?: string[] | null
+          created_at?: string
+          dispatch_name?: string
+          email?: string
+          emergency_contact?: string | null
+          experience_years?: number | null
+          id?: string
+          license_number?: string | null
+          payment_countdown_expires_at?: string | null
+          payment_due_date?: string | null
+          payment_received_at?: string | null
+          phone_number?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_type?: string
         }
         Relationships: []
       }
@@ -546,6 +738,78 @@ export type Database = {
           store_name?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_likes: {
+        Row: {
+          created_at: string
+          id: string
+          liked_user_id: string
+          liker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          liked_user_id: string
+          liker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          liked_user_id?: string
+          liker_id?: string
+        }
+        Relationships: []
+      }
+      user_types: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
+      vendor_activity_logs: {
+        Row: {
+          activity_details: Json | null
+          activity_type: string
+          created_at: string
+          id: string
+          vendor_id: string
+        }
+        Insert: {
+          activity_details?: Json | null
+          activity_type: string
+          created_at?: string
+          id?: string
+          vendor_id: string
+        }
+        Update: {
+          activity_details?: Json | null
+          activity_type?: string
+          created_at?: string
+          id?: string
+          vendor_id?: string
         }
         Relationships: []
       }

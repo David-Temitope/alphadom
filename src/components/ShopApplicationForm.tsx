@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useShopApplications } from '@/hooks/useShopApplications';
-import { Store, CreditCard } from 'lucide-react';
+import { useUserTypes } from '@/hooks/useUserTypes';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Store, CreditCard, Loader2 } from 'lucide-react';
 
 interface ShopApplicationFormProps {
   open: boolean;
@@ -15,7 +17,9 @@ interface ShopApplicationFormProps {
 
 export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormProps) => {
   const { submitApplication } = useShopApplications();
+  const { addUserType } = useUserTypes();
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [formData, setFormData] = useState({
     store_name: '',
     product_category: '',
@@ -41,6 +45,10 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreedToTerms) {
+      alert('Please agree to the terms and conditions');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -50,9 +58,11 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
         price_range_max: parseFloat(formData.price_range_max),
       };
 
-      const { error } = await submitApplication(applicationData);
+      const result = await submitApplication(applicationData);
       
-      if (!error) {
+      if (result?.error === null) {
+        await addUserType('vendor');
+        setAgreedToTerms(false);
         onOpenChange(false);
         setFormData({
           store_name: '',
@@ -265,12 +275,27 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
             </div>
           </div>
 
+          <div className="border rounded-lg p-4 bg-gray-50 mb-4">
+            <h3 className="font-semibold mb-2">Terms and Conditions & Privacy Policy</h3>
+            <p className="text-sm text-gray-600 mb-3">By applying for a shop, you agree to sell only legal and moral products. No immoral products are permitted.</p>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="shop-terms"
+                checked={agreedToTerms}
+                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+                required
+              />
+              <Label htmlFor="shop-terms" className="text-sm">I agree to the terms and conditions</Label>
+            </div>
+          </div>
+
           <div className="flex gap-4 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? 'Submitting...' : 'Submit Application'}
+            <Button type="submit" disabled={loading || !agreedToTerms} className="flex-1">
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Submit Application
             </Button>
           </div>
         </form>

@@ -3,19 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-interface ShopApplication {
+interface DispatchApplication {
   id: string;
   user_id: string;
-  store_name: string;
-  product_category: string;
-  price_range_min: number;
-  price_range_max: number;
+  dispatch_name: string;
+  vehicle_type: string;
+  phone_number: string;
+  availability: string;
+  experience_years?: number;
+  coverage_areas?: string[];
+  license_number?: string;
   email: string;
-  bank_details: any; // Using any for JSON fields from database
-  business_description?: string;
-  contact_phone?: string;
-  business_address?: string;
-  status: string; // Allow any string status from database
+  emergency_contact?: string;
+  status: string;
   admin_notes?: string;
   created_at: string;
   updated_at: string;
@@ -25,9 +25,9 @@ interface ShopApplication {
   payment_countdown_expires_at?: string;
 }
 
-export const useShopApplications = () => {
-  const [applications, setApplications] = useState<ShopApplication[]>([]);
-  const [userApplication, setUserApplication] = useState<ShopApplication | null>(null);
+export const useDispatchApplications = () => {
+  const [applications, setApplications] = useState<DispatchApplication[]>([]);
+  const [userApplication, setUserApplication] = useState<DispatchApplication | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -35,19 +35,21 @@ export const useShopApplications = () => {
   const fetchApplications = async () => {
     try {
       const { data, error } = await supabase
-        .from('shop_applications')
+        .from('dispatch_applications')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setApplications((data as any[]) || []);
+      setApplications(data || []);
     } catch (error) {
-      console.error('Error fetching applications:', error);
+      console.error('Error fetching dispatch applications:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch shop applications",
+        description: "Failed to fetch dispatch applications",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,24 +58,24 @@ export const useShopApplications = () => {
 
     try {
       const { data, error } = await supabase
-        .from('shop_applications')
+        .from('dispatch_applications')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setUserApplication((data as any) || null);
+      setUserApplication(data || null);
     } catch (error) {
-      console.error('Error fetching user application:', error);
+      console.error('Error fetching user dispatch application:', error);
     }
   };
 
-  const submitApplication = async (applicationData: Omit<ShopApplication, 'id' | 'user_id' | 'status' | 'created_at' | 'updated_at'>) => {
+  const submitApplication = async (applicationData: Omit<DispatchApplication, 'id' | 'user_id' | 'status' | 'created_at' | 'updated_at'>) => {
     if (!user) return { error: 'User not authenticated' };
 
     try {
       const { data, error } = await supabase
-        .from('shop_applications')
+        .from('dispatch_applications')
         .insert({
           user_id: user.id,
           ...applicationData
@@ -83,18 +85,18 @@ export const useShopApplications = () => {
 
       if (error) throw error;
 
-      setUserApplication(data as any);
+      setUserApplication(data);
       toast({
         title: "Success",
-        description: "Shop application submitted successfully!",
+        description: "Dispatch application submitted successfully!",
       });
 
       return { data, error: null };
     } catch (error: any) {
-      console.error('Error submitting application:', error);
+      console.error('Error submitting dispatch application:', error);
       toast({
         title: "Error",
-        description: "Failed to submit application",
+        description: "Failed to submit dispatch application",
         variant: "destructive",
       });
       return { data: null, error: error.message };
@@ -114,8 +116,8 @@ export const useShopApplications = () => {
 
       if (status === 'approved') {
         updateData.approved_at = new Date().toISOString();
-        updateData.payment_due_date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days from now
-        updateData.payment_countdown_expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days countdown
+        updateData.payment_due_date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        updateData.payment_countdown_expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       }
 
       if (status === 'payment') {
@@ -123,7 +125,7 @@ export const useShopApplications = () => {
       }
 
       const { data, error } = await supabase
-        .from('shop_applications')
+        .from('dispatch_applications')
         .update(updateData)
         .eq('id', applicationId)
         .select()
@@ -131,35 +133,36 @@ export const useShopApplications = () => {
 
       if (error) throw error;
 
-      // If approved and payment received, create vendor account
+      // If approved and payment received, create dispatcher account
       if (status === 'payment') {
         const application = applications.find(app => app.id === applicationId);
         if (application) {
-          const { error: vendorError } = await supabase
-            .from('approved_vendors')
+          const { error: dispatcherError } = await supabase
+            .from('approved_dispatchers')
             .insert({
               user_id: application.user_id,
               application_id: applicationId,
-              store_name: application.store_name,
-              product_category: application.product_category
+              dispatch_name: application.dispatch_name,
+              vehicle_type: application.vehicle_type,
+              phone_number: application.phone_number
             });
 
-          if (vendorError) throw vendorError;
+          if (dispatcherError) throw dispatcherError;
         }
       }
 
       await fetchApplications();
       toast({
         title: "Success",
-        description: `Application status updated to ${status}`,
+        description: `Dispatch application status updated to ${status}`,
       });
 
       return { data, error: null };
     } catch (error: any) {
-      console.error('Error updating application:', error);
+      console.error('Error updating dispatch application:', error);
       toast({
         title: "Error",
-        description: "Failed to update application status",
+        description: "Failed to update dispatch application status",
         variant: "destructive",
       });
       return { data: null, error: error.message };
@@ -170,7 +173,6 @@ export const useShopApplications = () => {
     setLoading(true);
     fetchApplications();
     fetchUserApplication();
-    setLoading(false);
   }, [user]);
 
   return {
