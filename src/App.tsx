@@ -27,10 +27,15 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminShopApplications from "./pages/admin/AdminShopApplications";
+import AdminDispatchApplications from "./pages/admin/AdminDispatchApplications";
+import AdminVendorMonitoring from "./pages/admin/AdminVendorMonitoring";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import ShopApplicationStatus from "./pages/ShopApplicationStatus";
 import VendorDashboard from "./pages/VendorDashboard";
+import UserTypeSelection from "./pages/UserTypeSelection";
+import Pilots from "./pages/Pilots";
+import VendorProfile from "./pages/VendorProfile";
 
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
@@ -78,6 +83,9 @@ const App = () => {
                       <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
                       <Route path="/shop-status" element={<Layout><ShopApplicationStatus /></Layout>} />
                       <Route path="/vendor-dashboard" element={<Layout><VendorDashboard /></Layout>} />
+                      <Route path="/user-types" element={<Layout><UserTypeSelection /></Layout>} />
+                      <Route path="/pilots" element={<Layout><Pilots /></Layout>} />
+                      <Route path="/vendor/:vendorSlug" element={<Layout><VendorProfile /></Layout>} />
                       <Route path="/about" element={<Layout><About /></Layout>} />
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
@@ -116,6 +124,16 @@ const App = () => {
                       <Route path="/appleisgood/applications" element={
                         <AdminProtectedRoute>
                           <AdminShopApplications />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/dispatch-applications" element={
+                        <AdminProtectedRoute>
+                          <AdminDispatchApplications />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/vendor-monitoring" element={
+                        <AdminProtectedRoute>
+                          <AdminVendorMonitoring />
                         </AdminProtectedRoute>
                       } />
 

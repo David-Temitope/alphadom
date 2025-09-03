@@ -3,9 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, Store, Truck, Star, Package } from 'lucide-react';
+import { Heart, Store, Truck, Star, Package, UserPlus, UserMinus, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useUserFollows } from '@/hooks/useUserFollows';
+import { Link } from 'react-router-dom';
 
 interface Pilot {
   id: string;
@@ -27,6 +29,7 @@ interface Pilot {
   };
   likes_count: number;
   is_liked_by_current_user: boolean;
+  customer_count?: number;
 }
 
 export const Pilots = () => {
@@ -34,6 +37,7 @@ export const Pilots = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isFollowing, getCustomerCount, toggleFollow } = useUserFollows();
 
   const fetchPilots = async () => {
     try {
@@ -83,6 +87,7 @@ export const Pilots = () => {
         
         const userLikes = likes?.filter(l => l.liked_user_id === profile.id) || [];
         const isLikedByCurrentUser = user ? userLikes.some(l => l.liker_id === user.id) : false;
+        const customerCount = getCustomerCount(profile.id);
 
         return {
           id: profile.id,
@@ -103,7 +108,8 @@ export const Pilots = () => {
             rating: dispatcherInfo.rating
           } : undefined,
           likes_count: userLikes.length,
-          is_liked_by_current_user: isLikedByCurrentUser
+          is_liked_by_current_user: isLikedByCurrentUser,
+          customer_count: customerCount
         };
       }) || [];
 
@@ -172,6 +178,10 @@ export const Pilots = () => {
     }
   };
 
+  const handleFollow = (pilotId: string) => {
+    toggleFollow(pilotId);
+  };
+
   const getTopCategory = (vendorInfo: any) => {
     return vendorInfo?.product_category || 'General';
   };
@@ -232,22 +242,45 @@ export const Pilots = () => {
                     </div>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleLike(pilot.id)}
-                  className={pilot.is_liked_by_current_user ? 'text-red-500' : 'text-gray-400'}
-                >
-                  <Heart 
-                    className={`w-5 h-5 ${pilot.is_liked_by_current_user ? 'fill-current' : ''}`} 
-                  />
-                  <span className="ml-1 text-sm">{pilot.likes_count}</span>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleLike(pilot.id)}
+                    className={pilot.is_liked_by_current_user ? 'text-red-500' : 'text-gray-400'}
+                  >
+                    <Heart 
+                      className={`w-4 h-4 ${pilot.is_liked_by_current_user ? 'fill-current' : ''}`} 
+                    />
+                    <span className="ml-1 text-xs">{pilot.likes_count}</span>
+                  </Button>
+                  
+                  {user && user.id !== pilot.id && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFollow(pilot.id)}
+                      className={isFollowing(pilot.id) ? 'text-blue-500' : 'text-gray-400'}
+                    >
+                      {isFollowing(pilot.id) ? (
+                        <UserMinus className="w-4 h-4" />
+                      ) : (
+                        <UserPlus className="w-4 h-4" />
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardHeader>
 
             <CardContent>
               <div className="space-y-3">
+                {/* Customer/Followers count */}
+                <div className="flex items-center justify-center text-sm text-gray-600">
+                  <span className="font-medium">{pilot.customer_count || 0}</span>
+                  <span className="ml-1">Customers</span>
+                </div>
+
                 {pilot.vendor_info && (
                   <div className="bg-green-50 p-3 rounded-lg">
                     <div className="flex items-center justify-between mb-1">
@@ -257,13 +290,19 @@ export const Pilots = () => {
                         <span className="text-sm ml-1">{pilot.vendor_info.rating}</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600">
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
                       <span>Category: {getTopCategory(pilot.vendor_info)}</span>
                       <div className="flex items-center">
                         <Package className="w-3 h-3 mr-1" />
                         {pilot.vendor_info.total_products} products
                       </div>
                     </div>
+                    <Link to={`/vendor/${pilot.vendor_info.store_name.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Store
+                      </Button>
+                    </Link>
                   </div>
                 )}
 
@@ -276,10 +315,14 @@ export const Pilots = () => {
                         <span className="text-sm ml-1">{pilot.dispatcher_info.rating}</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600">
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
                       <span>Vehicle: {pilot.dispatcher_info.vehicle_type}</span>
                       <span>{pilot.dispatcher_info.total_deliveries} deliveries</span>
                     </div>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Profile
+                    </Button>
                   </div>
                 )}
               </div>
