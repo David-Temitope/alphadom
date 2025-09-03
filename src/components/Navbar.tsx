@@ -69,6 +69,24 @@ export const Navbar = () => {
                 Products
               </Link>
               <Link 
+                to="/pilots" 
+                className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
+                  isActive('/pilots') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                }`}
+              >
+                Pilots
+              </Link>
+              {user && (
+                <Link 
+                  to="/user-types" 
+                  className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
+                    isActive('/user-types') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                  }`}
+                >
+                  User Types
+                </Link>
+              )}
+              <Link 
                 to="/about" 
                 className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
                   isActive('/about') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
@@ -155,6 +173,26 @@ export const Navbar = () => {
                 >
                   Products
                 </Link>
+                <Link 
+                  to="/pilots" 
+                  className={`block py-2 px-4 rounded-lg transition-colors ${
+                    isActive('/pilots') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Pilots
+                </Link>
+                {user && (
+                  <Link 
+                    to="/user-types" 
+                    className={`block py-2 px-4 rounded-lg transition-colors ${
+                      isActive('/user-types') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    User Types
+                  </Link>
+                )}
                 <Link 
                   to="/about" 
                   className={`block py-2 px-4 rounded-lg transition-colors ${
