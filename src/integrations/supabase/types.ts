@@ -127,6 +127,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          is_suspended: boolean | null
           product_category: string
           store_name: string
           total_orders: number
@@ -140,6 +141,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_suspended?: boolean | null
           product_category: string
           store_name: string
           total_orders?: number
@@ -153,6 +155,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_suspended?: boolean | null
           product_category?: string
           store_name?: string
           total_orders?: number
@@ -437,6 +440,8 @@ export type Database = {
       }
       orders: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           created_at: string | null
           id: string
           payment_method: string | null
@@ -452,6 +457,8 @@ export type Database = {
           vendor_id: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string | null
           id?: string
           payment_method?: string | null
@@ -467,6 +474,8 @@ export type Database = {
           vendor_id?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string | null
           id?: string
           payment_method?: string | null
@@ -780,6 +789,39 @@ export type Database = {
           id?: string
           liked_user_id?: string
           liker_id?: string
+        }
+        Relationships: []
+      }
+      user_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          related_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          related_id?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          related_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
