@@ -7,16 +7,70 @@ import { useCart } from '@/contexts/CartContext';
 import { UserMenu } from './UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
+import { useUserTypes } from '@/hooks/useUserTypes';
+import { NotificationCenter } from '@/components/NotificationCenter';
 export const Navbar = () => {
   const { items } = useCart();
   const { user } = useAuth();
   const { settings } = useAdminSettings();
+  const { hasUserType } = useUserTypes();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const isActive = (path: string) => location.pathname === path;
+  
+  const UserTypeNavLink = () => {
+    const getNavLink = () => {
+      if (hasUserType('vendor')) {
+        return { to: '/vendor-dashboard', text: 'My Shop' };
+      } else if (hasUserType('dispatch')) {
+        return { to: '/dispatch-dashboard', text: 'My Dashboard' };
+      } else {
+        return { to: '/user-types', text: 'User Types' };
+      }
+    };
+    
+    const navLink = getNavLink();
+    
+    return (
+      <Link 
+        to={navLink.to} 
+        className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
+          isActive(navLink.to) ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+        }`}
+      >
+        {navLink.text}
+      </Link>
+    );
+  };
+  
+  const UserTypeNavLinkMobile = () => {
+    const getNavLink = () => {
+      if (hasUserType('vendor')) {
+        return { to: '/vendor-dashboard', text: 'My Shop' };
+      } else if (hasUserType('dispatch')) {
+        return { to: '/dispatch-dashboard', text: 'My Dashboard' };
+      } else {
+        return { to: '/user-types', text: 'User Types' };
+      }
+    };
+    
+    const navLink = getNavLink();
+    
+    return (
+      <Link 
+        to={navLink.to} 
+        className={`block py-2 px-4 rounded-lg transition-colors ${
+          isActive(navLink.to) ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+        }`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        {navLink.text}
+      </Link>
+    );
+  };
 
   return (
     <>
@@ -77,14 +131,7 @@ export const Navbar = () => {
                 Pilots
               </Link>
               {user && (
-                <Link 
-                  to="/user-types" 
-                  className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-                    isActive('/user-types') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
-                  }`}
-                >
-                  User Types
-                </Link>
+                <UserTypeNavLink />
               )}
               <Link 
                 to="/about" 
@@ -118,6 +165,9 @@ export const Navbar = () => {
                   )}
                 </Link>
               </Button>
+
+              {/* Notifications */}
+              {user && <NotificationCenter />}
 
               {/* User Menu */}
               <div className="hidden md:block">
@@ -183,15 +233,7 @@ export const Navbar = () => {
                   Pilots
                 </Link>
                 {user && (
-                  <Link 
-                    to="/user-types" 
-                    className={`block py-2 px-4 rounded-lg transition-colors ${
-                      isActive('/user-types') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    User Types
-                  </Link>
+                  <UserTypeNavLinkMobile />
                 )}
                 <Link 
                   to="/about" 

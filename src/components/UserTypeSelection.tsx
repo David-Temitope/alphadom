@@ -33,40 +33,7 @@ export const UserTypeSelection = () => {
         <p className="text-gray-600">Select how you want to participate in our marketplace</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Regular User */}
-        <Card className="relative">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <User className="w-6 h-6 text-blue-600" />
-            </div>
-            <CardTitle>Regular User</CardTitle>
-            <CardDescription>Browse and purchase products from vendors</CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <ul className="text-sm text-gray-600 mb-4 space-y-1">
-              <li>• Browse all products</li>
-              <li>• Make purchases</li>
-              <li>• Write reviews</li>
-              <li>• Create wishlists</li>
-            </ul>
-            {hasUserType('regular') ? (
-              <Badge variant="default" className="w-full justify-center">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Active
-              </Badge>
-            ) : (
-              <Button 
-                onClick={() => handleAddUserType('regular')}
-                variant="outline"
-                className="w-full"
-              >
-                Become Regular User
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Vendor */}
         <Card className="relative border-blue-200">
           <CardHeader className="text-center">
@@ -83,10 +50,10 @@ export const UserTypeSelection = () => {
               <li>• Process orders</li>
               <li>• Analytics dashboard</li>
             </ul>
-            {hasUserType('vendor') ? (
+            {hasUserType('vendor') || hasUserType('dispatch') ? (
               <Badge variant="default" className="w-full justify-center">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Active
+                {hasUserType('vendor') ? 'Active' : 'Cannot have multiple roles'}
               </Badge>
             ) : (
               <Button 
@@ -115,10 +82,10 @@ export const UserTypeSelection = () => {
               <li>• Earn per delivery</li>
               <li>• Build reputation</li>
             </ul>
-            {hasUserType('dispatch') ? (
+            {hasUserType('dispatch') || hasUserType('vendor') ? (
               <Badge variant="default" className="w-full justify-center">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Active
+                {hasUserType('dispatch') ? 'Active' : 'Cannot have multiple roles'}
               </Badge>
             ) : (
               <Button 

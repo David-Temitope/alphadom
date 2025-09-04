@@ -56,9 +56,14 @@ export const VendorProfile = () => {
           profiles!inner(full_name, avatar_url, email)
         `)
         .eq('id', vendorId)
-        .single();
+        .maybeSingle();
 
       if (vendorError) throw vendorError;
+      
+      if (!vendorData) {
+        setVendor(null);
+        return;
+      }
 
       setVendor({
         ...vendorData,

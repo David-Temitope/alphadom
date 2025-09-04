@@ -35,7 +35,9 @@ import ShopApplicationStatus from "./pages/ShopApplicationStatus";
 import VendorDashboard from "./pages/VendorDashboard";
 import UserTypeSelection from "./pages/UserTypeSelection";
 import Pilots from "./pages/Pilots";
-import VendorProfile from "./pages/VendorProfile";
+import { VendorProfile } from "./pages/VendorProfile";
+import DispatchDashboard from "./pages/DispatchDashboard";
+import DispatchSelection from "./pages/DispatchSelection";
 
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
@@ -85,7 +87,9 @@ const App = () => {
                       <Route path="/vendor-dashboard" element={<Layout><VendorDashboard /></Layout>} />
                       <Route path="/user-types" element={<Layout><UserTypeSelection /></Layout>} />
                       <Route path="/pilots" element={<Layout><Pilots /></Layout>} />
-                      <Route path="/vendor/:vendorSlug" element={<Layout><VendorProfile /></Layout>} />
+                      <Route path="/pilot/:vendorId" element={<Layout><VendorProfile /></Layout>} />
+                      <Route path="/dispatch-dashboard" element={<Layout><DispatchDashboard /></Layout>} />
+                      <Route path="/dispatch-selection/:orderId" element={<Layout><DispatchSelection /></Layout>} />
                       <Route path="/about" element={<Layout><About /></Layout>} />
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
