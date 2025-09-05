@@ -28,6 +28,7 @@ const sidebarItems = [
   { name: 'Shop Applications', href: '/appleisgood/applications', icon: Store },
   { name: 'Dispatch Applications', href: '/appleisgood/dispatch-applications', icon: Truck },
   { name: 'Vendor Monitoring', href: '/appleisgood/vendor-monitoring', icon: BarChart3 },
+  { name: 'Dispatch Monitoring', href: '/appleisgood/dispatch-monitoring', icon: Truck },
   { name: 'Users', href: '/appleisgood/users', icon: Users },
   { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/appleisgood/settings', icon: Settings },

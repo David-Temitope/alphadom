@@ -28,7 +28,10 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminShopApplications from "./pages/admin/AdminShopApplications";
 import AdminDispatchApplications from "./pages/admin/AdminDispatchApplications";
+import AdminDispatchMonitoring from "./pages/admin/AdminDispatchMonitoring";
 import AdminVendorMonitoring from "./pages/admin/AdminVendorMonitoring";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import ShopApplicationStatus from "./pages/ShopApplicationStatus";
@@ -140,6 +143,15 @@ const App = () => {
                           <AdminVendorMonitoring />
                         </AdminProtectedRoute>
                       } />
+                      <Route path="/appleisgood/dispatch-monitoring" element={
+                        <AdminProtectedRoute>
+                          <AdminDispatchMonitoring />
+                        </AdminProtectedRoute>
+                      } />
+
+                      {/* Terms and Privacy Routes */}
+                      <Route path="/terms" element={<Layout><Terms /></Layout>} />
+                      <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
 
                       {/* 404 Route */}
                       <Route path="*" element={<NotFound />} />
