@@ -14,12 +14,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShopApplications } from '@/hooks/useShopApplications';
 import { useVendors } from '@/hooks/useVendors';
+import { useDispatchApplications } from '@/hooks/useDispatchApplications';
+import { useDispatchers } from '@/hooks/useDispatchers';
 import { ShopApplicationForm } from './ShopApplicationForm';
 
 export const UserMenu = () => {
   const { user, signOut } = useAuth();
-  const { userApplication } = useShopApplications();
+  const { userApplication: shopApplication } = useShopApplications();
+  const { userApplication: dispatchApplication } = useDispatchApplications();
   const { isVendor } = useVendors();
+  const { currentDispatcher } = useDispatchers();
   const [showShopForm, setShowShopForm] = useState(false);
 
   if (!user) return null;
@@ -79,19 +83,21 @@ export const UserMenu = () => {
               </Link>
             </DropdownMenuItem>
             
-            {/* Shop Application/Status */}
-            {!isVendor && !userApplication && (
-              <DropdownMenuItem onClick={() => setShowShopForm(true)} className="cursor-pointer">
-                <Store className="mr-2 h-4 w-4" />
-                Rent a Shop
-              </DropdownMenuItem>
-            )}
-            
-            {userApplication && !isVendor && (
+            {/* Shop/Dispatch Application/Status */}
+            {shopApplication && !isVendor && (
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link to="/shop-status">
                   <Store className="mr-2 h-4 w-4" />
                   Shop Application Status
+                </Link>
+              </DropdownMenuItem>
+            )}
+            
+            {dispatchApplication && !currentDispatcher && (
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link to="/user-type-selection">
+                  <Store className="mr-2 h-4 w-4" />
+                  Dispatch Application Status
                 </Link>
               </DropdownMenuItem>
             )}
@@ -101,6 +107,15 @@ export const UserMenu = () => {
                 <Link to="/vendor-dashboard">
                   <Store className="mr-2 h-4 w-4" />
                   My Shop Dashboard
+                </Link>
+              </DropdownMenuItem>
+            )}
+
+            {currentDispatcher && (
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link to="/dispatch-dashboard">
+                  <Store className="mr-2 h-4 w-4" />
+                  My Dispatch Dashboard
                 </Link>
               </DropdownMenuItem>
             )}

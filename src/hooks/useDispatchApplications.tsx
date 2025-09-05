@@ -135,7 +135,7 @@ export const useDispatchApplications = () => {
 
       // If approved and payment received, create dispatcher account
       if (status === 'payment') {
-        const application = applications.find(app => app.id === applicationId);
+        const application = applications.find(app => app.id === applicationId) || data;
         if (application) {
           const { error: dispatcherError } = await supabase
             .from('approved_dispatchers')
@@ -148,6 +148,14 @@ export const useDispatchApplications = () => {
             });
 
           if (dispatcherError) throw dispatcherError;
+
+          // Add user type for dispatcher
+          await supabase
+            .from('user_types')
+            .insert({
+              user_id: application.user_id,
+              user_type: 'dispatch'
+            });
         }
       }
 
