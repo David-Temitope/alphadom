@@ -137,25 +137,58 @@ export const useDispatchApplications = () => {
       if (status === 'payment') {
         const application = applications.find(app => app.id === applicationId) || data;
         if (application) {
-          const { error: dispatcherError } = await supabase
+          console.log('Creating dispatcher account for:', application);
+          
+          // Check if dispatcher already exists to avoid duplicate insertion
+          const { data: existingDispatcher } = await supabase
             .from('approved_dispatchers')
-            .insert({
-              user_id: application.user_id,
-              application_id: applicationId,
-              dispatch_name: application.dispatch_name,
-              vehicle_type: application.vehicle_type,
-              phone_number: application.phone_number
-            });
+            .select('id')
+            .eq('user_id', application.user_id)
+            .single();
 
-          if (dispatcherError) throw dispatcherError;
+          if (!existingDispatcher) {
+            const { data: dispatcherData, error: dispatcherError } = await supabase
+              .from('approved_dispatchers')
+              .insert({
+                user_id: application.user_id,
+                application_id: applicationId,
+                dispatch_name: application.dispatch_name,
+                vehicle_type: application.vehicle_type,
+                phone_number: application.phone_number
+              })
+              .select()
+              .single();
 
-          // Add user type for dispatcher
-          await supabase
+            if (dispatcherError) {
+              console.error('Dispatcher creation error:', dispatcherError);
+              throw dispatcherError;
+            }
+
+            console.log('Dispatcher account created:', dispatcherData);
+          }
+
+          // Check if user type already exists
+          const { data: existingUserType } = await supabase
             .from('user_types')
-            .insert({
-              user_id: application.user_id,
-              user_type: 'dispatch'
-            });
+            .select('id')
+            .eq('user_id', application.user_id)
+            .eq('user_type', 'dispatch')
+            .eq('is_active', true)
+            .single();
+
+          if (!existingUserType) {
+            const { error: userTypeError } = await supabase
+              .from('user_types')
+              .insert({
+                user_id: application.user_id,
+                user_type: 'dispatch'
+              });
+
+            if (userTypeError) {
+              console.error('User type creation error:', userTypeError);
+              throw userTypeError;
+            }
+          }
         }
       }
 
