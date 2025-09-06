@@ -5,10 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { ShopApplicationForm } from '@/components/ShopApplicationForm';
 import { DispatchApplicationForm } from '@/components/DispatchApplicationForm';
 import { useUserTypes } from '@/hooks/useUserTypes';
-import { Store, Truck, User, CheckCircle } from 'lucide-react';
+import { useShopApplications } from '@/hooks/useShopApplications';
+import { useDispatchApplications } from '@/hooks/useDispatchApplications';
+import { Store, Truck, User, CheckCircle, RotateCcw } from 'lucide-react';
 
 export const UserTypeSelection = () => {
   const { userTypes, addUserType, hasUserType, loading } = useUserTypes();
+  const { userApplication: shopApplication, deleteApplication: deleteShopApplication } = useShopApplications();
+  const { userApplication: dispatchApplication, deleteApplication: deleteDispatchApplication } = useDispatchApplications();
   const [showShopForm, setShowShopForm] = useState(false);
   const [showDispatchForm, setShowDispatchForm] = useState(false);
 
@@ -50,10 +54,33 @@ export const UserTypeSelection = () => {
               <li>• Process orders</li>
               <li>• Analytics dashboard</li>
             </ul>
-            {hasUserType('vendor') || hasUserType('dispatch') ? (
+            {hasUserType('vendor') ? (
               <Badge variant="default" className="w-full justify-center">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                {hasUserType('vendor') ? 'Active' : 'Cannot have multiple roles'}
+                Active
+              </Badge>
+            ) : hasUserType('dispatch') ? (
+              <Badge variant="outline" className="w-full justify-center">
+                Cannot have multiple roles
+              </Badge>
+            ) : shopApplication?.status === 'rejected' ? (
+              <div className="space-y-2">
+                <Badge variant="destructive" className="w-full justify-center">
+                  Application Rejected
+                </Badge>
+                <Button 
+                  onClick={() => deleteShopApplication?.(shopApplication.id)}
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reapply
+                </Button>
+              </div>
+            ) : shopApplication ? (
+              <Badge variant="outline" className="w-full justify-center">
+                Application {shopApplication.status}
               </Badge>
             ) : (
               <Button 
@@ -82,10 +109,33 @@ export const UserTypeSelection = () => {
               <li>• Earn per delivery</li>
               <li>• Build reputation</li>
             </ul>
-            {hasUserType('dispatch') || hasUserType('vendor') ? (
+            {hasUserType('dispatch') ? (
               <Badge variant="default" className="w-full justify-center">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                {hasUserType('dispatch') ? 'Active' : 'Cannot have multiple roles'}
+                Active
+              </Badge>
+            ) : hasUserType('vendor') ? (
+              <Badge variant="outline" className="w-full justify-center">
+                Cannot have multiple roles
+              </Badge>
+            ) : dispatchApplication?.status === 'rejected' ? (
+              <div className="space-y-2">
+                <Badge variant="destructive" className="w-full justify-center">
+                  Application Rejected
+                </Badge>
+                <Button 
+                  onClick={() => deleteDispatchApplication?.(dispatchApplication.id)}
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reapply
+                </Button>
+              </div>
+            ) : dispatchApplication ? (
+              <Badge variant="outline" className="w-full justify-center">
+                Application {dispatchApplication.status}
               </Badge>
             ) : (
               <Button 

@@ -122,6 +122,7 @@ export const useDispatchApplications = () => {
 
       if (status === 'payment') {
         updateData.payment_received_at = new Date().toISOString();
+        updateData.status = 'active'; // Set status to active instead of payment
       }
 
       const { data, error } = await supabase
@@ -133,7 +134,7 @@ export const useDispatchApplications = () => {
 
       if (error) throw error;
 
-      // If approved and payment received, create dispatcher account
+      // If payment received, create dispatcher account
       if (status === 'payment') {
         const application = applications.find(app => app.id === applicationId) || data;
         if (application) {
@@ -195,7 +196,7 @@ export const useDispatchApplications = () => {
       await fetchApplications();
       toast({
         title: "Success",
-        description: `Dispatch application status updated to ${status}`,
+        description: status === 'payment' ? 'Dispatch access granted successfully!' : `Dispatch application status updated to ${status}`,
       });
 
       return { data, error: null };
@@ -207,6 +208,34 @@ export const useDispatchApplications = () => {
         variant: "destructive",
       });
       return { data: null, error: error.message };
+    }
+  };
+
+  const deleteApplication = async (applicationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('dispatch_applications')
+        .delete()
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      await fetchApplications();
+      await fetchUserApplication();
+      toast({
+        title: "Success",
+        description: "Application deleted successfully. You can now reapply.",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error deleting dispatch application:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete application",
+        variant: "destructive",
+      });
+      return { error: error.message };
     }
   };
 
@@ -222,6 +251,7 @@ export const useDispatchApplications = () => {
     loading,
     submitApplication,
     updateApplicationStatus,
+    deleteApplication,
     refreshApplications: fetchApplications,
     refreshUserApplication: fetchUserApplication
   };

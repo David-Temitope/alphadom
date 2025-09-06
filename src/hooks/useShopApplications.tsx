@@ -166,6 +166,34 @@ export const useShopApplications = () => {
     }
   };
 
+  const deleteApplication = async (applicationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('shop_applications')
+        .delete()
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      await fetchApplications();
+      await fetchUserApplication();
+      toast({
+        title: "Success",
+        description: "Application deleted successfully. You can now reapply.",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error deleting shop application:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete application",
+        variant: "destructive",
+      });
+      return { error: error.message };
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     fetchApplications();
@@ -179,6 +207,7 @@ export const useShopApplications = () => {
     loading,
     submitApplication,
     updateApplicationStatus,
+    deleteApplication,
     refreshApplications: fetchApplications,
     refreshUserApplication: fetchUserApplication
   };
