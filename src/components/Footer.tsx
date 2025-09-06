@@ -15,7 +15,7 @@ export const Footer = () => {
               <div className="bg-green-600 p-2 rounded-lg">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold">EcoMart</span>
+              <span className="text-xl font-bold">Pilot</span>
             </div>
             <p className="text-gray-300 text-sm">
               Your trusted partner in sustainable living. We curate the finest eco-friendly products 
@@ -65,15 +65,15 @@ export const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-green-400" />
-                <span className="text-gray-300 text-sm">hello@ecomart.com</span>
+                <span className="text-gray-300 text-sm">pilots@gmail.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-green-400" />
-                <span className="text-gray-300 text-sm">+1 (555) 123-4567</span>
+                <span className="text-gray-300 text-sm">+234 810 5546 777</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-green-400" />
-                <span className="text-gray-300 text-sm">San Francisco, CA</span>
+                <span className="text-gray-300 text-sm">Abuja, Nigeria</span>
               </div>
             </div>
             
@@ -95,7 +95,7 @@ export const Footer = () => {
 
         <div className="mt-8 pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-400 text-sm">
-            © 2024 EcoMart. All rights reserved. | Made with 💚 for a sustainable future.
+            © 2025 Pilot. All rights reserved. | Made with 💚 for a sustainable future.
           </p>
         </div>
       </div>

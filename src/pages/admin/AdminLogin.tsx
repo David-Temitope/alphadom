@@ -91,8 +91,8 @@ const AdminLogin = () => {
           <div className="mt-6 p-4 bg-muted rounded-lg">
             <p className="text-sm text-muted-foreground">
               <strong>Demo Credentials:</strong><br />
-              Email: admin@ecomart.com<br />
-              Password: admin123
+              Email: ************<br />
+              Password: *****
             </p>
           </div>
         </CardContent>
