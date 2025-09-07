@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, CreditCard, Truck, Lock } from 'lucide-react';
+import { ShoppingCart, CreditCard, Truck, Lock, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
 
@@ -31,7 +31,9 @@ const Checkout = () => {
     country: 'US'
   });
   
-  const [paymentMethod, setPaymentMethod] = useState('credit_card');
+  const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptUrl, setReceiptUrl] = useState<string>('');
   const [processing, setProcessing] = useState(false);
   const [orderTotals, setOrderTotals] = useState({
     subtotal: 0,
@@ -93,6 +95,24 @@ const Checkout = () => {
     });
   };
 
+  const uploadReceipt = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `receipts/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   const handlePlaceOrder = async () => {
     if (!user) return;
 
@@ -105,9 +125,25 @@ const Checkout = () => {
       return;
     }
 
+    if (paymentMethod === 'bank_transfer' && !receiptFile) {
+      toast({
+        title: "Missing Receipt",
+        description: "Please upload your payment receipt",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setProcessing(true);
 
     try {
+      let uploadedReceiptUrl = '';
+      
+      // Upload receipt if bank transfer
+      if (paymentMethod === 'bank_transfer' && receiptFile) {
+        uploadedReceiptUrl = await uploadReceipt(receiptFile);
+      }
+
       const orderItems = items.map(item => ({
         product_id: item.id,
         quantity: item.quantity,
@@ -123,20 +159,23 @@ const Checkout = () => {
 
       if (error) throw error;
 
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Update order with payment details
+      // Update order with payment details and receipt
       if (order) {
+        const updateData: any = {
+          subtotal: orderTotals.subtotal,
+          shipping_cost: orderTotals.shipping,
+          tax_amount: orderTotals.tax,
+          payment_status: paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
+          status: paymentMethod === 'bank_transfer' ? 'pending' : 'processing'
+        };
+
+        if (uploadedReceiptUrl) {
+          updateData.receipt_image = uploadedReceiptUrl;
+        }
+
         await supabase
           .from('orders')
-          .update({
-            subtotal: orderTotals.subtotal,
-            shipping_cost: orderTotals.shipping,
-            tax_amount: orderTotals.tax,
-            payment_status: 'paid',
-            status: 'processing'
-          })
+          .update(updateData)
           .eq('id', order.id);
       }
 
@@ -306,47 +345,47 @@ const Checkout = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                    <SelectItem value="credit_card">Credit Card</SelectItem>
                   </SelectContent>
                 </Select>
                 
                 {paymentMethod === 'bank_transfer' && (
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-semibold mb-2">Bank Transfer Details</h4>
-                    <div className="space-y-1 text-sm">
-                      <p><strong>Bank:</strong> {settings.bank_details.bank_name || 'First National Bank'}</p>
-                      <p><strong>Account Name:</strong> {settings.bank_details.account_name || 'Pilot Store'}</p>
-                      <p><strong>Account Number:</strong> {settings.bank_details.account_number || '1234567890'}</p>
-                      <p><strong>Routing Number:</strong> {settings.bank_details.routing_number || '021000021'}</p>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-muted rounded-lg">
+                      <h4 className="font-semibold mb-2">Bank Transfer Details</h4>
+                      <div className="space-y-1 text-sm">
+                        <p><strong>Bank:</strong> {settings.bank_details?.bank_name || 'First National Bank'}</p>
+                        <p><strong>Account Name:</strong> {settings.bank_details?.account_name || 'Pilot Store'}</p>
+                        <p><strong>Account Number:</strong> {settings.bank_details?.account_number || '1234567890'}</p>
+                        <p><strong>Routing Number:</strong> {settings.bank_details?.routing_number || '021000021'}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Please include your order ID in the transfer description
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Please include your order ID in the transfer description
-                    </p>
+                    
+                    <div>
+                      <Label htmlFor="receipt">Upload Payment Receipt *</Label>
+                      <div className="mt-2">
+                        <Input
+                          id="receipt"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setReceiptFile(file);
+                            }
+                          }}
+                          className="cursor-pointer"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Upload a clear image of your payment receipt
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
-                {paymentMethod === 'credit_card' && (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="card-number">Card Number</Label>
-                      <Input id="card-number" placeholder="1234 5678 9012 3456" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiry">Expiry Date</Label>
-                        <Input id="expiry" placeholder="MM/YY" />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input id="cvv" placeholder="123" />
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="save-card" />
-                      <Label htmlFor="save-card" className="text-sm">Save card for future purchases</Label>
-                    </div>
-                  </div>
-                )}
                 
               </CardContent>
             </Card>

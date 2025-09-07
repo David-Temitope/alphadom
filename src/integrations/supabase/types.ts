@@ -446,6 +446,7 @@ export type Database = {
           id: string
           payment_method: string | null
           payment_status: string | null
+          receipt_image: string | null
           shipping_address: Json | null
           shipping_cost: number | null
           status: string
@@ -463,6 +464,7 @@ export type Database = {
           id?: string
           payment_method?: string | null
           payment_status?: string | null
+          receipt_image?: string | null
           shipping_address?: Json | null
           shipping_cost?: number | null
           status?: string
@@ -480,6 +482,7 @@ export type Database = {
           id?: string
           payment_method?: string | null
           payment_status?: string | null
+          receipt_image?: string | null
           shipping_address?: Json | null
           shipping_cost?: number | null
           status?: string
@@ -705,6 +708,7 @@ export type Database = {
           store_name: string
           updated_at: string
           user_id: string
+          vendor_bank_details: Json | null
         }
         Insert: {
           admin_notes?: string | null
@@ -726,6 +730,7 @@ export type Database = {
           store_name: string
           updated_at?: string
           user_id: string
+          vendor_bank_details?: Json | null
         }
         Update: {
           admin_notes?: string | null
@@ -747,6 +752,7 @@ export type Database = {
           store_name?: string
           updated_at?: string
           user_id?: string
+          vendor_bank_details?: Json | null
         }
         Relationships: []
       }

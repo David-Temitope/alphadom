@@ -1,88 +1,26 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useVendors } from '@/hooks/useVendors';
 import { useProducts } from '@/hooks/useProducts';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Package, TrendingUp, ShoppingCart, Edit, Trash2 } from 'lucide-react';
+import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { VendorProductForm } from '@/components/VendorProductForm';
 
 const VendorDashboard = () => {
   const { currentVendor, isVendor } = useVendors();
   const { products, refreshProducts } = useProducts();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isAddingProduct, setIsAddingProduct] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    image: '',
-    stock_count: '',
-    shipping_fee: '',
-    shipping_type: 'one_time'
-  });
+  // Remove unused state variables as we're using VendorProductForm component
 
   const vendorProducts = products.filter(p => p.vendor_user_id === user?.id);
 
-  const handleAddProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !currentVendor) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .insert({
-          name: newProduct.name,
-          description: newProduct.description,
-          price: parseFloat(newProduct.price),
-          category: newProduct.category,
-          image: newProduct.image,
-          stock_count: parseInt(newProduct.stock_count),
-          initial_stock_count: parseInt(newProduct.stock_count),
-          vendor_id: currentVendor.id,
-          vendor_user_id: user.id,
-          shipping_fee: parseFloat(newProduct.shipping_fee) || 0,
-          shipping_type: newProduct.shipping_type,
-          in_stock: parseInt(newProduct.stock_count) > 0
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Product added successfully",
-      });
-
-      setNewProduct({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        image: '',
-        stock_count: '',
-        shipping_fee: '',
-        shipping_type: 'one_time'
-      });
-      setIsAddingProduct(false);
-      refreshProducts();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to add product",
-        variant: "destructive",
-      });
-    }
-  };
+  // Product addition is now handled by VendorProductForm component
 
   const handleDeleteProduct = async (productId: string) => {
     try {
@@ -144,6 +82,7 @@ const VendorDashboard = () => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="products">My Products</TabsTrigger>
             <TabsTrigger value="add-product">Add Product</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -245,124 +184,28 @@ const VendorDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Add New Product</CardTitle>
-                <CardDescription>Add a new product to your store</CardDescription>
+                <CardDescription>Add a new product to your store using the same format as admin</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleAddProduct} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Product Name</Label>
-                      <Input
-                        id="name"
-                        value={newProduct.name}
-                        onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Category</Label>
-                      <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="electronics">Electronics</SelectItem>
-                          <SelectItem value="clothing">Clothing</SelectItem>
-                          <SelectItem value="home">Home & Garden</SelectItem>
-                          <SelectItem value="sports">Sports</SelectItem>
-                          <SelectItem value="books">Books</SelectItem>
-                          <SelectItem value="toys">Toys</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                <VendorProductForm onProductAdded={refreshProducts} />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newProduct.description}
-                      onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="price">Price ($)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        step="0.01"
-                        value={newProduct.price}
-                        onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="stock">Stock Count</Label>
-                      <Input
-                        id="stock"
-                        type="number"
-                        value={newProduct.stock_count}
-                        onChange={(e) => setNewProduct({...newProduct, stock_count: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="image">Image URL</Label>
-                      <Input
-                        id="image"
-                        type="url"
-                        value={newProduct.image}
-                        onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
-                      />
-                    </div>
-                  </div>
-
-                  {parseFloat(newProduct.price) >= 10 && (
-                    <div className="space-y-4 p-4 border rounded-lg">
-                      <h3 className="font-medium">Shipping Settings (Products $10+)</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="shipping_fee">Shipping Fee ($)</Label>
-                          <Input
-                            id="shipping_fee"
-                            type="number"
-                            step="0.01"
-                            value={newProduct.shipping_fee}
-                            onChange={(e) => setNewProduct({...newProduct, shipping_fee: e.target.value})}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="shipping_type">Shipping Type</Label>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Switch
-                              checked={newProduct.shipping_type === 'per_product'}
-                              onCheckedChange={(checked) => 
-                                setNewProduct({...newProduct, shipping_type: checked ? 'per_product' : 'one_time'})
-                              }
-                            />
-                            <Label>
-                              {newProduct.shipping_type === 'per_product' ? 'Per Product' : 'One Time Payment'}
-                            </Label>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {newProduct.shipping_type === 'per_product' 
-                              ? 'Shipping fee multiplies by quantity' 
-                              : 'Fixed shipping fee regardless of quantity'
-                            }
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button type="submit" className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Product
-                  </Button>
-                </form>
+          <TabsContent value="orders" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Order Management
+                </CardTitle>
+                <CardDescription>View and manage orders for your products</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => window.open('/vendor-orders', '_blank')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  View All Orders
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
