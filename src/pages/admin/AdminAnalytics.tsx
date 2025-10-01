@@ -16,24 +16,20 @@ import {
   Cell
 } from 'recharts';
 import { TrendingUp, Users, ShoppingCart, DollarSign } from 'lucide-react';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const AdminAnalytics = () => {
-  // Mock data - in a real app, this would come from your analytics service
-  const salesData = [
-    { month: 'Jan', sales: 4000, orders: 240 },
-    { month: 'Feb', sales: 3000, orders: 139 },
-    { month: 'Mar', sales: 2000, orders: 980 },
-    { month: 'Apr', sales: 2780, orders: 390 },
-    { month: 'May', sales: 1890, orders: 480 },
-    { month: 'Jun', sales: 2390, orders: 380 },
-  ];
+  const { analytics, loading } = useAnalytics();
 
-  const topProducts = [
-    { name: 'Eco Bottle', value: 400, color: '#8884d8' },
-    { name: 'Solar Panel', value: 300, color: '#82ca9d' },
-    { name: 'LED Bulbs', value: 300, color: '#ffc658' },
-    { name: 'Organic Seeds', value: 200, color: '#ff7c7c' },
-  ];
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -53,9 +49,9 @@ const AdminAnalytics = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$45,231.89</div>
+              <div className="text-2xl font-bold">${analytics.totalRevenue.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
-                +20.1% from last month
+                Real-time data
               </p>
             </CardContent>
           </Card>
@@ -65,9 +61,9 @@ const AdminAnalytics = () => {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2,350</div>
+              <div className="text-2xl font-bold">{analytics.totalOrders}</div>
               <p className="text-xs text-muted-foreground">
-                +15% from last month
+                Real-time data
               </p>
             </CardContent>
           </Card>
@@ -77,9 +73,9 @@ const AdminAnalytics = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">573</div>
+              <div className="text-2xl font-bold">{analytics.activeUsers}</div>
               <p className="text-xs text-muted-foreground">
-                +201 since last hour
+                Real-time data
               </p>
             </CardContent>
           </Card>
@@ -89,9 +85,9 @@ const AdminAnalytics = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12.5%</div>
+              <div className="text-2xl font-bold">{analytics.conversionRate.toFixed(1)}%</div>
               <p className="text-xs text-muted-foreground">
-                +2% from last month
+                Real-time data
               </p>
             </CardContent>
           </Card>
@@ -106,7 +102,7 @@ const AdminAnalytics = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={salesData}>
+                <LineChart data={analytics.salesData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
@@ -128,7 +124,7 @@ const AdminAnalytics = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={topProducts}
+                    data={analytics.topProducts}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -137,7 +133,7 @@ const AdminAnalytics = () => {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {topProducts.map((entry, index) => (
+                    {analytics.topProducts.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -156,7 +152,7 @@ const AdminAnalytics = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={salesData}>
+              <BarChart data={analytics.salesData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />

@@ -285,7 +285,16 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                 onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
                 required
               />
-              <Label htmlFor="shop-terms" className="text-sm">I agree to the terms and conditions</Label>
+              <Label htmlFor="shop-terms" className="text-sm">
+                I agree to the{' '}
+                <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
+                  terms and conditions
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
+                  privacy policy
+                </a>
+              </Label>
             </div>
           </div>
 

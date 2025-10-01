@@ -30,7 +30,9 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
     original_price: 0,
     image: '',
     description: '',
-    full_description: ''
+    full_description: '',
+    shipping_fee: '',
+    shipping_type: 'one_time' as 'one_time' | 'per_product',
   });
 
   const handleAddProduct = async (e: React.FormEvent) => {
@@ -69,6 +71,8 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
           in_stock: parseInt(newProduct.stock_count) > 0,
           rating: 0,
           reviews: 0,
+          shipping_fee: parseFloat(newProduct.shipping_fee) || 0,
+          shipping_type: newProduct.shipping_type,
         });
 
       if (error) throw error;
@@ -89,7 +93,9 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
         original_price: 0,
         image: '',
         description: '',
-        full_description: ''
+        full_description: '',
+        shipping_fee: '',
+        shipping_type: 'one_time',
       });
       
       onProductAdded();
@@ -210,6 +216,43 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
             placeholder="0.00"
             onChange={(e) => setNewProduct({...newProduct, original_price: parseFloat(e.target.value) || 0})}
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="shipping_fee">Shipping Fee ($) *</Label>
+          <Input 
+            id="shipping_fee" 
+            type="number" 
+            step="0.01"
+            placeholder="5.00"
+            value={newProduct.shipping_fee}
+            onChange={(e) => setNewProduct({...newProduct, shipping_fee: e.target.value})}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="shipping_type">Shipping Fee Type *</Label>
+          <Select 
+            value={newProduct.shipping_type} 
+            onValueChange={(value: 'one_time' | 'per_product') => 
+              setNewProduct({...newProduct, shipping_type: value})
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="one_time">One-time Payment</SelectItem>
+              <SelectItem value="per_product">Per Product Payment</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {newProduct.shipping_type === 'one_time' 
+              ? 'Customer pays once regardless of quantity' 
+              : 'Fee multiplies by quantity ordered'}
+          </p>
         </div>
       </div>
 

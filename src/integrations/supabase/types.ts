@@ -440,6 +440,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          added_by_user_id: string | null
           approved_at: string | null
           approved_by: string | null
           created_at: string | null
@@ -447,6 +448,7 @@ export type Database = {
           payment_method: string | null
           payment_status: string | null
           receipt_image: string | null
+          self_delivery: boolean | null
           shipping_address: Json | null
           shipping_cost: number | null
           status: string
@@ -458,6 +460,7 @@ export type Database = {
           vendor_id: string | null
         }
         Insert: {
+          added_by_user_id?: string | null
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string | null
@@ -465,6 +468,7 @@ export type Database = {
           payment_method?: string | null
           payment_status?: string | null
           receipt_image?: string | null
+          self_delivery?: boolean | null
           shipping_address?: Json | null
           shipping_cost?: number | null
           status?: string
@@ -476,6 +480,7 @@ export type Database = {
           vendor_id?: string | null
         }
         Update: {
+          added_by_user_id?: string | null
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string | null
@@ -483,6 +488,7 @@ export type Database = {
           payment_method?: string | null
           payment_status?: string | null
           receipt_image?: string | null
+          self_delivery?: boolean | null
           shipping_address?: Json | null
           shipping_cost?: number | null
           status?: string

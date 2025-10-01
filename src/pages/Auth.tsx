@@ -175,6 +175,17 @@ const Auth = () => {
                   </div>
                 </div>
 
+                <div className="text-xs text-muted-foreground">
+                  By creating an account, you agree to our{' '}
+                  <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
+                    Terms and Conditions
+                  </a>{' '}
+                  and{' '}
+                  <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
+                    Privacy Policy
+                  </a>
+                </div>
+
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>

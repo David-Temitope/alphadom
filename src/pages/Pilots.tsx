@@ -297,10 +297,10 @@ export const Pilots = () => {
                         {pilot.vendor_info.total_products} products
                       </div>
                     </div>
-                    <Link to={`/vendor/${pilot.vendor_info.store_name.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <Link to={`/vendor/${pilot.id}`}>
                       <Button variant="outline" size="sm" className="w-full">
                         <Eye className="w-4 h-4 mr-2" />
-                        View Store
+                        View Profile
                       </Button>
                     </Link>
                   </div>
@@ -319,10 +319,12 @@ export const Pilots = () => {
                       <span>Vehicle: {pilot.dispatcher_info.vehicle_type}</span>
                       <span>{pilot.dispatcher_info.total_deliveries} deliveries</span>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Eye className="w-4 h-4 mr-2" />
-                      View Profile
-                    </Button>
+                    <Link to={`/dispatcher/${pilot.id}`}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Profile
+                      </Button>
+                    </Link>
                   </div>
                 )}
               </div>

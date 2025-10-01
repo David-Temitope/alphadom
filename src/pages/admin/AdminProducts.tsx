@@ -59,6 +59,8 @@ const AdminProducts = () => {
     eco_features: [] as string[],
     discount_percentage: 0,
     original_price: 0,
+    shipping_fee: '',
+    shipping_type: 'one_time' as 'one_time' | 'per_product',
   });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -97,6 +99,8 @@ const AdminProducts = () => {
         in_stock: true,
         rating: 0,
         reviews: 0,
+        shipping_fee: parseFloat(newProduct.shipping_fee) || 0,
+        shipping_type: newProduct.shipping_type,
       });
 
       if (error) throw error;
@@ -120,6 +124,8 @@ const AdminProducts = () => {
         eco_features: [],
         discount_percentage: 0,
         original_price: 0,
+        shipping_fee: '',
+        shipping_type: 'one_time',
       });
     } catch (error) {
       toast({
@@ -170,6 +176,8 @@ const AdminProducts = () => {
         has_discount: editingProduct.discount_percentage > 0,
         discount_percentage: editingProduct.discount_percentage,
         original_price: editingProduct.original_price,
+        shipping_fee: parseFloat(editingProduct.shipping_fee) || 0,
+        shipping_type: editingProduct.shipping_type || 'one_time',
       });
 
       if (error) throw error;
@@ -400,8 +408,42 @@ const AdminProducts = () => {
                     onChange={(e) => setNewProduct({...newProduct, original_price: parseFloat(e.target.value) || 0})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="shipping_fee">Shipping Fee ($) *</Label>
+                  <Input 
+                    id="shipping_fee" 
+                    type="number" 
+                    step="0.01"
+                    placeholder="5.00"
+                    value={newProduct.shipping_fee}
+                    onChange={(e) => setNewProduct({...newProduct, shipping_fee: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="shipping_type">Shipping Fee Type *</Label>
+                  <Select 
+                    value={newProduct.shipping_type} 
+                    onValueChange={(value: 'one_time' | 'per_product') => 
+                      setNewProduct({...newProduct, shipping_type: value})
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="one_time">One-time Payment</SelectItem>
+                      <SelectItem value="per_product">Per Product Payment</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {newProduct.shipping_type === 'one_time' 
+                      ? 'Customer pays once regardless of quantity' 
+                      : 'Fee multiplies by quantity ordered'}
+                  </p>
+                </div>
                 <div className="col-span-2 space-y-2">
-                  <ImageUpload 
+                  <ImageUpload
                     onImageUploaded={(url) => setNewProduct({...newProduct, image: url})}
                   />
                 </div>
@@ -544,8 +586,36 @@ const AdminProducts = () => {
                     onChange={(e) => setEditingProduct({...editingProduct, original_price: parseFloat(e.target.value) || 0})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-shipping-fee">Shipping Fee ($)</Label>
+                  <Input 
+                    id="edit-shipping-fee" 
+                    type="number" 
+                    step="0.01"
+                    placeholder="5.00"
+                    value={editingProduct?.shipping_fee || ''}
+                    onChange={(e) => setEditingProduct({...editingProduct, shipping_fee: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-shipping-type">Shipping Fee Type</Label>
+                  <Select 
+                    value={editingProduct?.shipping_type || 'one_time'} 
+                    onValueChange={(value: 'one_time' | 'per_product') => 
+                      setEditingProduct({...editingProduct, shipping_type: value})
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="one_time">One-time Payment</SelectItem>
+                      <SelectItem value="per_product">Per Product Payment</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               <div className="col-span-2 space-y-2">
-                <ImageUpload 
+                <ImageUpload
                   onImageUploaded={(url) => setEditingProduct({...editingProduct, image: url})}
                 />
                 {editingProduct?.image && (

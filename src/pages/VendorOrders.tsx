@@ -51,14 +51,14 @@ const VendorOrders = () => {
     if (!currentVendor) return;
 
     try {
-      // Get orders for products that belong to this vendor
+      // Get all orders with bank transfer payment
       const { data: orderData, error } = await supabase
         .from('orders')
         .select(`
           *,
-          order_items (
+          order_items!inner (
             *,
-            products (
+            products!inner (
               name,
               image,
               vendor_user_id
@@ -69,18 +69,12 @@ const VendorOrders = () => {
             email
           )
         `)
-        .eq('payment_method', 'bank_transfer');
+        .eq('payment_method', 'bank_transfer')
+        .eq('order_items.products.vendor_user_id', user?.id);
 
       if (error) throw error;
 
-      // Filter orders that contain products from this vendor
-      const vendorOrders = orderData?.filter(order => 
-        order.order_items?.some(item => 
-          item.products?.vendor_user_id === user?.id
-        )
-      ) || [];
-
-      setOrders(vendorOrders as any);
+      setOrders(orderData as any || []);
     } catch (error) {
       console.error('Error fetching vendor orders:', error);
       toast({
@@ -337,6 +331,22 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
                 Start Processing
               </Button>
             )}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                // Toggle self delivery
+                supabase
+                  .from('orders')
+                  .update({ self_delivery: true })
+                  .eq('id', order.id)
+                  .then(() => {
+                    onUpdateStatus(order.id, 'processing');
+                  });
+              }}
+            >
+              Self Deliver
+            </Button>
             <Button variant="outline" size="sm">
               <Truck className="h-4 w-4 mr-2" />
               Hire Dispatcher
