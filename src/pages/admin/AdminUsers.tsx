@@ -21,15 +21,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Search, UserPlus, Mail, Ban, Shield, Loader2 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Search, UserPlus, Mail, Ban, Shield, Loader2, MessageSquare } from 'lucide-react';
 import { useUsers } from '@/hooks/useUsers';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminUsers = () => {
-  const { users, loading, banUser, unbanUser } = useUsers();
+  const { users, loading, banUser, unbanUser, updateUserProfile } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
-  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [messageTitle, setMessageTitle] = useState('');
+  const [messageContent, setMessageContent] = useState('');
+  const [sending, setSending] = useState(false);
   const { toast } = useToast();
 
   const filteredUsers = users.filter(user =>
@@ -37,14 +43,70 @@ const AdminUsers = () => {
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSendEmail = (user: any) => {
+  const handleSendMessage = (user: any) => {
     setSelectedUser(user);
-    setEmailDialogOpen(true);
-    // In a real app, you'd integrate with an email service
-    toast({
-      title: "Email Feature",
-      description: `Would send email to ${user.email}`,
-    });
+    setMessageTitle('');
+    setMessageContent('');
+    setMessageDialogOpen(true);
+  };
+
+  const sendUserMessage = async () => {
+    if (!messageTitle.trim() || !messageContent.trim() || !selectedUser) {
+      toast({
+        title: "Error",
+        description: "Please fill in both title and message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSending(true);
+    try {
+      const { error } = await supabase
+        .from('user_notifications')
+        .insert({
+          user_id: selectedUser.id,
+          title: messageTitle,
+          message: messageContent,
+          type: 'admin_message',
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message Sent",
+        description: `Message sent to ${selectedUser.full_name || selectedUser.email}`,
+      });
+      setMessageDialogOpen(false);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const toggleAIAccess = async (user: any) => {
+    const action = user.ai_access_blocked ? 'unblock' : 'block';
+    if (confirm(`Are you sure you want to ${action} AI access for ${user.full_name || user.email}?`)) {
+      const result = await updateUserProfile(user.id, { ai_access_blocked: !user.ai_access_blocked });
+      if (result.success) {
+        toast({
+          title: `AI Access ${action}ed`,
+          description: `${user.full_name || user.email}'s AI access has been ${action}ed`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to ${action} AI access`,
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleManageUser = (user: any) => {
@@ -187,16 +249,19 @@ const AdminUsers = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleSendEmail(user)}
+                          onClick={() => handleSendMessage(user)}
+                          title="Send Message"
                         >
-                          <Mail className="h-4 w-4" />
+                          <MessageSquare className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleManageUser(user)}
+                          onClick={() => toggleAIAccess(user)}
+                          title={user.ai_access_blocked ? "Unblock AI Access" : "Block AI Access"}
                         >
                           <Shield className="h-4 w-4" />
+                          {user.ai_access_blocked ? "Unblock AI" : "Block AI"}
                         </Button>
                         <Button 
                           variant="outline" 
@@ -215,19 +280,43 @@ const AdminUsers = () => {
           </CardContent>
         </Card>
 
-        <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Send Email</DialogTitle>
+              <DialogTitle>Send Message to User</DialogTitle>
               <DialogDescription>
-                Send an email to {selectedUser?.full_name || selectedUser?.email}
+                Send a notification to {selectedUser?.full_name || selectedUser?.email}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <p>Email functionality would be implemented here with your preferred email service.</p>
-              <div className="flex justify-end">
-                <Button onClick={() => setEmailDialogOpen(false)}>
-                  Close
+              <div className="space-y-2">
+                <Label htmlFor="messageTitle">Title</Label>
+                <Input
+                  id="messageTitle"
+                  value={messageTitle}
+                  onChange={(e) => setMessageTitle(e.target.value)}
+                  placeholder="Message title..."
+                  disabled={sending}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="messageContent">Message</Label>
+                <Textarea
+                  id="messageContent"
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  placeholder="Type your message here..."
+                  rows={4}
+                  disabled={sending}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setMessageDialogOpen(false)} disabled={sending}>
+                  Cancel
+                </Button>
+                <Button onClick={sendUserMessage} disabled={sending}>
+                  {sending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Send Message
                 </Button>
               </div>
             </div>

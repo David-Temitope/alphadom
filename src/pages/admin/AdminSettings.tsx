@@ -28,6 +28,8 @@ const AdminSettings = () => {
     navbar_logo: '',
     hero_title: '',
     hero_subtitle: '',
+    hero_main_text: 'Store',
+    hero_secondary_text: 'for Modern Living',
     about_hero_title: '',
     about_hero_subtitle: '',
     about_story: '',
@@ -63,6 +65,8 @@ const AdminSettings = () => {
         navbar_logo: settingsMap.navbar_config?.logo || '',
         hero_title: settingsMap.hero_config?.title || '',
         hero_subtitle: settingsMap.hero_config?.subtitle || '',
+        hero_main_text: settingsMap.hero_config?.main_text || 'Store',
+        hero_secondary_text: settingsMap.hero_config?.secondary_text || 'for Modern Living',
         about_hero_title: settingsMap.about_config?.hero_title || '',
         about_hero_subtitle: settingsMap.about_config?.hero_subtitle || '',
         about_story: settingsMap.about_config?.story || '',
@@ -132,6 +136,8 @@ const AdminSettings = () => {
           setting_value: {
             title: settings.hero_title,
             subtitle: settings.hero_subtitle,
+            main_text: settings.hero_main_text,
+            secondary_text: settings.hero_secondary_text,
           }
         }, { onConflict: 'setting_key' });
 
@@ -401,6 +407,24 @@ const AdminSettings = () => {
                 onChange={(e) => setSettings(prev => ({ ...prev, hero_subtitle: e.target.value }))}
                 placeholder="e.g., Discover high-quality products that combine style, functionality..."
                 rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="hero_main_text">Hero Main Text</Label>
+              <Input
+                id="hero_main_text"
+                value={settings.hero_main_text}
+                onChange={(e) => setSettings(prev => ({ ...prev, hero_main_text: e.target.value }))}
+                placeholder="e.g., Store"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hero_secondary_text">Hero Secondary Text</Label>
+              <Input
+                id="hero_secondary_text"
+                value={settings.hero_secondary_text}
+                onChange={(e) => setSettings(prev => ({ ...prev, hero_secondary_text: e.target.value }))}
+                placeholder="e.g., for Modern Living"
               />
             </div>
           </CardContent>

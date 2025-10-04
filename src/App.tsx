@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProtectedRoute } from "@/components/admin/AdminProtectedRoute";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { GideonChat } from "@/components/GideonChat";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -74,6 +75,7 @@ const App = () => {
             <AdminProvider>
               <BrowserRouter>
                 <div className="App">
+                  <GideonChat />
                   <Toaster />
                   <Sonner />
                   <Routes>

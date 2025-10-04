@@ -665,6 +665,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_access_blocked: boolean | null
           avatar_url: string | null
           created_at: string | null
           email: string
@@ -674,6 +675,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_access_blocked?: boolean | null
           avatar_url?: string | null
           created_at?: string | null
           email: string
@@ -683,6 +685,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_access_blocked?: boolean | null
           avatar_url?: string | null
           created_at?: string | null
           email?: string
@@ -1034,6 +1037,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_delete_out_of_stock_products: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       calculate_order_totals: {
         Args: { shipping_address: Json; subtotal_amount: number }
         Returns: {

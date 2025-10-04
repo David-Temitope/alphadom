@@ -1,1 +1,4 @@
 project_id = "ksdlqjyayvybbiiyfrxf"
+
+[functions.chat-with-gideon]
+verify_jwt = true

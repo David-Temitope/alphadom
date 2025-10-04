@@ -8,6 +8,8 @@ interface AdminSettings {
   navbar_logo: string;
   hero_title: string;
   hero_subtitle: string;
+  hero_main_text: string;
+  hero_secondary_text: string;
   about_hero_title: string;
   about_hero_subtitle: string;
   about_story: string;
@@ -33,6 +35,8 @@ export const useAdminSettings = () => {
     navbar_logo: "/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png",
     hero_title: "The People's Store",
     hero_subtitle: "Discover high-quality products that combine style, functionality, and reliability for your everyday needs.",
+    hero_main_text: "Store",
+    hero_secondary_text: "for Modern Living",
     about_hero_title: "Curating Quality Products",
     about_hero_subtitle: "We're on a mission to make quality products accessible, affordable, and beautiful for everyone.",
     about_story: "",
@@ -71,6 +75,8 @@ export const useAdminSettings = () => {
         navbar_logo: settingsMap.navbar_config?.logo || "/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png",
         hero_title: settingsMap.hero_config?.title || "The People's Store",
         hero_subtitle: settingsMap.hero_config?.subtitle || "Discover high-quality products that combine style, functionality, and reliability for your everyday needs.",
+        hero_main_text: settingsMap.hero_config?.main_text || "Store",
+        hero_secondary_text: settingsMap.hero_config?.secondary_text || "for Modern Living",
         about_hero_title: settingsMap.about_config?.hero_title || "Curating Quality Products",
         about_hero_subtitle: settingsMap.about_config?.hero_subtitle || "We're on a mission to make quality products accessible, affordable, and beautiful for everyone.",
         about_story: settingsMap.about_config?.story || "",

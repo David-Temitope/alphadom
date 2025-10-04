@@ -1,16 +1,19 @@
 
-import { Leaf, Users, Award, Target, Heart, Globe } from "lucide-react";
+import { Leaf, Users, Award, Target, Heart, Globe, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
+import { useAboutStats } from "@/hooks/useAboutStats";
 
 const About = () => {
   const { settings } = useAdminSettings();
+  const { stats: liveStats, loading: statsLoading } = useAboutStats();
+  
   const stats = [
-    { label: "Products Sold", value: "50K+" },
-    { label: "Trees Planted", value: "25K+" },
-    { label: "CO2 Offset", value: "100T+" },
-    { label: "Happy Customers", value: "10K+" },
+    { label: "Products Sold", value: statsLoading ? "..." : liveStats.productsSold.toLocaleString() },
+    { label: "Users", value: statsLoading ? "..." : liveStats.users.toLocaleString() },
+    { label: "Workers", value: statsLoading ? "..." : liveStats.workers.toLocaleString() },
+    { label: "Happy Customers", value: statsLoading ? "..." : liveStats.happyCustomers.toLocaleString() },
   ];
 
   const values = [
