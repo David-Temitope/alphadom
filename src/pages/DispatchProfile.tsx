@@ -45,7 +45,7 @@ export const DispatchProfile = () => {
           )
         `)
         .eq('user_id', dispatchId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

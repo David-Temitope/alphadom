@@ -41,6 +41,8 @@ const Checkout = () => {
     tax: 0,
     total: 0
   });
+  const [vendorBankDetails, setVendorBankDetails] = useState<any>(null);
+  const [productVendor, setProductVendor] = useState<any>(null);
 
   useEffect(() => {
     if (!user) {
@@ -54,7 +56,35 @@ const Checkout = () => {
     }
 
     calculateTotals();
+    fetchVendorBankDetails();
   }, [user, items, shippingInfo]);
+
+  const fetchVendorBankDetails = async () => {
+    if (items.length === 0) return;
+
+    // Get the first product's vendor (assuming single vendor checkout for now)
+    const firstProduct = items[0] as any;
+    
+    if (firstProduct.vendor_id) {
+      // Product added by vendor - fetch vendor's bank details
+      const { data, error } = await supabase
+        .from('approved_vendors')
+        .select('*, shop_applications!inner(vendor_bank_details)')
+        .eq('id', firstProduct.vendor_id)
+        .single();
+
+      if (!error && data) {
+        setProductVendor(data);
+        const shopApp = (data as any).shop_applications;
+        if (shopApp && shopApp.vendor_bank_details) {
+          setVendorBankDetails(shopApp.vendor_bank_details);
+        }
+      }
+    } else {
+      // Product added by admin - use admin bank details from settings
+      setVendorBankDetails(null); // Will fall back to admin settings
+    }
+  };
 
   const calculateTotals = async () => {
     const subtotal = total;
@@ -352,12 +382,23 @@ const Checkout = () => {
                   <div className="space-y-4">
                     <div className="p-4 bg-muted rounded-lg">
                       <h4 className="font-semibold mb-2">Bank Transfer Details</h4>
-                      <div className="space-y-1 text-sm">
-                        <p><strong>Bank:</strong> {settings.bank_details?.bank_name || 'First National Bank'}</p>
-                        <p><strong>Account Name:</strong> {settings.bank_details?.account_name || 'Pilot Store'}</p>
-                        <p><strong>Account Number:</strong> {settings.bank_details?.account_number || '1234567890'}</p>
-                        <p><strong>Routing Number:</strong> {settings.bank_details?.routing_number || '021000021'}</p>
-                      </div>
+                      {vendorBankDetails ? (
+                        <>
+                          <p className="text-xs text-primary mb-2">Payment goes to: {productVendor?.store_name}</p>
+                          <div className="space-y-1 text-sm">
+                            <p><strong>Bank:</strong> {vendorBankDetails.bank_name}</p>
+                            <p><strong>Account Name:</strong> {vendorBankDetails.account_name}</p>
+                            <p><strong>Account Number:</strong> {vendorBankDetails.account_number}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-1 text-sm">
+                          <p><strong>Bank:</strong> {settings.bank_details?.bank_name || 'First National Bank'}</p>
+                          <p><strong>Account Name:</strong> {settings.bank_details?.account_name || 'Alphadom'}</p>
+                          <p><strong>Account Number:</strong> {settings.bank_details?.account_number || '1234567890'}</p>
+                          <p><strong>Routing Number:</strong> {settings.bank_details?.routing_number || '021000021'}</p>
+                        </div>
+                      )}
                       <p className="text-xs text-muted-foreground mt-2">
                         Please include your order ID in the transfer description
                       </p>

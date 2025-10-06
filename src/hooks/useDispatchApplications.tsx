@@ -61,14 +61,16 @@ export const useDispatchApplications = () => {
         .from('dispatch_applications')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       setUserApplication(data || null);
     } catch (error) {
       console.error('Error fetching user dispatch application:', error);
     }
   };
+
+  
 
   const submitApplication = async (applicationData: Omit<DispatchApplication, 'id' | 'user_id' | 'status' | 'created_at' | 'updated_at'>) => {
     if (!user) return { error: 'User not authenticated' };

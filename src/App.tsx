@@ -36,6 +36,7 @@ import Privacy from "./pages/Privacy";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import ShopApplicationStatus from "./pages/ShopApplicationStatus";
+import DispatchApplicationStatus from "./pages/DispatchApplicationStatus";
 import VendorDashboard from "./pages/VendorDashboard";
 import UserTypeSelection from "./pages/UserTypeSelection";
 import Pilots from "./pages/Pilots";
@@ -91,6 +92,7 @@ const App = () => {
                       <Route path="/orders" element={<Layout><Orders /></Layout>} />
                       <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
                       <Route path="/shop-status" element={<Layout><ShopApplicationStatus /></Layout>} />
+                      <Route path="/dispatch-status" element={<Layout><DispatchApplicationStatus /></Layout>} />
                       <Route path="/vendor-dashboard" element={<Layout><VendorDashboard /></Layout>} />
                       <Route path="/vendor-orders" element={<Layout><VendorOrders /></Layout>} />
                       <Route path="/user-types" element={<Layout><UserTypeSelection /></Layout>} />

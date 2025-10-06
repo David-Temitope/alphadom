@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["admin_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["admin_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["admin_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
           created_at: string
@@ -78,6 +102,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_available: boolean
+          linked_vendor_id: string | null
           phone_number: string
           rating: number
           success_rate: number
@@ -94,6 +119,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_available?: boolean
+          linked_vendor_id?: string | null
           phone_number: string
           rating?: number
           success_rate?: number
@@ -110,6 +136,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_available?: boolean
+          linked_vendor_id?: string | null
           phone_number?: string
           rating?: number
           success_rate?: number
@@ -119,7 +146,15 @@ export type Database = {
           user_id?: string
           vehicle_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "approved_dispatchers_linked_vendor_id_fkey"
+            columns: ["linked_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       approved_vendors: {
         Row: {
@@ -129,11 +164,13 @@ export type Database = {
           is_active: boolean
           is_suspended: boolean | null
           product_category: string
+          product_slots: number | null
           store_name: string
           total_orders: number
           total_products: number
           total_revenue: number
           updated_at: string
+          used_slots: number | null
           user_id: string
         }
         Insert: {
@@ -143,11 +180,13 @@ export type Database = {
           is_active?: boolean
           is_suspended?: boolean | null
           product_category: string
+          product_slots?: number | null
           store_name: string
           total_orders?: number
           total_products?: number
           total_revenue?: number
           updated_at?: string
+          used_slots?: number | null
           user_id: string
         }
         Update: {
@@ -157,11 +196,13 @@ export type Database = {
           is_active?: boolean
           is_suspended?: boolean | null
           product_category?: string
+          product_slots?: number | null
           store_name?: string
           total_orders?: number
           total_products?: number
           total_revenue?: number
           updated_at?: string
+          used_slots?: number | null
           user_id?: string
         }
         Relationships: [
@@ -458,6 +499,7 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           vendor_id: string | null
+          vendor_owner_id: string | null
         }
         Insert: {
           added_by_user_id?: string | null
@@ -478,6 +520,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           vendor_id?: string | null
+          vendor_owner_id?: string | null
         }
         Update: {
           added_by_user_id?: string | null
@@ -498,11 +541,19 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           vendor_id?: string | null
+          vendor_owner_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "orders_vendor_id_fkey"
             columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_vendor_owner_id_fkey"
+            columns: ["vendor_owner_id"]
             isOneToOne: false
             referencedRelation: "approved_vendors"
             referencedColumns: ["id"]
@@ -1049,9 +1100,29 @@ export type Database = {
           total_amount: number
         }[]
       }
+      get_admin_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["admin_role"]
+      }
+      has_admin_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["admin_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      admin_role:
+        | "super_admin"
+        | "vendor_admin"
+        | "dispatch_admin"
+        | "user_admin"
+        | "orders_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1178,6 +1249,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      admin_role: [
+        "super_admin",
+        "vendor_admin",
+        "dispatch_admin",
+        "user_admin",
+        "orders_admin",
+      ],
+    },
   },
 } as const

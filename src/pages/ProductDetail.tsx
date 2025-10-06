@@ -183,6 +183,20 @@ const ProductDetail = () => {
               <p className="text-muted-foreground leading-relaxed">
                 {product.full_description || product.description}
               </p>
+              
+              {/* Vendor Info */}
+              <div className="mt-4 p-3 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold">Product From: </span>
+                  {product.vendor_user_id ? (
+                    <Link to={`/vendor/${product.vendor_user_id}`} className="text-primary hover:underline">
+                      Vendor
+                    </Link>
+                  ) : (
+                    <span className="text-primary font-semibold">Alphadom</span>
+                  )}
+                </p>
+              </div>
 
               {product.eco_features && product.eco_features.length > 0 && (
                 <div>
