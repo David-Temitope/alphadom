@@ -130,10 +130,19 @@ export const GideonChat = () => {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 border-2 border-white animate-pulse z-50"
+          className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl z-50 
+            bg-gradient-to-r from-green-500 to-emerald-400 
+            hover:from-green-600 hover:to-emerald-500 
+            border-4 border-white
+            shadow-[0_0_20px_rgba(16,185,129,0.5),0_0_40px_rgba(16,185,129,0.3)]
+            hover:shadow-[0_0_30px_rgba(16,185,129,0.6),0_0_60px_rgba(16,185,129,0.4)]
+            transition-all duration-500"
+          style={{
+            animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          }}
           size="icon"
         >
-          <MessageCircle className="h-6 w-6 text-white drop-shadow-lg" />
+          <MessageCircle className="h-8 w-8 text-white drop-shadow-lg" />
         </Button>
       )}
 
