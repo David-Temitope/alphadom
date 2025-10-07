@@ -61,19 +61,30 @@ const AdminManagement = () => {
 
   const fetchAdmins = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch admin roles
+      const { data: adminRoles, error: rolesError } = await supabase
         .from('admin_roles')
-        .select(`
-          *,
-          profiles (
-            email,
-            full_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setAdmins(data || []);
+      if (rolesError) throw rolesError;
+
+      // Fetch all profiles for those admin user_ids
+      const userIds = adminRoles?.map(a => a.user_id) || [];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Combine the data
+      const adminsWithProfiles = adminRoles?.map(admin => ({
+        ...admin,
+        profiles: profiles?.find(p => p.id === admin.user_id) || null
+      })) || [];
+
+      setAdmins(adminsWithProfiles as any);
     } catch (error) {
       console.error('Error fetching admins:', error);
       toast({
