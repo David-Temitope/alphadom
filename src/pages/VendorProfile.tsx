@@ -51,10 +51,7 @@ export const VendorProfile = () => {
       // Fetch vendor data using user_id since vendorId is the user_id from params
       const { data: vendorData, error: vendorError } = await supabase
         .from('approved_vendors')
-        .select(`
-          *,
-          profiles!approved_vendors_user_id_fkey(full_name, avatar_url, email)
-        `)
+        .select('*')
         .eq('user_id', vendorId)
         .maybeSingle();
 
@@ -65,9 +62,18 @@ export const VendorProfile = () => {
         return;
       }
 
+      // Fetch profile separately
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url, email')
+        .eq('id', vendorData.user_id)
+        .maybeSingle();
+
+      if (profileError) console.error('Profile fetch error:', profileError);
+
       setVendor({
         ...vendorData,
-        profile: vendorData.profiles as any
+        profile: profileData as any
       });
 
       // Fetch vendor's products using vendor's ID from the database

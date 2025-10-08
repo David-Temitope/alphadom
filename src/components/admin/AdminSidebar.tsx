@@ -30,6 +30,8 @@ const sidebarItems = [
   { name: 'Vendor Monitoring', href: '/appleisgood/vendor-monitoring', icon: BarChart3 },
   { name: 'Dispatch Monitoring', href: '/appleisgood/dispatch-monitoring', icon: Truck },
   { name: 'Users', href: '/appleisgood/users', icon: Users },
+  { name: 'Admin Management', href: '/appleisgood/admin-management', icon: Users },
+  { name: 'Activity Logs', href: '/appleisgood/activity-logs', icon: BarChart3 },
   { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/appleisgood/settings', icon: Settings },
 ];

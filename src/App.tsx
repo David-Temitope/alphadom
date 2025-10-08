@@ -31,6 +31,9 @@ import AdminShopApplications from "./pages/admin/AdminShopApplications";
 import AdminDispatchApplications from "./pages/admin/AdminDispatchApplications";
 import AdminDispatchMonitoring from "./pages/admin/AdminDispatchMonitoring";
 import AdminVendorMonitoring from "./pages/admin/AdminVendorMonitoring";
+import AdminManagement from "./pages/admin/AdminManagement";
+import AdminActivityLogs from "./pages/admin/AdminActivityLogs";
+import AdminConfirmInvitation from "./pages/admin/AdminConfirmInvitation";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Wishlist from "./pages/Wishlist";
@@ -157,6 +160,17 @@ const App = () => {
                           <AdminDispatchMonitoring />
                         </AdminProtectedRoute>
                       } />
+                      <Route path="/appleisgood/admin-management" element={
+                        <AdminProtectedRoute>
+                          <AdminManagement />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/activity-logs" element={
+                        <AdminProtectedRoute>
+                          <AdminActivityLogs />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/confirm-invitation/:token" element={<AdminConfirmInvitation />} />
 
                       {/* Terms and Privacy Routes */}
                       <Route path="/terms" element={<Layout><Terms /></Layout>} />

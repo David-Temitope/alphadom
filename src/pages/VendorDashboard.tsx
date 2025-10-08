@@ -202,7 +202,7 @@ const VendorDashboard = () => {
                 <CardDescription>View and manage orders for your products</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => window.open('/vendor-orders', '_blank')}>
+                <Button onClick={() => window.location.href = '/vendor-orders'}>
                   <FileText className="h-4 w-4 mr-2" />
                   View All Orders
                 </Button>

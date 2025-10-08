@@ -48,33 +48,52 @@ const VendorOrders = () => {
   }, [user, currentVendor]);
 
   const fetchVendorOrders = async () => {
-    if (!currentVendor) return;
+    if (!currentVendor || !user) return;
 
     try {
-      // Get all orders with bank transfer payment
-      const { data: orderData, error } = await supabase
+      // First, get all orders
+      const { data: allOrders, error: ordersError } = await supabase
         .from('orders')
-        .select(`
-          *,
-          order_items!inner (
-            *,
-            products!inner (
-              name,
-              image,
-              vendor_user_id
-            )
-          ),
-          profiles (
-            full_name,
-            email
-          )
-        `)
-        .eq('payment_method', 'bank_transfer')
-        .eq('order_items.products.vendor_user_id', user?.id);
+        .select('*')
+        .eq('vendor_id', currentVendor.id);
 
-      if (error) throw error;
+      if (ordersError) throw ordersError;
 
-      setOrders(orderData as any || []);
+      // For each order, fetch related data
+      const ordersWithDetails = await Promise.all(
+        (allOrders || []).map(async (order) => {
+          // Fetch order items with products
+          const { data: items, error: itemsError } = await supabase
+            .from('order_items')
+            .select(`
+              *,
+              products (
+                name,
+                image
+              )
+            `)
+            .eq('order_id', order.id);
+
+          if (itemsError) console.error('Items error:', itemsError);
+
+          // Fetch profile
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', order.user_id)
+            .maybeSingle();
+
+          if (profileError) console.error('Profile error:', profileError);
+
+          return {
+            ...order,
+            order_items: items || [],
+            profiles: profile
+          };
+        })
+      );
+
+      setOrders(ordersWithDetails as any);
     } catch (error) {
       console.error('Error fetching vendor orders:', error);
       toast({
