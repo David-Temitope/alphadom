@@ -14,11 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_logs: {
+        Row: {
+          action_details: Json | null
+          action_type: string
+          admin_user_id: string | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+        }
+        Insert: {
+          action_details?: Json | null
+          action_type: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+        }
+        Update: {
+          action_details?: Json | null
+          action_type?: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_activity_logs_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_roles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      admin_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          invitation_token: string
+          name: string
+          role: Database["public"]["Enums"]["admin_role"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          invitation_token: string
+          name: string
+          role: Database["public"]["Enums"]["admin_role"]
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          name?: string
+          role?: Database["public"]["Enums"]["admin_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_invitations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_roles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      admin_login_attempts: {
+        Row: {
+          attempted_at: string | null
+          email: string
+          id: string
+          ip_address: string | null
+          success: boolean
+        }
+        Insert: {
+          attempted_at?: string | null
+          email: string
+          id?: string
+          ip_address?: string | null
+          success: boolean
+        }
+        Update: {
+          attempted_at?: string | null
+          email?: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+        }
+        Relationships: []
+      }
+      admin_password_resets: {
+        Row: {
+          admin_id: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          reset_token: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          reset_token: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          reset_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_password_resets_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_roles: {
         Row: {
           created_at: string | null
           created_by: string | null
           id: string
+          is_active: boolean | null
+          is_locked: boolean | null
+          last_login: string | null
+          password_hash: string | null
           role: Database["public"]["Enums"]["admin_role"]
           user_id: string
         }
@@ -26,6 +165,10 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
+          is_active?: boolean | null
+          is_locked?: boolean | null
+          last_login?: string | null
+          password_hash?: string | null
           role: Database["public"]["Enums"]["admin_role"]
           user_id: string
         }
@@ -33,6 +176,10 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
+          is_active?: boolean | null
+          is_locked?: boolean | null
+          last_login?: string | null
+          password_hash?: string | null
           role?: Database["public"]["Enums"]["admin_role"]
           user_id?: string
         }
@@ -363,6 +510,7 @@ export type Database = {
           experience_years: number | null
           id: string
           license_number: string | null
+          linked_vendor_id: string | null
           payment_countdown_expires_at: string | null
           payment_due_date: string | null
           payment_received_at: string | null
@@ -371,6 +519,8 @@ export type Database = {
           updated_at: string
           user_id: string
           vehicle_type: string
+          vendor_approval_status: string | null
+          vendor_approved_at: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -384,6 +534,7 @@ export type Database = {
           experience_years?: number | null
           id?: string
           license_number?: string | null
+          linked_vendor_id?: string | null
           payment_countdown_expires_at?: string | null
           payment_due_date?: string | null
           payment_received_at?: string | null
@@ -392,6 +543,8 @@ export type Database = {
           updated_at?: string
           user_id: string
           vehicle_type: string
+          vendor_approval_status?: string | null
+          vendor_approved_at?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -405,6 +558,7 @@ export type Database = {
           experience_years?: number | null
           id?: string
           license_number?: string | null
+          linked_vendor_id?: string | null
           payment_countdown_expires_at?: string | null
           payment_due_date?: string | null
           payment_received_at?: string | null
@@ -413,8 +567,18 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vehicle_type?: string
+          vendor_approval_status?: string | null
+          vendor_approved_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dispatch_applications_linked_vendor_id_fkey"
+            columns: ["linked_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
@@ -1099,6 +1263,10 @@ export type Database = {
           tax_amount: number
           total_amount: number
         }[]
+      }
+      cleanup_expired_admin_invitations: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       get_admin_role: {
         Args: { _user_id: string }
