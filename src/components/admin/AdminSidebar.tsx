@@ -22,18 +22,18 @@ interface AdminSidebarProps {
 }
 
 const sidebarItems = [
-  { name: 'Dashboard', href: '/appleisgood', icon: LayoutDashboard },
-  { name: 'Products', href: '/appleisgood/products', icon: Package },
-  { name: 'Orders', href: '/appleisgood/orders', icon: ShoppingCart },
-  { name: 'Shop Applications', href: '/appleisgood/applications', icon: Store },
-  { name: 'Dispatch Applications', href: '/appleisgood/dispatch-applications', icon: Truck },
-  { name: 'Vendor Monitoring', href: '/appleisgood/vendor-monitoring', icon: BarChart3 },
-  { name: 'Dispatch Monitoring', href: '/appleisgood/dispatch-monitoring', icon: Truck },
-  { name: 'Users', href: '/appleisgood/users', icon: Users },
-  { name: 'Admin Management', href: '/appleisgood/admin-management', icon: Users },
-  { name: 'Activity Logs', href: '/appleisgood/activity-logs', icon: BarChart3 },
-  { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/appleisgood/settings', icon: Settings },
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Products', href: '/admin/products', icon: Package },
+  { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+  { name: 'Shop Applications', href: '/admin/applications', icon: Store },
+  { name: 'Dispatch Applications', href: '/admin/dispatch-applications', icon: Truck },
+  { name: 'Vendor Monitoring', href: '/admin/vendor-monitoring', icon: BarChart3 },
+  { name: 'Dispatch Monitoring', href: '/admin/dispatch-monitoring', icon: Truck },
+  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Admin Management', href: '/admin/admin-management', icon: Users },
+  { name: 'Activity Logs', href: '/admin/activity-logs', icon: BarChart3 },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavigate }) => {
