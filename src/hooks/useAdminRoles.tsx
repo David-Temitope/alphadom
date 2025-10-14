@@ -68,6 +68,14 @@ export const useAdminRoles = () => {
   };
 
   const canManageAdmins = (): boolean => {
+    // Check localStorage for hardcoded super admin
+    const savedAdmin = localStorage.getItem('admin_user');
+    if (savedAdmin) {
+      const admin = JSON.parse(savedAdmin);
+      if (admin.role === 'super_admin') {
+        return true;
+      }
+    }
     return hasRole('super_admin');
   };
 

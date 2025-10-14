@@ -109,68 +109,68 @@ const App = () => {
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
                       {/* Admin Routes */}
-                      <Route path="/admin/login" element={<AdminLogin />} />
-                      <Route path="/admin" element={
+                      <Route path="/appleisgood/login" element={<AdminLogin />} />
+                      <Route path="/appleisgood" element={
                         <AdminProtectedRoute>
                           <AdminDashboard />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/products" element={
+                      <Route path="/appleisgood/products" element={
                         <AdminProtectedRoute>
                           <AdminProducts />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/orders" element={
+                      <Route path="/appleisgood/orders" element={
                         <AdminProtectedRoute>
                           <AdminOrders />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/users" element={
+                      <Route path="/appleisgood/users" element={
                         <AdminProtectedRoute>
                           <AdminUsers />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/settings" element={
+                      <Route path="/appleisgood/settings" element={
                         <AdminProtectedRoute>
                           <AdminSettings />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/analytics" element={
+                      <Route path="/appleisgood/analytics" element={
                         <AdminProtectedRoute>
                           <AdminAnalytics />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/applications" element={
+                      <Route path="/appleisgood/applications" element={
                         <AdminProtectedRoute>
                           <AdminShopApplications />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/dispatch-applications" element={
+                      <Route path="/appleisgood/dispatch-applications" element={
                         <AdminProtectedRoute>
                           <AdminDispatchApplications />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/vendor-monitoring" element={
+                      <Route path="/appleisgood/vendor-monitoring" element={
                         <AdminProtectedRoute>
                           <AdminVendorMonitoring />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/dispatch-monitoring" element={
+                      <Route path="/appleisgood/dispatch-monitoring" element={
                         <AdminProtectedRoute>
                           <AdminDispatchMonitoring />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/admin-management" element={
+                      <Route path="/appleisgood/admin-management" element={
                         <AdminProtectedRoute>
                           <AdminManagement />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/activity-logs" element={
+                      <Route path="/appleisgood/activity-logs" element={
                         <AdminProtectedRoute>
                           <AdminActivityLogs />
                         </AdminProtectedRoute>
                       } />
-                      <Route path="/admin/confirm-invitation/:token" element={<AdminConfirmInvitation />} />
+                      <Route path="/appleisgood/confirm-invitation/:token" element={<AdminConfirmInvitation />} />
 
                       {/* Terms and Privacy Routes */}
                       <Route path="/terms" element={<Layout><Terms /></Layout>} />
