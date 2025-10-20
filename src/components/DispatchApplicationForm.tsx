@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDispatchApplications } from '@/hooks/useDispatchApplications';
 import { useUserTypes } from '@/hooks/useUserTypes';
-import { useVendors } from '@/hooks/useVendors';
 import { Loader2 } from 'lucide-react';
 
 interface DispatchApplicationFormProps {
@@ -19,7 +18,6 @@ interface DispatchApplicationFormProps {
 export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicationFormProps) => {
   const { submitApplication } = useDispatchApplications();
   const { addUserType } = useUserTypes();
-  const { vendors } = useVendors();
   
   const [formData, setFormData] = useState({
     dispatch_name: '',
@@ -31,7 +29,6 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
     license_number: '',
     email: '',
     emergency_contact: '',
-    linked_vendor_id: '',
   });
   
   const [loading, setLoading] = useState(false);
@@ -70,11 +67,6 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
       return;
     }
 
-    if (!formData.linked_vendor_id) {
-      alert('Please select a shop to register under');
-      return;
-    }
-
     setLoading(true);
     
     const applicationData = {
@@ -99,7 +91,6 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
         license_number: '',
         email: '',
         emergency_contact: '',
-        linked_vendor_id: '',
       });
       setAgreedToTerms(false);
       onOpenChange(false);
@@ -133,45 +124,20 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h4 className="font-semibold text-yellow-900 mb-2">Register Under a Shop</h4>
-              <p className="text-sm text-yellow-800 mb-3">
-                You must register under a shop to apply as a dispatcher. Select a shop from the list below.
-              </p>
-              <Label htmlFor="linked_vendor_id">Select Shop *</Label>
-              <Select
-                value={formData.linked_vendor_id}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, linked_vendor_id: value }))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="dispatch_name">Dispatch Business Name</Label>
+              <Input
+                id="dispatch_name"
+                type="text"
+                value={formData.dispatch_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, dispatch_name: e.target.value }))}
                 required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a shop" />
-                </SelectTrigger>
-                <SelectContent>
-                  {vendors.map((vendor) => (
-                    <SelectItem key={vendor.id} value={vendor.id}>
-                      {vendor.store_name} - {vendor.product_category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="dispatch_name">Dispatch Business Name</Label>
-                <Input
-                  id="dispatch_name"
-                  type="text"
-                  value={formData.dispatch_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dispatch_name: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="email">Email Address</Label>
+            <div>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -265,10 +231,10 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
                 onChange={(e) => setFormData(prev => ({ ...prev, experience_years: e.target.value }))}
               />
             </div>
-            </div>
+          </div>
 
-            <div>
-              <Label>Coverage Areas (select all that apply)</Label>
+          <div>
+            <Label>Coverage Areas (select all that apply)</Label>
             <div className="grid grid-cols-2 gap-2 mt-2">
               {coverageAreas.map((area) => (
                 <div key={area} className="flex items-center space-x-2">
