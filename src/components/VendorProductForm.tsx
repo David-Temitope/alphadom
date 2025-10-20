@@ -124,7 +124,7 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="price">Price (₦) *</Label>
+          <Label htmlFor="price">Price *</Label>
           <Input 
             id="price" 
             type="number" 
@@ -221,21 +221,19 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="shipping_fee">Shipping Fee (₦)</Label>
+          <Label htmlFor="shipping_fee">Shipping Fee ($) *</Label>
           <Input 
             id="shipping_fee" 
             type="number" 
             step="0.01"
-            placeholder="0.00 (Enter 0 for free delivery)"
+            placeholder="5.00"
             value={newProduct.shipping_fee}
             onChange={(e) => setNewProduct({...newProduct, shipping_fee: e.target.value})}
+            required
           />
-          <p className="text-xs text-muted-foreground">
-            Enter 0 for free delivery
-          </p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="shipping_type">Shipping Fee Type</Label>
+          <Label htmlFor="shipping_type">Shipping Fee Type *</Label>
           <Select 
             value={newProduct.shipping_type} 
             onValueChange={(value: 'one_time' | 'per_product') => 

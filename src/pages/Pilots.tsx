@@ -113,9 +113,9 @@ export const Pilots = () => {
         };
       }) || [];
 
-      // Filter to show only vendors (not dispatchers)
+      // Filter out regular users without vendor or dispatcher info
       const filteredPilots = pilotsData.filter(pilot => 
-        pilot.user_types.includes('vendor')
+        pilot.user_types.includes('vendor') || pilot.user_types.includes('dispatch')
       );
 
       setPilots(filteredPilots);
@@ -201,8 +201,8 @@ export const Pilots = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Vendors Directory</h1>
-        <p className="text-gray-600">Discover amazing vendors in our marketplace</p>
+        <h1 className="text-3xl font-bold mb-2">Pilots Directory</h1>
+        <p className="text-gray-600">Discover vendors and dispatchers in our marketplace</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
