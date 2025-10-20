@@ -12,7 +12,7 @@ import { Leaf, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Auth = () => {
-  const { user, signIn, signUp, resetPassword } = useAuth();
+  const { user, signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -124,29 +124,6 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
-                
-                <div className="text-center">
-                  <Button
-                    type="button"
-                    variant="link"
-                    onClick={async () => {
-                      const email = (document.getElementById('signin-email') as HTMLInputElement)?.value;
-                      if (!email) {
-                        toast.error('Please enter your email address');
-                        return;
-                      }
-                      const { error } = await resetPassword(email);
-                      if (error) {
-                        toast.error('Failed to send reset email: ' + error.message);
-                      } else {
-                        toast.success('Password reset email sent! Check your inbox.');
-                      }
-                    }}
-                    className="text-sm"
-                  >
-                    Forgot password?
-                  </Button>
-                </div>
               </form>
             </TabsContent>
             

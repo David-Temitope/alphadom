@@ -21,7 +21,7 @@ export const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ childr
   }
 
   if (!admin) {
-    return <Navigate to="/appleisgood/login" state={{ from: location }} replace />;
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

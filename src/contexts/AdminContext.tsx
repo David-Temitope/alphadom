@@ -5,7 +5,7 @@ interface AdminUser {
   id: string;
   email: string;
   name: string;
-  role: 'super_admin' | 'vendor_admin' | 'dispatch_admin' | 'user_admin' | 'orders_admin';
+  role: 'admin' | 'super_admin';
 }
 
 interface AdminContextType {
@@ -38,13 +38,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Hardcoded super admin credentials
+    // Mock authentication - in real app, this would be an API call
     if (email === 'admin@ecomart.com' && password === 'admin123') {
       const adminUser: AdminUser = {
         id: '1',
         email: 'admin@ecomart.com',
-        name: 'Super Admin',
-        role: 'super_admin'
+        name: 'Admin User',
+        role: 'admin'
       };
       setAdmin(adminUser);
       localStorage.setItem('admin_user', JSON.stringify(adminUser));

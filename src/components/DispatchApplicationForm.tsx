@@ -172,99 +172,99 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
 
               <div>
                 <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  required
-                />
-              </div>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                required
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="phone_number">WhatsApp Phone Number</Label>
-                <Input
-                  id="phone_number"
-                  type="tel"
-                  value={formData.phone_number}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone_number: e.target.value }))}
-                  placeholder="+1234567890"
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="phone_number">WhatsApp Phone Number</Label>
+              <Input
+                id="phone_number"
+                type="tel"
+                value={formData.phone_number}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone_number: e.target.value }))}
+                placeholder="+1234567890"
+                required
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="emergency_contact">Emergency Contact</Label>
-                <Input
-                  id="emergency_contact"
-                  type="tel"
-                  value={formData.emergency_contact}
-                  onChange={(e) => setFormData(prev => ({ ...prev, emergency_contact: e.target.value }))}
-                  placeholder="+1234567890"
-                />
-              </div>
+            <div>
+              <Label htmlFor="emergency_contact">Emergency Contact</Label>
+              <Input
+                id="emergency_contact"
+                type="tel"
+                value={formData.emergency_contact}
+                onChange={(e) => setFormData(prev => ({ ...prev, emergency_contact: e.target.value }))}
+                placeholder="+1234567890"
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="vehicle_type">Vehicle Type</Label>
-                <Select
-                  value={formData.vehicle_type}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, vehicle_type: value }))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select vehicle type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vehicleTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="vehicle_type">Vehicle Type</Label>
+              <Select
+                value={formData.vehicle_type}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, vehicle_type: value }))}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select vehicle type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicleTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div>
-                <Label htmlFor="license_number">Driver's License Number</Label>
-                <Input
-                  id="license_number"
-                  type="text"
-                  value={formData.license_number}
-                  onChange={(e) => setFormData(prev => ({ ...prev, license_number: e.target.value }))}
-                />
-              </div>
+            <div>
+              <Label htmlFor="license_number">Driver's License Number</Label>
+              <Input
+                id="license_number"
+                type="text"
+                value={formData.license_number}
+                onChange={(e) => setFormData(prev => ({ ...prev, license_number: e.target.value }))}
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="availability">Availability</Label>
-                <Select
-                  value={formData.availability}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, availability: value }))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select availability" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availabilityOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="availability">Availability</Label>
+              <Select
+                value={formData.availability}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, availability: value }))}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select availability" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availabilityOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div>
-                <Label htmlFor="experience_years">Years of Delivery Experience</Label>
-                <Input
-                  id="experience_years"
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={formData.experience_years}
-                  onChange={(e) => setFormData(prev => ({ ...prev, experience_years: e.target.value }))}
-                />
-              </div>
+            <div>
+              <Label htmlFor="experience_years">Years of Delivery Experience</Label>
+              <Input
+                id="experience_years"
+                type="number"
+                min="0"
+                max="50"
+                value={formData.experience_years}
+                onChange={(e) => setFormData(prev => ({ ...prev, experience_years: e.target.value }))}
+              />
+            </div>
             </div>
 
             <div>
@@ -283,7 +283,6 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
                 </div>
               ))}
             </div>
-          </div>
           </div>
 
           <div className="border rounded-lg p-4 bg-gray-50">
