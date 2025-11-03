@@ -84,6 +84,34 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
 
           <Separator />
 
+          {/* Products Ordered */}
+          {order.order_items && order.order_items.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3">Products Ordered</h3>
+              <div className="space-y-3">
+                {order.order_items.map((item: any) => (
+                  <div key={item.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    {item.products?.image && (
+                      <img 
+                        src={item.products.image} 
+                        alt={item.products.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-800">{item.products?.name || 'Unknown Product'}</p>
+                      <p className="text-sm text-slate-600">
+                        Quantity: {item.quantity} × ${Number(item.price).toFixed(2)} = ${(item.quantity * Number(item.price)).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
           {/* Order Summary */}
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">

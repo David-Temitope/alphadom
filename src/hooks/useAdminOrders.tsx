@@ -5,9 +5,20 @@ import { Tables } from '@/integrations/supabase/types';
 
 type Order = Tables<'orders'> & {
   profiles?: {
+    id: string;
     full_name: string | null;
     email: string;
   } | null;
+  order_items?: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    products: {
+      id: string;
+      name: string;
+      image: string | null;
+    } | null;
+  }>;
 };
 
 export const useAdminOrders = () => {
@@ -46,10 +57,27 @@ export const useAdminOrders = () => {
       setLoading(true);
       setError(null);
       
-      // First fetch orders
+      // Fetch orders with profiles and order items including products
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          profiles!orders_user_id_fkey (
+            id,
+            full_name,
+            email
+          ),
+          order_items (
+            id,
+            quantity,
+            price,
+            products (
+              id,
+              name,
+              image
+            )
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (ordersError) {
@@ -59,29 +87,7 @@ export const useAdminOrders = () => {
       
       console.log('Orders fetched successfully:', ordersData?.length || 0, 'orders');
       
-      // Then fetch all profiles
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, full_name, email');
-        
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError.message);
-        // Continue without profiles data
-      }
-      
-      // Manually join the data
-      const typedOrders: Order[] = (ordersData || []).map(order => {
-        const profile = profilesData?.find(p => p.id === order.user_id);
-        return {
-          ...order,
-          profiles: profile ? {
-            full_name: profile.full_name,
-            email: profile.email
-          } : null
-        };
-      });
-      
-      setOrders(typedOrders);
+      setOrders(ordersData as any || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load orders';
       setError(errorMessage);

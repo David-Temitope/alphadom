@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVendors } from '@/hooks/useVendors';
 import { useToast } from '@/hooks/use-toast';
-import { Truck, Eye, CheckCircle, Clock, Package } from 'lucide-react';
+import { Truck, CheckCircle, Clock, Package } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -111,17 +110,6 @@ const VendorOrders = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-blue-100 text-blue-800';
-      case 'processing': return 'bg-purple-100 text-purple-800';
-      case 'shipped': return 'bg-green-100 text-green-800';
-      case 'delivered': return 'bg-emerald-100 text-emerald-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   if (!user || !currentVendor) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -148,79 +136,70 @@ const VendorOrders = () => {
           <p className="text-muted-foreground">Manage orders for your products</p>
         </div>
 
-        <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="pending" className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Pending ({pendingOrders.length})
-            </TabsTrigger>
-            <TabsTrigger value="processing" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Processing ({processingOrders.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Completed ({completedOrders.length})
-            </TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Pending Orders
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{pendingOrders.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Processing Orders
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{processingOrders.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Completed Orders
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{completedOrders.length}</div>
+              </CardContent>
+            </Card>
+          </div>
 
-          <TabsContent value="pending" className="space-y-4">
-            {pendingOrders.length === 0 ? (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">All Orders</h2>
+            
+            {loading ? (
               <Card>
                 <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No pending orders</p>
+                  <p className="text-muted-foreground">Loading orders...</p>
+                </CardContent>
+              </Card>
+            ) : orders.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground">No orders found</p>
                 </CardContent>
               </Card>
             ) : (
-              pendingOrders.map((order) => (
+              orders.map((order) => (
                 <OrderCard
                   key={order.id}
                   order={order}
                   onUpdateStatus={updateOrderStatus}
-                  showActions={true}
+                  showActions={order.status === 'pending' || order.status === 'approved'}
                 />
               ))
             )}
-          </TabsContent>
-
-          <TabsContent value="processing" className="space-y-4">
-            {processingOrders.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No processing orders</p>
-                </CardContent>
-              </Card>
-            ) : (
-              processingOrders.map((order) => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  onUpdateStatus={updateOrderStatus}
-                  showActions={order.status === 'approved'}
-                />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="completed" className="space-y-4">
-            {completedOrders.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No completed orders</p>
-                </CardContent>
-              </Card>
-            ) : (
-              completedOrders.map((order) => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  onUpdateStatus={updateOrderStatus}
-                  showActions={false}
-                />
-              ))
-            )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );
