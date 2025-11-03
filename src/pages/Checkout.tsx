@@ -28,7 +28,8 @@ const Checkout = () => {
     city: '',
     state: '',
     zipCode: '',
-    country: 'US'
+    country: 'US',
+    phone: ''
   });
   
   const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
@@ -146,10 +147,10 @@ const Checkout = () => {
   const handlePlaceOrder = async () => {
     if (!user) return;
 
-    if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
+    if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode || !shippingInfo.phone) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all shipping details",
+        description: "Please fill in all shipping details including phone number",
         variant: "destructive",
       });
       return;
@@ -355,6 +356,18 @@ const Checkout = () => {
                     value={shippingInfo.zipCode}
                     onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
                     placeholder="12345"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={shippingInfo.phone}
+                    onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
+                    placeholder="+1 (555) 123-4567"
+                    required
                   />
                 </div>
               </CardContent>

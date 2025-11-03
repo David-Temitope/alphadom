@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { OrderDetailsDialog } from '@/components/admin/OrderDetailsDialog';
 import {
   Table,
   TableBody,
@@ -28,6 +29,8 @@ const AdminOrders = () => {
   const { orders, loading, error, updateOrderStatus } = useAdminOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
   console.log('AdminOrders render - orders:', orders, 'loading:', loading, 'error:', error);
@@ -237,7 +240,15 @@ const AdminOrders = () => {
                         <TableCell>{getPaymentBadge(order.payment_status || 'pending')}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm" className="border-slate-200 hover:bg-slate-50">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="border-slate-200 hover:bg-slate-50"
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setDialogOpen(true);
+                              }}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Select 
@@ -266,6 +277,12 @@ const AdminOrders = () => {
           </CardContent>
         </Card>
       </div>
+      
+      <OrderDetailsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        order={selectedOrder}
+      />
     </AdminLayout>
   );
 };
