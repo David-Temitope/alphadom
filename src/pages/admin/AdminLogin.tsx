@@ -18,7 +18,7 @@ const AdminLogin = () => {
   const { admin, login } = useAdmin();
   const location = useLocation();
   
-  const from = location.state?.from?.pathname || '/admin';
+  const from = location.state?.from?.pathname || '/appleisgood';
 
   if (admin) {
     return <Navigate to={from} replace />;
