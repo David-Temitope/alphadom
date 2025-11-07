@@ -63,7 +63,7 @@ const VendorOrders = () => {
               vendor_user_id
             )
           ),
-          profiles!orders_user_id_fkey (
+          profiles:orders_user_id_fkey (
             full_name,
             email
           )

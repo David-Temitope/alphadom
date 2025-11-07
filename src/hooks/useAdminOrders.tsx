@@ -62,7 +62,7 @@ export const useAdminOrders = () => {
         .from('orders')
         .select(`
           *,
-          profiles!orders_user_id_fkey (
+          profiles:orders_user_id_fkey (
             id,
             full_name,
             email
