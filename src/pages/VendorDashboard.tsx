@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { VendorProductForm } from '@/components/VendorProductForm';
 
 const VendorDashboard = () => {
+  const navigate = useNavigate();
   const { currentVendor, isVendor } = useVendors();
   const { products, refreshProducts } = useProducts();
   const { user } = useAuth();
@@ -202,7 +204,7 @@ const VendorDashboard = () => {
                 <CardDescription>View and manage orders for your products</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => window.open('/vendor-orders', '_blank')}>
+                <Button onClick={() => navigate('/vendor-orders')}>
                   <FileText className="h-4 w-4 mr-2" />
                   View All Orders
                 </Button>
