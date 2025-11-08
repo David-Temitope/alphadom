@@ -44,7 +44,7 @@ const About = () => {
       name: "Obasa David Temitope",
       role: "CEO & Founder",
       bio: "Junior Developer, passionate about sustainable living.",
-      image: "https://ibb.co/PvHV2QCK"
+      image: "hhttps://i.ibb.co/Mx0Jz6Nr/Whats-App-Image-2025-11-08-at-11-25-02-3e7eba83.jpg"
     },
     {
       name: "Michael",
