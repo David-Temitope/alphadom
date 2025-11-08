@@ -76,6 +76,23 @@ export const useOrders = () => {
     if (!user) throw new Error('User not authenticated');
 
     try {
+      // Get vendor info from the first product (assuming single vendor orders)
+      let vendorId = null;
+      let vendorOwnerId = null;
+      
+      if (orderData.items.length > 0) {
+        const { data: product } = await supabase
+          .from('products')
+          .select('vendor_id, vendor_user_id')
+          .eq('id', orderData.items[0].product_id)
+          .single();
+        
+        if (product) {
+          vendorId = product.vendor_id;
+          vendorOwnerId = product.vendor_user_id;
+        }
+      }
+
       // Create the order
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -85,7 +102,9 @@ export const useOrders = () => {
           shipping_address: orderData.shipping_address,
           payment_method: orderData.payment_method,
           status: 'pending',
-          payment_status: 'pending'
+          payment_status: 'pending',
+          vendor_id: vendorId,
+          vendor_owner_id: vendorOwnerId
         })
         .select()
         .single();

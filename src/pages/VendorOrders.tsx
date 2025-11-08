@@ -50,7 +50,7 @@ const VendorOrders = () => {
     if (!currentVendor) return;
 
     try {
-      // Get all orders with bank transfer payment
+      // Get all orders for this vendor's products
       const { data: orderData, error } = await supabase
         .from('orders')
         .select(`
@@ -68,8 +68,8 @@ const VendorOrders = () => {
             email
           )
         `)
-        .eq('payment_method', 'bank_transfer')
-        .eq('order_items.products.vendor_user_id', user?.id);
+        .eq('order_items.products.vendor_user_id', user?.id)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
