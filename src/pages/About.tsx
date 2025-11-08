@@ -4,8 +4,56 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useAboutStats } from "@/hooks/useAboutStats";
+import { useEffect } from "react";
 
 const About = () => {
+  // Set page-specific SEO
+  useEffect(() => {
+    document.title = "About Alphadom - Meet Our Team | Obasa David Temitope, CEO";
+    
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", "Learn about Alphadom and our mission to provide quality products across Nigeria. Meet our founder Obasa David Temitope and our dedicated team of product enthusiasts.");
+    }
+    
+    // Add structured data for the team
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "mainEntity": {
+        "@type": "Organization",
+        "name": "Alphadom",
+        "founder": {
+          "@type": "Person",
+          "name": "Obasa David Temitope",
+          "jobTitle": "CEO & Founder",
+          "image": "https://i.ibb.co/Mx0Jz6Nr/Whats-App-Image-2025-11-08-at-11-25-02-3e7eba83.jpg",
+          "description": "Junior Developer, passionate about sustainable living and bringing quality products to Nigeria"
+        },
+        "employee": [
+          {
+            "@type": "Person",
+            "name": "Michael",
+            "jobTitle": "Head of Sustainability",
+            "description": "Former environmental consultant with 15+ years of experience in green technologies"
+          },
+          {
+            "@type": "Person",
+            "name": "Emma Forest",
+            "jobTitle": "Product Manager",
+            "description": "Product expert specializing in eco-friendly materials and sustainable manufacturing"
+          }
+        ]
+      }
+    });
+    document.head.appendChild(script);
+    
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
   const { settings } = useAdminSettings();
   const { stats: liveStats, loading: statsLoading } = useAboutStats();
   
