@@ -92,9 +92,9 @@ const Auth = () => {
           <div className="mx-auto w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
             <Leaf className="h-6 w-6 text-white" />
           </div>
-          <CardTitle className="text-2xl">Welcome to EcoMart</CardTitle>
+          <CardTitle className="text-2xl">Welcome to Alphadom</CardTitle>
           <CardDescription>
-            Your sustainable marketplace for eco-friendly products
+            Your reliable online marketplace
           </CardDescription>
         </CardHeader>
         <CardContent>

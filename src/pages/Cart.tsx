@@ -18,7 +18,7 @@ const Cart = () => {
               <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-6" />
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
               <p className="text-gray-600 mb-8">
-                Looks like you haven't added any sustainable products yet. Start shopping to make a positive impact!
+                Looks like you haven't added any products yet. Start shopping to make a positive impact!
               </p>
               <Link to="/products">
                 <Button size="lg" className="bg-green-600 hover:bg-green-700">
@@ -38,7 +38,7 @@ const Cart = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-          <p className="text-gray-600">Review your eco-friendly selections</p>
+          <p className="text-gray-600">Review your product selections</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -190,7 +190,7 @@ const Cart = () => {
                 {/* Security Features */}
                 <div className="text-xs text-gray-500 space-y-1 pt-4 border-t border-gray-200">
                   <p>✓ Secure checkout with SSL encryption</p>
-                  <p>✓ 30-day return policy</p>
+                  <p>✓ 7-day return policy</p>
                   <p>✓ Carbon-neutral shipping included</p>
                 </div>
               </CardContent>

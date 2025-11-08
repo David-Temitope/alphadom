@@ -68,7 +68,7 @@ const Terms = () => {
                 <li>All transactions are processed through our secure payment system</li>
                 <li>Vendors are responsible for applicable taxes on their sales</li>
                 <li>Platform commission rates are clearly stated during registration</li>
-                <li>Refunds and returns are subject to individual vendor policies</li>
+                <li>Refunds and returns are subject to individual vendor policies. We connect buyers and sellers through our secure online platform. Products are listed and fulfilled directly by independent vendors.</li>
                 <li>Payment processing fees may apply to transactions</li>
               </ul>
             </section>
@@ -100,9 +100,8 @@ const Terms = () => {
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Quality or condition of products sold</li>
-                <li>Disputes between users</li>
+                <li>Disputes between customers and vendors</li>
                 <li>Loss or damage during delivery</li>
-                <li>Payment issues between parties</li>
               </ul>
             </section>
 

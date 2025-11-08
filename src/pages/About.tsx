@@ -41,13 +41,13 @@ const About = () => {
 
   const team = [
     {
-      name: "Sarah Green",
+      name: "Obasa David Temitope",
       role: "CEO & Founder",
-      bio: "Environmental scientist turned entrepreneur, passionate about sustainable living.",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face"
+      bio: "Junior Developer, passionate about sustainable living.",
+      image: "https://www.facebook.com/share/1FWgVEDJnd/"
     },
     {
-      name: "Michael Eco",
+      name: "Michael",
       role: "Head of Sustainability",
       bio: "Former environmental consultant with 15+ years of experience in green technologies.",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"

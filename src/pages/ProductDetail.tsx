@@ -173,7 +173,7 @@ const ProductDetail = () => {
                 </div>
                 {hasDiscount && (
                   <p className="text-sm text-green-600 font-medium">
-                    You save: ${(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
+                    You save: NGN{(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
                   </p>
                 )}
               </div>

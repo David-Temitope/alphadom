@@ -275,7 +275,7 @@ const Checkout = () => {
                       </div>
                       {hasShipping && (
                         <div className="text-xs text-muted-foreground ml-15">
-                          Shipping: ${shippingFee} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
+                          Shipping: NGN{shippingFee} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
                         </div>
                       )}
                     </div>
@@ -300,7 +300,7 @@ const Checkout = () => {
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${orderTotals.total.toFixed(2)}</span>
+                    <span>NGN{orderTotals.total.toFixed(2)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -413,7 +413,7 @@ const Checkout = () => {
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground mt-2">
-                        Please include your order ID in the transfer description
+                        Please include the product name in the transfer description
                       </p>
                     </div>
                     

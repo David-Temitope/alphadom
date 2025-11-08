@@ -17,19 +17,19 @@ const Contact = () => {
     {
       icon: Mail,
       title: "Email Us",
-      details: "hello@ecomart.com",
+      details: "alphadominity@gmail.com",
       subtext: "We respond within 24 hours"
     },
     {
       icon: Phone,
       title: "Call Us",
-      details: "+1 (555) 123-4567",
+      details: "+234 8105 546 777",
       subtext: "Mon-Fri, 9AM-6PM PST"
     },
     {
       icon: MapPin,
-      title: "Visit Us",
-      details: "123 Green Street, San Francisco, CA 94102",
+      title: "Where Are We?",
+      details: "Serving customers globally from Abuja, Nigeria",
       subtext: "By appointment only"
     },
     {
@@ -42,20 +42,20 @@ const Contact = () => {
 
   const faqs = [
     {
-      question: "How do you ensure products are truly sustainable?",
-      answer: "We have a rigorous 10-point sustainability assessment that evaluates materials, manufacturing, packaging, and supply chain ethics."
+      question: "How do I start selling on this platform?",
+      answer: "To start selling on this platform you need to first create a vendor account from the User Type page, wait for approval and then pay for online store."
     },
     {
-      question: "What is your return policy?",
-      answer: "We offer a 30-day return policy for all products. Items must be in original condition with eco-friendly packaging intact."
+      question: "Is it safe to buy from sellers here?",
+      answer: "Yes. Every vendor is verified before they can sell and customers are secured with our 7 days return policy. In case you have a issue with one of our vendors, please do well by reporting through our email."
     },
     {
-      question: "How is shipping carbon-neutral?",
-      answer: "We partner with certified carbon offset programs and use eco-friendly packaging materials for all our shipments."
+      question: "Do I need to have a registered business before joining?",
+      answer: "Not necessarily. This platform is created for people who just started their business and looking for online awareness. However, having proper registeration helps build customers trust."
     },
     {
-      question: "Do you offer bulk discounts?",
-      answer: "Yes! We offer special pricing for bulk orders over $500. Contact us for a custom quote."
+      question: "What fee or commissions does the platform charge?",
+      answer: "We charge rental fee to users who wants to be vendor, and also small commission on every sale to help maintain the platform and provide secure service."
     }
   ];
 
