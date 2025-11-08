@@ -78,18 +78,16 @@ export const useOrders = () => {
     try {
       // Get vendor info from the first product (assuming single vendor orders)
       let vendorId = null;
-      let vendorOwnerId = null;
       
       if (orderData.items.length > 0) {
         const { data: product } = await supabase
           .from('products')
-          .select('vendor_id, vendor_user_id')
+          .select('vendor_id')
           .eq('id', orderData.items[0].product_id)
           .single();
         
         if (product) {
           vendorId = product.vendor_id;
-          vendorOwnerId = product.vendor_user_id;
         }
       }
 
@@ -103,8 +101,7 @@ export const useOrders = () => {
           payment_method: orderData.payment_method,
           status: 'pending',
           payment_status: 'pending',
-          vendor_id: vendorId,
-          vendor_owner_id: vendorOwnerId
+          vendor_id: vendorId
         })
         .select()
         .single();
