@@ -32,7 +32,7 @@ const AdminLogin = () => {
     const success = await login(email, password);
     
     if (!success) {
-      setError('Invalid credentials. Use admin@ecomart.com / admin123');
+      setError('Invalid credentials.');
     }
     
     setIsLoading(false);
@@ -59,7 +59,7 @@ const AdminLogin = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@ecomart.com"
+                placeholder="example@gmail.com"
                 required
               />
             </div>
