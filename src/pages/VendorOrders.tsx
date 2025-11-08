@@ -50,17 +50,16 @@ const VendorOrders = () => {
     if (!currentVendor) return;
 
     try {
-      // Get all orders for this vendor's products
+      // Get all orders for this vendor
       const { data: orderData, error } = await supabase
         .from('orders')
         .select(`
           *,
-          order_items!inner (
+          order_items (
             *,
-            products!inner (
+            products (
               name,
-              image,
-              vendor_user_id
+              image
             )
           ),
           profiles:orders_user_id_fkey (
@@ -68,7 +67,7 @@ const VendorOrders = () => {
             email
           )
         `)
-        .eq('order_items.products.vendor_user_id', user?.id)
+        .eq('vendor_id', currentVendor.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
