@@ -47,7 +47,7 @@ const AdminLogin = () => {
           </div>
           <CardTitle className="text-2xl">Admin Login</CardTitle>
           <CardDescription>
-            Access the EcoMart admin dashboard
+            Access the Alphadom admin dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
