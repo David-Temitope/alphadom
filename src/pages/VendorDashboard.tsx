@@ -25,23 +25,46 @@ const VendorDashboard = () => {
   // Product addition is now handled by VendorProductForm component
 
   const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
     try {
-      const { error } = await supabase
+      // Get product details first to delete image
+      const { data: product } = await supabase
+        .from('products')
+        .select('image')
+        .eq('id', productId)
+        .single();
+
+      // Delete product from database
+      const { error: deleteError } = await supabase
         .from('products')
         .delete()
         .eq('id', productId);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
+
+      // Try to delete image if it exists
+      if (product?.image) {
+        const imagePath = product.image.split('/').pop();
+        if (imagePath) {
+          await supabase.storage
+            .from('product-images')
+            .remove([imagePath]);
+        }
+      }
 
       toast({
         title: "Success",
         description: "Product deleted successfully",
       });
+      
+      // Refresh products list
       refreshProducts();
     } catch (error: any) {
+      console.error('Error deleting product:', error);
       toast({
         title: "Error",
-        description: "Failed to delete product",
+        description: error.message || "Failed to delete product",
         variant: "destructive",
       });
     }

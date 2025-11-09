@@ -59,9 +59,16 @@ export const Pilots = () => {
       // Fetch vendor info
       const { data: vendors, error: vendorsError } = await supabase
         .from('approved_vendors')
-        .select('user_id, store_name, product_category, total_products');
+        .select('id, user_id, store_name, product_category, total_products');
 
       if (vendorsError) throw vendorsError;
+
+      // Fetch actual product counts for each vendor
+      const { data: allProducts, error: productsError } = await supabase
+        .from('products')
+        .select('vendor_id');
+
+      if (productsError) throw productsError;
 
       // Fetch dispatcher info
       const { data: dispatchers, error: dispatchersError } = await supabase
@@ -85,6 +92,10 @@ export const Pilots = () => {
         const vendorInfo = vendors?.find(v => v.user_id === profile.id);
         const dispatcherInfo = dispatchers?.find(d => d.user_id === profile.id);
         
+        // Count actual products for this vendor
+        const actualProductCount = vendorInfo ? 
+          allProducts?.filter(p => p.vendor_id === vendorInfo.id).length || 0 : 0;
+        
         const userLikes = likes?.filter(l => l.liked_user_id === profile.id) || [];
         const isLikedByCurrentUser = user ? userLikes.some(l => l.liker_id === user.id) : false;
         const customerCount = getCustomerCount(profile.id);
@@ -98,7 +109,7 @@ export const Pilots = () => {
           vendor_info: vendorInfo ? {
             store_name: vendorInfo.store_name,
             product_category: vendorInfo.product_category,
-            total_products: vendorInfo.total_products,
+            total_products: actualProductCount,
             rating: 4.5 // Mock rating for now
           } : undefined,
           dispatcher_info: dispatcherInfo ? {
