@@ -91,6 +91,25 @@ export const useAdminProducts = () => {
     try {
       console.log('Starting product deletion process for:', productId);
       
+      // Check if product has any orders
+      const { data: orderItems, error: checkError } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('product_id', productId)
+        .limit(1);
+
+      if (checkError) {
+        console.error('Error checking product orders:', checkError);
+        throw checkError;
+      }
+
+      if (orderItems && orderItems.length > 0) {
+        return { 
+          success: false, 
+          error: 'This product has existing orders and cannot be deleted. You can mark it as out of stock instead.' 
+        };
+      }
+      
       // First get the product to check if it has an image
       const { data: product, error: fetchError } = await supabase
         .from('products')

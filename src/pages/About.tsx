@@ -58,7 +58,7 @@ const About = () => {
   const { stats: liveStats, loading: statsLoading } = useAboutStats();
   
   const stats = [
-    { label: "Products Sold", value: statsLoading ? "..." : liveStats.productsSold.toLocaleString() },
+    { label: "Products On Sell", value: statsLoading ? "..." : liveStats.productsOnSell.toLocaleString() },
     { label: "Users", value: statsLoading ? "..." : liveStats.users.toLocaleString() },
     { label: "Workers", value: statsLoading ? "..." : liveStats.workers.toLocaleString() },
     { label: "Happy Customers", value: statsLoading ? "..." : liveStats.happyCustomers.toLocaleString() },

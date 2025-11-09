@@ -28,6 +28,24 @@ const VendorDashboard = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
     
     try {
+      // Check if product has any orders
+      const { data: orderItems, error: checkError } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('product_id', productId)
+        .limit(1);
+
+      if (checkError) throw checkError;
+
+      if (orderItems && orderItems.length > 0) {
+        toast({
+          title: "Cannot Delete Product",
+          description: "This product has existing orders and cannot be deleted. You can mark it as out of stock instead.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Get product details first to delete image
       const { data: product } = await supabase
         .from('products')
