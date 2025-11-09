@@ -53,7 +53,7 @@ export const VendorProfile = () => {
         .from('approved_vendors')
         .select(`
           *,
-          profiles!approved_vendors_user_id_fkey(full_name, avatar_url, email)
+          profiles(full_name, avatar_url, email)
         `)
         .eq('user_id', vendorId)
         .maybeSingle();
