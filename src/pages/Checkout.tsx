@@ -117,7 +117,7 @@ const Checkout = () => {
       totalShipping = subtotal * 0.05;
     }
     
-    const tax = subtotal * 0.08;
+    const tax = subtotal * 0.03; // Reduced to 3%
     setOrderTotals({
       subtotal,
       shipping: totalShipping,
@@ -183,6 +183,9 @@ const Checkout = () => {
 
       const { order, error } = await createOrder({
         total_amount: orderTotals.total,
+        subtotal: orderTotals.subtotal,
+        shipping_cost: orderTotals.shipping,
+        tax_amount: orderTotals.tax,
         shipping_address: shippingInfo,
         payment_method: paymentMethod,
         items: orderItems
@@ -193,9 +196,6 @@ const Checkout = () => {
       // Update order with payment details and receipt
       if (order) {
         const updateData: any = {
-          subtotal: orderTotals.subtotal,
-          shipping_cost: orderTotals.shipping,
-          tax_amount: orderTotals.tax,
           payment_status: paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
           status: paymentMethod === 'bank_transfer' ? 'pending' : 'processing'
         };
@@ -271,11 +271,11 @@ const Checkout = () => {
                             <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                           </div>
                         </div>
-                        <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
                       </div>
                       {hasShipping && (
                         <div className="text-xs text-muted-foreground ml-15">
-                          Shipping: NGN{shippingFee} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
+                          Shipping: ₦{shippingFee.toLocaleString()} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
                         </div>
                       )}
                     </div>
@@ -287,20 +287,20 @@ const Checkout = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${orderTotals.subtotal.toFixed(2)}</span>
+                    <span>₦{orderTotals.subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span>{orderTotals.shipping === 0 ? 'FREE' : `$${orderTotals.shipping.toFixed(2)}`}</span>
+                    <span>{orderTotals.shipping === 0 ? 'FREE' : `₦${orderTotals.shipping.toLocaleString()}`}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax</span>
-                    <span>${orderTotals.tax.toFixed(2)}</span>
+                    <span>Tax (3%)</span>
+                    <span>₦{orderTotals.tax.toLocaleString()}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>NGN{orderTotals.total.toFixed(2)}</span>
+                    <span>₦{orderTotals.total.toLocaleString()}</span>
                   </div>
                 </div>
               </CardContent>
@@ -459,7 +459,7 @@ const Checkout = () => {
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Place Order - ${orderTotals.total.toFixed(2)}
+                  Place Order - ₦{orderTotals.total.toLocaleString()}
                 </>
               )}
             </Button>

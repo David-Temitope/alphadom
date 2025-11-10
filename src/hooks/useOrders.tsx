@@ -65,6 +65,9 @@ export const useOrders = () => {
 
   const createOrder = async (orderData: {
     total_amount: number;
+    subtotal?: number;
+    shipping_cost?: number;
+    tax_amount?: number;
     shipping_address: any;
     payment_method: string;
     items: Array<{
@@ -91,12 +94,15 @@ export const useOrders = () => {
         }
       }
 
-      // Create the order
+      // Create the order with all details
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
           user_id: user.id,
           total_amount: orderData.total_amount,
+          subtotal: orderData.subtotal || orderData.total_amount,
+          shipping_cost: orderData.shipping_cost || 0,
+          tax_amount: orderData.tax_amount || 0,
           shipping_address: orderData.shipping_address,
           payment_method: orderData.payment_method,
           status: 'pending',

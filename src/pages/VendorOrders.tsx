@@ -6,13 +6,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVendors } from '@/hooks/useVendors';
 import { useToast } from '@/hooks/use-toast';
-import { Truck, CheckCircle, Clock, Package } from 'lucide-react';
+import { Truck, CheckCircle, Clock, Package, Users } from 'lucide-react';
 
 interface Order {
   id: string;
   user_id: string;
   total_amount: number;
+  subtotal?: number;
+  shipping_cost?: number;
+  tax_amount?: number;
   status: string;
+  payment_status?: string;
   payment_method: string;
   receipt_image?: string;
   shipping_address: any;
@@ -30,6 +34,7 @@ interface Order {
   profiles: {
     full_name: string;
     email: string;
+    avatar_url?: string;
   } | null;
 }
 
@@ -59,12 +64,9 @@ const VendorOrders = () => {
             *,
             products (
               name,
-              image
+              image,
+              shipping_fee
             )
-          ),
-          profiles:orders_user_id_fkey (
-            full_name,
-            email
           )
         `)
         .eq('vendor_id', currentVendor.id)
@@ -72,7 +74,23 @@ const VendorOrders = () => {
 
       if (error) throw error;
 
-      setOrders(orderData as any || []);
+      // Fetch profile data for each order
+      const ordersWithProfiles = await Promise.all(
+        (orderData || []).map(async (order) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('full_name, email, avatar_url')
+            .eq('id', order.user_id)
+            .single();
+
+          return {
+            ...order,
+            profiles: profileData
+          };
+        })
+      );
+
+      setOrders(ordersWithProfiles as any || []);
     } catch (error) {
       console.error('Error fetching vendor orders:', error);
       toast({
@@ -225,11 +243,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
-            <CardDescription>
-              Customer: {order.profiles?.full_name || order.profiles?.email}
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div className="flex-1">
+            <CardTitle className="text-lg mb-2">Order #{order.id.slice(0, 8)}</CardTitle>
+            <CardDescription className="space-y-1">
+              <div className="flex items-center gap-2">
+                {order.profiles?.avatar_url && (
+                  <img src={order.profiles.avatar_url} alt="" className="w-6 h-6 rounded-full" />
+                )}
+                <span>Customer: {order.profiles?.full_name || order.profiles?.email}</span>
+              </div>
             </CardDescription>
           </div>
           <Badge className={getStatusColor(order.status)}>
@@ -237,42 +260,54 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-semibold mb-2">Order Details</h4>
-            <p className="text-sm text-muted-foreground">Total: ${order.total_amount}</p>
-            <p className="text-sm text-muted-foreground">Date: {new Date(order.created_at).toLocaleDateString()}</p>
-            <p className="text-sm text-muted-foreground">Payment: {order.payment_method.replace('_', ' ')}</p>
-          </div>
-          
-          {order.receipt_image && (
+      <CardContent className="space-y-6">
+        {/* Customer Information */}
+        <div className="border-b pb-4">
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Customer Information
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
             <div>
-              <h4 className="font-semibold mb-2">Payment Receipt</h4>
-              <img 
-                src={order.receipt_image} 
-                alt="Payment receipt" 
-                className="w-32 h-32 object-cover rounded border cursor-pointer"
-                onClick={() => window.open(order.receipt_image, '_blank')}
-              />
+              <span className="text-muted-foreground">Name: </span>
+              <span className="font-medium">{order.profiles?.full_name || 'N/A'}</span>
             </div>
-          )}
+            <div>
+              <span className="text-muted-foreground">Email: </span>
+              <span className="font-medium">{order.profiles?.email}</span>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <h4 className="font-semibold mb-2">Products</h4>
-          <div className="space-y-2">
+        {/* Shipping Address */}
+        {order.shipping_address && (
+          <div className="border-b pb-4">
+            <h4 className="font-semibold mb-3">Shipping Address</h4>
+            <div className="text-sm space-y-1">
+              <p>{order.shipping_address.street}</p>
+              <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zipCode}</p>
+              {order.shipping_address.phone && (
+                <p className="text-muted-foreground">Phone: {order.shipping_address.phone}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Products Ordered */}
+        <div className="border-b pb-4">
+          <h4 className="font-semibold mb-3">Products Ordered</h4>
+          <div className="space-y-3">
             {order.order_items?.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 p-2 bg-muted rounded">
+              <div key={item.id} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
                 <img 
                   src={item.products?.image} 
                   alt={item.products?.name}
-                  className="w-12 h-12 object-cover rounded"
+                  className="w-16 h-16 object-cover rounded"
                 />
-                <div className="flex-1">
-                  <p className="font-medium">{item.products?.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Qty: {item.quantity} × ${item.price} = ${(item.quantity * item.price).toFixed(2)}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{item.products?.name}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Quantity: {item.quantity} × ₦{Number(item.price).toLocaleString()} = ₦{(item.quantity * Number(item.price)).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -280,12 +315,72 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           </div>
         </div>
 
-        {order.shipping_address && (
+        {/* Order Summary */}
+        <div className="border-b pb-4">
+          <h4 className="font-semibold mb-3">Order Summary</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Subtotal:</span>
+              <span>₦{Number(order.subtotal || order.total_amount).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Shipping:</span>
+              <span>
+                {order.shipping_cost && Number(order.shipping_cost) > 0 
+                  ? `₦${Number(order.shipping_cost).toLocaleString()}`
+                  : 'Free'}
+              </span>
+            </div>
+            {order.tax_amount !== undefined && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tax:</span>
+                <span>₦{Number(order.tax_amount).toLocaleString()}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-base pt-2 border-t">
+              <span>Total:</span>
+              <span>₦{Number(order.total_amount).toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Order Status */}
+        <div className="border-b pb-4">
+          <h4 className="font-semibold mb-3">Order Status</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <span className="text-muted-foreground">Status: </span>
+              <Badge className={getStatusColor(order.status)}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </Badge>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Payment Status: </span>
+              <Badge variant={order.payment_status === 'paid' ? 'default' : 'outline'}>
+                {order.payment_status || 'Pending'}
+              </Badge>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Payment Method: </span>
+              <span className="font-medium">{order.payment_method.replace('_', ' ')}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Order Date: </span>
+              <span className="font-medium">{new Date(order.created_at).toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Receipt */}
+        {order.receipt_image && (
           <div>
-            <h4 className="font-semibold mb-2">Shipping Address</h4>
-            <p className="text-sm text-muted-foreground">
-              {order.shipping_address.street}, {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zipCode}
-            </p>
+            <h4 className="font-semibold mb-3">Payment Receipt</h4>
+            <img 
+              src={order.receipt_image} 
+              alt="Payment receipt" 
+              className="max-w-xs h-auto object-contain rounded border cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => window.open(order.receipt_image, '_blank')}
+            />
           </div>
         )}
 

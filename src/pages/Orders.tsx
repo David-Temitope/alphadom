@@ -100,7 +100,7 @@ const Orders = () => {
                         </span>
                         <span className="flex items-center gap-1">
                           <CreditCard className="h-4 w-4" />
-                          ${Number(order.total_amount).toFixed(2)}
+                          ₦{Number(order.total_amount).toLocaleString()}
                         </span>
                       </CardDescription>
                     </div>

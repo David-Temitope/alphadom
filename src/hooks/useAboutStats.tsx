@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const useAboutStats = () => {
   const [stats, setStats] = useState({
-    productsSold: 0,
+    productsOnSell: 0,
     users: 0,
     workers: 0,
     happyCustomers: 0,
@@ -12,11 +12,10 @@ export const useAboutStats = () => {
 
   const fetchStats = async () => {
     try {
-      // Get total products sold from orders
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('status', 'delivered');
+      // Get total products listed on the platform
+      const { data: products } = await supabase
+        .from('products')
+        .select('id');
 
       // Get total users
       const { data: profiles } = await supabase
@@ -54,7 +53,7 @@ export const useAboutStats = () => {
       ]);
 
       setStats({
-        productsSold: orders?.length || 0,
+        productsOnSell: products?.length || 0,
         users: profiles?.length || 0,
         workers: (vendors?.length || 0) + (dispatchers?.length || 0),
         happyCustomers: uniqueHappyCustomers.size,

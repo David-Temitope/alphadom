@@ -12,6 +12,7 @@ import { LikeButton } from '@/components/LikeButton';
 import { ProductCard } from '@/components/ProductCard';
 import { ProductComments } from '@/components/ProductComments';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   ShoppingCart, 
   Leaf, 
@@ -19,7 +20,8 @@ import {
   Truck, 
   Shield, 
   RotateCcw,
-  ArrowLeft
+  ArrowLeft,
+  Share2
 } from 'lucide-react';
 
 const ProductDetail = () => {
@@ -28,6 +30,7 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [vendorStoreName, setVendorStoreName] = useState<string | null>(null);
 
   const product = products.find(p => p.id === id);
   const similarProducts = products
@@ -38,6 +41,24 @@ const ProductDetail = () => {
   const hasDiscount = product?.has_discount && product?.discount_percentage && product?.original_price;
   const discountPercentage = hasDiscount ? product.discount_percentage : 0;
   const originalPrice = hasDiscount ? product.original_price : 0;
+
+  // Fetch vendor store name
+  useEffect(() => {
+    const fetchVendorName = async () => {
+      if (product?.vendor_id) {
+        const { data } = await supabase
+          .from('approved_vendors')
+          .select('store_name')
+          .eq('id', product.vendor_id)
+          .maybeSingle();
+        
+        if (data) {
+          setVendorStoreName(data.store_name);
+        }
+      }
+    };
+    fetchVendorName();
+  }, [product?.vendor_id]);
 
   const handleAddToCart = () => {
     if (product && (product.stock_count || 0) > 0) {
@@ -54,6 +75,33 @@ const ProductDetail = () => {
         description: "This product is currently out of stock.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: product?.name,
+      text: `Check out ${product?.name} on Alphadom!`,
+      url: shareUrl
+    };
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        toast({
+          title: "Shared successfully",
+          description: "Product link shared!",
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: "Link copied",
+          description: "Product link copied to clipboard!",
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
     }
   };
 
@@ -163,17 +211,17 @@ const ProductDetail = () => {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3 mb-2">
                   <span className={`text-3xl lg:text-4xl font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
-                    ${product.price.toFixed(2)}
+                    ₦{product.price.toLocaleString()}
                   </span>
                   {hasDiscount && (
                     <span className="text-lg text-muted-foreground line-through">
-                      ${originalPrice.toFixed(2)}
+                      ₦{originalPrice.toLocaleString()}
                     </span>
                   )}
                 </div>
                 {hasDiscount && (
                   <p className="text-sm text-green-600 font-medium">
-                    You save: NGN{(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
+                    You save: ₦{(originalPrice - product.price).toLocaleString()} ({discountPercentage}%)
                   </p>
                 )}
               </div>
@@ -190,7 +238,7 @@ const ProductDetail = () => {
                   <span className="font-semibold">Product From: </span>
                   {product.vendor_user_id ? (
                     <Link to={`/vendor/${product.vendor_user_id}`} className="text-primary hover:underline">
-                      Vendor
+                      {vendorStoreName || 'Vendor'}
                     </Link>
                   ) : (
                     <span className="text-primary font-semibold">Alphadom</span>
@@ -263,6 +311,10 @@ const ProductDetail = () => {
                 <div className="flex gap-3 justify-center">
                   <WishlistButton productId={product.id} size="lg" className="flex-1 h-11" />
                   <LikeButton productId={product.id} size="lg" className="flex-1 h-11" />
+                  <Button onClick={handleShare} variant="outline" size="lg" className="flex-1 h-11">
+                    <Share2 className="w-5 h-5 mr-2" />
+                    Share
+                  </Button>
                 </div>
               </div>
             </div>
@@ -272,7 +324,7 @@ const ProductDetail = () => {
               <div className="text-center">
                 <Truck className="w-8 h-8 mx-auto mb-2 text-primary" />
                 <p className="text-sm font-medium">Free Shipping</p>
-                <p className="text-xs text-muted-foreground">On orders less than NGN5000</p>
+                <p className="text-xs text-muted-foreground">On orders less than ₦5000</p>
               </div>
               <div className="text-center">
                 <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />

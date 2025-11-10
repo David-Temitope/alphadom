@@ -126,11 +126,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="mt-auto">
             <div className="flex items-baseline gap-2 mb-1">
               <span className={`text-lg font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
-                ${product.price.toFixed(2)}
+                ₦{product.price.toLocaleString()}
               </span>
               {hasDiscount && (
                 <span className="text-sm text-muted-foreground line-through">
-                  ${originalPrice.toFixed(2)}
+                  ₦{originalPrice.toLocaleString()}
                 </span>
               )}
             </div>
