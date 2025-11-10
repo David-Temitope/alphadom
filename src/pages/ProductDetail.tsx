@@ -211,17 +211,17 @@ const ProductDetail = () => {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3 mb-2">
                   <span className={`text-3xl lg:text-4xl font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
-                    ${product.price.toFixed(2)}
+                    ₦{product.price.toLocaleString()}
                   </span>
                   {hasDiscount && (
                     <span className="text-lg text-muted-foreground line-through">
-                      ${originalPrice.toFixed(2)}
+                      ₦{originalPrice.toLocaleString()}
                     </span>
                   )}
                 </div>
                 {hasDiscount && (
                   <p className="text-sm text-green-600 font-medium">
-                    You save: NGN{(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
+                    You save: ₦{(originalPrice - product.price).toLocaleString()} ({discountPercentage}%)
                   </p>
                 )}
               </div>
@@ -324,7 +324,7 @@ const ProductDetail = () => {
               <div className="text-center">
                 <Truck className="w-8 h-8 mx-auto mb-2 text-primary" />
                 <p className="text-sm font-medium">Free Shipping</p>
-                <p className="text-xs text-muted-foreground">On orders less than NGN5000</p>
+                <p className="text-xs text-muted-foreground">On orders less than ₦5000</p>
               </div>
               <div className="text-center">
                 <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />
