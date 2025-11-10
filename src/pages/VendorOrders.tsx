@@ -64,12 +64,9 @@ const VendorOrders = () => {
             *,
             products (
               name,
-              image
+              image,
+              shipping_fee
             )
-          ),
-          profiles:orders_user_id_fkey (
-            full_name,
-            email
           )
         `)
         .eq('vendor_id', currentVendor.id)
@@ -77,7 +74,23 @@ const VendorOrders = () => {
 
       if (error) throw error;
 
-      setOrders(orderData as any || []);
+      // Fetch profile data for each order
+      const ordersWithProfiles = await Promise.all(
+        (orderData || []).map(async (order) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('full_name, email, avatar_url')
+            .eq('id', order.user_id)
+            .single();
+
+          return {
+            ...order,
+            profiles: profileData
+          };
+        })
+      );
+
+      setOrders(ordersWithProfiles as any || []);
     } catch (error) {
       console.error('Error fetching vendor orders:', error);
       toast({
@@ -310,12 +323,14 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
               <span className="text-muted-foreground">Subtotal:</span>
               <span>₦{Number(order.subtotal || order.total_amount).toLocaleString()}</span>
             </div>
-            {order.shipping_cost !== undefined && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping:</span>
-                <span>₦{Number(order.shipping_cost).toLocaleString()}</span>
-              </div>
-            )}
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Shipping:</span>
+              <span>
+                {order.shipping_cost && Number(order.shipping_cost) > 0 
+                  ? `₦${Number(order.shipping_cost).toLocaleString()}`
+                  : 'Free'}
+              </span>
+            </div>
             {order.tax_amount !== undefined && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tax:</span>

@@ -183,6 +183,9 @@ const Checkout = () => {
 
       const { order, error } = await createOrder({
         total_amount: orderTotals.total,
+        subtotal: orderTotals.subtotal,
+        shipping_cost: orderTotals.shipping,
+        tax_amount: orderTotals.tax,
         shipping_address: shippingInfo,
         payment_method: paymentMethod,
         items: orderItems
@@ -193,9 +196,6 @@ const Checkout = () => {
       // Update order with payment details and receipt
       if (order) {
         const updateData: any = {
-          subtotal: orderTotals.subtotal,
-          shipping_cost: orderTotals.shipping,
-          tax_amount: orderTotals.tax,
           payment_status: paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
           status: paymentMethod === 'bank_transfer' ? 'pending' : 'processing'
         };
