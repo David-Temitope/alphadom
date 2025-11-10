@@ -47,16 +47,16 @@ const About = () => {
       image: "https://i.ibb.co/Mx0Jz6Nr/Whats-App-Image-2025-11-08-at-11-25-02-3e7eba83.jpg"
     },
     {
-      name: "Michael",
+      name: "Lorem ipsum",
       role: "Head of Sustainability",
       bio: "Former environmental consultant with 15+ years of experience in green technologies.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
+      image: "https://i.ibb.co/HfN5dVtf/dominity.jpg"
     },
     {
-      name: "Emma Forest",
+      name: "Lorem ipsum",
       role: "Product Manager",
       bio: "Product expert specializing in eco-friendly materials and sustainable manufacturing.",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face"
+      image: "https://i.ibb.co/HfN5dVtf/dominity.jpg"
     }
   ];
 

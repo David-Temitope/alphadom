@@ -40,10 +40,7 @@ const Terms = () => {
 
                 <h3 className="text-lg font-medium">For Dispatchers:</h3>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>You must have valid documentation for delivery services</li>
-                  <li>You are responsible for safe and timely delivery of products</li>
-                  <li>You must maintain professional conduct with customers</li>
-                  <li>Platform fees will be deducted from delivery payments</li>
+                  <p>We don't handle dispatch for now</p>
                 </ul>
               </div>
             </section>
