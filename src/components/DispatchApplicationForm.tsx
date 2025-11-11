@@ -9,6 +9,19 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useDispatchApplications } from '@/hooks/useDispatchApplications';
 import { useUserTypes } from '@/hooks/useUserTypes';
 import { Loader2 } from 'lucide-react';
+import { z } from 'zod';
+import { useToast } from '@/hooks/use-toast';
+
+const dispatchApplicationSchema = z.object({
+  dispatch_name: z.string().trim().min(1, 'Business name is required').max(100, 'Name too long'),
+  email: z.string().email('Invalid email address').max(255, 'Email too long'),
+  phone_number: z.string().trim().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format'),
+  emergency_contact: z.string().trim().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format').optional().or(z.literal('')),
+  vehicle_type: z.string().min(1, 'Vehicle type is required'),
+  availability: z.string().min(1, 'Availability is required'),
+  license_number: z.string().max(30, 'License number too long').optional(),
+  experience_years: z.string().optional().refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 50), 'Invalid years of experience'),
+});
 
 interface DispatchApplicationFormProps {
   open: boolean;
@@ -18,6 +31,7 @@ interface DispatchApplicationFormProps {
 export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicationFormProps) => {
   const { submitApplication } = useDispatchApplications();
   const { addUserType } = useUserTypes();
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     dispatch_name: '',
@@ -63,40 +77,65 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreedToTerms) {
-      alert('Please agree to the terms and conditions');
+      toast({
+        title: "Error",
+        description: "Please agree to the terms and conditions",
+        variant: "destructive",
+      });
       return;
     }
 
     setLoading(true);
     
-    const applicationData = {
-      ...formData,
-      experience_years: formData.experience_years ? parseInt(formData.experience_years) : undefined,
-    };
-
-    const result = await submitApplication(applicationData);
-    
-    if (result?.error === null) {
-      // Add user type as dispatch
-      await addUserType('dispatch');
+    try {
+      // Validate input with zod
+      const validation = dispatchApplicationSchema.safeParse(formData);
       
-      // Reset form
-      setFormData({
-        dispatch_name: '',
-        vehicle_type: '',
-        phone_number: '',
-        availability: '',
-        experience_years: '',
-        coverage_areas: [],
-        license_number: '',
-        email: '',
-        emergency_contact: '',
+      if (!validation.success) {
+        toast({
+          title: "Validation Error",
+          description: validation.error.errors[0].message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const applicationData = {
+        ...formData,
+        experience_years: formData.experience_years ? parseInt(formData.experience_years) : undefined,
+      };
+
+      const result = await submitApplication(applicationData);
+      
+      if (result?.error === null) {
+        // Add user type as dispatch
+        await addUserType('dispatch');
+        
+        // Reset form
+        setFormData({
+          dispatch_name: '',
+          vehicle_type: '',
+          phone_number: '',
+          availability: '',
+          experience_years: '',
+          coverage_areas: [],
+          license_number: '',
+          email: '',
+          emergency_contact: '',
+        });
+        setAgreedToTerms(false);
+        onOpenChange(false);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit application",
+        variant: "destructive",
       });
-      setAgreedToTerms(false);
-      onOpenChange(false);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const handleCoverageAreaChange = (area: string, checked: boolean) => {

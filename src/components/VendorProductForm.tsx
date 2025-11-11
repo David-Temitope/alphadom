@@ -9,6 +9,20 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVendors } from '@/hooks/useVendors';
+import { z } from 'zod';
+
+const productSchema = z.object({
+  name: z.string().trim().min(1, 'Product name is required').max(200, 'Name too long'),
+  price: z.string().min(1, 'Price is required').refine((val) => !isNaN(Number(val)) && Number(val) > 0, 'Price must be positive'),
+  category: z.string().min(1, 'Category is required'),
+  stock_count: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, 'Stock must be 0 or more'),
+  sustainability_score: z.string().optional().refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= 1 && Number(val) <= 10), 'Score must be between 1-10'),
+  description: z.string().max(5000, 'Description too long').optional(),
+  full_description: z.string().max(10000, 'Full description too long').optional(),
+  shipping_fee: z.string().min(1, 'Shipping fee is required').refine((val) => !isNaN(Number(val)) && Number(val) >= 0, 'Shipping fee must be 0 or more'),
+  discount_percentage: z.number().min(0).max(100),
+  original_price: z.number().min(0),
+});
 
 interface VendorProductFormProps {
   onProductAdded: () => void;
@@ -39,17 +53,20 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
     e.preventDefault();
     if (!user || !currentVendor) return;
 
-    if (!newProduct.name || !newProduct.price || !newProduct.category) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setSubmitting(true);
     try {
+      // Validate input with zod
+      const validation = productSchema.safeParse(newProduct);
+      
+      if (!validation.success) {
+        toast({
+          title: "Validation Error",
+          description: validation.error.errors[0].message,
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
       const { error } = await supabase
         .from('products')
         .insert({

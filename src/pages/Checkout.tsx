@@ -127,21 +127,27 @@ const Checkout = () => {
   };
 
   const uploadReceipt = async (file: File) => {
+    if (!user) return null;
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `receipts/${fileName}`;
+    const filePath = `${user.id}/${fileName}`;
 
+    // Upload to private receipts bucket
     const { error: uploadError } = await supabase.storage
-      .from('product-images')
+      .from('receipts')
       .upload(filePath, file);
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(filePath);
+    // Get signed URL with 7-day expiry for private access
+    const { data, error: urlError } = await supabase.storage
+      .from('receipts')
+      .createSignedUrl(filePath, 604800); // 7 days
 
-    return data.publicUrl;
+    if (urlError) throw urlError;
+
+    return data.signedUrl;
   };
 
   const handlePlaceOrder = async () => {
