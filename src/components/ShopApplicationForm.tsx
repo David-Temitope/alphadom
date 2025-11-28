@@ -9,25 +9,6 @@ import { useShopApplications } from '@/hooks/useShopApplications';
 import { useUserTypes } from '@/hooks/useUserTypes';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Store, CreditCard, Loader2 } from 'lucide-react';
-import { z } from 'zod';
-import { useToast } from '@/hooks/use-toast';
-
-const shopApplicationSchema = z.object({
-  store_name: z.string().trim().min(1, 'Store name is required').max(100, 'Store name too long'),
-  product_category: z.string().min(1, 'Category is required'),
-  price_range_min: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, 'Min price must be 0 or more'),
-  price_range_max: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, 'Max price must be positive'),
-  email: z.string().email('Invalid email address').max(255, 'Email too long'),
-  contact_phone: z.string().max(20, 'Phone too long').optional(),
-  business_address: z.string().max(500, 'Address too long').optional(),
-  business_description: z.string().max(2000, 'Description too long').optional(),
-  bank_details: z.object({
-    bank_name: z.string().trim().min(1, 'Bank name is required').max(100, 'Bank name too long'),
-    account_name: z.string().trim().min(1, 'Account name is required').max(100, 'Account name too long'),
-    account_number: z.string().trim().min(5, 'Invalid account number').max(30, 'Account number too long'),
-    routing_number: z.string().trim().min(4, 'Invalid routing number').max(20, 'Routing number too long'),
-  })
-});
 
 interface ShopApplicationFormProps {
   open: boolean;
@@ -37,7 +18,6 @@ interface ShopApplicationFormProps {
 export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormProps) => {
   const { submitApplication } = useShopApplications();
   const { addUserType } = useUserTypes();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [formData, setFormData] = useState({
@@ -66,30 +46,12 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreedToTerms) {
-      toast({
-        title: "Error",
-        description: "Please agree to the terms and conditions",
-        variant: "destructive",
-      });
+      alert('Please agree to the terms and conditions');
       return;
     }
-    
     setLoading(true);
 
     try {
-      // Validate input with zod
-      const validation = shopApplicationSchema.safeParse(formData);
-      
-      if (!validation.success) {
-        toast({
-          title: "Validation Error",
-          description: validation.error.errors[0].message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
       const applicationData = {
         ...formData,
         price_range_min: parseFloat(formData.price_range_min),

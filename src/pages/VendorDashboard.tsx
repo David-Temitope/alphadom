@@ -7,7 +7,7 @@ import { useVendors } from '@/hooks/useVendors';
 import { useProducts } from '@/hooks/useProducts';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText, User, Share2 } from 'lucide-react';
+import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorProductForm } from '@/components/VendorProductForm';
@@ -22,89 +22,26 @@ const VendorDashboard = () => {
 
   const vendorProducts = products.filter(p => p.vendor_user_id === user?.id);
 
-  const handleShareProfile = async () => {
-    const profileUrl = `${window.location.origin}/vendor/${user?.id}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: currentVendor?.store_name,
-          text: `Check out ${currentVendor?.store_name} on Alphadom!`,
-          url: profileUrl,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(profileUrl);
-      toast({
-        title: "Link Copied!",
-        description: "Profile link copied to clipboard",
-      });
-    }
-  };
-
   // Product addition is now handled by VendorProductForm component
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-    
     try {
-      // Check if product has any orders
-      const { data: orderItems, error: checkError } = await supabase
-        .from('order_items')
-        .select('id')
-        .eq('product_id', productId)
-        .limit(1);
-
-      if (checkError) throw checkError;
-
-      if (orderItems && orderItems.length > 0) {
-        toast({
-          title: "Cannot Delete Product",
-          description: "This product has existing orders and cannot be deleted. You can mark it as out of stock instead.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Get product details first to delete image
-      const { data: product } = await supabase
-        .from('products')
-        .select('image')
-        .eq('id', productId)
-        .single();
-
-      // Delete product from database
-      const { error: deleteError } = await supabase
+      const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', productId);
 
-      if (deleteError) throw deleteError;
-
-      // Try to delete image if it exists
-      if (product?.image) {
-        const imagePath = product.image.split('/').pop();
-        if (imagePath) {
-          await supabase.storage
-            .from('product-images')
-            .remove([imagePath]);
-        }
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
         description: "Product deleted successfully",
       });
-      
-      // Refresh products list
       refreshProducts();
     } catch (error: any) {
-      console.error('Error deleting product:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete product",
+        description: "Failed to delete product",
         variant: "destructive",
       });
     }
@@ -143,9 +80,8 @@ const VendorDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="flex-wrap h-auto">
+          <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="profile">My Profile</TabsTrigger>
             <TabsTrigger value="products">My Products</TabsTrigger>
             <TabsTrigger value="add-product">Add Product</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
@@ -159,7 +95,7 @@ const VendorDashboard = () => {
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">₦{currentVendor.total_revenue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">${currentVendor.total_revenue}</div>
                 </CardContent>
               </Card>
 
@@ -196,80 +132,6 @@ const VendorDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    My Vendor Profile
-                  </CardTitle>
-                  <Button onClick={handleShareProfile} variant="outline" size="sm">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Profile
-                  </Button>
-                </div>
-                <CardDescription>How customers see your profile</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-2xl font-bold text-primary">
-                        {currentVendor.store_name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">{currentVendor.store_name}</h3>
-                      <p className="text-muted-foreground">{currentVendor.product_category}</p>
-                      <Badge variant="default" className="mt-2">Verified Vendor</Badge>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-primary">{vendorProducts.length}</div>
-                        <div className="text-sm text-muted-foreground">Products Listed</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-primary">{currentVendor.total_orders}</div>
-                        <div className="text-sm text-muted-foreground">Total Orders</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-primary">
-                          {(() => {
-                            const created = new Date(currentVendor.created_at);
-                            const now = new Date();
-                            const months = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24 * 30));
-                            if (months < 1) return "New";
-                            if (months < 12) return `${months}mo`;
-                            return `${Math.floor(months / 12)}yr`;
-                          })()}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Vendor Since</div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div>
-                    <Button 
-                      onClick={() => window.open(`/vendor/${user?.id}`, '_blank')}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      View Public Profile
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="products" className="space-y-6">
             <Card>
               <CardHeader>
@@ -288,14 +150,14 @@ const VendorDashboard = () => {
                             <h3 className="font-medium">{product.name}</h3>
                             <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
                             <div className="flex justify-between items-center">
-                              <span className="font-bold">₦{product.price.toLocaleString()}</span>
+                              <span className="font-bold">${product.price}</span>
                               <Badge variant={product.in_stock ? "default" : "destructive"}>
                                 Stock: {product.stock_count}
                               </Badge>
                             </div>
                             {parseFloat(product.shipping_fee?.toString() || '0') > 0 && (
                               <div className="text-xs text-muted-foreground">
-                                Shipping: ₦{product.shipping_fee} ({product.shipping_type?.replace('_', ' ')})
+                                Shipping: ${product.shipping_fee} ({product.shipping_type?.replace('_', ' ')})
                               </div>
                             )}
                             <div className="flex gap-2">

@@ -716,13 +716,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "orders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "vendor_profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "orders_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
@@ -1263,20 +1256,7 @@ export type Database = {
       }
     }
     Views: {
-      vendor_profiles_public: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          product_category: string | null
-          store_name: string | null
-          total_orders: number | null
-          total_products: number | null
-          vendor_since: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       auto_delete_out_of_stock_products: { Args: never; Returns: undefined }
