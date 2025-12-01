@@ -12,6 +12,7 @@ import { LikeButton } from '@/components/LikeButton';
 import { ProductCard } from '@/components/ProductCard';
 import { ProductComments } from '@/components/ProductComments';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   ShoppingCart, 
   Leaf, 
@@ -28,11 +29,28 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [vendorName, setVendorName] = useState<string>('');
 
   const product = products.find(p => p.id === id);
   const similarProducts = products
     .filter(p => p.id !== id && p.category === product?.category)
     .slice(0, 4);
+
+  useEffect(() => {
+    const fetchVendorName = async () => {
+      if (product?.vendor_id) {
+        const { data } = await supabase
+          .from('approved_vendors')
+          .select('store_name')
+          .eq('id', product.vendor_id)
+          .single();
+        
+        if (data) setVendorName(data.store_name);
+      }
+    };
+    
+    fetchVendorName();
+  }, [product?.vendor_id]);
 
   // Use admin-set discount if available
   const hasDiscount = product?.has_discount && product?.discount_percentage && product?.original_price;
@@ -190,7 +208,7 @@ const ProductDetail = () => {
                   <span className="font-semibold">Product From: </span>
                   {product.vendor_user_id ? (
                     <Link to={`/vendor/${product.vendor_user_id}`} className="text-primary hover:underline">
-                      Vendor
+                      {vendorName || 'Vendor'}
                     </Link>
                   ) : (
                     <span className="text-primary font-semibold">Alphadom</span>

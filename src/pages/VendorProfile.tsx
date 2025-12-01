@@ -48,13 +48,10 @@ export const VendorProfile = () => {
 
   const fetchVendorProfile = async () => {
     try {
-      // Fetch vendor data using user_id since vendorId is the user_id from params
+      // Fetch vendor data using user_id
       const { data: vendorData, error: vendorError } = await supabase
         .from('approved_vendors')
-        .select(`
-          *,
-          profiles!approved_vendors_user_id_fkey(full_name, avatar_url, email)
-        `)
+        .select('*')
         .eq('user_id', vendorId)
         .maybeSingle();
 
@@ -65,23 +62,29 @@ export const VendorProfile = () => {
         return;
       }
 
+      // Fetch vendor's profile separately
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url, email')
+        .eq('id', vendorId)
+        .single();
+
       setVendor({
         ...vendorData,
-        profile: vendorData.profiles as any
+        profile: profileData as any
       });
 
-      // Fetch vendor's products using vendor's ID from the database
+      // Fetch vendor's products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*')
-        .eq('vendor_id', vendorData?.id)
+        .eq('vendor_id', vendorData.id)
         .order('created_at', { ascending: false });
 
       if (productsError) throw productsError;
       setProducts(productsData || []);
 
     } catch (error) {
-      console.error('Error fetching vendor profile:', error);
       toast({
         title: "Error",
         description: "Failed to fetch vendor profile",
