@@ -31,63 +31,53 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedAdmin = localStorage.getItem('admin_user');
-    if (savedAdmin) {
-      setAdmin(JSON.parse(savedAdmin));
-    }
-    setIsLoading(false);
+    // Check Supabase session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: roleData } = await supabase
+          .from('admin_roles')
+          .select('*, profiles!inner(full_name)')
+          .eq('user_id', session.user.id)
+          .eq('is_active', true)
+          .single();
+
+        if (roleData) {
+          setAdmin({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: (roleData.profiles as any)?.full_name || 'Admin User',
+            role: roleData.role as 'admin' | 'super_admin'
+          });
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkSession();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Hardcoded super admin credentials
-      if (email === 'admin@ecomart.com' && password === 'admin123') {
-        // Try to sign in with Supabase
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (authError) {
-          console.error('Supabase auth error:', authError);
-          // If user doesn't exist, still allow login for backwards compatibility
-          // but warn that RLS policies won't work properly
-          console.warn('Admin not authenticated with Supabase - data access may be limited');
-        }
-
-        const adminUser: AdminUser = {
-          id: authData?.user?.id || '1',
-          email: 'admin@ecomart.com',
-          name: 'Super Admin',
-          role: 'super_admin'
-        };
-        
-        setAdmin(adminUser);
-        localStorage.setItem('admin_user', JSON.stringify(adminUser));
-        return true;
-      }
-
-      // Check against admin_roles table for other admins
+      // Authenticate with Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) {
-        console.error('Login error:', authError);
         return false;
       }
 
       // Check if user has admin role
       const { data: roleData, error: roleError } = await supabase
         .from('admin_roles')
-        .select('*')
+        .select('*, profiles!inner(full_name)')
         .eq('user_id', authData.user.id)
         .eq('is_active', true)
         .single();
 
       if (roleError || !roleData) {
-        console.error('Not an admin user');
         await supabase.auth.signOut();
         return false;
       }
@@ -95,22 +85,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const adminUser: AdminUser = {
         id: authData.user.id,
         email: authData.user.email || email,
-        name: 'Admin User',
+        name: (roleData.profiles as any)?.full_name || 'Admin User',
         role: roleData.role as 'admin' | 'super_admin'
       };
 
       setAdmin(adminUser);
-      localStorage.setItem('admin_user', JSON.stringify(adminUser));
       return true;
     } catch (error) {
-      console.error('Login error:', error);
       return false;
     }
   };
 
   const logout = () => {
     setAdmin(null);
-    localStorage.removeItem('admin_user');
     supabase.auth.signOut();
   };
 
