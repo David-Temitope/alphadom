@@ -72,8 +72,8 @@ const VendorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-7xl">
+    <div className="min-h-screen bg-background p-2 md:p-4">
+      <div className="container mx-auto max-w-7xl overflow-x-hidden">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Vendor Dashboard</h1>
           <p className="text-muted-foreground">{currentVendor.store_name} - {currentVendor.product_category}</p>
@@ -87,15 +87,15 @@ const VendorDashboard = () => {
             <TabsTrigger value="orders">Orders</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <TabsContent value="overview" className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${currentVendor.total_revenue}</div>
+                  <div className="text-xl md:text-2xl font-bold">₦{currentVendor.total_revenue}</div>
                 </CardContent>
               </Card>
 
@@ -105,7 +105,7 @@ const VendorDashboard = () => {
                   <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{currentVendor.total_orders}</div>
+                  <div className="text-xl md:text-2xl font-bold">{currentVendor.total_orders}</div>
                 </CardContent>
               </Card>
 
@@ -115,7 +115,7 @@ const VendorDashboard = () => {
                   <Package className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{vendorProducts.length}</div>
+                  <div className="text-xl md:text-2xl font-bold">{vendorProducts.length}</div>
                 </CardContent>
               </Card>
 
@@ -142,7 +142,7 @@ const VendorDashboard = () => {
                 {vendorProducts.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">No products added yet. Add your first product to get started!</p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {vendorProducts.map((product) => (
                       <Card key={product.id}>
                         <CardContent className="p-4">
@@ -150,14 +150,14 @@ const VendorDashboard = () => {
                             <h3 className="font-medium">{product.name}</h3>
                             <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
                             <div className="flex justify-between items-center">
-                              <span className="font-bold">${product.price}</span>
+                              <span className="font-bold">₦{product.price}</span>
                               <Badge variant={product.in_stock ? "default" : "destructive"}>
                                 Stock: {product.stock_count}
                               </Badge>
                             </div>
                             {parseFloat(product.shipping_fee?.toString() || '0') > 0 && (
                               <div className="text-xs text-muted-foreground">
-                                Shipping: ${product.shipping_fee} ({product.shipping_type?.replace('_', ' ')})
+                                Shipping: ₦{product.shipping_fee} ({product.shipping_type?.replace('_', ' ')})
                               </div>
                             )}
                             <div className="flex gap-2">

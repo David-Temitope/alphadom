@@ -1,19 +1,23 @@
 import { useProducts } from "@/hooks/useProducts";
 import { JumiaProductCard } from "./JumiaProductCard";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from 'react';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const FeaturedProducts = () => {
   const { products, loading } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const isMobile = useIsMobile();
 
   // Get unique categories
   const categories = ['all', ...Array.from(new Set(products?.map(p => p.category) || []))];
   
-  // Filter products by category and show more products (at least 24 for multiple rows)
+  // Show 6 recently added products (2 rows x 3 columns)
+  const recentProducts = products?.slice(0, 6) || [];
   const filteredProducts = selectedCategory === 'all' 
-    ? products?.slice(0, 24) || []
-    : products?.filter(p => p.category === selectedCategory).slice(0, 24) || [];
+    ? recentProducts
+    : products?.filter(p => p.category === selectedCategory).slice(0, 6) || [];
 
   if (loading) {
     return (
@@ -44,23 +48,40 @@ export const FeaturedProducts = () => {
           </h2>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              className="whitespace-nowrap"
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category === 'all' ? 'All Products' : category}
-            </Button>
-          ))}
-        </div>
+        {/* Category Filter - Dropdown on mobile, buttons on desktop */}
+        {isMobile ? (
+          <div className="mb-6">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category === 'all' ? 'All Products' : category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                className="whitespace-nowrap"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category === 'all' ? 'All Products' : category}
+              </Button>
+            ))}
+          </div>
+        )}
 
-        {/* Products Grid - Multiple Rows */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        {/* Products Grid - 2 columns on mobile, more on larger screens */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
           {filteredProducts.map((product) => (
             <div key={product.id} className="w-full">
               <JumiaProductCard product={product} />
