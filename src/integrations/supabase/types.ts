@@ -1289,6 +1289,15 @@ export type Database = {
         }[]
       }
       cleanup_expired_admin_invitations: { Args: never; Returns: undefined }
+      generate_sitemap_data: {
+        Args: never
+        Returns: {
+          changefreq: string
+          lastmod: string
+          priority: number
+          url: string
+        }[]
+      }
       get_admin_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]
