@@ -94,16 +94,24 @@ export const UserTypeSelection = () => {
         </Card>
 
         {/* Dispatcher */}
-        <Card className="relative">
+        <Card className="relative border-yellow-200">
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
               <Truck className="w-6 h-6 text-purple-600" />
             </div>
             <CardTitle>Dispatcher</CardTitle>
             <CardDescription>Deliver products and earn money</CardDescription>
+            <Badge variant="outline" className="mt-2 bg-yellow-50 border-yellow-300 text-yellow-800">
+              Currently Not Available
+            </Badge>
           </CardHeader>
           <CardContent className="text-center">
-            <ul className="text-sm text-gray-600 mb-4 space-y-1">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+              <p className="text-xs text-yellow-800">
+                ℹ️ We don't handle dispatch services at the moment. This feature will be available soon!
+              </p>
+            </div>
+            <ul className="text-sm text-gray-600 mb-4 space-y-1 opacity-50">
               <li>• Accept delivery requests</li>
               <li>• Flexible schedule</li>
               <li>• Earn per delivery</li>
@@ -142,8 +150,9 @@ export const UserTypeSelection = () => {
                 onClick={() => handleAddUserType('dispatch')}
                 variant="secondary"
                 className="w-full"
+                disabled
               >
-                Apply as Dispatcher
+                Coming Soon
               </Button>
             )}
           </CardContent>

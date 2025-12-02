@@ -40,7 +40,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .select('*, profiles!inner(full_name)')
           .eq('user_id', session.user.id)
           .eq('is_active', true)
-          .single();
+          .maybeSingle();
 
         if (roleData) {
           setAdmin({
@@ -55,6 +55,33 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     checkSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const { data: roleData } = await supabase
+          .from('admin_roles')
+          .select('*, profiles!inner(full_name)')
+          .eq('user_id', session.user.id)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (roleData) {
+          setAdmin({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: (roleData.profiles as any)?.full_name || 'Admin User',
+            role: roleData.role as 'admin' | 'super_admin'
+          });
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setAdmin(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
