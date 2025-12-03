@@ -1,17 +1,19 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Shield } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { UserMenu } from './UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
 import { useUserTypes } from '@/hooks/useUserTypes';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { useAdmin } from '@/contexts/AdminContext';
+
 export const Navbar = () => {
   const { items } = useCart();
   const { user } = useAuth();
+  const { admin } = useAdmin();
   const { settings } = useAdminSettings();
   const { hasUserType } = useUserTypes();
   const location = useLocation();
@@ -19,7 +21,7 @@ export const Navbar = () => {
   
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
   
   const UserTypeNavLink = () => {
     const getNavLink = () => {
@@ -149,6 +151,17 @@ export const Navbar = () => {
               >
                 Contact
               </Link>
+              {admin && (
+                <Link 
+                  to="/appleisgood" 
+                  className={`text-sm font-medium transition-colors duration-200 hover:text-primary flex items-center gap-1 ${
+                    isActive('/appleisgood') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                  }`}
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Link>
+              )}
             </div>
 
             {/* Right Side Actions */}
@@ -253,6 +266,18 @@ export const Navbar = () => {
                 >
                   Contact
                 </Link>
+                {admin && (
+                  <Link 
+                    to="/appleisgood" 
+                    className={`block py-2 px-4 rounded-lg transition-colors flex items-center gap-2 ${
+                      isActive('/appleisgood') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Shield className="h-4 w-4" />
+                    Admin Panel
+                  </Link>
+                )}
               </div>
 
               <div className="pt-4 border-t border-border">
