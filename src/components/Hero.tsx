@@ -25,7 +25,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-blue-50 to-slate-50 min-h-[90vh] flex items-center">
+    <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-blue-50 to-slate-50 min-h-[90vh] flex items-center pb-16">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-green-200/30 rounded-full blur-3xl"></div>
