@@ -12,7 +12,8 @@ import {
   LogOut,
   Leaf,
   Truck,
-  Store
+  Store,
+  UserCog
 } from 'lucide-react';
 import { useAdmin } from '@/contexts/AdminContext';
 import { Button } from '@/components/ui/button';
@@ -21,22 +22,38 @@ interface AdminSidebarProps {
   onNavigate?: () => void;
 }
 
-const sidebarItems = [
-  { name: 'Dashboard', href: '/appleisgood', icon: LayoutDashboard },
-  { name: 'Products', href: '/appleisgood/products', icon: Package },
-  { name: 'Orders', href: '/appleisgood/orders', icon: ShoppingCart },
-  { name: 'Shop Applications', href: '/appleisgood/applications', icon: Store },
-  { name: 'Dispatch Applications', href: '/appleisgood/dispatch-applications', icon: Truck },
-  { name: 'Vendor Monitoring', href: '/appleisgood/vendor-monitoring', icon: BarChart3 },
-  { name: 'Dispatch Monitoring', href: '/appleisgood/dispatch-monitoring', icon: Truck },
-  { name: 'Users', href: '/appleisgood/users', icon: Users },
-  { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/appleisgood/settings', icon: Settings },
+type AdminRole = 'super_admin' | 'vendor_admin' | 'dispatch_admin' | 'user_admin' | 'orders_admin';
+
+interface SidebarItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  allowedRoles: AdminRole[];
+}
+
+const sidebarItems: SidebarItem[] = [
+  { name: 'Dashboard', href: '/appleisgood', icon: LayoutDashboard, allowedRoles: ['super_admin', 'vendor_admin', 'dispatch_admin', 'user_admin', 'orders_admin'] },
+  { name: 'Products', href: '/appleisgood/products', icon: Package, allowedRoles: ['super_admin', 'orders_admin'] },
+  { name: 'Orders', href: '/appleisgood/orders', icon: ShoppingCart, allowedRoles: ['super_admin', 'orders_admin'] },
+  { name: 'Shop Applications', href: '/appleisgood/applications', icon: Store, allowedRoles: ['super_admin', 'vendor_admin'] },
+  { name: 'Dispatch Applications', href: '/appleisgood/dispatch-applications', icon: Truck, allowedRoles: ['super_admin', 'dispatch_admin'] },
+  { name: 'Vendor Monitoring', href: '/appleisgood/vendor-monitoring', icon: BarChart3, allowedRoles: ['super_admin', 'vendor_admin'] },
+  { name: 'Dispatch Monitoring', href: '/appleisgood/dispatch-monitoring', icon: Truck, allowedRoles: ['super_admin', 'dispatch_admin'] },
+  { name: 'Users', href: '/appleisgood/users', icon: Users, allowedRoles: ['super_admin', 'user_admin'] },
+  { name: 'Admin Management', href: '/appleisgood/admin-management', icon: UserCog, allowedRoles: ['super_admin'] },
+  { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3, allowedRoles: ['super_admin'] },
+  { name: 'Settings', href: '/appleisgood/settings', icon: Settings, allowedRoles: ['super_admin'] },
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavigate }) => {
   const location = useLocation();
-  const { logout } = useAdmin();
+  const { logout, admin } = useAdmin();
+
+  // Filter sidebar items based on user's role
+  const filteredItems = sidebarItems.filter(item => {
+    if (!admin) return false;
+    return admin.role === 'super_admin' || item.allowedRoles.includes(admin.role);
+  });
 
   return (
     <div className="w-64 bg-card border-r border-border h-full flex flex-col">
@@ -46,15 +63,15 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavigate }) => {
             <Leaf className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="font-semibold">Pilot</h2>
-            <p className="text-sm text-muted-foreground">Admin Panel</p>
+            <h2 className="font-semibold">Alphadom</h2>
+            <p className="text-sm text-muted-foreground capitalize">{admin?.role.replace('_', ' ')}</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 p-4">
+      <nav className="flex-1 p-4 overflow-y-auto">
         <ul className="space-y-2">
-          {sidebarItems.map((item) => {
+          {filteredItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <li key={item.name}>

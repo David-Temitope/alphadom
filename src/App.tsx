@@ -31,6 +31,7 @@ import AdminShopApplications from "./pages/admin/AdminShopApplications";
 import AdminDispatchApplications from "./pages/admin/AdminDispatchApplications";
 import AdminDispatchMonitoring from "./pages/admin/AdminDispatchMonitoring";
 import AdminVendorMonitoring from "./pages/admin/AdminVendorMonitoring";
+import AdminManagement from "./pages/admin/AdminManagement";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Wishlist from "./pages/Wishlist";
@@ -113,48 +114,53 @@ const App = () => {
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/products" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['orders_admin']}>
                           <AdminProducts />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/orders" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['orders_admin']}>
                           <AdminOrders />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/users" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['user_admin']}>
                           <AdminUsers />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/settings" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['super_admin']}>
                           <AdminSettings />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/analytics" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['super_admin']}>
                           <AdminAnalytics />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/applications" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['vendor_admin']}>
                           <AdminShopApplications />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/dispatch-applications" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['dispatch_admin']}>
                           <AdminDispatchApplications />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/vendor-monitoring" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['vendor_admin']}>
                           <AdminVendorMonitoring />
                         </AdminProtectedRoute>
                       } />
                       <Route path="/appleisgood/dispatch-monitoring" element={
-                        <AdminProtectedRoute>
+                        <AdminProtectedRoute allowedRoles={['dispatch_admin']}>
                           <AdminDispatchMonitoring />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/admin-management" element={
+                        <AdminProtectedRoute allowedRoles={['super_admin']}>
+                          <AdminManagement />
                         </AdminProtectedRoute>
                       } />
 
