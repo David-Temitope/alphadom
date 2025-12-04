@@ -1,5 +1,5 @@
 
-import { Leaf, Users, Award, Target, Heart, Globe, Loader2, Mail } from "lucide-react";
+import { Leaf, Users, Award, Target, Heart, Globe, Mail } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ const About = () => {
   const stats = [
     { label: "Products Sold", value: statsLoading ? "..." : liveStats.productsSold.toLocaleString() },
     { label: "Users", value: statsLoading ? "..." : liveStats.users.toLocaleString() },
-    { label: "Workers", value: statsLoading ? "..." : liveStats.workers.toLocaleString() },
     { label: "Happy Customers", value: statsLoading ? "..." : liveStats.happyCustomers.toLocaleString() },
   ];
 
@@ -96,27 +95,11 @@ const About = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Story Section - NOW BEFORE STATS */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            {stats.map((stat, index) => (
-              <Card key={index} className="border-primary/20">
-                <CardContent className="p-6">
-                  <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
-                  <div className="text-muted-foreground">{stat.label}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="order-2 lg:order-1">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
               <div className="space-y-4 text-gray-700 leading-relaxed">
                 {settings.about_story ? (
@@ -142,7 +125,7 @@ const About = () => {
                 )}
               </div>
             </div>
-            <div className="relative">
+            <div className="relative order-1 lg:order-2">
               <img
                 src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop"
                 alt="Sustainable workspace"
@@ -154,6 +137,22 @@ const About = () => {
                 <div className="text-sm">Worldwide Shipping</div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section - NOW AFTER STORY */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-3 gap-4 md:gap-8 text-center">
+            {stats.map((stat, index) => (
+              <Card key={index} className="border-primary/20">
+                <CardContent className="p-4 md:p-6">
+                  <div className="text-xl md:text-3xl font-bold text-primary mb-1 md:mb-2">{stat.value}</div>
+                  <div className="text-xs md:text-base text-muted-foreground">{stat.label}</div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

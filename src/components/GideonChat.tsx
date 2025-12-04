@@ -138,7 +138,7 @@ export const GideonChat = () => {
       )}
 
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-96 h-[500px] shadow-2xl z-50 flex flex-col">
+        <Card className="fixed bottom-6 right-4 left-4 md:left-auto md:right-6 md:w-96 h-[500px] shadow-2xl z-50 flex flex-col max-w-[calc(100vw-2rem)]">
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />

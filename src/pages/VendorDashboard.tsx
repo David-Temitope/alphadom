@@ -88,43 +88,43 @@ const VendorDashboard = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 md:space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <div className="grid grid-cols-4 gap-2 md:gap-6">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <CardHeader className="p-2 md:p-6 flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+                  <CardTitle className="text-[10px] md:text-sm font-medium">Revenue</CardTitle>
+                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground hidden md:block" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-xl md:text-2xl font-bold">₦{currentVendor.total_revenue}</div>
+                <CardContent className="p-2 pt-0 md:p-6 md:pt-0">
+                  <div className="text-sm md:text-2xl font-bold">₦{currentVendor.total_revenue.toLocaleString()}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                <CardHeader className="p-2 md:p-6 flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+                  <CardTitle className="text-[10px] md:text-sm font-medium">Orders</CardTitle>
+                  <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground hidden md:block" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-xl md:text-2xl font-bold">{currentVendor.total_orders}</div>
+                <CardContent className="p-2 pt-0 md:p-6 md:pt-0">
+                  <div className="text-sm md:text-2xl font-bold">{currentVendor.total_orders}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Products Listed</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+                <CardHeader className="p-2 md:p-6 flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+                  <CardTitle className="text-[10px] md:text-sm font-medium">Products</CardTitle>
+                  <Package className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground hidden md:block" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-xl md:text-2xl font-bold">{vendorProducts.length}</div>
+                <CardContent className="p-2 pt-0 md:p-6 md:pt-0">
+                  <div className="text-sm md:text-2xl font-bold">{vendorProducts.length}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Shop Status</CardTitle>
+                <CardHeader className="p-2 md:p-6 flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+                  <CardTitle className="text-[10px] md:text-sm font-medium">Status</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <Badge variant={currentVendor.is_active ? "default" : "destructive"}>
+                <CardContent className="p-2 pt-0 md:p-6 md:pt-0">
+                  <Badge variant={currentVendor.is_active ? "default" : "destructive"} className="text-[10px] md:text-xs">
                     {currentVendor.is_active ? "Active" : "Inactive"}
                   </Badge>
                 </CardContent>
