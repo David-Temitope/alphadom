@@ -15,6 +15,8 @@ import { ShoppingCart, CreditCard, Truck, Lock, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
 
+const VAT_RATE = 0.025; // 2.5% VAT
+
 const Checkout = () => {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
@@ -28,7 +30,7 @@ const Checkout = () => {
     city: '',
     state: '',
     zipCode: '',
-    country: 'US',
+    country: 'NG',
     phone: ''
   });
   
@@ -39,7 +41,7 @@ const Checkout = () => {
   const [orderTotals, setOrderTotals] = useState({
     subtotal: 0,
     shipping: 0,
-    tax: 0,
+    vat: 0,
     total: 0
   });
   const [vendorBankDetails, setVendorBankDetails] = useState<any>(null);
@@ -63,11 +65,9 @@ const Checkout = () => {
   const fetchVendorBankDetails = async () => {
     if (items.length === 0) return;
 
-    // Get the first product's vendor (assuming single vendor checkout for now)
     const firstProduct = items[0] as any;
     
     if (firstProduct.vendor_id) {
-      // Product added by vendor - fetch vendor's bank details
       const { data, error } = await supabase
         .from('approved_vendors')
         .select('*, shop_applications!inner(vendor_bank_details)')
@@ -82,20 +82,18 @@ const Checkout = () => {
         }
       }
     } else {
-      // Product added by admin - use admin bank details from settings
-      setVendorBankDetails(null); // Will fall back to admin settings
+      setVendorBankDetails(null);
     }
   };
 
   const calculateTotals = async () => {
     const subtotal = total;
     
-    // Calculate shipping based on product shipping fees
     let totalShipping = 0;
-    const shippingGroups = new Map(); // Group by shipping type
+    const shippingGroups = new Map();
     
     for (const item of items) {
-      const product = item as any; // Cast to access shipping properties
+      const product = item as any;
       const productPrice = item.price;
       const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
       
@@ -103,7 +101,6 @@ const Checkout = () => {
         if (product.shipping_type === 'per_product') {
           totalShipping += shippingFee * item.quantity;
         } else {
-          // One-time shipping - group by product to avoid duplicates
           if (!shippingGroups.has(product.id)) {
             shippingGroups.set(product.id, shippingFee);
             totalShipping += shippingFee;
@@ -112,17 +109,16 @@ const Checkout = () => {
       }
     }
     
-    // Add base shipping if no product shipping and subtotal < $30
     if (totalShipping === 0 && subtotal < 30) {
       totalShipping = subtotal * 0.05;
     }
     
-    const tax = subtotal * 0.08;
+    const vat = subtotal * VAT_RATE;
     setOrderTotals({
       subtotal,
       shipping: totalShipping,
-      tax,
-      total: subtotal + totalShipping + tax
+      vat,
+      total: subtotal + totalShipping + vat
     });
   };
 
@@ -170,7 +166,6 @@ const Checkout = () => {
     try {
       let uploadedReceiptUrl = '';
       
-      // Upload receipt if bank transfer
       if (paymentMethod === 'bank_transfer' && receiptFile) {
         uploadedReceiptUrl = await uploadReceipt(receiptFile);
       }
@@ -190,12 +185,11 @@ const Checkout = () => {
 
       if (error) throw error;
 
-      // Update order with payment details and receipt
       if (order) {
         const updateData: any = {
           subtotal: orderTotals.subtotal,
           shipping_cost: orderTotals.shipping,
-          tax_amount: orderTotals.tax,
+          tax_amount: orderTotals.vat,
           payment_status: paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
           status: paymentMethod === 'bank_transfer' ? 'pending' : 'processing'
         };
@@ -271,11 +265,11 @@ const Checkout = () => {
                             <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                           </div>
                         </div>
-                        <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
                       </div>
                       {hasShipping && (
                         <div className="text-xs text-muted-foreground ml-15">
-                          Shipping: NGN{shippingFee} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
+                          Shipping: ₦{shippingFee.toLocaleString()} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
                         </div>
                       )}
                     </div>
@@ -287,20 +281,20 @@ const Checkout = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${orderTotals.subtotal.toFixed(2)}</span>
+                    <span>₦{orderTotals.subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span>{orderTotals.shipping === 0 ? 'FREE' : `$${orderTotals.shipping.toFixed(2)}`}</span>
+                    <span>{orderTotals.shipping === 0 ? 'FREE' : `₦${orderTotals.shipping.toLocaleString()}`}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax</span>
-                    <span>${orderTotals.tax.toFixed(2)}</span>
+                    <span>VAT (2.5%)</span>
+                    <span>₦{orderTotals.vat.toLocaleString()}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>NGN{orderTotals.total.toFixed(2)}</span>
+                    <span>₦{orderTotals.total.toLocaleString()}</span>
                   </div>
                 </div>
               </CardContent>
@@ -335,7 +329,7 @@ const Checkout = () => {
                       id="city"
                       value={shippingInfo.city}
                       onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
-                      placeholder="San Francisco"
+                      placeholder="Lagos"
                     />
                   </div>
                   <div>
@@ -344,7 +338,7 @@ const Checkout = () => {
                       id="state"
                       value={shippingInfo.state}
                       onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
-                      placeholder="CA"
+                      placeholder="Lagos"
                     />
                   </div>
                 </div>
@@ -355,7 +349,7 @@ const Checkout = () => {
                     id="zipCode"
                     value={shippingInfo.zipCode}
                     onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
-                    placeholder="12345"
+                    placeholder="100001"
                   />
                 </div>
                 
@@ -366,7 +360,7 @@ const Checkout = () => {
                     type="tel"
                     value={shippingInfo.phone}
                     onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+234 xxx xxx xxxx"
                     required
                   />
                 </div>
@@ -409,7 +403,6 @@ const Checkout = () => {
                           <p><strong>Bank:</strong> {settings.bank_details?.bank_name || 'First National Bank'}</p>
                           <p><strong>Account Name:</strong> {settings.bank_details?.account_name || 'Alphadom'}</p>
                           <p><strong>Account Number:</strong> {settings.bank_details?.account_number || '1234567890'}</p>
-                          <p><strong>Routing Number:</strong> {settings.bank_details?.routing_number || '021000021'}</p>
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground mt-2">
@@ -459,7 +452,7 @@ const Checkout = () => {
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Place Order - ${orderTotals.total.toFixed(2)}
+                  Place Order - ₦{orderTotals.total.toLocaleString()}
                 </>
               )}
             </Button>
