@@ -74,6 +74,23 @@ const Checkout: React.FC = () => {
     }
   }, [vendorBankDetails, paymentMethod]);
 
+  useEffect(() => {
+  // Only load once
+  if (window.PaystackPop) return;
+
+  const script = document.createElement('script');
+  script.src = 'https://js.paystack.co/v1/inline.js';
+  script.async = true;
+  script.onload = () => console.log('Paystack script loaded');
+  script.onerror = () => console.error('Failed to load Paystack script');
+  document.body.appendChild(script);
+
+  return () => {
+    document.body.removeChild(script);
+  };
+}, []);
+
+
   const fetchVendorBankDetails = async () => {
     if (items.length === 0) return;
 
