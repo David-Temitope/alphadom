@@ -22,8 +22,6 @@ declare global {
   }
 }
 
-const VAT_RATE = 0.025; // 2.5% VAT (adjust if needed)
-
 const Checkout: React.FC = () => {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
@@ -82,12 +80,13 @@ const Checkout: React.FC = () => {
     // Get the first product's vendor (assuming single vendor checkout for now)
     const firstProduct = items[0] as any;
     if (firstProduct.vendor_id) {
-      // Product added by vendor - fetch vendor's bank details
-      const { data, error } = await supabase
-        .from('approved_vendors')
-        .select('*, shop_applications!inner(vendor_bank_details)')
-        .eq('id', firstProduct.vendor_id)
-        .single();
+      try {
+        // Product added by vendor - fetch vendor's bank details
+        const { data, error } = await supabase
+          .from('approved_vendors')
+          .select('*, shop_applications!inner(vendor_bank_details)')
+          .eq('id', firstProduct.vendor_id)
+          .single();
 
         if (error) {
           console.warn('Vendor fetch error:', error);
@@ -127,8 +126,8 @@ const Checkout: React.FC = () => {
       const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
       
       if (productPrice >= 10 && shippingFee > 0) {
-        if (p.shipping_type === 'per_product') {
-          totalShipping += shippingFee * p.quantity;
+        if (product.shipping_type === 'per_product') {
+          totalShipping += shippingFee * item.quantity;
         } else {
           // One-time shipping - group by product to avoid duplicates
           if (!shippingGroups.has(product.id)) {
@@ -144,7 +143,7 @@ const Checkout: React.FC = () => {
       totalShipping = subtotal * 0.05;
     }
     
-    const tax = subtotal * 0.03; // Reduced to 3%
+    const vat = subtotal * VAT_RATE; // 2.5% VAT
     setOrderTotals({
       subtotal,
       shipping: totalShipping,
@@ -181,7 +180,7 @@ const Checkout: React.FC = () => {
     }
 
     if (!window.PaystackPop) {
-      toast({ title: 'Payment Error', description: 'Paystack script not loaded. Add https://js.paystack.co/v1/inline.js to index.html', variant: 'destructive' });
+      toast({ title: 'Payment Error', description: 'Paystack script not loaded. Please refresh and try again.', variant: 'destructive' });
       return;
     }
 
@@ -213,12 +212,8 @@ const Checkout: React.FC = () => {
 
           const { order, error } = await createOrder({
             total_amount: orderTotals.total,
-            subtotal: orderTotals.subtotal,
-            shipping_cost: orderTotals.shipping,
-            tax_amount: orderTotals.vat,
             shipping_address: shippingInfo,
             payment_method: 'paystack',
-            payment_reference: response.reference,
             items: orderItems
           });
 
@@ -315,9 +310,6 @@ const Checkout: React.FC = () => {
 
       const { order, error } = await createOrder({
         total_amount: orderTotals.total,
-        subtotal: orderTotals.subtotal,
-        shipping_cost: orderTotals.shipping,
-        tax_amount: orderTotals.tax,
         shipping_address: shippingInfo,
         payment_method: paymentMethod,
         items: orderItems
@@ -498,11 +490,9 @@ const Checkout: React.FC = () => {
                   <Label htmlFor="phone">Phone Number</Label>
                   <Input
                     id="phone"
-                    type="tel"
                     value={shippingInfo.phone}
                     onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
-                    placeholder="+1 (555) 123-4567"
-                    required
+                    placeholder="+234 800 000 0000"
                   />
                 </div>
               </CardContent>
@@ -517,70 +507,51 @@ const Checkout: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Select value={paymentMethod} onValueChange={(val: any) => setPaymentMethod(val)}>
+                <Select value={paymentMethod} onValueChange={(value: 'bank_transfer' | 'paystack') => setPaymentMethod(value)}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select payment method" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* Only show bank_transfer if vendor has bank details (we hide for admin products per your choice) */}
-                    {vendorBankDetails && <SelectItem value="bank_transfer">Bank Transfer</SelectItem>}
-                    <SelectItem value="paystack">Paystack</SelectItem>
+                    <SelectItem value="paystack">Pay with Paystack (Card/Bank/USSD)</SelectItem>
+                    {vendorBankDetails && (
+                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
 
                 {paymentMethod === 'bank_transfer' && vendorBankDetails && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-semibold mb-2">Bank Transfer Details</h4>
-                      {vendorBankDetails ? (
-                        <>
-                          <p className="text-xs text-primary mb-2">Payment goes to: {productVendor?.store_name}</p>
-                          <div className="space-y-1 text-sm">
-                            <p><strong>Bank:</strong> {vendorBankDetails.bank_name}</p>
-                            <p><strong>Account Name:</strong> {vendorBankDetails.account_name}</p>
-                            <p><strong>Account Number:</strong> {vendorBankDetails.account_number}</p>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="space-y-1 text-sm">
-                          <p><strong>Bank:</strong> {settings.bank_details?.bank_name || 'First National Bank'}</p>
-                          <p><strong>Account Name:</strong> {settings.bank_details?.account_name || 'Alphadom'}</p>
-                          <p><strong>Account Number:</strong> {settings.bank_details?.account_number || '1234567890'}</p>
-                          <p><strong>Routing Number:</strong> {settings.bank_details?.routing_number || '021000021'}</p>
-                        </div>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Please include the product name in the transfer description
-                      </p>
-                    </div>
-
+                  <div className="bg-muted p-4 rounded-lg space-y-2">
+                    <h4 className="font-medium">Bank Transfer Details</h4>
+                    <p className="text-sm">Bank: {vendorBankDetails.bank_name}</p>
+                    <p className="text-sm">Account Name: {vendorBankDetails.account_name}</p>
+                    <p className="text-sm">Account Number: {vendorBankDetails.account_number}</p>
+                    <p className="text-sm font-medium text-primary">
+                      Amount: ₦{orderTotals.total.toLocaleString()}
+                    </p>
+                    <Separator className="my-3" />
                     <div>
-                      <Label htmlFor="receipt">Upload Payment Receipt *</Label>
-                      <div className="mt-2">
-                        <Input
-                          id="receipt"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setReceiptFile(file);
-                            }
-                          }}
-                          className="cursor-pointer"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Upload a clear image of your payment receipt
-                        </p>
-                      </div>
+                      <Label htmlFor="receipt">Upload Payment Receipt</Label>
+                      <Input
+                        id="receipt"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                        className="mt-2"
+                      />
                     </div>
                   </div>
                 )}
 
+                {paymentMethod === 'paystack' && (
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      You'll be redirected to Paystack to complete your payment securely.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Place Order Button */}
             <Button
               onClick={handlePlaceOrder}
               disabled={processing}
@@ -588,21 +559,14 @@ const Checkout: React.FC = () => {
               size="lg"
             >
               {processing ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Processing...
-                </>
+                'Processing...'
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Place Order - ₦{orderTotals.total.toLocaleString()}
+                  {paymentMethod === 'paystack' ? 'Pay Now' : 'Place Order'}
                 </>
               )}
             </Button>
-
-            <p className="text-xs text-gray-600 text-center">
-              Your payment information is secure and encrypted
-            </p>
           </div>
         </div>
       </div>
