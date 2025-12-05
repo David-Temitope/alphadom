@@ -27,13 +27,13 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
-    const savedCart = localStorage.getItem('cart');
+    const savedCart = localStorage.getItem('cart_items');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(items));
+    localStorage.setItem('cart_items', JSON.stringify(items));
   }, [items]);
 
   // Calculate total price

@@ -716,6 +716,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
@@ -894,6 +901,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_banned: boolean
+          role: string | null
           updated_at: string | null
         }
         Insert: {
@@ -904,6 +912,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_banned?: boolean
+          role?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -914,6 +923,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_banned?: boolean
+          role?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1256,7 +1266,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vendor_profiles_public: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          product_category: string | null
+          store_name: string | null
+          total_orders: number | null
+          total_products: number | null
+          vendor_since: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_delete_out_of_stock_products: { Args: never; Returns: undefined }
@@ -1269,6 +1292,15 @@ export type Database = {
         }[]
       }
       cleanup_expired_admin_invitations: { Args: never; Returns: undefined }
+      generate_sitemap_data: {
+        Args: never
+        Returns: {
+          changefreq: string
+          lastmod: string
+          priority: number
+          url: string
+        }[]
+      }
       get_admin_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]

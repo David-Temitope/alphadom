@@ -14,6 +14,8 @@ import { ShoppingCart, CreditCard, Truck, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
 
+const VAT_RATE = 0.025; // 2.5% VAT
+
 declare global {
   interface Window {
     PaystackPop?: any;
@@ -35,7 +37,7 @@ const Checkout: React.FC = () => {
     city: '',
     state: '',
     zipCode: '',
-    country: 'US',
+    country: 'NG',
     phone: ''
   });
 
@@ -75,21 +77,17 @@ const Checkout: React.FC = () => {
   }, [vendorBankDetails, paymentMethod]);
 
   const fetchVendorBankDetails = async () => {
-    if (!items || items.length === 0) {
-      setVendorBankDetails(null);
-      setProductVendor(null);
-      return;
-    }
+    if (items.length === 0) return;
 
+    // Get the first product's vendor (assuming single vendor checkout for now)
     const firstProduct = items[0] as any;
     if (firstProduct.vendor_id) {
-      // product provided by a vendor - attempt to fetch vendor bank details
-      try {
-        const { data, error } = await supabase
-          .from('approved_vendors')
-          .select('*, shop_applications!inner(vendor_bank_details)')
-          .eq('id', firstProduct.vendor_id)
-          .single();
+      // Product added by vendor - fetch vendor's bank details
+      const { data, error } = await supabase
+        .from('approved_vendors')
+        .select('*, shop_applications!inner(vendor_bank_details)')
+        .eq('id', firstProduct.vendor_id)
+        .single();
 
         if (error) {
           console.warn('Vendor fetch error:', error);
@@ -111,41 +109,42 @@ const Checkout: React.FC = () => {
         setProductVendor(null);
       }
     } else {
-      // Admin product: explicitly set vendorBankDetails to null to hide bank-transfer
-      setVendorBankDetails(null);
-      setProductVendor(null);
+      // Product added by admin - use admin bank details from settings
+      setVendorBankDetails(null); // Will fall back to admin settings
     }
   };
 
-  const calculateTotals = () => {
-    const subtotal = total || 0;
-
+  const calculateTotals = async () => {
+    const subtotal = total;
+    
+    // Calculate shipping based on product shipping fees
     let totalShipping = 0;
-    const shippingGroups = new Map<string | number, number>();
-
+    const shippingGroups = new Map(); // Group by shipping type
+    
     for (const item of items) {
-      const p = item as any;
-      const shippingFee = parseFloat(p.shipping_fee?.toString() || '0');
-      const productPrice = p.price || 0;
-
+      const product = item as any; // Cast to access shipping properties
+      const productPrice = item.price;
+      const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
+      
       if (productPrice >= 10 && shippingFee > 0) {
         if (p.shipping_type === 'per_product') {
           totalShipping += shippingFee * p.quantity;
         } else {
-          if (!shippingGroups.has(p.id)) {
-            shippingGroups.set(p.id, shippingFee);
+          // One-time shipping - group by product to avoid duplicates
+          if (!shippingGroups.has(product.id)) {
+            shippingGroups.set(product.id, shippingFee);
             totalShipping += shippingFee;
           }
         }
       }
     }
-
+    
+    // Add base shipping if no product shipping and subtotal < $30
     if (totalShipping === 0 && subtotal < 30) {
       totalShipping = subtotal * 0.05;
     }
-
-    const vat = subtotal * VAT_RATE;
-
+    
+    const tax = subtotal * 0.03; // Reduced to 3%
     setOrderTotals({
       subtotal,
       shipping: totalShipping,
@@ -302,7 +301,8 @@ const Checkout: React.FC = () => {
 
     try {
       let uploadedReceiptUrl = '';
-
+      
+      // Upload receipt if bank transfer
       if (paymentMethod === 'bank_transfer' && receiptFile) {
         uploadedReceiptUrl = await uploadReceipt(receiptFile);
       }
@@ -317,7 +317,7 @@ const Checkout: React.FC = () => {
         total_amount: orderTotals.total,
         subtotal: orderTotals.subtotal,
         shipping_cost: orderTotals.shipping,
-        tax_amount: orderTotals.vat,
+        tax_amount: orderTotals.tax,
         shipping_address: shippingInfo,
         payment_method: paymentMethod,
         items: orderItems
@@ -325,8 +325,12 @@ const Checkout: React.FC = () => {
 
       if (error) throw error;
 
-      if (order && order.id) {
+      // Update order with payment details and receipt
+      if (order) {
         const updateData: any = {
+          subtotal: orderTotals.subtotal,
+          shipping_cost: orderTotals.shipping,
+          tax_amount: orderTotals.vat,
           payment_status: paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
           status: paymentMethod === 'bank_transfer' ? 'pending' : 'processing'
         };
@@ -465,7 +469,7 @@ const Checkout: React.FC = () => {
                     <Input
                       id="city"
                       value={shippingInfo.city}
-                      onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                      onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
                       placeholder="San Francisco"
                     />
                   </div>
@@ -474,7 +478,7 @@ const Checkout: React.FC = () => {
                     <Input
                       id="state"
                       value={shippingInfo.state}
-                      onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
+                      onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
                       placeholder="CA"
                     />
                   </div>
@@ -485,7 +489,7 @@ const Checkout: React.FC = () => {
                   <Input
                     id="zipCode"
                     value={shippingInfo.zipCode}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
+                    onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
                     placeholder="12345"
                   />
                 </div>
@@ -496,7 +500,7 @@ const Checkout: React.FC = () => {
                     id="phone"
                     type="tel"
                     value={shippingInfo.phone}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
+                    onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
                     placeholder="+1 (555) 123-4567"
                     required
                   />
@@ -528,12 +532,23 @@ const Checkout: React.FC = () => {
                   <div className="space-y-4">
                     <div className="p-4 bg-muted rounded-lg">
                       <h4 className="font-semibold mb-2">Bank Transfer Details</h4>
-                      <p className="text-xs text-primary mb-2">Payment goes to: {productVendor?.store_name || 'Vendor'}</p>
-                      <div className="space-y-1 text-sm">
-                        <p><strong>Bank:</strong> {vendorBankDetails.bank_name}</p>
-                        <p><strong>Account Name:</strong> {vendorBankDetails.account_name}</p>
-                        <p><strong>Account Number:</strong> {vendorBankDetails.account_number}</p>
-                      </div>
+                      {vendorBankDetails ? (
+                        <>
+                          <p className="text-xs text-primary mb-2">Payment goes to: {productVendor?.store_name}</p>
+                          <div className="space-y-1 text-sm">
+                            <p><strong>Bank:</strong> {vendorBankDetails.bank_name}</p>
+                            <p><strong>Account Name:</strong> {vendorBankDetails.account_name}</p>
+                            <p><strong>Account Number:</strong> {vendorBankDetails.account_number}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-1 text-sm">
+                          <p><strong>Bank:</strong> {settings.bank_details?.bank_name || 'First National Bank'}</p>
+                          <p><strong>Account Name:</strong> {settings.bank_details?.account_name || 'Alphadom'}</p>
+                          <p><strong>Account Number:</strong> {settings.bank_details?.account_number || '1234567890'}</p>
+                          <p><strong>Routing Number:</strong> {settings.bank_details?.routing_number || '021000021'}</p>
+                        </div>
+                      )}
                       <p className="text-xs text-muted-foreground mt-2">
                         Please include the product name in the transfer description
                       </p>

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, Package, Users, MapPin, CheckCircle, UserPlus, UserMinus, Share2 } from 'lucide-react';
+import { Star, Package, Users, MapPin, CheckCircle, UserPlus, UserMinus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserFollows } from '@/hooks/useUserFollows';
@@ -48,7 +48,7 @@ export const VendorProfile = () => {
 
   const fetchVendorProfile = async () => {
     try {
-      // Fetch vendor data using user_id since vendorId is the user_id from params
+      // Fetch vendor data using user_id
       const { data: vendorData, error: vendorError } = await supabase
         .from('approved_vendors')
         .select('*')
@@ -62,32 +62,29 @@ export const VendorProfile = () => {
         return;
       }
 
-      // Fetch profile data separately
-      const { data: profileData, error: profileError } = await supabase
+      // Fetch vendor's profile separately
+      const { data: profileData } = await supabase
         .from('profiles')
         .select('full_name, avatar_url, email')
         .eq('id', vendorId)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
+        .single();
 
       setVendor({
         ...vendorData,
         profile: profileData as any
       });
 
-      // Fetch vendor's products using vendor's ID from the database
+      // Fetch vendor's products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('*')
-        .eq('vendor_id', vendorData?.id)
+        .eq('vendor_id', vendorData.id)
         .order('created_at', { ascending: false });
 
       if (productsError) throw productsError;
       setProducts(productsData || []);
 
     } catch (error) {
-      console.error('Error fetching vendor profile:', error);
       toast({
         title: "Error",
         description: "Failed to fetch vendor profile",
@@ -110,29 +107,6 @@ export const VendorProfile = () => {
     }
   };
 
-  const handleShare = async () => {
-    const profileUrl = `${window.location.origin}/vendor/${vendorId}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: vendor?.store_name,
-          text: `Check out ${vendor?.store_name} on Alphadom!`,
-          url: profileUrl,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(profileUrl);
-      toast({
-        title: "Link Copied!",
-        description: "Profile link copied to clipboard",
-      });
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -152,122 +126,108 @@ export const VendorProfile = () => {
   const customerCount = getCustomerCount(vendor.user_id);
   const isUserFollowing = isFollowing(vendor.user_id);
 
-  const vendorDuration = () => {
-    const created = new Date(vendor.created_at);
-    const now = new Date();
-    const months = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24 * 30));
-    
-    if (months < 1) return "New Vendor";
-    if (months < 12) return `${months} month${months > 1 ? 's' : ''}`;
-    const years = Math.floor(months / 12);
-    return `${years} year${years > 1 ? 's' : ''}`;
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Vendor Header */}
       <Card className="mb-8">
         <CardHeader>
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full md:w-auto">
-              <div className="relative flex-shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-200 rounded-full flex items-center justify-center">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
                   {vendor.profile?.avatar_url ? (
                     <img 
                       src={vendor.profile.avatar_url} 
                       alt={vendor.store_name}
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
+                      className="w-24 h-24 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-xl sm:text-2xl font-semibold text-gray-600">
+                    <span className="text-2xl font-semibold text-gray-600">
                       {vendor.store_name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
                 <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  <CheckCircle className="w-5 h-5 text-white" />
                 </div>
               </div>
               
-              <div className="space-y-2 w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <CardTitle className="text-2xl sm:text-3xl break-words">{vendor.store_name}</CardTitle>
-                  <Badge variant="default" className="bg-green-100 text-green-800 w-fit">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="text-3xl">{vendor.store_name}</CardTitle>
+                  <Badge variant="default" className="bg-green-100 text-green-800">
                     Verified
                   </Badge>
                 </div>
-                <p className="text-gray-600 text-sm sm:text-base">{vendor.profile?.full_name}</p>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
+                <p className="text-gray-600">{vendor.profile?.full_name}</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span>Category: {vendor.product_category}</span>
-                  <span className="hidden sm:inline">•</span>
+                  <span>•</span>
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <MapPin className="w-4 h-4" />
                     <span>Lagos, Nigeria</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current" />
-                  <span className="text-xs sm:text-sm font-medium">4.8</span>
-                  <span className="text-xs sm:text-sm text-gray-500">(Customer rating)</span>
+                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                  <span className="text-sm font-medium">4.8</span>
+                  <span className="text-sm text-gray-500">({vendor.total_orders} reviews)</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              {user && user.id !== vendor.user_id && (
-                <Button
-                  onClick={handleFollow}
-                  variant={isUserFollowing ? "outline" : "default"}
-                  className="flex items-center gap-2"
-                  size="sm"
-                >
-                  {isUserFollowing ? (
-                    <>
-                      <UserMinus className="w-4 h-4" />
-                      <span>Unfollow</span>
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4" />
-                      <span>Follow</span>
-                    </>
-                  )}
-                </Button>
-              )}
+            {user && user.id !== vendor.user_id && (
               <Button
-                onClick={handleShare}
-                variant="outline"
+                onClick={handleFollow}
+                variant={isUserFollowing ? "outline" : "default"}
                 className="flex items-center gap-2"
-                size="sm"
               >
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
+                {isUserFollowing ? (
+                  <>
+                    <UserMinus className="w-4 h-4" />
+                    Unfollow
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    Follow
+                  </>
+                )}
               </Button>
-            </div>
+            )}
           </div>
         </CardHeader>
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="text-xl sm:text-2xl font-bold text-primary">{customerCount}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Customers</div>
+          <CardContent className="p-6 text-center">
+            <div className="text-2xl font-bold text-primary">{customerCount}</div>
+            <div className="text-sm text-gray-600">Customers</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="text-xl sm:text-2xl font-bold text-primary">{products.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Products</div>
+          <CardContent className="p-6 text-center">
+            <div className="text-2xl font-bold text-primary">{vendor.total_products}</div>
+            <div className="text-sm text-gray-600">Products</div>
           </CardContent>
         </Card>
         
-        <Card className="col-span-2 md:col-span-1">
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="text-xl sm:text-2xl font-bold text-primary">{vendorDuration()}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Vendor Since</div>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="text-2xl font-bold text-primary">{vendor.total_orders}</div>
+            <div className="text-sm text-gray-600">Reviews</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="text-2xl font-bold text-primary">
+              ${vendor.total_revenue.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-600">Total Sales</div>
           </CardContent>
         </Card>
       </div>

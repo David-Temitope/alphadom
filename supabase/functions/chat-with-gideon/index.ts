@@ -53,22 +53,49 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are Gideon, a helpful AI assistant for an e-commerce platform. You ONLY answer questions about:
-- Finding products on the platform (best selling, highest rated, etc.)
-- Information about vendors and dispatchers
-- Platform features and how to use them
-- Order tracking and shipping information
-- Product categories and specifications
-- Platform policies and procedures
+    // Fetch actual platform data
+    const { data: products } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false }).limit(50);
+    const { data: vendors } = await supabaseClient.from('approved_vendors').select('*');
+    const { data: profiles } = await supabaseClient.from('profiles').select('id, full_name, email');
+    
+    // Build context with actual data
+    const platformContext = `
+PLATFORM DATA (Use ONLY this information to answer questions):
 
-You DO NOT answer questions about:
-- How to build a platform or write code
-- General knowledge unrelated to the platform
-- Confidential business information
-- Personal data of other users
-- Administrative functions or backend systems
+PRODUCTS (${products?.length || 0} available):
+${products?.map(p => `- ${p.name}: ₦${p.price} (Category: ${p.category}, Stock: ${p.stock_count || 0}, Rating: ${p.rating || 'N/A'})`).join('\n') || 'No products available'}
 
-If asked about topics outside your scope, politely redirect users to ask platform-related questions. Keep answers concise and helpful.`;
+VENDORS (${vendors?.length || 0} active):
+${vendors?.map(v => `- ${v.store_name} (Category: ${v.product_category}, Products: ${v.total_products}, Revenue: ₦${v.total_revenue}, Orders: ${v.total_orders})`).join('\n') || 'No vendors available'}
+
+CURRENCY: All prices are in Nigerian Naira (₦), never use dollars or other currencies.
+
+IMPORTANT: Only provide information from the above data. Do not make up products, vendors, or prices. If asked about something not in this data, say "I don't have that information in our current catalog."
+`;
+
+    const systemPrompt = `You are Gideon, a helpful AI assistant for an e-commerce platform in Nigeria. 
+
+${platformContext}
+
+RULES:
+1. ONLY use the platform data provided above
+2. NEVER invent products, prices, or vendors that aren't listed
+3. Always use Nigerian Naira (₦) for prices
+4. When asked about "best" or "highest rated" items, use the actual data provided
+5. Keep answers concise and accurate
+6. If information isn't in the data, say so clearly
+
+You help users with:
+- Finding actual products on the platform
+- Information about real vendors
+- Platform features and usage
+- Product categories and availability
+
+You DO NOT:
+- Make up products or prices
+- Discuss technical/coding topics
+- Share confidential information
+- Answer general knowledge questions unrelated to the platform`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

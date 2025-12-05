@@ -4,13 +4,17 @@ import { useProducts } from "@/hooks/useProducts";
 import { ProductCard } from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Search, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("name");
+  const [showSearch, setShowSearch] = useState(false);
+  const isMobile = useIsMobile();
 
   if (loading) {
     return (
@@ -56,28 +60,42 @@ const Products = () => {
     });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Products</h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Discover our curated collection of eco-friendly products for a sustainable lifestyle.
-          </p>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="mb-6 md:mb-8">
+          {/* Header with Search Toggle */}
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl md:text-4xl font-bold">Our Products</h1>
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSearch(!showSearch)}
+              >
+                {showSearch ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+              </Button>
+            )}
+          </div>
           
-          {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          {/* Mobile Search Bar (toggleable) */}
+          {(showSearch || !isMobile) && (
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-            
+          )}
+          
+          {/* Filters - Side by side on mobile, row on desktop */}
+          <div className="flex gap-2 md:gap-4 mb-4">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="flex-1 md:w-48">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -91,15 +109,15 @@ const Products = () => {
             </Select>
             
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Sort by" />
+              <SelectTrigger className="flex-1 md:w-48">
+                <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="price-low">Price ↑</SelectItem>
+                <SelectItem value="price-high">Price ↓</SelectItem>
                 <SelectItem value="rating">Rating</SelectItem>
-                <SelectItem value="sustainability">Sustainability Score</SelectItem>
+                <SelectItem value="sustainability">Eco Score</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -108,10 +126,10 @@ const Products = () => {
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No products found matching your criteria.</p>
+            <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
                   key={product.id}

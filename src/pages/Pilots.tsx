@@ -59,16 +59,9 @@ export const Pilots = () => {
       // Fetch vendor info
       const { data: vendors, error: vendorsError } = await supabase
         .from('approved_vendors')
-        .select('id, user_id, store_name, product_category, total_products');
+        .select('user_id, store_name, product_category, total_products');
 
       if (vendorsError) throw vendorsError;
-
-      // Fetch actual product counts for each vendor
-      const { data: allProducts, error: productsError } = await supabase
-        .from('products')
-        .select('vendor_id');
-
-      if (productsError) throw productsError;
 
       // Fetch dispatcher info
       const { data: dispatchers, error: dispatchersError } = await supabase
@@ -92,10 +85,6 @@ export const Pilots = () => {
         const vendorInfo = vendors?.find(v => v.user_id === profile.id);
         const dispatcherInfo = dispatchers?.find(d => d.user_id === profile.id);
         
-        // Count actual products for this vendor
-        const actualProductCount = vendorInfo ? 
-          allProducts?.filter(p => p.vendor_id === vendorInfo.id).length || 0 : 0;
-        
         const userLikes = likes?.filter(l => l.liked_user_id === profile.id) || [];
         const isLikedByCurrentUser = user ? userLikes.some(l => l.liker_id === user.id) : false;
         const customerCount = getCustomerCount(profile.id);
@@ -109,7 +98,7 @@ export const Pilots = () => {
           vendor_info: vendorInfo ? {
             store_name: vendorInfo.store_name,
             product_category: vendorInfo.product_category,
-            total_products: actualProductCount,
+            total_products: vendorInfo.total_products,
             rating: 4.5 // Mock rating for now
           } : undefined,
           dispatcher_info: dispatcherInfo ? {
@@ -213,133 +202,52 @@ export const Pilots = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Pilots Directory</h1>
-        <p className="text-gray-600">Discover vendors and dispatchers in our marketplace</p>
+        <p className="text-muted-foreground">Discover vendors and dispatchers in our marketplace</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {pilots.map(pilot => (
-          <Card key={pilot.id} className="relative">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+          <Card key={pilot.id} className="relative hover:shadow-lg transition-shadow cursor-pointer">
+            <Link to={pilot.user_types.includes('vendor') ? `/vendor/${pilot.id}` : `/dispatcher/${pilot.id}`}>
+              <CardHeader className="pb-3">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-muted rounded-full flex items-center justify-center">
                     {pilot.avatar_url ? (
                       <img 
                         src={pilot.avatar_url} 
                         alt={pilot.full_name}
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover"
                       />
                     ) : (
-                      <span className="font-semibold text-gray-600">
+                      <span className="font-semibold text-2xl text-muted-foreground">
                         {pilot.full_name.charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
-                  <div>
-                    <CardTitle className="text-lg">{pilot.full_name}</CardTitle>
-                    <div className="flex gap-1 mt-1">
-                      {pilot.user_types.includes('vendor') && (
+                  <div className="text-center">
+                    <CardTitle className="text-base md:text-lg">{pilot.full_name}</CardTitle>
+                    <div className="flex gap-1 mt-1 justify-center">
+                      {pilot.user_types.includes('vendor') && pilot.vendor_info && (
                         <Badge variant="default" className="text-xs">
-                          <Store className="w-3 h-3 mr-1" />
-                          Vendor
-                        </Badge>
-                      )}
-                      {pilot.user_types.includes('dispatch') && (
-                        <Badge variant="secondary" className="text-xs">
-                          <Truck className="w-3 h-3 mr-1" />
-                          Dispatcher
+                          {pilot.vendor_info.product_category}
                         </Badge>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleLike(pilot.id)}
-                    className={pilot.is_liked_by_current_user ? 'text-red-500' : 'text-gray-400'}
-                  >
-                    <Heart 
-                      className={`w-4 h-4 ${pilot.is_liked_by_current_user ? 'fill-current' : ''}`} 
-                    />
-                    <span className="ml-1 text-xs">{pilot.likes_count}</span>
-                  </Button>
-                  
-                  {user && user.id !== pilot.id && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFollow(pilot.id)}
-                      className={isFollowing(pilot.id) ? 'text-blue-500' : 'text-gray-400'}
-                    >
-                      {isFollowing(pilot.id) ? (
-                        <UserMinus className="w-4 h-4" />
-                      ) : (
-                        <UserPlus className="w-4 h-4" />
-                      )}
-                    </Button>
+                
+                {/* Customer Count and Rating */}
+                <div className="flex items-center justify-between mt-2 text-sm">
+                  <span className="text-muted-foreground">{pilot.customer_count || 0} Customers</span>
+                  {(pilot.vendor_info || pilot.dispatcher_info) && (
+                    <div className="flex items-center">
+                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                      <span className="ml-1">{pilot.vendor_info?.rating || pilot.dispatcher_info?.rating || 0}</span>
+                    </div>
                   )}
                 </div>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <div className="space-y-3">
-                {/* Customer/Followers count */}
-                <div className="flex items-center justify-center text-sm text-gray-600">
-                  <span className="font-medium">{pilot.customer_count || 0}</span>
-                  <span className="ml-1">Customers</span>
-                </div>
-
-                {pilot.vendor_info && (
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm">{pilot.vendor_info.store_name}</span>
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm ml-1">{pilot.vendor_info.rating}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                      <span>Category: {getTopCategory(pilot.vendor_info)}</span>
-                      <div className="flex items-center">
-                        <Package className="w-3 h-3 mr-1" />
-                        {pilot.vendor_info.total_products} products
-                      </div>
-                    </div>
-                    <Link to={`/vendor/${pilot.id}`}>
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Profile
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-
-                {pilot.dispatcher_info && (
-                  <div className="bg-purple-50 p-3 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm">{pilot.dispatcher_info.dispatch_name}</span>
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm ml-1">{pilot.dispatcher_info.rating}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                      <span>Vehicle: {pilot.dispatcher_info.vehicle_type}</span>
-                      <span>{pilot.dispatcher_info.total_deliveries} deliveries</span>
-                    </div>
-                    <Link to={`/dispatcher/${pilot.id}`}>
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Profile
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </CardContent>
+              </CardHeader>
+            </Link>
           </Card>
         ))}
       </div>
