@@ -174,70 +174,34 @@ const Checkout: React.FC = () => {
   // Paystack integration
   // -------------------------
   const handlePaystackPayment = () => {
-  if (!user) {
-    toast({ title: 'Not signed in', description: 'Please sign in to continue', variant: 'destructive' });
-    return;
-  }
-
-  if (!window.PaystackPop) {
-    toast({ title: 'Payment Error', description: 'Paystack script not loaded. Please refresh and try again.', variant: 'destructive' });
-    return;
-  }
+  if (!user) return toast({ title: 'Sign in required', variant: 'destructive' });
+  if (!window.PaystackPop) return toast({ title: 'Paystack not loaded', variant: 'destructive' });
+  if (orderTotals.total <= 0) return toast({ title: 'Invalid amount', variant: 'destructive' });
 
   const handler = window.PaystackPop.setup({
     key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-    email: user.email || (user?.user_metadata?.email ?? ''),
-    amount: Math.round((orderTotals.total || 0) * 100), // in kobo
+    email: user.email,
+    amount: Math.round(orderTotals.total * 100),
     currency: 'NGN',
     ref: `ALPHADOM_${Date.now()}`,
     metadata: {
       custom_fields: [
-        {
-          display_name: 'Customer Phone',
-          variable_name: 'phone',
-          value: shippingInfo.phone
-        }
+        { display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }
       ]
     },
-    // ⚠️ Plain function, not async
     callback: function(response: any) {
-      setProcessing(true);
-
-      // Run async logic in IIFE
-      (async () => {
-        try {
-          const { order, error } = await createOrder({
-            total_amount: orderTotals.total,
-            shipping_address: shippingInfo,
-            payment_method: 'paystack',
-            items: items.map(it => ({ product_id: it.id, quantity: it.quantity, price: it.price }))
-          });
-
-          if (error) throw error;
-
-          await supabase
-            .from('orders')
-            .update({ payment_status: 'paid', status: 'processing' })
-            .eq('id', order.id);
-
-          clearCart();
-          toast({ title: 'Payment Successful', description: 'Your order has been placed.' });
-          navigate('/orders');
-        } catch (err) {
-          console.error('post-paystack-order error:', err);
-          toast({ title: 'Order Error', description: 'Failed to create order after payment', variant: 'destructive' });
-        } finally {
-          setProcessing(false);
-        }
-      })();
+      console.log('Payment successful', response);
+      toast({ title: 'Payment Successful' });
+      // Place order logic here
     },
     onClose: function() {
-      toast({ title: 'Payment Cancelled', description: 'You closed the payment window', variant: 'destructive' });
+      toast({ title: 'Payment cancelled' });
     }
   });
 
   handler.openIframe();
 };
+
 
 
   // -------------------------
