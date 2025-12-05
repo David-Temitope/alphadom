@@ -199,47 +199,34 @@ const Checkout: React.FC = () => {
           }
         ]
       },
-      callback: async function (response: any) {
-        // response.reference
-        setProcessing(true);
-        try {
-          // Create order with payment_reference and mark as paid
-          const orderItems = items.map((it: any) => ({
-            product_id: it.id,
-            quantity: it.quantity,
-            price: it.price
-          }));
+      callback: function(response: any) {
+  setProcessing(true);
+  createOrder({
+    total_amount: orderTotals.total,
+    shipping_address: shippingInfo,
+    payment_method: 'paystack',
+    items: items.map(it => ({ product_id: it.id, quantity: it.quantity, price: it.price }))
+  })
+    .then(({ order, error }) => {
+      if (error) throw error;
 
-          const { order, error } = await createOrder({
-            total_amount: orderTotals.total,
-            shipping_address: shippingInfo,
-            payment_method: 'paystack',
-            items: orderItems
-          });
-
-          if (error) throw error;
-
-          // Optionally update status in orders table if createOrder doesn't set it
-          if (order && order.id) {
-            await supabase
-              .from('orders')
-              .update({
-                payment_status: 'paid',
-                status: 'processing'
-              })
-              .eq('id', order.id);
-          }
-
-          clearCart();
-          toast({ title: 'Payment Successful', description: 'Your order has been placed.' });
-          navigate('/orders');
-        } catch (err) {
-          console.error('post-paystack-order error:', err);
-          toast({ title: 'Order Error', description: 'Failed to create order after payment', variant: 'destructive' });
-        } finally {
-          setProcessing(false);
-        }
-      },
+      return supabase
+        .from('orders')
+        .update({ payment_status: 'paid', status: 'processing' })
+        .eq('id', order.id);
+    })
+    .then(() => {
+      clearCart();
+      toast({ title: 'Payment Successful', description: 'Your order has been placed.' });
+      navigate('/orders');
+    })
+    .catch(err => {
+      console.error('post-paystack-order error:', err);
+      toast({ title: 'Order Error', description: 'Failed to create order after payment', variant: 'destructive' });
+    })
+    .finally(() => setProcessing(false));
+}
+,
       onClose: function () {
         toast({ title: 'Payment Cancelled', description: 'You closed the payment window', variant: 'destructive' });
       }
