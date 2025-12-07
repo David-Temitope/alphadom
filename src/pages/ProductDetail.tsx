@@ -9,7 +9,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { WishlistButton } from '@/components/WishlistButton';
 import { LikeButton } from '@/components/LikeButton';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { ProductComments } from '@/components/ProductComments';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -340,7 +340,7 @@ const ProductDetail = () => {
             <h2 className="text-2xl font-bold mb-8">Similar Products</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {similarProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCardMobile key={product.id} product={product} />
               ))}
             </div>
           </section>
