@@ -1,7 +1,7 @@
-
 import React, { useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductCardMobile } from "@/components/ProductCardMobile";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -131,7 +131,24 @@ const Products = () => {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard
+              isMobile ? (
+                <ProductCardMobile
+                  key={product.id}
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    price: Number(product.price),
+                    image: product.image || '/placeholder.svg',
+                    category: product.category,
+                    rating: Number(product.rating) || 0,
+                    stock_count: product.stock_count || 0,
+                    has_discount: product.has_discount,
+                    discount_percentage: product.discount_percentage,
+                    original_price: product.original_price
+                  }}
+                />
+              ) : (
+                <ProductCard
                   key={product.id}
                   product={{
                     id: product.id,
@@ -148,7 +165,8 @@ const Products = () => {
                     discount_percentage: product.discount_percentage,
                     original_price: product.original_price
                   }}
-              />
+                />
+              )
             ))}
           </div>
         )}

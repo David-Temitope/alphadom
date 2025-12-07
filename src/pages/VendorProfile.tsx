@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserFollows } from '@/hooks/useUserFollows';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductCardMobile } from '@/components/ProductCardMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface VendorProfile {
   id: string;
@@ -35,6 +37,10 @@ interface VendorProduct {
   category: string;
   rating: number;
   reviews: number;
+  stock_count?: number;
+  has_discount?: boolean;
+  discount_percentage?: number;
+  original_price?: number;
 }
 
 export const VendorProfile = () => {
@@ -45,6 +51,7 @@ export const VendorProfile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { isFollowing, getCustomerCount, toggleFollow } = useUserFollows();
+  const isMobile = useIsMobile();
 
   const fetchVendorProfile = async () => {
     try {
@@ -132,102 +139,117 @@ export const VendorProfile = () => {
       <Card className="mb-8">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4 md:space-x-6">
               <div className="relative">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-200 rounded-full flex items-center justify-center">
                   {vendor.profile?.avatar_url ? (
                     <img 
                       src={vendor.profile.avatar_url} 
                       alt={vendor.store_name}
-                      className="w-24 h-24 rounded-full object-cover"
+                      className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-2xl font-semibold text-gray-600">
+                    <span className="text-xl md:text-2xl font-semibold text-gray-600">
                       {vendor.store_name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                  <CheckCircle className="w-5 h-5 text-white" />
+                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5 md:p-1">
+                  <CheckCircle className="w-3 h-3 md:w-5 md:h-5 text-white" />
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-3xl">{vendor.store_name}</CardTitle>
-                  <Badge variant="default" className="bg-green-100 text-green-800">
+              <div className="space-y-1 md:space-y-2">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <CardTitle className="text-lg md:text-3xl">{vendor.store_name}</CardTitle>
+                  <Badge variant="default" className="bg-green-100 text-green-800 text-[10px] md:text-xs">
                     Verified
                   </Badge>
                 </div>
-                <p className="text-gray-600">{vendor.profile?.full_name}</p>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span>Category: {vendor.product_category}</span>
-                  <span>•</span>
-                  <div className="flex items-center gap-1">
+                <p className="text-sm md:text-base text-gray-600">{vendor.profile?.full_name}</p>
+                <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500">
+                  <span>{vendor.product_category}</span>
+                  <span className="hidden md:inline">•</span>
+                  <div className="hidden md:flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
                     <span>Lagos, Nigeria</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span className="text-sm font-medium">4.8</span>
-                  <span className="text-sm text-gray-500">({vendor.total_orders} reviews)</span>
+                  <Star className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 fill-current" />
+                  <span className="text-xs md:text-sm font-medium">4.8</span>
+                  <span className="text-xs md:text-sm text-gray-500">({vendor.total_orders} reviews)</span>
                 </div>
               </div>
             </div>
 
             {user && user.id !== vendor.user_id && (
-              <Button
-                onClick={handleFollow}
-                variant={isUserFollowing ? "outline" : "default"}
-                className="flex items-center gap-2"
-              >
-                {isUserFollowing ? (
-                  <>
+              isMobile ? (
+                <Button
+                  onClick={handleFollow}
+                  variant={isUserFollowing ? "outline" : "default"}
+                  size="icon"
+                  className="h-9 w-9"
+                >
+                  {isUserFollowing ? (
                     <UserMinus className="w-4 h-4" />
-                    Unfollow
-                  </>
-                ) : (
-                  <>
+                  ) : (
                     <UserPlus className="w-4 h-4" />
-                    Follow
-                  </>
-                )}
-              </Button>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleFollow}
+                  variant={isUserFollowing ? "outline" : "default"}
+                  className="flex items-center gap-2"
+                >
+                  {isUserFollowing ? (
+                    <>
+                      <UserMinus className="w-4 h-4" />
+                      Unfollow
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Follow
+                    </>
+                  )}
+                </Button>
+              )
             )}
           </div>
         </CardHeader>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      {/* Stats Cards - 3 on mobile (no total sales), 4 on desktop */}
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 mb-8">
         <Card>
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-primary">{customerCount}</div>
-            <div className="text-sm text-gray-600">Customers</div>
+          <CardContent className="p-3 md:p-6 text-center">
+            <div className="text-lg md:text-2xl font-bold text-primary">{customerCount}</div>
+            <div className="text-[10px] md:text-sm text-gray-600">Customers</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-primary">{vendor.total_products}</div>
-            <div className="text-sm text-gray-600">Products</div>
+          <CardContent className="p-3 md:p-6 text-center">
+            <div className="text-lg md:text-2xl font-bold text-primary">{products.length}</div>
+            <div className="text-[10px] md:text-sm text-gray-600">Products</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-primary">{vendor.total_orders}</div>
-            <div className="text-sm text-gray-600">Reviews</div>
+          <CardContent className="p-3 md:p-6 text-center">
+            <div className="text-lg md:text-2xl font-bold text-primary">{vendor.total_orders}</div>
+            <div className="text-[10px] md:text-sm text-gray-600">Reviews</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-primary">
-              ${vendor.total_revenue.toLocaleString()}
+        <Card className="hidden md:block">
+          <CardContent className="p-3 md:p-6 text-center">
+            <div className="text-lg md:text-2xl font-bold text-primary">
+              ₦{vendor.total_revenue.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-600">Total Sales</div>
+            <div className="text-[10px] md:text-sm text-gray-600">Total Sales</div>
           </CardContent>
         </Card>
       </div>
@@ -244,9 +266,13 @@ export const VendorProfile = () => {
         </CardHeader>
         <CardContent>
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
               {products.map(product => (
-                <ProductCard key={product.id} product={product as any} />
+                isMobile ? (
+                  <ProductCardMobile key={product.id} product={product as any} />
+                ) : (
+                  <ProductCard key={product.id} product={product as any} />
+                )
               ))}
             </div>
           ) : (
