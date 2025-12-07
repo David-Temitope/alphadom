@@ -1,5 +1,5 @@
 import { useProducts } from "@/hooks/useProducts";
-import { JumiaProductCard } from "./JumiaProductCard";
+import { ProductCard } from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from 'react';
@@ -84,7 +84,7 @@ export const FeaturedProducts = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
           {filteredProducts.map((product) => (
             <div key={product.id} className="w-full">
-              <JumiaProductCard product={product} />
+              <ProductCard product={product} />
             </div>
           ))}
         </div>
