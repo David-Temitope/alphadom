@@ -86,6 +86,15 @@ const ShopApplicationStatus = () => {
 
     setProcessing(true);
 
+    console.log({
+  email: user?.email,
+  amount: paymentAmount,
+  hasRefresh: typeof refreshUserApplication,
+  hasToast: typeof toast,
+  hasSetProcessing: typeof setProcessing
+});
+
+
     const handler = window.PaystackPop.setup({
       key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
       email: user.email,
@@ -98,20 +107,30 @@ const ShopApplicationStatus = () => {
           { display_name: 'Store', variable_name: 'store_name', value: userApplication.store_name }
         ]
       },
-      callback: async function(response: any) {
-        console.log('Shop payment successful', response);
-        toast({
-          title: 'Payment Successful!',
-          description: 'Your payment has been received. Please wait for admin to activate your shop.',
-        });
-        // Refresh application to see updated status
-        refreshUserApplication();
-        setProcessing(false);
-      },
-      onClose: function() {
-        toast({ title: 'Payment cancelled' });
-        setProcessing(false);
-      }
+      callback: function(response) {
+  try {
+    console.log("Paystack complete:", response);
+
+    // Optional if this function exists
+    if (typeof refreshUserApplication === "function") {
+      refreshUserApplication();
+    }
+
+    toast?.({ title: "Payment successful!" });
+    setProcessing?.(false);
+  } catch (err) {
+    console.error("Callback error:", err);
+  }
+},
+onClose: function() {
+  try {
+    toast?.({ title: "Payment cancelled" });
+    setProcessing?.(false);
+  } catch (err) {
+    console.error("Close error:", err);
+  }
+},
+
     });
 
     handler.openIframe?.() || handler.openCheckout?.();
