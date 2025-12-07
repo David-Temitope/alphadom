@@ -9,6 +9,38 @@ import { useCart } from "@/contexts/CartContext";
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, totalSustainabilityImpact, clearCart } = useCart();
 
+  const calculateTotals = () => {
+  let subtotal = totalPrice;
+  let shipping = 0;
+  const shippingGroups = new Map();
+
+  for (const item of items) {
+    const shippingFee = parseFloat(item.shipping_fee?.toString() || '0');
+    if (item.price >= 10 && shippingFee > 0) {
+      if (item.shipping_type === 'per_product') {
+        shipping += shippingFee * item.quantity;
+      } else {
+        if (!shippingGroups.has(item.id)) {
+          shippingGroups.set(item.id, shippingFee);
+          shipping += shippingFee;
+        }
+      }
+    }
+  }
+
+  if (shipping === 0 && subtotal < 30) {
+    shipping = subtotal * 0.05;
+  }
+
+  const vat = subtotal * 0.025; // 2.5% VAT
+  const total = subtotal + shipping + vat;
+
+  return { subtotal, shipping, vat, total };
+};
+
+const { subtotal, shipping, vat, total } = calculateTotals();
+
+
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
@@ -31,7 +63,9 @@ const Cart = () => {
         </div>
       </div>
     );
-  }
+  };
+
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -141,23 +175,24 @@ const Cart = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Items ({items.reduce((sum, item) => sum + item.quantity, 0)})</span>
-                    <span className="font-medium">₦{totalPrice.toLocaleString()}</span>
+                    <span className="font-medium">₦{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium text-green-600">Free</span>
+                    <span className="font-medium text-green-600">
+                      {shipping === 0 ? 'FREE' : `₦${shipping.toLocaleString()}`}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">₦{(totalPrice * 0.08).toLocaleString()}</span>
+                    <span className="font-medium">₦{vat.toLocaleString()}</span>
                   </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
+                  ...
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-green-600">₦{(totalPrice * 1.08).toLocaleString()}</span>
+                    <span className="text-green-600">₦{total.toLocaleString()}</span>
                   </div>
+
                 </div>
 
                 {/* Sustainability Impact */}

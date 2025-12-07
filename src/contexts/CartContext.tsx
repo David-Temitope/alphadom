@@ -5,11 +5,14 @@ interface CartItem {
   id: string;
   name: string;
   price: number;
-  image: string;
   quantity: number;
+  image: string;
   category: string;
   sustainabilityScore: number;
+  shipping_fee?: number;       // optional
+  shipping_type?: 'per_product' | 'one_time'; // optional
 }
+
 
 interface CartContextType {
   items: CartItem[];
