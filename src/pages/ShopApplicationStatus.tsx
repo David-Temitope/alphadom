@@ -27,19 +27,14 @@ const ShopApplicationStatus = () => {
 
   // Load Paystack script
   useEffect(() => {
-    if (window.PaystackPop) return;
+  if (window.PaystackPop) return;
 
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    document.body.appendChild(script);
+  const script = document.createElement('script');
+  script.src = 'https://js.paystack.co/v1/inline.js';
+  script.onload = () => console.log("Paystack loaded");
+  document.body.appendChild(script);
+}, []);
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (userApplication?.payment_countdown_expires_at) {
@@ -119,7 +114,8 @@ const ShopApplicationStatus = () => {
       }
     });
 
-    handler.openIframe();
+    handler.openIframe?.() || handler.openCheckout?.();
+    ;
   };
 
   if (!user) {
