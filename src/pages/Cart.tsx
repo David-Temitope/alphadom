@@ -64,11 +64,13 @@ const Cart = () => {
                         </div>
                         <div className="text-right">
                           <div className="text-lg font-bold text-green-600">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ₦{(item.price * item.quantity).toLocaleString()}
                           </div>
+
                           <div className="text-sm text-gray-500">
-                            ${item.price.toFixed(2)} each
+                            ₦{item.price.toLocaleString()} each
                           </div>
+
                         </div>
                       </div>
 
@@ -139,7 +141,7 @@ const Cart = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Items ({items.reduce((sum, item) => sum + item.quantity, 0)})</span>
-                    <span className="font-medium">${totalPrice.toFixed(2)}</span>
+                    <span className="font-medium">₦{totalPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
@@ -147,14 +149,14 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">${(totalPrice * 0.08).toFixed(2)}</span>
+                    <span className="font-medium">₦{(totalPrice * 0.08).toLocaleString()}</span>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-green-600">${(totalPrice * 1.08).toFixed(2)}</span>
+                    <span className="text-green-600">₦{(totalPrice * 1.08).toLocaleString()}</span>
                   </div>
                 </div>
 
