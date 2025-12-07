@@ -59,6 +59,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const hasDiscount = product.has_discount && product.discount_percentage && product.original_price;
   const discountPercentage = hasDiscount ? product.discount_percentage : 0;
   const originalPrice = hasDiscount ? product.original_price : 0;
+  const formatNaira = (amount: number) => {
+  return amount.toLocaleString("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 0,
+  });
+};
+
 
   return (
     <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg border bg-white dark:bg-card">
@@ -126,14 +134,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="mt-auto">
             <div className="flex items-baseline gap-2 mb-1">
               <span className={`text-lg font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
-                ${product.price.toFixed(2)}
+                {formatNaira(product.price)}
               </span>
+
               {hasDiscount && (
                 <span className="text-sm text-muted-foreground line-through">
-                  ${originalPrice.toFixed(2)}
+                  {formatNaira(originalPrice)}
                 </span>
               )}
             </div>
+
             
             <div className="flex items-center justify-between">
               <Badge variant="outline" className="text-xs border-green-200 text-green-700">

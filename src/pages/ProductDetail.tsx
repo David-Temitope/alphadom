@@ -32,9 +32,9 @@ const ProductDetail = () => {
   const [vendorName, setVendorName] = useState<string>('');
 
   const product = products.find(p => p.id === id);
-  const similarProducts = products
-    .filter(p => p.id !== id && p.category === product?.category)
-    .slice(0, 4);
+  const similarProducts = product
+  ? products.filter(p => p.id !== id && p.category === product.category).slice(0, 4)
+  : [];
 
   useEffect(() => {
     const fetchVendorName = async () => {
@@ -74,6 +74,10 @@ const ProductDetail = () => {
       });
     }
   };
+  const amountSaved = hasDiscount 
+  ? Number(originalPrice) - Number(product.price) 
+  : 0;
+
 
   if (loading) {
     return (
@@ -181,8 +185,9 @@ const ProductDetail = () => {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3 mb-2">
                   <span className={`text-3xl lg:text-4xl font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
-                    ${product.price.toFixed(2)}
+                    NGN{product.price.toLocaleString()}
                   </span>
+
                   {hasDiscount && (
                     <span className="text-lg text-muted-foreground line-through">
                       ${originalPrice.toFixed(2)}
@@ -191,8 +196,9 @@ const ProductDetail = () => {
                 </div>
                 {hasDiscount && (
                   <p className="text-sm text-green-600 font-medium">
-                    You save: NGN{(originalPrice - product.price).toFixed(2)} ({discountPercentage}%)
+                    You save: NGN{amountSaved.toLocaleString()} ({discountPercentage}%)
                   </p>
+
                 )}
               </div>
             </div>
