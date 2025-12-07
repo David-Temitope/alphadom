@@ -33,6 +33,54 @@ export const Hero = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-green-100/20 to-blue-100/20 rounded-full blur-3xl"></div>
       </div>
       
+      <div className="relative">
+            <div className="relative z-10 h-96 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
+              <div className="relative w-full h-full">
+                {settings.hero_images.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
+                      index === currentSlide ? 'translate-x-0' : 
+                      index < currentSlide ? '-translate-x-full' : 'translate-x-full'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Hero slide ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+                
+                {/* Navigation Arrows */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
+                >
+                  <ChevronLeft className="w-5 h-5 text-slate-700" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
+                >
+                  <ChevronRight className="w-5 h-5 text-slate-700" />
+                </button>
+                
+                {/* Dots Indicator */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                  {settings.hero_images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                        index === currentSlide ? 'bg-white shadow-lg' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
@@ -102,53 +150,7 @@ export const Hero = () => {
             </div>
           </div>
           
-          <div className="relative">
-            <div className="relative z-10 h-96 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
-              <div className="relative w-full h-full">
-                {settings.hero_images.map((image, index) => (
-                  <div
-                    key={index}
-                    className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
-                      index === currentSlide ? 'translate-x-0' : 
-                      index < currentSlide ? '-translate-x-full' : 'translate-x-full'
-                    }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`Hero slide ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-                
-                {/* Navigation Arrows */}
-                <button
-                  onClick={prevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
-                >
-                  <ChevronLeft className="w-5 h-5 text-slate-700" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
-                >
-                  <ChevronRight className="w-5 h-5 text-slate-700" />
-                </button>
-                
-                {/* Dots Indicator */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                  {settings.hero_images.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentSlide(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                        index === currentSlide ? 'bg-white shadow-lg' : 'bg-white/50'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+          
             <div className="absolute -inset-4 bg-gradient-to-r from-green-200/30 to-blue-200/30 rounded-3xl blur-xl"></div>
           </div>
         </div>
