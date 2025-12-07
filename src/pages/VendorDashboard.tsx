@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useVendors } from '@/hooks/useVendors';
 import { useProducts } from '@/hooks/useProducts';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText } from 'lucide-react';
+import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorProductForm } from '@/components/VendorProductForm';
@@ -18,11 +19,8 @@ const VendorDashboard = () => {
   const { products, refreshProducts } = useProducts();
   const { user } = useAuth();
   const { toast } = useToast();
-  // Remove unused state variables as we're using VendorProductForm component
 
   const vendorProducts = products.filter(p => p.vendor_user_id === user?.id);
-
-  // Product addition is now handled by VendorProductForm component
 
   const handleDeleteProduct = async (productId: string) => {
     try {
@@ -71,6 +69,10 @@ const VendorDashboard = () => {
     );
   }
 
+  // Check if vendor is suspended
+  const isSuspended = currentVendor.is_suspended === true;
+  const isInactive = !currentVendor.is_active;
+
   return (
     <div className="min-h-screen bg-background p-2 md:p-4">
       <div className="container mx-auto max-w-7xl overflow-x-hidden">
@@ -79,11 +81,23 @@ const VendorDashboard = () => {
           <p className="text-muted-foreground">{currentVendor.store_name} - {currentVendor.product_category}</p>
         </div>
 
+        {/* Suspension/Inactive Alert */}
+        {(isSuspended || isInactive) && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Shop Suspended</AlertTitle>
+            <AlertDescription>
+              Your shop has been suspended by the management team. You cannot add or edit products until your shop has been reactivated. 
+              Please contact support for more information.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="products">My Products</TabsTrigger>
-            <TabsTrigger value="add-product">Add Product</TabsTrigger>
+            <TabsTrigger value="add-product" disabled={isSuspended || isInactive}>Add Product</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
           </TabsList>
 
@@ -124,8 +138,11 @@ const VendorDashboard = () => {
                   <CardTitle className="text-[10px] md:text-sm font-medium">Status</CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 pt-0 md:p-6 md:pt-0">
-                  <Badge variant={currentVendor.is_active ? "default" : "destructive"} className="text-[10px] md:text-xs">
-                    {currentVendor.is_active ? "Active" : "Inactive"}
+                  <Badge 
+                    variant={isSuspended ? "destructive" : currentVendor.is_active ? "default" : "destructive"} 
+                    className="text-[10px] md:text-xs"
+                  >
+                    {isSuspended ? "Suspended" : currentVendor.is_active ? "Active" : "Inactive"}
                   </Badge>
                 </CardContent>
               </Card>
@@ -161,13 +178,14 @@ const VendorDashboard = () => {
                               </div>
                             )}
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" disabled={isSuspended || isInactive}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="destructive"
                                 onClick={() => handleDeleteProduct(product.id)}
+                                disabled={isSuspended || isInactive}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -189,7 +207,17 @@ const VendorDashboard = () => {
                 <CardDescription>Add a new product to your store using the same format as admin</CardDescription>
               </CardHeader>
               <CardContent>
-                <VendorProductForm onProductAdded={refreshProducts} />
+                {isSuspended || isInactive ? (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Cannot Add Products</AlertTitle>
+                    <AlertDescription>
+                      Your shop is currently suspended. You cannot add new products until your shop has been reactivated by the management team.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <VendorProductForm onProductAdded={refreshProducts} />
+                )}
               </CardContent>
             </Card>
           </TabsContent>

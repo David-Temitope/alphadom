@@ -7,6 +7,7 @@ import { UserMenu } from './UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
 import { useUserTypes } from '@/hooks/useUserTypes';
+import { useShopApplications } from '@/hooks/useShopApplications';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { useAdmin } from '@/contexts/AdminContext';
 
@@ -24,11 +25,15 @@ export const Navbar = () => {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
   
   const UserTypeNavLink = () => {
+    const { userApplication } = useShopApplications();
+    
     const getNavLink = () => {
       if (hasUserType('vendor')) {
         return { to: '/vendor-dashboard', text: 'My Shop' };
       } else if (hasUserType('dispatch')) {
         return { to: '/dispatch-dashboard', text: 'My Dashboard' };
+      } else if (userApplication) {
+        return { to: '/shop-application-status', text: 'Application Status' };
       } else {
         return { to: '/user-types', text: 'User Types' };
       }
@@ -49,11 +54,15 @@ export const Navbar = () => {
   };
   
   const UserTypeNavLinkMobile = () => {
+    const { userApplication } = useShopApplications();
+    
     const getNavLink = () => {
       if (hasUserType('vendor')) {
         return { to: '/vendor-dashboard', text: 'My Shop' };
       } else if (hasUserType('dispatch')) {
         return { to: '/dispatch-dashboard', text: 'My Dashboard' };
+      } else if (userApplication) {
+        return { to: '/shop-application-status', text: 'Application Status' };
       } else {
         return { to: '/user-types', text: 'User Types' };
       }

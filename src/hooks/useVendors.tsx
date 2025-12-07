@@ -9,6 +9,7 @@ interface Vendor {
   store_name: string;
   product_category: string;
   is_active: boolean;
+  is_suspended?: boolean;
   total_revenue: number;
   total_orders: number;
   total_products: number;
