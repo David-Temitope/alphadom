@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import { ShoppingCart, CreditCard, Truck, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
 
+// --- Types & Constants ---
 const VAT_RATE = 0.025; // 2.5% VAT
 
 declare global {
@@ -22,15 +23,75 @@ declare global {
   }
 }
 
+type ShippingInfo = {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string; // Assuming 'NG'
+  phone: string;
+};
+
+type OrderTotals = {
+  subtotal: number;
+  shipping: number;
+  vat: number;
+  total: number;
+};
+
+type PaymentMethod = 'bank_transfer' | 'paystack';
+
+// --- Utility Functions ---
+
+/**
+ * Calculates the shipping cost for all items in the cart.
+ * @param items - The items in the shopping cart.
+ * @param subtotal - The subtotal of all items.
+ * @returns The total shipping cost.
+ */
+const calculateShipping = (items: any[], subtotal: number): number => {
+  let totalShipping = 0;
+  const shippingGroups = new Map<string | number, number>(); // Group by product ID for one-time shipping
+
+  for (const item of items) {
+    const product = item as any;
+    const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
+
+    // Only apply shipping fee if product price is reasonable and fee > 0
+    if (item.price >= 10 && shippingFee > 0) {
+      if (product.shipping_type === 'per_product') {
+        totalShipping += shippingFee * item.quantity;
+      } else {
+        // One-time shipping per product type/vendor (simplified to per product ID here)
+        if (!shippingGroups.has(product.id)) {
+          shippingGroups.set(product.id, shippingFee);
+          totalShipping += shippingFee;
+        }
+      }
+    }
+  }
+
+  // Add base shipping if no product shipping and subtotal < $30
+  if (totalShipping === 0 && subtotal < 30) {
+    totalShipping = subtotal * 0.05;
+  }
+
+  return totalShipping;
+};
+
+
+// --- Component ---
 const Checkout: React.FC = () => {
+  // --- Hooks and Context ---
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
   const { createOrder } = useOrders();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { settings } = useAdminSettings();
+  // const { settings } = useAdminSettings(); // Not used in provided logic, keeping for context
 
-  const [shippingInfo, setShippingInfo] = useState({
+  // --- State ---
+  const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     street: '',
     city: '',
     state: '',
@@ -39,80 +100,74 @@ const Checkout: React.FC = () => {
     phone: ''
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'paystack'>('bank_transfer');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [orderTotals, setOrderTotals] = useState({
+  const [orderTotals, setOrderTotals] = useState<OrderTotals>({
     subtotal: 0,
     shipping: 0,
     vat: 0,
     total: 0
   });
   const [vendorBankDetails, setVendorBankDetails] = useState<any>(null);
-  const [productVendor, setProductVendor] = useState<any>(null);
+  // const [productVendor, setProductVendor] = useState<any>(null); // Not used in provided logic
 
-  // Fetch vendor bank details (single-vendor checkout assumed)
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    if (!items || items.length === 0) {
-      navigate('/cart');
-      return;
-    }
+  // --- Derived Values ---
+  const isBankTransferAvailable = !!vendorBankDetails;
+  
+  const validateShippingInfo = useMemo(() => {
+    return (
+      shippingInfo.street &&
+      shippingInfo.city &&
+      shippingInfo.state &&
+      shippingInfo.zipCode &&
+      shippingInfo.phone
+    );
+  }, [shippingInfo]);
 
-    calculateTotals();
-    fetchVendorBankDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, items, shippingInfo]);
+  // --- Effects and Callbacks ---
 
-  // If there are no vendor bank details (admin product), hide/disable bank_transfer
-  useEffect(() => {
-    if (!vendorBankDetails && paymentMethod === 'bank_transfer') {
-      setPaymentMethod('paystack');
-    }
-  }, [vendorBankDetails, paymentMethod]);
+  /**
+   * Calculates all order totals (subtotal, shipping, VAT, total).
+   */
+  const calculateTotals = useCallback(() => {
+    const subtotal = total;
+    const totalShipping = calculateShipping(items, subtotal);
+    const vat = subtotal * VAT_RATE; // 2.5% VAT
 
-  useEffect(() => {
-  // Only load once
-  if (window.PaystackPop) return;
+    setOrderTotals({
+      subtotal,
+      shipping: totalShipping,
+      vat,
+      total: subtotal + totalShipping + vat
+    });
+  }, [items, total]);
 
-  const script = document.createElement('script');
-  script.src = 'https://js.paystack.co/v1/inline.js';
-  script.async = true;
-  script.onload = () => console.log('Paystack script loaded');
-  script.onerror = () => console.error('Failed to load Paystack script');
-  document.body.appendChild(script);
-
-  return () => {
-    document.body.removeChild(script);
-  };
-}, []);
-
-
-  const fetchVendorBankDetails = async () => {
+  /**
+   * Fetches vendor's bank details for bank transfer option.
+   */
+  const fetchVendorBankDetails = useCallback(async () => {
     if (items.length === 0) return;
 
-    // Get the first product's vendor (assuming single vendor checkout for now)
+    // Assuming single vendor checkout: get the first product's vendor
     const firstProduct = items[0] as any;
+
     if (firstProduct.vendor_id) {
       try {
-        // Product added by vendor - fetch vendor's bank details
         const { data, error } = await supabase
           .from('approved_vendors')
           .select('*, shop_applications!inner(vendor_bank_details)')
           .eq('id', firstProduct.vendor_id)
           .single();
 
-        if (error) {
-          console.warn('Vendor fetch error:', error);
+        if (error || !data) {
+          console.warn('Vendor fetch error or not found:', error);
           setVendorBankDetails(null);
-          setProductVendor(null);
+          // setProductVendor(null);
           return;
         }
 
-        setProductVendor(data);
+        // setProductVendor(data);
         const shopApp = (data as any).shop_applications;
         if (shopApp && shopApp.vendor_bank_details) {
           setVendorBankDetails(shopApp.vendor_bank_details);
@@ -122,54 +177,56 @@ const Checkout: React.FC = () => {
       } catch (err) {
         console.error('fetchVendorBankDetails error:', err);
         setVendorBankDetails(null);
-        setProductVendor(null);
+        // setProductVendor(null);
       }
     } else {
-      // Product added by admin - use admin bank details from settings
-      setVendorBankDetails(null); // Will fall back to admin settings
+      // Product added by admin - use admin bank details (or disable bank transfer if not set)
+      setVendorBankDetails(null);
     }
-  };
+  }, [items]);
 
-  const calculateTotals = async () => {
-    const subtotal = total;
-    
-    // Calculate shipping based on product shipping fees
-    let totalShipping = 0;
-    const shippingGroups = new Map(); // Group by shipping type
-    
-    for (const item of items) {
-      const product = item as any; // Cast to access shipping properties
-      const productPrice = item.price;
-      const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
-      
-      if (productPrice >= 10 && shippingFee > 0) {
-        if (product.shipping_type === 'per_product') {
-          totalShipping += shippingFee * item.quantity;
-        } else {
-          // One-time shipping - group by product to avoid duplicates
-          if (!shippingGroups.has(product.id)) {
-            shippingGroups.set(product.id, shippingFee);
-            totalShipping += shippingFee;
-          }
-        }
-      }
+  // Initial load and dependency monitoring
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    if (!items || items.length === 0) {
+      navigate('/cart');
+      return;
     }
     
-    // Add base shipping if no product shipping and subtotal < $30
-    if (totalShipping === 0 && subtotal < 30) {
-      totalShipping = subtotal * 0.05;
-    }
-    
-    const vat = subtotal * VAT_RATE; // 2.5% VAT
-    setOrderTotals({
-      subtotal,
-      shipping: totalShipping,
-      vat,
-      total: subtotal + totalShipping + vat
-    });
-  };
+    calculateTotals();
+    fetchVendorBankDetails();
+  }, [user, items, navigate, calculateTotals, fetchVendorBankDetails]);
 
-  const uploadReceipt = async (file: File) => {
+  // Disable bank_transfer if vendor details are missing
+  useEffect(() => {
+    if (!isBankTransferAvailable && paymentMethod === 'bank_transfer') {
+      setPaymentMethod('paystack');
+    }
+  }, [isBankTransferAvailable, paymentMethod]);
+
+  // Load Paystack script
+  useEffect(() => {
+    if (window.PaystackPop) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    script.onload = () => console.log('Paystack script loaded');
+    script.onerror = () => console.error('Failed to load Paystack script');
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  /**
+   * Uploads the payment receipt file to Supabase storage.
+   */
+  const uploadReceipt = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
     const filePath = `receipts/${fileName}`;
@@ -187,70 +244,77 @@ const Checkout: React.FC = () => {
     return data.publicUrl;
   };
 
-  // -------------------------
-  // Paystack integration
-  // -------------------------
-  const handlePaystackPayment = async () => {
+  /**
+   * Handles the successful creation and update of an order in the database.
+   */
+  const finalizeOrder = async (
+    paymentStatus: 'paid' | 'pending',
+    orderStatus: 'processing' | 'pending',
+    uploadedReceiptUrl: string = ''
+  ) => {
+    const orderItems = items.map(item => ({
+      product_id: item.id,
+      quantity: item.quantity,
+      price: item.price
+    }));
+
+    const { order, error: createError } = await createOrder({
+      total_amount: orderTotals.total,
+      shipping_address: shippingInfo,
+      payment_method: paymentMethod,
+      items: orderItems
+    });
+
+    if (createError) throw createError;
+    
+    if (order) {
+      const updateData: any = {
+        subtotal: orderTotals.subtotal,
+        shipping_cost: orderTotals.shipping,
+        tax_amount: orderTotals.vat,
+        payment_status: paymentStatus,
+        status: orderStatus
+      };
+
+      if (uploadedReceiptUrl) {
+        updateData.receipt_image = uploadedReceiptUrl;
+      }
+
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update(updateData)
+        .eq('id', order.id);
+        
+      if (updateError) throw updateError;
+    }
+
+    clearCart();
+  };
+
+  /**
+   * Initiates the Paystack payment process.
+   */
+  const handlePaystackPayment = useCallback(() => {
     if (!user) return toast({ title: 'Sign in required', variant: 'destructive' });
     if (!window.PaystackPop) return toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
     if (orderTotals.total <= 0) return toast({ title: 'Invalid amount', variant: 'destructive' });
 
-    // Validate shipping info first
-    if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode || !shippingInfo.phone) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please fill in all shipping details including phone number',
-        variant: 'destructive'
-      });
-      return;
-    }
+    setProcessing(true); // Set processing early for UI feedback
 
     const handler = window.PaystackPop.setup({
-      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
+      // Use environment variable for production key
+      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581', 
       email: user.email,
-      amount: Math.round(orderTotals.total * 100),
+      amount: Math.round(orderTotals.total * 100), // amount in kobo
       currency: 'NGN',
       ref: `ALPHADOM_${Date.now()}`,
       metadata: {
-        custom_fields: [
-          { display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }
-        ]
+        custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
       },
-      callback: async function(response: any) {
-        console.log('Payment successful', response);
-        setProcessing(true);
-        
+      callback: async function() { // response is available but not strictly needed for order finalization
         try {
-          const orderItems = items.map(item => ({
-            product_id: item.id,
-            quantity: item.quantity,
-            price: item.price
-          }));
-
-          const { order, error } = await createOrder({
-            total_amount: orderTotals.total,
-            shipping_address: shippingInfo,
-            payment_method: 'paystack',
-            items: orderItems
-          });
-
-          if (error) throw error;
-
-          // Update order with payment details
-          if (order) {
-            await supabase
-              .from('orders')
-              .update({
-                subtotal: orderTotals.subtotal,
-                shipping_cost: orderTotals.shipping,
-                tax_amount: orderTotals.vat,
-                payment_status: 'paid',
-                status: 'processing'
-              })
-              .eq('id', order.id);
-          }
-
-          clearCart();
+          // Finalize order with paid status
+          await finalizeOrder('paid', 'processing');
 
           toast({
             title: 'Order Placed Successfully!',
@@ -270,43 +334,42 @@ const Checkout: React.FC = () => {
         }
       },
       onClose: function() {
+        setProcessing(false); // Reset processing if payment is closed
         toast({ title: 'Payment cancelled' });
       }
     });
 
     handler.openIframe();
-  };
+  }, [user, orderTotals, shippingInfo, navigate, toast, clearCart, createOrder, items, paymentMethod]);
 
 
-
-  // -------------------------
-  // Main place order handler
-  // -------------------------
+  /**
+   * Main handler for placing the order.
+   */
   const handlePlaceOrder = async () => {
     if (!user) return;
 
-    // Validate shipping info
-    if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode || !shippingInfo.phone) {
+    if (!validateShippingInfo) {
       toast({
         title: 'Missing Information',
-        description: 'Please fill in all shipping details including phone number',
+        description: 'Please fill in all shipping details including phone number.',
         variant: 'destructive'
       });
       return;
     }
 
-    // If payment method is paystack -> open paystack flow
+    // 1. Paystack Flow
     if (paymentMethod === 'paystack') {
       handlePaystackPayment();
       return;
     }
 
-    // Bank transfer route (only shown when vendor has bank details)
+    // 2. Bank Transfer Flow
     if (paymentMethod === 'bank_transfer') {
-      if (!vendorBankDetails) {
+      if (!isBankTransferAvailable) {
         toast({
           title: 'Payment Method Unavailable',
-          description: 'Bank transfer is not available for this product. Choose Paystack instead.',
+          description: 'Bank transfer is not available for this vendor. Choose Paystack instead.',
           variant: 'destructive'
         });
         setPaymentMethod('paystack');
@@ -316,13 +379,14 @@ const Checkout: React.FC = () => {
       if (!receiptFile) {
         toast({
           title: 'Missing Receipt',
-          description: 'Please upload your payment receipt',
+          description: 'Please upload your payment receipt.',
           variant: 'destructive'
         });
         return;
       }
     }
 
+    // Proceed with order creation (Bank Transfer)
     setProcessing(true);
 
     try {
@@ -333,46 +397,12 @@ const Checkout: React.FC = () => {
         uploadedReceiptUrl = await uploadReceipt(receiptFile);
       }
 
-      const orderItems = items.map(item => ({
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price
-      }));
-
-      const { order, error } = await createOrder({
-        total_amount: orderTotals.total,
-        shipping_address: shippingInfo,
-        payment_method: paymentMethod,
-        items: orderItems
-      });
-
-      if (error) throw error;
-
-      // Update order with payment details and receipt
-      if (order) {
-        const updateData: any = {
-          subtotal: orderTotals.subtotal,
-          shipping_cost: orderTotals.shipping,
-          tax_amount: orderTotals.vat,
-          payment_status: paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
-          status: paymentMethod === 'bank_transfer' ? 'pending' : 'processing'
-        };
-
-        if (uploadedReceiptUrl) {
-          updateData.receipt_image = uploadedReceiptUrl;
-        }
-
-        await supabase
-          .from('orders')
-          .update(updateData)
-          .eq('id', order.id);
-      }
-
-      clearCart();
+      // Finalize order with pending status
+      await finalizeOrder('pending', 'pending', uploadedReceiptUrl);
 
       toast({
         title: 'Order Placed Successfully!',
-        description: 'Your order has been received and is being processed.'
+        description: 'Your order has been received and is awaiting payment confirmation.'
       });
 
       navigate('/orders');
@@ -388,8 +418,9 @@ const Checkout: React.FC = () => {
     }
   };
 
-  if (!user) return null;
-  if (!items || items.length === 0) return null;
+  // --- Render Logic ---
+  if (!user) return null; // Redirect handled in useEffect
+  if (!items || items.length === 0) return null; // Redirect handled in useEffect
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -400,7 +431,7 @@ const Checkout: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Order Summary */}
+          {/* 1. Order Summary */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -452,7 +483,7 @@ const Checkout: React.FC = () => {
                     <span>{orderTotals.shipping === 0 ? 'FREE' : `₦${orderTotals.shipping.toLocaleString()}`}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>VAT (2.5%)</span>
+                    <span>VAT ({VAT_RATE * 100}%)</span>
                     <span>₦{orderTotals.vat.toLocaleString()}</span>
                   </div>
                   <Separator />
@@ -465,7 +496,7 @@ const Checkout: React.FC = () => {
             </Card>
           </div>
 
-          {/* Checkout Form */}
+          {/* 2. Checkout Form (Shipping & Payment) */}
           <div className="space-y-6">
             {/* Shipping Information */}
             <Card>
@@ -476,6 +507,7 @@ const Checkout: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* ... Shipping Input Fields ... */}
                 <div>
                   <Label htmlFor="street">Street Address</Label>
                   <Input
@@ -538,26 +570,29 @@ const Checkout: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Select value={paymentMethod} onValueChange={(value: 'bank_transfer' | 'paystack') => setPaymentMethod(value)}>
+                <Select
+                  value={paymentMethod}
+                  onValueChange={(value: PaymentMethod) => setPaymentMethod(value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select payment method" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="paystack">Pay with Paystack (Card/Bank/USSD)</SelectItem>
-                    {vendorBankDetails && (
+                    {isBankTransferAvailable && (
                       <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
 
-                {paymentMethod === 'bank_transfer' && vendorBankDetails && (
+                {paymentMethod === 'bank_transfer' && isBankTransferAvailable && (
                   <div className="bg-muted p-4 rounded-lg space-y-2">
                     <h4 className="font-medium">Bank Transfer Details</h4>
-                    <p className="text-sm">Bank: {vendorBankDetails.bank_name}</p>
-                    <p className="text-sm">Account Name: {vendorBankDetails.account_name}</p>
-                    <p className="text-sm">Account Number: {vendorBankDetails.account_number}</p>
-                    <p className="text-sm font-medium text-primary">
-                      Amount: ₦{orderTotals.total.toLocaleString()}
+                    <p className="text-sm">Bank: **{vendorBankDetails.bank_name}**</p>
+                    <p className="text-sm">Account Name: **{vendorBankDetails.account_name}**</p>
+                    <p className="text-sm">Account Number: **{vendorBankDetails.account_number}**</p>
+                    <p className="text-sm font-medium text-primary mt-3">
+                      Amount to Transfer: ₦{orderTotals.total.toLocaleString()}
                     </p>
                     <Separator className="my-3" />
                     <div>
@@ -576,7 +611,7 @@ const Checkout: React.FC = () => {
                 {paymentMethod === 'paystack' && (
                   <div className="bg-muted p-4 rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                      You'll be redirected to Paystack to complete your payment securely.
+                      You'll be redirected to Paystack to complete your payment securely via Card, Bank, or USSD.
                     </p>
                   </div>
                 )}
@@ -585,7 +620,7 @@ const Checkout: React.FC = () => {
 
             <Button
               onClick={handlePlaceOrder}
-              disabled={processing}
+              disabled={processing || orderTotals.total <= 0}
               className="w-full"
               size="lg"
             >
