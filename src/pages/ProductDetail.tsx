@@ -213,9 +213,10 @@ const ProductDetail = () => {
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold">Product From: </span>
                   {product.vendor_user_id ? (
-                    <Link to={`/vendor/${product.vendor_user_id}`} className="text-primary hover:underline">
-                      {vendorName || 'Vendor'}
-                    </Link>
+                    {product.vendor_id ? (
+                  <Link to={`/vendor/${product.vendor_id}`} className="text-primary hover:underline">
+                    {vendorName || 'Vendor'}
+                  </Link>
                   ) : (
                     <span className="text-primary font-semibold">Alphadom</span>
                   )}
