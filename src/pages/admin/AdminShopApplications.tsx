@@ -9,6 +9,7 @@ import { Loader2, Eye, CheckCircle, XCircle, Clock, DollarSign } from 'lucide-re
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 
 const AdminShopApplications = () => {
@@ -203,23 +204,44 @@ const AdminShopApplications = () => {
                             <DialogHeader>
                               <DialogTitle>Approve Application</DialogTitle>
                               <DialogDescription>
-                                Add any notes for the applicant (optional)
+                                Enter the payment amount and any notes for the applicant
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label htmlFor="notes">Admin Notes</Label>
+                                <Label htmlFor="payment-amount">Payment Amount (₦) *</Label>
+                                <Input
+                                  id="payment-amount"
+                                  type="number"
+                                  placeholder="e.g., 50000"
+                                  className="mt-1"
+                                  onChange={(e) => {
+                                    const amount = e.target.value;
+                                    if (amount) {
+                                      setAdminNotes(prev => {
+                                        const existingNotes = prev.replace(/Payment Amount: ₦[\d,]+\n?/g, '');
+                                        return `Payment Amount: ₦${parseInt(amount).toLocaleString()}\n${existingNotes}`.trim();
+                                      });
+                                    }
+                                  }}
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  This amount will be shown on the applicant's payment page
+                                </p>
+                              </div>
+                              <div>
+                                <Label htmlFor="notes">Additional Notes (Optional)</Label>
                                 <Textarea
                                   id="notes"
                                   value={adminNotes}
                                   onChange={(e) => setAdminNotes(e.target.value)}
-                                  placeholder="Optional notes for the applicant..."
+                                  placeholder="Additional notes for the applicant..."
                                 />
                               </div>
                               <div className="flex gap-2 justify-end">
                                 <Button
                                   onClick={() => handleStatusUpdate(application.id, 'approved')}
-                                  disabled={updating}
+                                  disabled={updating || !adminNotes.includes('₦')}
                                 >
                                   {updating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                                   Approve Application

@@ -190,34 +190,92 @@ const Checkout: React.FC = () => {
   // -------------------------
   // Paystack integration
   // -------------------------
-  const handlePaystackPayment = () => {
-  if (!user) return toast({ title: 'Sign in required', variant: 'destructive' });
-  if (!window.PaystackPop) return toast({ title: 'Paystack not loaded', variant: 'destructive' });
-  if (orderTotals.total <= 0) return toast({ title: 'Invalid amount', variant: 'destructive' });
+  const handlePaystackPayment = async () => {
+    if (!user) return toast({ title: 'Sign in required', variant: 'destructive' });
+    if (!window.PaystackPop) return toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
+    if (orderTotals.total <= 0) return toast({ title: 'Invalid amount', variant: 'destructive' });
 
-  const handler = window.PaystackPop.setup({
-    key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-    email: user.email,
-    amount: Math.round(orderTotals.total * 100),
-    currency: 'NGN',
-    ref: `ALPHADOM_${Date.now()}`,
-    metadata: {
-      custom_fields: [
-        { display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }
-      ]
-    },
-    callback: function(response: any) {
-      console.log('Payment successful', response);
-      toast({ title: 'Payment Successful' });
-      // Place order logic here
-    },
-    onClose: function() {
-      toast({ title: 'Payment cancelled' });
+    // Validate shipping info first
+    if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode || !shippingInfo.phone) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all shipping details including phone number',
+        variant: 'destructive'
+      });
+      return;
     }
-  });
 
-  handler.openIframe();
-};
+    const handler = window.PaystackPop.setup({
+      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
+      email: user.email,
+      amount: Math.round(orderTotals.total * 100),
+      currency: 'NGN',
+      ref: `ALPHADOM_${Date.now()}`,
+      metadata: {
+        custom_fields: [
+          { display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }
+        ]
+      },
+      callback: async function(response: any) {
+        console.log('Payment successful', response);
+        setProcessing(true);
+        
+        try {
+          const orderItems = items.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            price: item.price
+          }));
+
+          const { order, error } = await createOrder({
+            total_amount: orderTotals.total,
+            shipping_address: shippingInfo,
+            payment_method: 'paystack',
+            items: orderItems
+          });
+
+          if (error) throw error;
+
+          // Update order with payment details
+          if (order) {
+            await supabase
+              .from('orders')
+              .update({
+                subtotal: orderTotals.subtotal,
+                shipping_cost: orderTotals.shipping,
+                tax_amount: orderTotals.vat,
+                payment_status: 'paid',
+                status: 'processing'
+              })
+              .eq('id', order.id);
+          }
+
+          clearCart();
+
+          toast({
+            title: 'Order Placed Successfully!',
+            description: 'Your payment was successful and your order is being processed.'
+          });
+
+          navigate('/orders');
+        } catch (err) {
+          console.error('Error creating order after payment:', err);
+          toast({
+            title: 'Order Creation Failed',
+            description: 'Payment was successful but order creation failed. Please contact support.',
+            variant: 'destructive'
+          });
+        } finally {
+          setProcessing(false);
+        }
+      },
+      onClose: function() {
+        toast({ title: 'Payment cancelled' });
+      }
+    });
+
+    handler.openIframe();
+  };
 
 
 
