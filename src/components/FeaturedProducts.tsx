@@ -1,5 +1,5 @@
 import { useProducts } from "@/hooks/useProducts";
-import { ProductCard } from "./ProductCard";
+import { ProductCardMobile } from "./ProductCardMobile";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from 'react';
@@ -84,7 +84,7 @@ export const FeaturedProducts = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
           {filteredProducts.map((product) => (
             <div key={product.id} className="w-full">
-              <ProductCard product={product} />
+              <ProductCardMobile product={product} />
             </div>
           ))}
         </div>
