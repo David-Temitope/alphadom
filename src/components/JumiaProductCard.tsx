@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Heart, Star } from 'lucide-react';
@@ -11,6 +11,9 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  has_discount?: boolean;
+  discount_percentage?: number;
+  original_price?: number;
   image: string;
   category: string;
   description?: string;
@@ -37,8 +40,10 @@ export const JumiaProductCard: React.FC<JumiaProductCardProps> = ({ product }) =
     });
   };
 
-  const discountPercentage = Math.floor(Math.random() * 30) + 5; // Random discount for demo
-  const originalPrice = product.price * (1 + discountPercentage / 100);
+  const hasDiscount = product?.has_discount && product?.discount_percentage && product?.original_price;
+  const discountPercentage = hasDiscount ? product.discount_percentage : 0;
+  const originalPrice = hasDiscount ? product.original_price : 0;
+
 
   return (
     <Card className="group relative h-full flex flex-col bg-card hover:shadow-lg transition-all duration-300 border border-border/20 rounded-lg overflow-hidden">
