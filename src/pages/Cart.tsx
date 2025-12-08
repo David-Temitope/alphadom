@@ -13,18 +13,17 @@ const Cart = () => {
     let shipping = 0;
     
     // Using a Set for tracking one-time fees by ID and Type.
-    // This ensures that products with 'one_time' shipping fees are only charged once.
     const shippingGroups = new Set(); 
 
     for (const item of items) {
-      // Ensure shippingFee is a number
-      const shippingFee = parseFloat(item.shipping_fee?.toString() || '0');
+      // FIX 1: Robustly parse shippingFee and ensure it's a finite positive number.
+      // Use Number() conversion and fall back to 0 if NaN.
+      const rawShippingFee = item.shipping_fee;
+      const shippingFee = isFinite(Number(rawShippingFee)) ? Number(rawShippingFee) : 0;
+      
       const shippingType = item.shipping_type || 'one_time';
-      // Create a unique key using product ID and shipping type for 'one_time' tracking
       const uniqueShippingKey = `${item.id}-${shippingType}`;
 
-      // FIX APPLIED: Only check if a specific shipping fee is defined (shippingFee > 0).
-      // The restrictive 'item.price >= 10' condition is removed.
       if (shippingFee > 0) {
         if (shippingType === 'per_product') {
           // Per product: multiply the fee by the quantity
@@ -39,7 +38,7 @@ const Cart = () => {
       }
     }
 
-    // Secondary shipping logic (e.g., small order fee) - this acts as a fallback if no custom shipping was applied
+    // Secondary shipping logic (e.g., small order fee)
     if (shipping === 0 && subtotal < 30) {
       shipping = subtotal * 0.05;
     }
@@ -48,7 +47,13 @@ const Cart = () => {
     const vat = subtotal * VAT_RATE; // 2.5% VAT
     const total = subtotal + shipping + vat;
 
-    return { subtotal, shipping, vat, total };
+    // FIX 2: Round all currency outputs to 2 decimal places to prevent floating point errors
+    return { 
+      subtotal: parseFloat(subtotal.toFixed(2)), 
+      shipping: parseFloat(shipping.toFixed(2)), 
+      vat: parseFloat(vat.toFixed(2)), 
+      total: parseFloat(total.toFixed(2)) 
+    };
   };
 
   const { subtotal, shipping, vat, total } = calculateTotals();
@@ -193,8 +198,8 @@ const Cart = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium text-green-600">
-                      {/* Display FREE if shipping is exactly 0, otherwise display the amount */}
-                      {shipping === 0 ? 'FREE' : `₦${shipping.toLocaleString()}`}
+                      {/* Using the calculated shipping fee */}
+                      {shipping > 0 ? `₦${shipping.toLocaleString()}` : 'FREE'}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
