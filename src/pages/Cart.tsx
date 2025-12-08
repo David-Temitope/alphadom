@@ -12,21 +12,22 @@ const Cart = () => {
     let subtotal = totalPrice;
     let shipping = 0;
     
-    // FIX: Using a Set for tracking one-time fees by ID and Type.
-    // This ensures one-time fees are applied once per unique product regardless of quantity, 
-    // while per_product fees are multiplied by quantity.
-    const shippingGroups = new Set<string>();
+    // Using a Set for tracking one-time fees by ID and Type.
+    // This ensures that products with 'one_time' shipping fees are only charged once.
+    const shippingGroups = new Set(); 
 
     for (const item of items) {
       // Ensure shippingFee is a number
       const shippingFee = parseFloat(item.shipping_fee?.toString() || '0');
       const shippingType = item.shipping_type || 'one_time';
+      // Create a unique key using product ID and shipping type for 'one_time' tracking
       const uniqueShippingKey = `${item.id}-${shippingType}`;
 
-      // Added check: assuming item.price >= 10 is an existing business rule for charging shipping
-      if (item.price >= 10 && shippingFee > 0) {
+      // FIX APPLIED: Only check if a specific shipping fee is defined (shippingFee > 0).
+      // The restrictive 'item.price >= 10' condition is removed.
+      if (shippingFee > 0) {
         if (shippingType === 'per_product') {
-          // Per product: multiply by quantity
+          // Per product: multiply the fee by the quantity
           shipping += shippingFee * item.quantity;
         } else {
           // One-time: applied once per unique product ID and shipping type
@@ -38,7 +39,7 @@ const Cart = () => {
       }
     }
 
-    // Secondary shipping logic (e.g., small order fee)
+    // Secondary shipping logic (e.g., small order fee) - this acts as a fallback if no custom shipping was applied
     if (shipping === 0 && subtotal < 30) {
       shipping = subtotal * 0.05;
     }
@@ -192,6 +193,7 @@ const Cart = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium text-green-600">
+                      {/* Display FREE if shipping is exactly 0, otherwise display the amount */}
                       {shipping === 0 ? 'FREE' : `₦${shipping.toLocaleString()}`}
                     </span>
                   </div>
