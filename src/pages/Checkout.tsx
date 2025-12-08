@@ -48,7 +48,6 @@ type PaymentMethod = 'bank_transfer' | 'paystack';
  * @param items - The items in the shopping cart.
  * @returns The total shipping cost.
  */
-// Removed unused 'subtotal' parameter to clean up the function signature
 const calculateShipping = (items: any[]): number => {
   let totalShipping = 0;
   // Use a map to track which product IDs have already had their one-time fee applied
@@ -128,7 +127,6 @@ const Checkout: React.FC = () => {
    */
   const calculateTotals = useCallback(() => {
     const subtotal = total;
-    // Calling corrected calculateShipping signature
     const totalShipping = calculateShipping(items); 
     const vat = subtotal * VAT_RATE; // 2.5% VAT
 
@@ -142,7 +140,7 @@ const Checkout: React.FC = () => {
 
   /**
    * Fetches vendor's bank details for bank transfer option.
-   * ✅ FIX: Replaced .single() with .limit(1) and array indexing for robust Supabase fetching.
+   * FIX: Replaced .single() with .limit(1) and array indexing for robust Supabase fetching.
    */
   const fetchVendorBankDetails = useCallback(async () => {
     if (items.length === 0) return;
@@ -224,7 +222,6 @@ const Checkout: React.FC = () => {
    */
   const uploadReceipt = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
-    // Corrected string interpolation for fileName and filePath
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
     const filePath = `receipts/${fileName}`;
 
@@ -238,7 +235,6 @@ const Checkout: React.FC = () => {
       .from('product-images')
       .getPublicUrl(filePath);
 
-    // Added safety check for publicUrl
     if (!data || !data.publicUrl) {
         throw new Error('Failed to get public URL for the uploaded receipt.');
     }
@@ -259,7 +255,6 @@ const Checkout: React.FC = () => {
       price: item.price
     }));
 
-    // Assuming createOrder returns { order: Order | null, error: any }
     const { order, error: createError } = await createOrder({
       total_amount: orderTotals.total,
       shipping_address: shippingInfo,
@@ -295,7 +290,8 @@ const Checkout: React.FC = () => {
 
   /**
    * Initiates the Paystack payment process.
-   * ✅ FIX: The 'callback' function is now correctly defined to accept the Paystack response object.
+   * ✅ FIX: The 'callback' function is now defined as a synchronous function, 
+   * and the async logic is executed inside of it using a Promise/then pattern or an IIFE.
    */
   const handlePaystackPayment = useCallback(() => {
     if (!user) {
@@ -321,33 +317,38 @@ const Checkout: React.FC = () => {
         email: user.email,
         amount: Math.round(orderTotals.total * 100), // amount in kobo
         currency: 'NGN',
-        // Corrected string interpolation for ref
         ref: `ALPHADOM_${Date.now()}`,
         metadata: {
           custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
         },
-        // FIX: Callback function must accept the response object (even if unused here)
-        callback: async function(response: any) { 
-          // Note: response.reference should ideally be sent to backend for server-side verification.
-          setProcessing(true);
-          try {
-            await finalizeOrder('paid', 'processing');
-            toast({
-              title: 'Order Placed Successfully!',
-              description: 'Your payment was successful and your order is being processed.'
-            });
-            navigate('/orders');
-          } catch (err) {
-            console.error('Error creating order after payment:', err);
-            toast({
-              title: 'Order Creation Failed',
-              description: 'Payment was successful but order creation failed. Please contact support.',
-              variant: 'destructive'
-            });
-          } finally {
-            setProcessing(false);
-          }
+        
+        // FIX: Paystack requires a synchronous function for callback.
+        callback: function(response: any) { 
+          // Use an immediately invoked async function (IIFE) to handle the async database logic
+          (async () => {
+            setProcessing(true); // Re-affirm processing state
+            try {
+              // Perform order finalization
+              await finalizeOrder('paid', 'processing');
+
+              toast({
+                title: 'Order Placed Successfully!',
+                description: `Payment reference: ${response.reference}. Your order is being processed.`
+              });
+              navigate('/orders');
+            } catch (err) {
+              console.error('Error creating order after payment:', err);
+              toast({
+                title: 'Order Creation Failed',
+                description: 'Payment succeeded but order creation failed. Please contact support.',
+                variant: 'destructive'
+              });
+            } finally {
+              setProcessing(false);
+            }
+          })();
         },
+        
         onClose: function() {
           setProcessing(false);
           toast({ title: 'Payment cancelled', description: 'You closed the payment popup.' });
