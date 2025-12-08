@@ -41,7 +41,7 @@ type OrderTotals = {
 
 type PaymentMethod = 'bank_transfer' | 'paystack';
 
-// --- Utility Functions ---
+// --- Utility Functions (FIX APPLIED HERE) ---
 
 /**
  * Calculates the shipping cost for all items in the cart.
@@ -50,22 +50,26 @@ type PaymentMethod = 'bank_transfer' | 'paystack';
  */
 const calculateShipping = (items: any[]): number => {
   let totalShipping = 0;
-  // Use a map to track which product IDs have already had their one-time fee applied
-  const shippingGroups = new Map<string, number>(); 
+  // Use a Set to track which product/type combinations have already had their one-time fee applied
+  // Key format: `${item.id}-${shippingType}`
+  const shippingGroups = new Set<string>(); 
 
   for (const item of items) {
+    // Ensure shippingFee is a number, default to 0
     const shippingFee = Number(item.shipping_fee) || 0;
     const shippingType = item.shipping_type || 'one_time';
-
+    const uniqueShippingKey = `${item.id}-${shippingType}`;
+    
     // Only apply shipping fee if fee > 0
     if (shippingFee > 0) {
       if (shippingType === 'per_product') {
         // Per product: multiply by quantity
         totalShipping += shippingFee * item.quantity;
       } else {
-        // One-time shipping per product type (using product ID as the key)
-        if (!shippingGroups.has(item.id)) {
-          shippingGroups.set(item.id, shippingFee);
+        // One-time shipping per product type/ID combination
+        // Check if the combination has been processed already
+        if (!shippingGroups.has(uniqueShippingKey)) {
+          shippingGroups.add(uniqueShippingKey);
           totalShipping += shippingFee;
         }
       }
@@ -123,8 +127,8 @@ const Checkout: React.FC = () => {
   // --- Effects and Callbacks ---
 
   /**
-   * Calculates all order totals (subtotal, shipping, VAT, total).
-   */
+    * Calculates all order totals (subtotal, shipping, VAT, total).
+    */
   const calculateTotals = useCallback(() => {
     const subtotal = total;
     const totalShipping = calculateShipping(items); 
@@ -139,9 +143,9 @@ const Checkout: React.FC = () => {
   }, [items, total]);
 
   /**
-   * Fetches vendor's bank details for bank transfer option.
-   * FIX: Replaced .single() with .limit(1) and array indexing for robust Supabase fetching.
-   */
+    * Fetches vendor's bank details for bank transfer option.
+    * FIX: Replaced .single() with .limit(1) and array indexing for robust Supabase fetching.
+    */
   const fetchVendorBankDetails = useCallback(async () => {
     if (items.length === 0) return;
 
@@ -218,8 +222,8 @@ const Checkout: React.FC = () => {
   }, []);
 
   /**
-   * Uploads the payment receipt file to Supabase storage.
-   */
+    * Uploads the payment receipt file to Supabase storage.
+    */
   const uploadReceipt = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
@@ -242,8 +246,8 @@ const Checkout: React.FC = () => {
   };
 
   /**
-   * Handles the successful creation and update of an order in the database.
-   */
+    * Handles the successful creation and update of an order in the database.
+    */
   const finalizeOrder = async (
     paymentStatus: 'paid' | 'pending',
     orderStatus: 'processing' | 'pending',
@@ -289,10 +293,10 @@ const Checkout: React.FC = () => {
   };
 
   /**
-   * Initiates the Paystack payment process.
-   * ✅ FIX: The 'callback' function is now defined as a synchronous function, 
-   * and the async logic is executed inside of it using a Promise/then pattern or an IIFE.
-   */
+    * Initiates the Paystack payment process.
+    * ✅ FIX: The 'callback' function is now defined as a synchronous function, 
+    * and the async logic is executed inside of it using a Promise/then pattern or an IIFE.
+    */
   const handlePaystackPayment = useCallback(() => {
     if (!user) {
       toast({ title: 'Sign in required', variant: 'destructive' });
@@ -365,8 +369,8 @@ const Checkout: React.FC = () => {
 
 
   /**
-   * Main handler for placing the order.
-   */
+    * Main handler for placing the order.
+    */
   const handlePlaceOrder = async () => {
     if (!user) return;
 

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag, Leaf, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,35 +9,48 @@ const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, totalSustainabilityImpact, clearCart } = useCart();
 
   const calculateTotals = () => {
-  let subtotal = totalPrice;
-  let shipping = 0;
-  const shippingGroups = new Map();
+    let subtotal = totalPrice;
+    let shipping = 0;
+    
+    // FIX: Using a Set for tracking one-time fees by ID and Type.
+    // This ensures one-time fees are applied once per unique product regardless of quantity, 
+    // while per_product fees are multiplied by quantity.
+    const shippingGroups = new Set<string>();
 
-  for (const item of items) {
-    const shippingFee = parseFloat(item.shipping_fee?.toString() || '0');
-    if (item.price >= 10 && shippingFee > 0) {
-      if (item.shipping_type === 'per_product') {
-        shipping += shippingFee * item.quantity;
-      } else {
-        if (!shippingGroups.has(item.id)) {
-          shippingGroups.set(item.id, shippingFee);
-          shipping += shippingFee;
+    for (const item of items) {
+      // Ensure shippingFee is a number
+      const shippingFee = parseFloat(item.shipping_fee?.toString() || '0');
+      const shippingType = item.shipping_type || 'one_time';
+      const uniqueShippingKey = `${item.id}-${shippingType}`;
+
+      // Added check: assuming item.price >= 10 is an existing business rule for charging shipping
+      if (item.price >= 10 && shippingFee > 0) {
+        if (shippingType === 'per_product') {
+          // Per product: multiply by quantity
+          shipping += shippingFee * item.quantity;
+        } else {
+          // One-time: applied once per unique product ID and shipping type
+          if (!shippingGroups.has(uniqueShippingKey)) {
+            shippingGroups.add(uniqueShippingKey);
+            shipping += shippingFee;
+          }
         }
       }
     }
-  }
 
-  if (shipping === 0 && subtotal < 30) {
-    shipping = subtotal * 0.05;
-  }
+    // Secondary shipping logic (e.g., small order fee)
+    if (shipping === 0 && subtotal < 30) {
+      shipping = subtotal * 0.05;
+    }
 
-  const vat = subtotal * 0.025; // 2.5% VAT
-  const total = subtotal + shipping + vat;
+    const VAT_RATE = 0.025;
+    const vat = subtotal * VAT_RATE; // 2.5% VAT
+    const total = subtotal + shipping + vat;
 
-  return { subtotal, shipping, vat, total };
-};
+    return { subtotal, shipping, vat, total };
+  };
 
-const { subtotal, shipping, vat, total } = calculateTotals();
+  const { subtotal, shipping, vat, total } = calculateTotals();
 
 
   if (items.length === 0) {
@@ -187,8 +199,7 @@ const { subtotal, shipping, vat, total } = calculateTotals();
                     <span className="text-gray-600">Tax</span>
                     <span className="font-medium">₦{vat.toLocaleString()}</span>
                   </div>
-                  ...
-                  <div className="flex justify-between text-lg font-bold">
+                  <div className="flex justify-between text-lg font-bold pt-4 border-t border-gray-200">
                     <span>Total</span>
                     <span className="text-green-600">₦{total.toLocaleString()}</span>
                   </div>
