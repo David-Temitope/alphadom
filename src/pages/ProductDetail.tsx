@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,10 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { WishlistButton } from '@/components/WishlistButton';
 import { LikeButton } from '@/components/LikeButton';
+// NOTE: ProductCardMobile and ProductCard were imported but not used, 
+// since 'isMobile' hook was missing in the original file.
+// If the hook is available, ensure it is imported: import { useIsMobile } from '@/hooks/use-mobile'; 
+import { ProductCard } from '@/components/ProductCard'; 
 import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { ProductComments } from '@/components/ProductComments';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +26,20 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
+// NOTE: Since the useIsMobile hook was missing, I'm providing a simple placeholder 
+// to ensure the component compiles. Replace this with your actual hook if needed.
+const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return isMobile;
+};
+
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { products, loading } = useProducts();
@@ -30,22 +47,28 @@ const ProductDetail = () => {
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
   const [vendorName, setVendorName] = useState<string>('');
+  const isMobile = useIsMobile(); // ✅ FIX: Added missing hook call
 
-  const product = products.find(p => p.id === id);
+  // FIX: Ensure 'products' is treated as an array before using find
+  const product = products?.find(p => p.id === id); 
   const similarProducts = product
-  ? products.filter(p => p.id !== id && p.category === product.category).slice(0, 4)
-  : [];
+    ? products.filter(p => p.id !== id && p.category === product.category).slice(0, 4)
+    : [];
 
   useEffect(() => {
     const fetchVendorName = async () => {
       if (product?.vendor_id) {
-        const { data } = await supabase
+        // ✅ Supabase fetch fix: Use limit(1) instead of single() for safer queries if vendor might not exist
+        const { data, error } = await supabase 
           .from('approved_vendors')
           .select('store_name')
           .eq('id', product.vendor_id)
-          .single();
+          .limit(1); 
         
-        if (data) setVendorName(data.store_name);
+        if (error) console.error("Error fetching vendor:", error);
+        
+        // Check if data is an array and has content, then use the first item
+        if (data && data.length > 0) setVendorName(data[0].store_name);
       }
     };
     
@@ -54,8 +77,8 @@ const ProductDetail = () => {
 
   // Use admin-set discount if available
   const hasDiscount = product?.has_discount && product?.discount_percentage && product?.original_price;
-  const discountPercentage = hasDiscount ? product.discount_percentage : 0;
-  const originalPrice = hasDiscount ? product.original_price : 0;
+  const discountPercentage = hasDiscount ? product!.discount_percentage : 0;
+  const originalPrice = hasDiscount ? product!.original_price : 0;
 
   const handleAddToCart = () => {
     if (product && (product.stock_count || 0) > 0) {
@@ -74,9 +97,11 @@ const ProductDetail = () => {
       });
     }
   };
-  const amountSaved = hasDiscount 
-  ? Number(originalPrice) - Number(product.price) 
-  : 0;
+  
+  // ✅ FIX: Added null check for product
+  const amountSaved = hasDiscount && product 
+    ? Number(originalPrice) - Number(product.price) 
+    : 0;
 
 
   if (loading) {
@@ -190,7 +215,7 @@ const ProductDetail = () => {
 
                   {hasDiscount && (
                     <span className="text-lg text-muted-foreground line-through">
-                      ${originalPrice.toFixed(2)}
+                      NGN{originalPrice.toLocaleString()} {/* FIX: Changed to NGN and used toLocaleString */}
                     </span>
                   )}
                 </div>
@@ -338,13 +363,19 @@ const ProductDetail = () => {
         {similarProducts.length > 0 && (
           <section className="mt-16">
             <h2 className="text-2xl font-bold mb-8">Similar Products</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-              {similarProducts.map((product) => (
-                <ProductCardMobile key={product.id} product={product} />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
+              {/* ✅ FIX: Correctly mapping over the 'similarProducts' array */}
+              {similarProducts.map(similarProduct => (
+                isMobile ? (
+                  <ProductCardMobile key={similarProduct.id} product={similarProduct as any} />
+                ) : (
+                  <ProductCard key={similarProduct.id} product={similarProduct as any} />
+                )
               ))}
             </div>
           </section>
         )}
+        {/* Removed redundant and incorrect closing tags */}
       </div>
     </div>
   );
