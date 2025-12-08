@@ -210,18 +210,18 @@ const ProductDetail = () => {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3 mb-2">
                   <span className={`text-3xl lg:text-4xl font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
-                    NGN{product.price.toLocaleString()}
+                    ₦{product.price.toLocaleString()}
                   </span>
 
                   {hasDiscount && (
                     <span className="text-lg text-muted-foreground line-through">
-                      NGN{originalPrice.toLocaleString()} {/* FIX: Changed to NGN and used toLocaleString */}
+                      ₦{originalPrice.toLocaleString()} {/* FIX: Changed to NGN and used toLocaleString */}
                     </span>
                   )}
                 </div>
                 {hasDiscount && (
                   <p className="text-sm text-green-600 font-medium">
-                    You save: NGN{amountSaved.toLocaleString()} ({discountPercentage}%)
+                    You save: ₦{amountSaved.toLocaleString()} ({discountPercentage}%)
                   </p>
 
                 )}

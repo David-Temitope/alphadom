@@ -88,17 +88,8 @@ export const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-
-            {/* Logo */}
+            
+            {/* Logo - Now on the far left, hidden on desktop (md:hidden removed) */}
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="h-10 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 overflow-hidden">
                 <img 
@@ -115,7 +106,7 @@ export const Navbar = () => {
               </div>
             </Link>
 
-            {/* Navigation Links - Desktop */}
+            {/* Navigation Links - Desktop (Center) */}
             <div className="hidden md:flex items-center space-x-8">
               <Link 
                 to="/" 
@@ -173,7 +164,7 @@ export const Navbar = () => {
               )}
             </div>
 
-            {/* Right Side Actions */}
+            {/* Right Side Actions (Cart, Notifications, User Menu, Mobile Menu Button) */}
             <div className="flex items-center space-x-4">
               
               {/* Cart */}
@@ -191,7 +182,7 @@ export const Navbar = () => {
               {/* Notifications */}
               {user && <NotificationCenter />}
 
-              {/* User Menu */}
+              {/* User Menu - Hidden on mobile */}
               <div className="hidden md:block">
                 {user ? (
                   <UserMenu />
@@ -208,12 +199,23 @@ export const Navbar = () => {
                   </Button>
                 )}
               </div>
+              
+              {/* Mobile Menu Button - Now on the far right on mobile */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="md:hidden" // Only visible on mobile
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar (remains the same) */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
