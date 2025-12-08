@@ -16,7 +16,9 @@ export const FeaturedProducts = () => {
   
   // Show 6 recently added products (2 rows x 3 columns)
   const recentProducts = products?.slice(0, 6) || [];
-  const filteredProducts = selectedCategory === 'all' 
+  
+  // Determine which products to display based on the selected category
+  const productsToDisplay = selectedCategory === 'all' 
     ? recentProducts
     : products?.filter(p => p.category === selectedCategory).slice(0, 6) || [];
 
@@ -81,14 +83,23 @@ export const FeaturedProducts = () => {
           </div>
         )}
 
-        {/* Products Grid - 2 columns on mobile, more on larger screens */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="w-full">
-              <ProductCardMobile product={product} />
-            </div>
-          ))}
-        </div>
+        {/* Products Grid or No Products Message */}
+        {productsToDisplay.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
+            {productsToDisplay.map(product => (
+              // Cast product type to 'any' as per the original component structure
+              isMobile ? (
+                <ProductCardMobile key={product.id} product={product as any} />
+              ) : (
+                <ProductCard key={product.id} product={product as any} />
+              )
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No products found for the selected category.</p>
+          </div>
+        )}
       </div>
     </section>
   );
