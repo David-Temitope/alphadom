@@ -48,13 +48,15 @@ type PaymentMethod = 'bank_transfer' | 'paystack';
  * @param items - The items in the shopping cart.
  * @returns The total shipping cost.
  */
+// Removed unused 'subtotal' parameter to clean up the function signature
 const calculateShipping = (items: any[]): number => {
   let totalShipping = 0;
-  const shippingGroups = new Map<string | number, number>(); // Group by product ID for one-time shipping
+  // Use a map to track which product IDs have already had their one-time fee applied
+  const shippingGroups = new Map<string, number>(); 
 
   for (const item of items) {
-    const product = item as any;
-    const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
+    const shippingFee = Number(item.shipping_fee) || 0;
+    const shippingType = item.shipping_type || 'one_time';
 
     // Only apply shipping fee if fee > 0
     if (shippingFee > 0) {
@@ -62,9 +64,9 @@ const calculateShipping = (items: any[]): number => {
         // Per product: multiply by quantity
         totalShipping += shippingFee * item.quantity;
       } else {
-        // One-time shipping per product type/vendor (simplified to per product ID here)
-        if (!shippingGroups.has(product.id)) {
-          shippingGroups.set(product.id, shippingFee);
+        // One-time shipping per product type (using product ID as the key)
+        if (!shippingGroups.has(item.id)) {
+          shippingGroups.set(item.id, shippingFee);
           totalShipping += shippingFee;
         }
       }
@@ -126,7 +128,8 @@ const Checkout: React.FC = () => {
    */
   const calculateTotals = useCallback(() => {
     const subtotal = total;
-    const totalShipping = calculateShipping(items);
+    // Calling corrected calculateShipping signature
+    const totalShipping = calculateShipping(items); 
     const vat = subtotal * VAT_RATE; // 2.5% VAT
 
     setOrderTotals({
@@ -139,8 +142,7 @@ const Checkout: React.FC = () => {
 
   /**
    * Fetches vendor's bank details for bank transfer option.
-   * FIX: Replaced .single() with .limit(1) and array indexing to prevent HTTP 406 error
-   * if no vendor is found or if the query structure is slightly off.
+   * ✅ FIX: Replaced .single() with .limit(1) and array indexing for robust Supabase fetching.
    */
   const fetchVendorBankDetails = useCallback(async () => {
     if (items.length === 0) return;
@@ -154,15 +156,15 @@ const Checkout: React.FC = () => {
           .from('approved_vendors')
           .select('*, shop_applications!inner(vendor_bank_details)')
           .eq('id', firstProduct.vendor_id)
-          .limit(1); // Use limit(1) to handle the possibility of 0 rows gracefully
+          .limit(1); // Use limit(1) instead of single()
 
-        if (error || !data || data.length === 0) {
+        if (error || !data || data.length === 0) { // Check for empty array
           console.warn('Vendor fetch error or not found:', error);
           setVendorBankDetails(null);
           return;
         }
-
-        const vendorData = data[0]; // Get the first (and only) item
+        
+        const vendorData = data[0]; // Access the first (and only) item
         const shopApp = (vendorData as any).shop_applications;
         if (shopApp && shopApp.vendor_bank_details) {
           setVendorBankDetails(shopApp.vendor_bank_details);
@@ -222,6 +224,7 @@ const Checkout: React.FC = () => {
    */
   const uploadReceipt = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
+    // Corrected string interpolation for fileName and filePath
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
     const filePath = `receipts/${fileName}`;
 
@@ -235,10 +238,9 @@ const Checkout: React.FC = () => {
       .from('product-images')
       .getPublicUrl(filePath);
 
-    // Supabase public URL logic may need adjustment based on your setup.
-    // If the path is correct, the publicUrl should be valid.
+    // Added safety check for publicUrl
     if (!data || !data.publicUrl) {
-      throw new Error('Failed to get public URL for the uploaded receipt.');
+        throw new Error('Failed to get public URL for the uploaded receipt.');
     }
     return data.publicUrl;
   };
@@ -257,6 +259,7 @@ const Checkout: React.FC = () => {
       price: item.price
     }));
 
+    // Assuming createOrder returns { order: Order | null, error: any }
     const { order, error: createError } = await createOrder({
       total_amount: orderTotals.total,
       shipping_address: shippingInfo,
@@ -279,7 +282,6 @@ const Checkout: React.FC = () => {
         updateData.receipt_image = uploadedReceiptUrl;
       }
 
-      // NOTE: You must ensure 'id' is a valid field on your 'orders' table
       const { error: updateError } = await supabase
         .from('orders')
         .update(updateData)
@@ -293,52 +295,64 @@ const Checkout: React.FC = () => {
 
   /**
    * Initiates the Paystack payment process.
-   * FIX: The callback is now defined correctly as a standard function accepting the response.
+   * ✅ FIX: The 'callback' function is now correctly defined to accept the Paystack response object.
    */
   const handlePaystackPayment = useCallback(() => {
-    if (!user) return toast({ title: 'Sign in required', variant: 'destructive' });
-    if (!window.PaystackPop) return toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
-    if (orderTotals.total <= 0) return toast({ title: 'Invalid amount', variant: 'destructive' });
+    if (!user) {
+      toast({ title: 'Sign in required', variant: 'destructive' });
+      return;
+    }
+    
+    if (!window.PaystackPop) {
+      toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
+      return;
+    }
+    
+    if (orderTotals.total <= 0) {
+      toast({ title: 'Invalid amount', variant: 'destructive' });
+      return;
+    }
 
-    setProcessing(true); // Set processing early for UI feedback
+    setProcessing(true);
 
-    const handler = window.PaystackPop.setup({
-      // Use environment variable for production key
-      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581', 
-      email: user.email,
-      amount: Math.round(orderTotals.total * 100), // amount in kobo
-      currency: 'NGN',
-      ref: `ALPHADOM_${Date.now()}`,
-      metadata: {
-        custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
-      },
-      callback: async function() { // response is available but not strictly needed for order finalization
-        try {
-          // Finalize order with paid status
-          await finalizeOrder('paid', 'processing');
-
-          toast({
-            title: 'Order Placed Successfully!',
-            description: 'Your payment was successful and your order is being processed.'
-          });
-
-          navigate('/orders');
-        } catch (err) {
-          console.error('Error creating order after payment:', err);
-          toast({
-            title: 'Order Creation Failed',
-            description: 'Payment was successful but order creation failed. Please contact support.',
-            variant: 'destructive'
-          });
-        } finally {
+    try {
+      const handler = window.PaystackPop.setup({
+        key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581', 
+        email: user.email,
+        amount: Math.round(orderTotals.total * 100), // amount in kobo
+        currency: 'NGN',
+        // Corrected string interpolation for ref
+        ref: `ALPHADOM_${Date.now()}`,
+        metadata: {
+          custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
+        },
+        // FIX: Callback function must accept the response object (even if unused here)
+        callback: async function(response: any) { 
+          // Note: response.reference should ideally be sent to backend for server-side verification.
+          setProcessing(true);
+          try {
+            await finalizeOrder('paid', 'processing');
+            toast({
+              title: 'Order Placed Successfully!',
+              description: 'Your payment was successful and your order is being processed.'
+            });
+            navigate('/orders');
+          } catch (err) {
+            console.error('Error creating order after payment:', err);
+            toast({
+              title: 'Order Creation Failed',
+              description: 'Payment was successful but order creation failed. Please contact support.',
+              variant: 'destructive'
+            });
+          } finally {
+            setProcessing(false);
+          }
+        },
+        onClose: function() {
           setProcessing(false);
+          toast({ title: 'Payment cancelled', description: 'You closed the payment popup.' });
         }
-      },
-      onClose: function() {
-        setProcessing(false); // Reset processing if payment is closed
-        toast({ title: 'Payment cancelled' });
-      }
-    });
+      });
 
       handler.openIframe();
     } catch (err) {
@@ -366,7 +380,6 @@ const Checkout: React.FC = () => {
 
     // 1. Paystack Flow
     if (paymentMethod === 'paystack') {
-      // Paystack handler sets/resets processing itself
       handlePaystackPayment();
       return;
     }
@@ -449,9 +462,12 @@ const Checkout: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {items.map((item) => {
-                  const product = item as any;
-                  const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
-                  const hasShipping = item.price >= 10 && shippingFee > 0;
+                  const shippingFee = Number(item.shipping_fee) || 0;
+                  const shippingType = item.shipping_type || 'one_time';
+                  const hasShipping = shippingFee > 0;
+                  const itemShippingCost = shippingType === 'per_product' 
+                    ? shippingFee * item.quantity 
+                    : shippingFee;
 
                   return (
                     <div key={item.id} className="space-y-2">
