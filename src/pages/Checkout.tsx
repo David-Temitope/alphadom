@@ -50,13 +50,11 @@ type PaymentMethod = 'bank_transfer' | 'paystack';
  */
 const calculateShipping = (items: any[]): number => {
   let totalShipping = 0;
-  // Use a map to track which product IDs have already had their one-time fee applied
-  const shippingGroups = new Map<string, number>(); 
+  const shippingGroups = new Map<string | number, number>(); // Group by product ID for one-time shipping
 
   for (const item of items) {
-    // Ensure item structure aligns with calculation
-    const shippingFee = Number(item.shipping_fee) || 0;
-    const shippingType = item.shipping_type || 'one_time';
+    const product = item as any;
+    const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
 
     // Only apply shipping fee if fee > 0
     if (shippingFee > 0) {
@@ -64,9 +62,9 @@ const calculateShipping = (items: any[]): number => {
         // Per product: multiply by quantity
         totalShipping += shippingFee * item.quantity;
       } else {
-        // One-time shipping per product type (using product ID as the key)
-        if (!shippingGroups.has(item.id)) {
-          shippingGroups.set(item.id, shippingFee);
+        // One-time shipping per product type/vendor (simplified to per product ID here)
+        if (!shippingGroups.has(product.id)) {
+          shippingGroups.set(product.id, shippingFee);
           totalShipping += shippingFee;
         }
       }
@@ -298,67 +296,49 @@ const Checkout: React.FC = () => {
    * FIX: The callback is now defined correctly as a standard function accepting the response.
    */
   const handlePaystackPayment = useCallback(() => {
-    if (!user) {
-      toast({ title: 'Sign in required', variant: 'destructive' });
-      return;
-    }
-    
-    if (!window.PaystackPop) {
-      toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
-      return;
-    }
-    
-    if (orderTotals.total <= 0) {
-      toast({ title: 'Invalid amount', variant: 'destructive' });
-      return;
-    }
-    
-    setProcessing(true); // Set processing here, and reset in final or onClose
+    if (!user) return toast({ title: 'Sign in required', variant: 'destructive' });
+    if (!window.PaystackPop) return toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
+    if (orderTotals.total <= 0) return toast({ title: 'Invalid amount', variant: 'destructive' });
 
-    try {
-      // NOTE: You should use your LIVE Paystack key here. Using a test key for development.
-      const PAYSTACK_PUBLIC_KEY = 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581';
+    setProcessing(true); // Set processing early for UI feedback
 
-      const handler = window.PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: user.email,
-        amount: Math.round(orderTotals.total * 100), // amount in kobo
-        currency: 'NGN',
-        ref: `ALPHADOM_${Date.now()}`,
-        metadata: {
-          custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
-        },
-        
-        // --- FIXED PAYSTACK CALLBACK ---
-        callback: async function(response: any) { 
-          // Note: Response object contains payment verification details (response.reference)
-          // For a production app, verification should happen on the server using response.reference.
-          
-          setProcessing(true); // Keep processing true until final result is known
-          try {
-            await finalizeOrder('paid', 'processing');
-            toast({
-              title: 'Order Placed Successfully!',
-              description: 'Your payment was successful and your order is being processed.'
-            });
-            navigate('/orders');
-          } catch (err) {
-            console.error('Error creating order after payment:', err);
-            toast({
-              title: 'Order Creation Failed',
-              description: 'Payment was successful but order creation failed. Please contact support.',
-              variant: 'destructive'
-            });
-          } finally {
-            setProcessing(false);
-          }
-        },
-        
-        onClose: function() {
+    const handler = window.PaystackPop.setup({
+      // Use environment variable for production key
+      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581', 
+      email: user.email,
+      amount: Math.round(orderTotals.total * 100), // amount in kobo
+      currency: 'NGN',
+      ref: `ALPHADOM_${Date.now()}`,
+      metadata: {
+        custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
+      },
+      callback: async function() { // response is available but not strictly needed for order finalization
+        try {
+          // Finalize order with paid status
+          await finalizeOrder('paid', 'processing');
+
+          toast({
+            title: 'Order Placed Successfully!',
+            description: 'Your payment was successful and your order is being processed.'
+          });
+
+          navigate('/orders');
+        } catch (err) {
+          console.error('Error creating order after payment:', err);
+          toast({
+            title: 'Order Creation Failed',
+            description: 'Payment was successful but order creation failed. Please contact support.',
+            variant: 'destructive'
+          });
+        } finally {
           setProcessing(false);
-          toast({ title: 'Payment cancelled', description: 'You closed the payment window.' });
         }
-      });
+      },
+      onClose: function() {
+        setProcessing(false); // Reset processing if payment is closed
+        toast({ title: 'Payment cancelled' });
+      }
+    });
 
       handler.openIframe();
     } catch (err) {
@@ -469,14 +449,9 @@ const Checkout: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {items.map((item) => {
-                  const shippingFee = Number(item.shipping_fee) || 0;
-                  const shippingType = item.shipping_type || 'one_time';
-                  const hasShipping = shippingFee > 0;
-                  // The line below should be handled carefully if you use a combination of one_time and per_product.
-                  // Since `calculateShipping` handles the aggregation, this cost display is mainly for per-item context.
-                  const itemShippingCost = shippingType === 'per_product' 
-                    ? shippingFee * item.quantity 
-                    : shippingFee;
+                  const product = item as any;
+                  const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
+                  const hasShipping = item.price >= 10 && shippingFee > 0;
 
                   return (
                     <div key={item.id} className="space-y-2">
