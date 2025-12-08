@@ -46,34 +46,31 @@ type PaymentMethod = 'bank_transfer' | 'paystack';
 /**
  * Calculates the shipping cost for all items in the cart.
  * @param items - The items in the shopping cart.
- * @param subtotal - The subtotal of all items.
  * @returns The total shipping cost.
  */
-const calculateShipping = (items: any[], subtotal: number): number => {
+const calculateShipping = (items: any[]): number => {
   let totalShipping = 0;
-  const shippingGroups = new Map<string | number, number>(); // Group by product ID for one-time shipping
+  // Use a map to track which product IDs have already had their one-time fee applied
+  const shippingGroups = new Map<string, number>(); 
 
   for (const item of items) {
-    const product = item as any;
-    const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
+    // Ensure item structure aligns with calculation
+    const shippingFee = Number(item.shipping_fee) || 0;
+    const shippingType = item.shipping_type || 'one_time';
 
-    // Only apply shipping fee if product price is reasonable and fee > 0
-    if (item.price >= 10 && shippingFee > 0) {
-      if (product.shipping_type === 'per_product') {
+    // Only apply shipping fee if fee > 0
+    if (shippingFee > 0) {
+      if (shippingType === 'per_product') {
+        // Per product: multiply by quantity
         totalShipping += shippingFee * item.quantity;
       } else {
-        // One-time shipping per product type/vendor (simplified to per product ID here)
-        if (!shippingGroups.has(product.id)) {
-          shippingGroups.set(product.id, shippingFee);
+        // One-time shipping per product type (using product ID as the key)
+        if (!shippingGroups.has(item.id)) {
+          shippingGroups.set(item.id, shippingFee);
           totalShipping += shippingFee;
         }
       }
     }
-  }
-
-  // Add base shipping if no product shipping and subtotal < $30
-  if (totalShipping === 0 && subtotal < 30) {
-    totalShipping = subtotal * 0.05;
   }
 
   return totalShipping;
@@ -110,7 +107,6 @@ const Checkout: React.FC = () => {
     total: 0
   });
   const [vendorBankDetails, setVendorBankDetails] = useState<any>(null);
-  // const [productVendor, setProductVendor] = useState<any>(null); // Not used in provided logic
 
   // --- Derived Values ---
   const isBankTransferAvailable = !!vendorBankDetails;
@@ -132,7 +128,7 @@ const Checkout: React.FC = () => {
    */
   const calculateTotals = useCallback(() => {
     const subtotal = total;
-    const totalShipping = calculateShipping(items, subtotal);
+    const totalShipping = calculateShipping(items);
     const vat = subtotal * VAT_RATE; // 2.5% VAT
 
     setOrderTotals({
@@ -145,6 +141,8 @@ const Checkout: React.FC = () => {
 
   /**
    * Fetches vendor's bank details for bank transfer option.
+   * FIX: Replaced .single() with .limit(1) and array indexing to prevent HTTP 406 error
+   * if no vendor is found or if the query structure is slightly off.
    */
   const fetchVendorBankDetails = useCallback(async () => {
     if (items.length === 0) return;
@@ -158,17 +156,16 @@ const Checkout: React.FC = () => {
           .from('approved_vendors')
           .select('*, shop_applications!inner(vendor_bank_details)')
           .eq('id', firstProduct.vendor_id)
-          .single();
+          .limit(1); // Use limit(1) to handle the possibility of 0 rows gracefully
 
-        if (error || !data) {
+        if (error || !data || data.length === 0) {
           console.warn('Vendor fetch error or not found:', error);
           setVendorBankDetails(null);
-          // setProductVendor(null);
           return;
         }
 
-        // setProductVendor(data);
-        const shopApp = (data as any).shop_applications;
+        const vendorData = data[0]; // Get the first (and only) item
+        const shopApp = (vendorData as any).shop_applications;
         if (shopApp && shopApp.vendor_bank_details) {
           setVendorBankDetails(shopApp.vendor_bank_details);
         } else {
@@ -177,7 +174,6 @@ const Checkout: React.FC = () => {
       } catch (err) {
         console.error('fetchVendorBankDetails error:', err);
         setVendorBankDetails(null);
-        // setProductVendor(null);
       }
     } else {
       // Product added by admin - use admin bank details (or disable bank transfer if not set)
@@ -241,6 +237,11 @@ const Checkout: React.FC = () => {
       .from('product-images')
       .getPublicUrl(filePath);
 
+    // Supabase public URL logic may need adjustment based on your setup.
+    // If the path is correct, the publicUrl should be valid.
+    if (!data || !data.publicUrl) {
+      throw new Error('Failed to get public URL for the uploaded receipt.');
+    }
     return data.publicUrl;
   };
 
@@ -280,6 +281,7 @@ const Checkout: React.FC = () => {
         updateData.receipt_image = uploadedReceiptUrl;
       }
 
+      // NOTE: You must ensure 'id' is a valid field on your 'orders' table
       const { error: updateError } = await supabase
         .from('orders')
         .update(updateData)
@@ -293,54 +295,78 @@ const Checkout: React.FC = () => {
 
   /**
    * Initiates the Paystack payment process.
+   * FIX: The callback is now defined correctly as a standard function accepting the response.
    */
   const handlePaystackPayment = useCallback(() => {
-    if (!user) return toast({ title: 'Sign in required', variant: 'destructive' });
-    if (!window.PaystackPop) return toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
-    if (orderTotals.total <= 0) return toast({ title: 'Invalid amount', variant: 'destructive' });
+    if (!user) {
+      toast({ title: 'Sign in required', variant: 'destructive' });
+      return;
+    }
+    
+    if (!window.PaystackPop) {
+      toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
+      return;
+    }
+    
+    if (orderTotals.total <= 0) {
+      toast({ title: 'Invalid amount', variant: 'destructive' });
+      return;
+    }
+    
+    setProcessing(true); // Set processing here, and reset in final or onClose
 
-    setProcessing(true); // Set processing early for UI feedback
+    try {
+      // NOTE: You should use your LIVE Paystack key here. Using a test key for development.
+      const PAYSTACK_PUBLIC_KEY = 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581';
 
-    const handler = window.PaystackPop.setup({
-      // Use environment variable for production key
-      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581', 
-      email: user.email,
-      amount: Math.round(orderTotals.total * 100), // amount in kobo
-      currency: 'NGN',
-      ref: `ALPHADOM_${Date.now()}`,
-      metadata: {
-        custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
-      },
-      callback: async function() { // response is available but not strictly needed for order finalization
-        try {
-          // Finalize order with paid status
-          await finalizeOrder('paid', 'processing');
-
-          toast({
-            title: 'Order Placed Successfully!',
-            description: 'Your payment was successful and your order is being processed.'
-          });
-
-          navigate('/orders');
-        } catch (err) {
-          console.error('Error creating order after payment:', err);
-          toast({
-            title: 'Order Creation Failed',
-            description: 'Payment was successful but order creation failed. Please contact support.',
-            variant: 'destructive'
-          });
-        } finally {
+      const handler = window.PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: user.email,
+        amount: Math.round(orderTotals.total * 100), // amount in kobo
+        currency: 'NGN',
+        ref: `ALPHADOM_${Date.now()}`,
+        metadata: {
+          custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
+        },
+        
+        // --- FIXED PAYSTACK CALLBACK ---
+        callback: async function(response: any) { 
+          // Note: Response object contains payment verification details (response.reference)
+          // For a production app, verification should happen on the server using response.reference.
+          
+          setProcessing(true); // Keep processing true until final result is known
+          try {
+            await finalizeOrder('paid', 'processing');
+            toast({
+              title: 'Order Placed Successfully!',
+              description: 'Your payment was successful and your order is being processed.'
+            });
+            navigate('/orders');
+          } catch (err) {
+            console.error('Error creating order after payment:', err);
+            toast({
+              title: 'Order Creation Failed',
+              description: 'Payment was successful but order creation failed. Please contact support.',
+              variant: 'destructive'
+            });
+          } finally {
+            setProcessing(false);
+          }
+        },
+        
+        onClose: function() {
           setProcessing(false);
+          toast({ title: 'Payment cancelled', description: 'You closed the payment window.' });
         }
-      },
-      onClose: function() {
-        setProcessing(false); // Reset processing if payment is closed
-        toast({ title: 'Payment cancelled' });
-      }
-    });
+      });
 
-    handler.openIframe();
-  }, [user, orderTotals, shippingInfo, navigate, toast, clearCart, createOrder, items, paymentMethod]);
+      handler.openIframe();
+    } catch (err) {
+      console.error('Paystack setup error:', err);
+      toast({ title: 'Payment initialization failed', variant: 'destructive' });
+      setProcessing(false);
+    }
+  }, [user, orderTotals, shippingInfo, navigate, toast, finalizeOrder]);
 
 
   /**
@@ -360,6 +386,7 @@ const Checkout: React.FC = () => {
 
     // 1. Paystack Flow
     if (paymentMethod === 'paystack') {
+      // Paystack handler sets/resets processing itself
       handlePaystackPayment();
       return;
     }
@@ -442,9 +469,14 @@ const Checkout: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {items.map((item) => {
-                  const product = item as any;
-                  const shippingFee = parseFloat(product.shipping_fee?.toString() || '0');
-                  const hasShipping = item.price >= 10 && shippingFee > 0;
+                  const shippingFee = Number(item.shipping_fee) || 0;
+                  const shippingType = item.shipping_type || 'one_time';
+                  const hasShipping = shippingFee > 0;
+                  // The line below should be handled carefully if you use a combination of one_time and per_product.
+                  // Since `calculateShipping` handles the aggregation, this cost display is mainly for per-item context.
+                  const itemShippingCost = shippingType === 'per_product' 
+                    ? shippingFee * item.quantity 
+                    : shippingFee;
 
                   return (
                     <div key={item.id} className="space-y-2">
@@ -464,7 +496,7 @@ const Checkout: React.FC = () => {
                       </div>
                       {hasShipping && (
                         <div className="text-xs text-muted-foreground ml-15">
-                          Shipping: ₦{shippingFee.toLocaleString()} ({product.shipping_type === 'per_product' ? 'per item' : 'one-time'})
+                          Shipping: ₦{itemShippingCost.toLocaleString()} ({shippingType === 'per_product' ? `₦${shippingFee.toLocaleString()} × ${item.quantity}` : 'one-time'})
                         </div>
                       )}
                     </div>
