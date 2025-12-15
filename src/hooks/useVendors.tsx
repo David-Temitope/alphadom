@@ -15,6 +15,14 @@ interface Vendor {
   total_products: number;
   created_at: string;
   updated_at: string;
+  subscription_plan?: string;
+  subscription_start_date?: string;
+  subscription_end_date?: string;
+  product_limit?: number;
+  commission_rate?: number;
+  has_home_visibility?: boolean;
+  free_ads_remaining?: number;
+  application_id?: string;
 }
 
 export const useVendors = () => {

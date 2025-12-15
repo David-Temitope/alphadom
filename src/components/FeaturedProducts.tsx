@@ -1,105 +1,79 @@
-import { useProducts } from "@/hooks/useProducts";
-import { ProductCardMobile } from "./ProductCardMobile";
-import { ProductCard } from "./ProductCard";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from 'react';
+import { ProductCard } from "./ProductCard";
+import { ProductCardMobile } from "./ProductCardMobile";
+import { useProducts } from "@/hooks/useProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Flame, Crown, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const FeaturedProducts = () => {
   const { products, loading } = useProducts();
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const isMobile = useIsMobile();
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [vendorPlans, setVendorPlans] = useState<Record<string, string>>({});
 
-  // Get unique categories
-  const categories = ['all', ...Array.from(new Set(products?.map(p => p.category) || []))];
-  
-  // Show 6 recently added products (2 rows x 3 columns)
-  const recentProducts = products?.slice(0, 6) || [];
-  
-  // Determine which products to display based on the selected category
-  const productsToDisplay = selectedCategory === 'all' 
-    ? recentProducts
-    : products?.filter(p => p.category === selectedCategory).slice(0, 6) || [];
+  useEffect(() => {
+    const fetchVendorPlans = async () => {
+      const { data } = await supabase.from('approved_vendors').select('id, subscription_plan');
+      if (data) {
+        const plans: Record<string, string> = {};
+        data.forEach((v: any) => { plans[v.id] = v.subscription_plan || 'free'; });
+        setVendorPlans(plans);
+      }
+    };
+    fetchVendorPlans();
+  }, []);
+
+  const categories = ["all", ...new Set(products.map(p => p.category))];
+  const filteredProducts = selectedCategory === "all" ? products : products.filter(p => p.category === selectedCategory);
+
+  // Best Selling (First Class vendors, fallback to oldest)
+  const bestSelling = filteredProducts.filter(p => p.vendor_id && vendorPlans[p.vendor_id] === 'first_class').slice(0, 8);
+  const bestSellingFinal = bestSelling.length > 0 ? bestSelling : [...filteredProducts].sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()).slice(0, 8);
+
+  // Hot Sales (Economy vendors, fallback to newest)
+  const hotSales = filteredProducts.filter(p => p.vendor_id && vendorPlans[p.vendor_id] === 'economy').slice(0, 8);
+  const hotSalesFinal = hotSales.length > 0 ? hotSales : [...filteredProducts].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0, 8);
 
   if (loading) {
-    return (
-      <section className="py-12 px-4 bg-background">
-        <div className="container mx-auto">
-          <div className="bg-gradient-to-r from-primary to-primary/80 rounded-lg p-6 mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-primary-foreground mb-2">
-              Top Deals on Products
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {[...Array(12)].map((_, i) => (
-              <div key={i} className="bg-card rounded-lg h-80 animate-pulse border border-border/20" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+    return <section className="py-12 px-4"><div className="container mx-auto"><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[...Array(8)].map((_, i) => <div key={i} className="h-64 bg-muted rounded animate-pulse" />)}</div></div></section>;
   }
 
+  const ProductGrid = ({ items }: { items: typeof products }) => (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+      {items.map(product => isMobile ? <ProductCardMobile key={product.id} product={product as any} /> : <ProductCard key={product.id} product={product as any} />)}
+    </div>
+  );
+
   return (
-    <section className="py-12 px-4 bg-background">
+    <section className="py-8 md:py-16 px-4 bg-background">
       <div className="container mx-auto">
-        {/* Header Section */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-primary-foreground mb-2">
-            Top Deals on Products
-          </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold">Featured Products</h2>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[140px] md:w-[180px]"><SelectValue placeholder="Category" /></SelectTrigger>
+            <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{c === "all" ? "All Categories" : c}</SelectItem>)}</SelectContent>
+          </Select>
         </div>
 
-        {/* Category Filter - Dropdown on mobile, buttons on desktop */}
-        {isMobile ? (
-          <div className="mb-6">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category === 'all' ? 'All Products' : category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2"><Crown className="h-5 w-5 text-yellow-500" /><h3 className="text-lg md:text-xl font-semibold">Best Selling Products</h3></div>
+            <Link to="/products"><Button variant="ghost" size="sm">See All <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
           </div>
-        ) : (
-          <div className="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                className="whitespace-nowrap"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category === 'all' ? 'All Products' : category}
-              </Button>
-            ))}
-          </div>
-        )}
+          {bestSellingFinal.length > 0 ? <ProductGrid items={bestSellingFinal} /> : <p className="text-center text-muted-foreground py-8">No products</p>}
+        </div>
 
-        {/* Products Grid or No Products Message */}
-        {productsToDisplay.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
-            {productsToDisplay.map(product => (
-              // Cast product type to 'any' as per the original component structure
-              isMobile ? (
-                <ProductCardMobile key={product.id} product={product as any} />
-              ) : (
-                <ProductCard key={product.id} product={product as any} />
-              )
-            ))}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2"><Flame className="h-5 w-5 text-orange-500" /><h3 className="text-lg md:text-xl font-semibold">Hot Sales</h3></div>
+            <Link to="/products"><Button variant="ghost" size="sm">See All <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No products found for the selected category.</p>
-          </div>
-        )}
+          {hotSalesFinal.length > 0 ? <ProductGrid items={hotSalesFinal} /> : <p className="text-center text-muted-foreground py-8">No products</p>}
+        </div>
       </div>
     </section>
   );

@@ -1,0 +1,333 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Crown, Star, Zap, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useVendors } from '@/hooks/useVendors';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+declare global {
+  interface Window {
+    PaystackPop?: any;
+  }
+}
+
+const PAYSTACK_PUBLIC_KEY = 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581';
+
+const subscriptionPlans = [
+  {
+    id: 'free',
+    name: 'Free Plan',
+    price: 0,
+    features: [
+      'Upload up to 20 products',
+      '15% commission rate',
+      'Low visibility',
+      'No ads included'
+    ],
+    productLimit: 20,
+    commissionRate: 15,
+    homeVisibility: false,
+    freeAds: 0,
+    icon: Zap,
+    color: 'bg-gray-100 text-gray-800'
+  },
+  {
+    id: 'economy',
+    name: 'Economy Plan',
+    price: 7000,
+    features: [
+      'Upload up to 50 products',
+      '9% commission rate',
+      'Standard visibility',
+      'No ads included'
+    ],
+    productLimit: 50,
+    commissionRate: 9,
+    homeVisibility: false,
+    freeAds: 0,
+    icon: Star,
+    color: 'bg-blue-100 text-blue-800'
+  },
+  {
+    id: 'first_class',
+    name: 'First Class Plan',
+    price: 15000,
+    features: [
+      'Unlimited products',
+      '5% commission rate',
+      'Homepage visibility',
+      '1 free ad per month'
+    ],
+    productLimit: -1, // unlimited
+    commissionRate: 5,
+    homeVisibility: true,
+    freeAds: 1,
+    icon: Crown,
+    color: 'bg-yellow-100 text-yellow-800'
+  }
+];
+
+interface VendorSubscriptionProps {
+  onPlanChange?: () => void;
+}
+
+export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanChange }) => {
+  const { currentVendor, refreshVendors } = useVendors();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [processing, setProcessing] = useState(false);
+  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
+  const [progressPercentage, setProgressPercentage] = useState(0);
+
+  useEffect(() => {
+    if (currentVendor?.subscription_end_date) {
+      const endDate = new Date(currentVendor.subscription_end_date);
+      const now = new Date();
+      const diffTime = endDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setDaysRemaining(Math.max(0, diffDays));
+      
+      // Calculate progress (31 days = 100%)
+      const progress = Math.max(0, Math.min(100, (diffDays / 31) * 100));
+      setProgressPercentage(progress);
+    } else {
+      setDaysRemaining(null);
+      setProgressPercentage(0);
+    }
+  }, [currentVendor]);
+
+  const handleSelectPlan = async (planId: string) => {
+    if (!user || !currentVendor) return;
+
+    const selectedPlan = subscriptionPlans.find(p => p.id === planId);
+    if (!selectedPlan) return;
+
+    if (planId === 'free') {
+      // Free plan - activate immediately
+      await activatePlan(planId);
+    } else {
+      // Paid plans - open Paystack
+      handlePaystackPayment(selectedPlan);
+    }
+  };
+
+  const handlePaystackPayment = (plan: typeof subscriptionPlans[0]) => {
+    if (!window.PaystackPop) {
+      toast({
+        title: "Error",
+        description: "Payment system is not ready. Please refresh and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user?.email) {
+      toast({
+        title: "Error",
+        description: "User email not found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setProcessing(true);
+
+    try {
+      const handler = window.PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: user.email,
+        amount: plan.price * 100, // Convert to kobo
+        currency: 'NGN',
+        ref: `SUB_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+        metadata: {
+          plan_id: plan.id,
+          vendor_id: currentVendor?.id,
+          user_id: user.id
+        },
+        callback: async (response: any) => {
+          if (response.status === 'success') {
+            await activatePlan(plan.id, response.reference);
+            
+            // Record transaction
+            await supabase.from('platform_transactions').insert({
+              transaction_type: 'subscription',
+              amount: plan.price,
+              user_id: user.id,
+              vendor_id: currentVendor?.id,
+              reference: response.reference,
+              payment_method: 'paystack',
+              description: `${plan.name} subscription payment`,
+              metadata: { plan_id: plan.id }
+            });
+          }
+          setProcessing(false);
+        },
+        onClose: () => {
+          setProcessing(false);
+        }
+      });
+
+      handler.openIframe();
+    } catch (error) {
+      console.error('Paystack error:', error);
+      setProcessing(false);
+      toast({
+        title: "Error",
+        description: "Failed to initialize payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const activatePlan = async (planId: string, reference?: string) => {
+    const plan = subscriptionPlans.find(p => p.id === planId);
+    if (!plan || !currentVendor) return;
+
+    try {
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 31);
+
+      const { error } = await supabase
+        .from('approved_vendors')
+        .update({
+          subscription_plan: planId,
+          subscription_start_date: startDate.toISOString(),
+          subscription_end_date: endDate.toISOString(),
+          product_limit: plan.productLimit,
+          commission_rate: plan.commissionRate,
+          has_home_visibility: plan.homeVisibility,
+          free_ads_remaining: plan.freeAds,
+          is_suspended: false // Remove suspension
+        })
+        .eq('id', currentVendor.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `${plan.name} activated successfully! Your subscription will expire in 31 days.`,
+      });
+
+      await refreshVendors();
+      onPlanChange?.();
+    } catch (error) {
+      console.error('Error activating plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to activate plan. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const currentPlan = subscriptionPlans.find(p => p.id === (currentVendor?.subscription_plan || 'free'));
+  const isExpired = daysRemaining !== null && daysRemaining <= 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Current Subscription Status */}
+      {currentVendor?.subscription_start_date && (
+        <Card className={isExpired ? 'border-destructive' : ''}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  {isExpired ? (
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                  ) : (
+                    <Clock className="h-5 w-5" />
+                  )}
+                  Current Subscription
+                </CardTitle>
+                <CardDescription>
+                  {currentPlan?.name} - {isExpired ? 'Expired' : `${daysRemaining} days remaining`}
+                </CardDescription>
+              </div>
+              <Badge className={currentPlan?.color}>
+                {currentPlan?.name}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!isExpired && daysRemaining !== null && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Time remaining</span>
+                  <span className="font-medium">{daysRemaining} days</span>
+                </div>
+                <Progress value={progressPercentage} className="h-2" />
+              </div>
+            )}
+            {isExpired && (
+              <div className="text-destructive text-sm">
+                Your subscription has expired. Please select a plan below to continue selling.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Subscription Plans */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {subscriptionPlans.map((plan) => {
+          const IconComponent = plan.icon;
+          const isCurrentPlan = currentVendor?.subscription_plan === plan.id;
+          
+          return (
+            <Card 
+              key={plan.id} 
+              className={`relative ${isCurrentPlan && !isExpired ? 'border-primary border-2' : ''}`}
+            >
+              {isCurrentPlan && !isExpired && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-primary">Current Plan</Badge>
+                </div>
+              )}
+              <CardHeader className="text-center">
+                <div className={`w-12 h-12 rounded-full ${plan.color} mx-auto flex items-center justify-center mb-2`}>
+                  <IconComponent className="h-6 w-6" />
+                </div>
+                <CardTitle>{plan.name}</CardTitle>
+                <CardDescription>
+                  {plan.price === 0 ? (
+                    <span className="text-2xl font-bold">Free</span>
+                  ) : (
+                    <span className="text-2xl font-bold">₦{plan.price.toLocaleString()}</span>
+                  )}
+                  <span className="text-sm text-muted-foreground"> / month</span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-2">
+                  {plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  className="w-full"
+                  variant={isCurrentPlan && !isExpired ? "outline" : "default"}
+                  onClick={() => handleSelectPlan(plan.id)}
+                  disabled={processing || (isCurrentPlan && !isExpired)}
+                >
+                  {processing ? 'Processing...' : 
+                   isCurrentPlan && !isExpired ? 'Current Plan' : 
+                   plan.price === 0 ? 'Select Free Plan' : 'Subscribe Now'}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default VendorSubscription;

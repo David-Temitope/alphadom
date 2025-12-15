@@ -306,13 +306,20 @@ export type Database = {
       approved_vendors: {
         Row: {
           application_id: string
+          commission_rate: number | null
           created_at: string
+          free_ads_remaining: number | null
+          has_home_visibility: boolean | null
           id: string
           is_active: boolean
           is_suspended: boolean | null
           product_category: string
+          product_limit: number | null
           product_slots: number | null
           store_name: string
+          subscription_end_date: string | null
+          subscription_plan: string | null
+          subscription_start_date: string | null
           total_orders: number
           total_products: number
           total_revenue: number
@@ -322,13 +329,20 @@ export type Database = {
         }
         Insert: {
           application_id: string
+          commission_rate?: number | null
           created_at?: string
+          free_ads_remaining?: number | null
+          has_home_visibility?: boolean | null
           id?: string
           is_active?: boolean
           is_suspended?: boolean | null
           product_category: string
+          product_limit?: number | null
           product_slots?: number | null
           store_name: string
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
           total_orders?: number
           total_products?: number
           total_revenue?: number
@@ -338,13 +352,20 @@ export type Database = {
         }
         Update: {
           application_id?: string
+          commission_rate?: number | null
           created_at?: string
+          free_ads_remaining?: number | null
+          has_home_visibility?: boolean | null
           id?: string
           is_active?: boolean
           is_suspended?: boolean | null
           product_category?: string
+          product_limit?: number | null
           product_slots?: number | null
           store_name?: string
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
           total_orders?: number
           total_products?: number
           total_revenue?: number
@@ -419,6 +440,45 @@ export type Database = {
           subject?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      contact_messages: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          responded_at: string | null
+          status: string | null
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          responded_at?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          responded_at?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -738,6 +798,117 @@ export type Database = {
           },
         ]
       }
+      platform_ads: {
+        Row: {
+          animation_type: string | null
+          created_at: string
+          cta_text: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          priority: number | null
+          target_page: string | null
+          target_product_id: string | null
+          target_url: string | null
+          target_vendor_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          animation_type?: string | null
+          created_at?: string
+          cta_text?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          priority?: number | null
+          target_page?: string | null
+          target_product_id?: string | null
+          target_url?: string | null
+          target_vendor_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          animation_type?: string | null
+          created_at?: string
+          cta_text?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          priority?: number | null
+          target_page?: string | null
+          target_product_id?: string | null
+          target_url?: string | null
+          target_vendor_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_ads_target_product_id_fkey"
+            columns: ["target_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_ads_target_vendor_id_fkey"
+            columns: ["target_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "approved_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          order_id: string | null
+          payment_method: string | null
+          reference: string | null
+          status: string | null
+          transaction_type: string
+          user_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          payment_method?: string | null
+          reference?: string | null
+          status?: string | null
+          transaction_type: string
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          payment_method?: string | null
+          reference?: string | null
+          status?: string | null
+          transaction_type?: string
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       product_comments: {
         Row: {
           comment: string
@@ -797,27 +968,34 @@ export type Database = {
       products: {
         Row: {
           category: string
+          colors: string[] | null
           created_at: string | null
           description: string | null
           discount_percentage: number | null
           eco_features: string[] | null
           full_description: string | null
+          gender: string | null
           has_discount: boolean | null
           id: string
           image: string | null
           in_stock: boolean | null
           initial_stock_count: number | null
           last_stock_update: string | null
+          material: string | null
           name: string
           original_price: number | null
           price: number
+          product_type: string | null
           rating: number | null
           reviews: number | null
           shipping_fee: number | null
           shipping_type: string | null
+          sizes: string[] | null
           specifications: Json | null
           stock_count: number | null
           sustainability_score: number | null
+          tags: string[] | null
+          thickness: string | null
           total_likes: number | null
           total_orders: number | null
           updated_at: string | null
@@ -826,27 +1004,34 @@ export type Database = {
         }
         Insert: {
           category: string
+          colors?: string[] | null
           created_at?: string | null
           description?: string | null
           discount_percentage?: number | null
           eco_features?: string[] | null
           full_description?: string | null
+          gender?: string | null
           has_discount?: boolean | null
           id?: string
           image?: string | null
           in_stock?: boolean | null
           initial_stock_count?: number | null
           last_stock_update?: string | null
+          material?: string | null
           name: string
           original_price?: number | null
           price: number
+          product_type?: string | null
           rating?: number | null
           reviews?: number | null
           shipping_fee?: number | null
           shipping_type?: string | null
+          sizes?: string[] | null
           specifications?: Json | null
           stock_count?: number | null
           sustainability_score?: number | null
+          tags?: string[] | null
+          thickness?: string | null
           total_likes?: number | null
           total_orders?: number | null
           updated_at?: string | null
@@ -855,27 +1040,34 @@ export type Database = {
         }
         Update: {
           category?: string
+          colors?: string[] | null
           created_at?: string | null
           description?: string | null
           discount_percentage?: number | null
           eco_features?: string[] | null
           full_description?: string | null
+          gender?: string | null
           has_discount?: boolean | null
           id?: string
           image?: string | null
           in_stock?: boolean | null
           initial_stock_count?: number | null
           last_stock_update?: string | null
+          material?: string | null
           name?: string
           original_price?: number | null
           price?: number
+          product_type?: string | null
           rating?: number | null
           reviews?: number | null
           shipping_fee?: number | null
           shipping_type?: string | null
+          sizes?: string[] | null
           specifications?: Json | null
           stock_count?: number | null
           sustainability_score?: number | null
+          tags?: string[] | null
+          thickness?: string | null
           total_likes?: number | null
           total_orders?: number | null
           updated_at?: string | null
@@ -931,14 +1123,20 @@ export type Database = {
       shop_applications: {
         Row: {
           admin_notes: string | null
+          agreed_policies: Json | null
           approved_at: string | null
           bank_details: Json
           business_address: string | null
           business_description: string | null
+          business_type: string | null
           contact_phone: string | null
           created_at: string
           email: string
           id: string
+          id_image_url: string | null
+          id_number: string | null
+          id_type: string | null
+          is_registered: boolean | null
           payment_countdown_expires_at: string | null
           payment_due_date: string | null
           payment_received_at: string | null
@@ -947,20 +1145,28 @@ export type Database = {
           product_category: string
           status: string
           store_name: string
+          subscription_plan: string | null
+          tin_number: string | null
           updated_at: string
           user_id: string
           vendor_bank_details: Json | null
         }
         Insert: {
           admin_notes?: string | null
+          agreed_policies?: Json | null
           approved_at?: string | null
           bank_details: Json
           business_address?: string | null
           business_description?: string | null
+          business_type?: string | null
           contact_phone?: string | null
           created_at?: string
           email: string
           id?: string
+          id_image_url?: string | null
+          id_number?: string | null
+          id_type?: string | null
+          is_registered?: boolean | null
           payment_countdown_expires_at?: string | null
           payment_due_date?: string | null
           payment_received_at?: string | null
@@ -969,20 +1175,28 @@ export type Database = {
           product_category: string
           status?: string
           store_name: string
+          subscription_plan?: string | null
+          tin_number?: string | null
           updated_at?: string
           user_id: string
           vendor_bank_details?: Json | null
         }
         Update: {
           admin_notes?: string | null
+          agreed_policies?: Json | null
           approved_at?: string | null
           bank_details?: Json
           business_address?: string | null
           business_description?: string | null
+          business_type?: string | null
           contact_phone?: string | null
           created_at?: string
           email?: string
           id?: string
+          id_image_url?: string | null
+          id_number?: string | null
+          id_type?: string | null
+          is_registered?: boolean | null
           payment_countdown_expires_at?: string | null
           payment_due_date?: string | null
           payment_received_at?: string | null
@@ -991,6 +1205,8 @@ export type Database = {
           product_category?: string
           status?: string
           store_name?: string
+          subscription_plan?: string | null
+          tin_number?: string | null
           updated_at?: string
           user_id?: string
           vendor_bank_details?: Json | null
