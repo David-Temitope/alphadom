@@ -11,11 +11,11 @@ interface ShopApplication {
   price_range_min: number;
   price_range_max: number;
   email: string;
-  bank_details: any; // Using any for JSON fields from database
+  bank_details: any;
   business_description?: string;
   contact_phone?: string;
   business_address?: string;
-  status: string; // Allow any string status from database
+  status: string;
   admin_notes?: string;
   created_at: string;
   updated_at: string;
@@ -23,6 +23,16 @@ interface ShopApplication {
   payment_due_date?: string;
   payment_received_at?: string;
   payment_countdown_expires_at?: string;
+  // New fields for identity verification and business info
+  id_type?: string;
+  id_number?: string;
+  id_image_url?: string;
+  business_type?: string;
+  is_registered?: boolean;
+  tin_number?: string;
+  agreed_policies?: any;
+  subscription_plan?: string;
+  vendor_bank_details?: any;
 }
 
 export const useShopApplications = () => {
