@@ -1,21 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useShopApplications } from '@/hooks/useShopApplications';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Eye, CheckCircle, XCircle, Clock, DollarSign } from 'lucide-react';
+import { Loader2, Eye, CheckCircle, XCircle, Clock, Store } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { useState } from 'react';
 
 const AdminShopApplications = () => {
   const { applications, loading, updateApplicationStatus } = useShopApplications();
-  const { toast } = useToast();
-  const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [updating, setUpdating] = useState(false);
 
@@ -24,7 +19,6 @@ const AdminShopApplications = () => {
     try {
       await updateApplicationStatus(applicationId, newStatus, adminNotes);
       setAdminNotes('');
-      setSelectedApplication(null);
     } catch (error) {
       console.error('Error updating status:', error);
     } finally {
@@ -45,7 +39,7 @@ const AdminShopApplications = () => {
     switch (status) {
       case 'approved': return <CheckCircle className="h-4 w-4" />;
       case 'rejected': return <XCircle className="h-4 w-4" />;
-      case 'payment': return <DollarSign className="h-4 w-4" />;
+      case 'payment': return <Store className="h-4 w-4" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
@@ -66,7 +60,7 @@ const AdminShopApplications = () => {
         <div>
           <h1 className="text-3xl font-bold">Shop Applications</h1>
           <p className="text-muted-foreground">
-            Review and manage shop rental applications from users.
+            Review and manage shop rental applications. Approved applicants can select their subscription plan.
           </p>
         </div>
 
@@ -91,23 +85,36 @@ const AdminShopApplications = () => {
                         {application.product_category} • {application.email}
                       </CardDescription>
                     </div>
-                    <Badge variant={getStatusBadgeVariant(application.status)}>
-                      {application.status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {application.subscription_plan && application.status === 'payment' && (
+                        <Badge variant="outline">
+                          {application.subscription_plan.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      )}
+                      <Badge variant={getStatusBadgeVariant(application.status)}>
+                        {application.status}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div>
                       <p className="text-sm font-medium">Price Range</p>
                       <p className="text-sm text-muted-foreground">
-                        ${application.price_range_min} - ${application.price_range_max}
+                        ₦{application.price_range_min?.toLocaleString()} - ₦{application.price_range_max?.toLocaleString()}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm font-medium">Contact</p>
                       <p className="text-sm text-muted-foreground">
                         {application.contact_phone || 'Not provided'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Business Type</p>
+                      <p className="text-sm text-muted-foreground">
+                        {application.business_type || 'Individual'}
                       </p>
                     </div>
                     <div>
@@ -118,10 +125,10 @@ const AdminShopApplications = () => {
                     </div>
                   </div>
 
-                  {application.business_description && (
+                  {application.business_address && (
                     <div className="mb-4">
-                      <p className="text-sm font-medium mb-1">Business Description</p>
-                      <p className="text-sm text-muted-foreground">{application.business_description}</p>
+                      <p className="text-sm font-medium mb-1">Business Address</p>
+                      <p className="text-sm text-muted-foreground">{application.business_address}</p>
                     </div>
                   )}
 
@@ -132,7 +139,7 @@ const AdminShopApplications = () => {
                     </div>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="sm">
@@ -140,7 +147,7 @@ const AdminShopApplications = () => {
                           View Details
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>{application.store_name}</DialogTitle>
                           <DialogDescription>
@@ -163,9 +170,35 @@ const AdminShopApplications = () => {
                             </div>
                             <div>
                               <Label>Price Range</Label>
-                              <p className="text-sm">${application.price_range_min} - ${application.price_range_max}</p>
+                              <p className="text-sm">₦{application.price_range_min?.toLocaleString()} - ₦{application.price_range_max?.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <Label>Business Type</Label>
+                              <p className="text-sm">{application.business_type || 'Individual'}</p>
+                            </div>
+                            <div>
+                              <Label>ID Type</Label>
+                              <p className="text-sm">{application.id_type || 'Not provided'}</p>
                             </div>
                           </div>
+                          
+                          {application.id_number && (
+                            <div>
+                              <Label>ID Number</Label>
+                              <p className="text-sm">{application.id_number}</p>
+                            </div>
+                          )}
+
+                          {application.id_image_url && (
+                            <div>
+                              <Label>ID Image</Label>
+                              <img 
+                                src={application.id_image_url} 
+                                alt="ID Document" 
+                                className="mt-2 max-w-full h-auto rounded border"
+                              />
+                            </div>
+                          )}
                           
                           {application.business_address && (
                             <div>
@@ -187,6 +220,15 @@ const AdminShopApplications = () => {
                               {JSON.stringify(application.bank_details, null, 2)}
                             </pre>
                           </div>
+
+                          {application.agreed_policies && (
+                            <div>
+                              <Label>Agreed Policies</Label>
+                              <pre className="text-xs bg-muted p-2 rounded mt-1">
+                                {JSON.stringify(application.agreed_policies, null, 2)}
+                              </pre>
+                            </div>
+                          )}
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -204,44 +246,23 @@ const AdminShopApplications = () => {
                             <DialogHeader>
                               <DialogTitle>Approve Application</DialogTitle>
                               <DialogDescription>
-                                Enter the payment amount and any notes for the applicant
+                                Once approved, the applicant can select their subscription plan to activate the shop.
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label htmlFor="payment-amount">Payment Amount (₦) *</Label>
-                                <Input
-                                  id="payment-amount"
-                                  type="number"
-                                  placeholder="e.g., 50000"
-                                  className="mt-1"
-                                  onChange={(e) => {
-                                    const amount = e.target.value;
-                                    if (amount) {
-                                      setAdminNotes(prev => {
-                                        const existingNotes = prev.replace(/Payment Amount: ₦[\d,]+\n?/g, '');
-                                        return `Payment Amount: ₦${parseInt(amount).toLocaleString()}\n${existingNotes}`.trim();
-                                      });
-                                    }
-                                  }}
-                                />
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  This amount will be shown on the applicant's payment page
-                                </p>
-                              </div>
-                              <div>
-                                <Label htmlFor="notes">Additional Notes (Optional)</Label>
+                                <Label htmlFor="approval-notes">Notes (Optional)</Label>
                                 <Textarea
-                                  id="notes"
+                                  id="approval-notes"
                                   value={adminNotes}
                                   onChange={(e) => setAdminNotes(e.target.value)}
-                                  placeholder="Additional notes for the applicant..."
+                                  placeholder="Any notes for the applicant..."
                                 />
                               </div>
                               <div className="flex gap-2 justify-end">
                                 <Button
                                   onClick={() => handleStatusUpdate(application.id, 'approved')}
-                                  disabled={updating || !adminNotes.includes('₦')}
+                                  disabled={updating}
                                 >
                                   {updating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                                   Approve Application
@@ -267,7 +288,7 @@ const AdminShopApplications = () => {
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label htmlFor="rejection-notes">Rejection Reason</Label>
+                                <Label htmlFor="rejection-notes">Rejection Reason *</Label>
                                 <Textarea
                                   id="rejection-notes"
                                   value={adminNotes}
@@ -290,19 +311,6 @@ const AdminShopApplications = () => {
                           </DialogContent>
                         </Dialog>
                       </>
-                    )}
-
-                    {application.status === 'approved' && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleStatusUpdate(application.id, 'payment')}
-                        disabled={updating}
-                      >
-                        {updating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        <DollarSign className="h-4 w-4 mr-2" />
-                        Give Shop (Payment Received)
-                      </Button>
                     )}
                   </div>
                 </CardContent>

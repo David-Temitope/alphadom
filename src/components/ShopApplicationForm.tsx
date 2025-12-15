@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,52 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useShopApplications } from '@/hooks/useShopApplications';
 import { useUserTypes } from '@/hooks/useUserTypes';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Store, CreditCard, Loader2, ChevronRight, ChevronLeft, Crown, Star, Zap, Upload, CheckCircle, FileText, Building2, User } from 'lucide-react';
+import { Store, CreditCard, Loader2, ChevronRight, ChevronLeft, Upload, CheckCircle, FileText, Building2, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
-declare global {
-  interface Window {
-    PaystackPop?: any;
-  }
-}
-
-const PAYSTACK_PUBLIC_KEY = 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581';
 
 interface ShopApplicationFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const subscriptionPlans = [
-  {
-    id: 'free',
-    name: 'Free Plan',
-    price: 0,
-    features: ['Up to 20 products', '15% commission', 'Low visibility', 'No ads'],
-    icon: Zap,
-    color: 'bg-gray-100 text-gray-800 border-gray-300'
-  },
-  {
-    id: 'economy',
-    name: 'Economy Plan',
-    price: 7000,
-    features: ['Up to 50 products', '9% commission', 'Standard visibility', 'No ads'],
-    icon: Star,
-    color: 'bg-blue-100 text-blue-800 border-blue-300'
-  },
-  {
-    id: 'first_class',
-    name: 'First Class Plan',
-    price: 15000,
-    features: ['Unlimited products', '5% commission', 'Homepage visibility', '1 free ad/month'],
-    icon: Crown,
-    color: 'bg-yellow-100 text-yellow-800 border-yellow-300'
-  }
-];
 
 export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormProps) => {
   const { submitApplication } = useShopApplications();
@@ -64,7 +27,6 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
   const [step, setStep] = useState(1);
   const [uploadingId, setUploadingId] = useState(false);
   
-  // Form data
   const [formData, setFormData] = useState({
     store_name: '',
     product_category: '',
@@ -80,14 +42,12 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
       account_name: '',
       routing_number: ''
     },
-    // New fields
     id_type: '',
     id_number: '',
     id_image_url: '',
     business_type: 'individual',
     is_registered: false,
     tin_number: '',
-    subscription_plan: 'free',
     agreed_policies: {
       return: false,
       refund: false,
@@ -152,59 +112,17 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
     formData.bank_details.account_name &&
     formData.bank_details.account_number;
 
-  const canProceedStep2 = formData.id_type && 
+  const canSubmit = formData.id_type && 
     formData.id_number && 
     formData.id_image_url &&
     allPoliciesAgreed &&
     (formData.business_type === 'individual' || 
       (formData.business_type === 'company' && (!formData.is_registered || formData.tin_number)));
 
-  const handlePaystackPayment = (plan: typeof subscriptionPlans[0]) => {
-    return new Promise<boolean>((resolve) => {
-      if (!window.PaystackPop) {
-        toast({ title: "Error", description: "Payment system not ready", variant: "destructive" });
-        resolve(false);
-        return;
-      }
-
-      const handler = window.PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: formData.email || user?.email,
-        amount: plan.price * 100,
-        currency: 'NGN',
-        ref: `SHOP_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-        callback: (response: any) => {
-          if (response.status === 'success') {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        },
-        onClose: () => {
-          resolve(false);
-        }
-      });
-
-      handler.openIframe();
-    });
-  };
-
   const handleSubmit = async () => {
     setLoading(true);
 
     try {
-      const selectedPlan = subscriptionPlans.find(p => p.id === formData.subscription_plan);
-      
-      // If paid plan, process payment first
-      if (selectedPlan && selectedPlan.price > 0) {
-        const paymentSuccess = await handlePaystackPayment(selectedPlan);
-        if (!paymentSuccess) {
-          setLoading(false);
-          toast({ title: "Payment Cancelled", description: "Please complete payment to submit your application", variant: "destructive" });
-          return;
-        }
-      }
-
       const applicationData = {
         store_name: formData.store_name,
         product_category: formData.product_category,
@@ -221,7 +139,7 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
         business_type: formData.business_type,
         is_registered: formData.is_registered,
         tin_number: formData.tin_number,
-        subscription_plan: formData.subscription_plan,
+        subscription_plan: 'free', // Default, will be selected after approval
         agreed_policies: formData.agreed_policies
       };
 
@@ -231,6 +149,10 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
         await addUserType('vendor');
         onOpenChange(false);
         resetForm();
+        toast({
+          title: "Application Submitted",
+          description: "Your application has been submitted. You'll be able to select a subscription plan once approved."
+        });
       }
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -257,7 +179,6 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
       business_type: 'individual',
       is_registered: false,
       tin_number: '',
-      subscription_plan: 'free',
       agreed_policies: { return: false, refund: false, delivery: false, dispute: false }
     });
   };
@@ -268,25 +189,24 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Store className="h-5 w-5" />
-            Rent a Shop - Step {step} of 3
+            Rent a Shop - Step {step} of 2
           </DialogTitle>
           <DialogDescription>
             {step === 1 && "Fill out your basic store information and bank details."}
             {step === 2 && "Complete identity verification and agree to policies."}
-            {step === 3 && "Select your subscription plan."}
           </DialogDescription>
         </DialogHeader>
 
         {/* Progress indicator */}
         <div className="flex items-center gap-2 mb-4">
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div key={s} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 s <= step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
               }`}>
                 {s < step ? <CheckCircle className="h-5 w-5" /> : s}
               </div>
-              {s < 3 && <div className={`w-8 h-0.5 ${s < step ? 'bg-primary' : 'bg-muted'}`} />}
+              {s < 2 && <div className={`w-16 h-0.5 ${s < step ? 'bg-primary' : 'bg-muted'}`} />}
             </div>
           ))}
         </div>
@@ -370,13 +290,14 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
             </div>
 
             <div>
-              <Label htmlFor="business_address">Business Address</Label>
+              <Label htmlFor="business_address">Business Address *</Label>
               <Textarea
                 id="business_address"
                 value={formData.business_address}
                 onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
                 placeholder="Enter your business address"
                 rows={2}
+                required
               />
             </div>
 
@@ -493,11 +414,16 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                 <div className="mt-2">
                   {formData.id_image_url ? (
                     <div className="relative">
-                      <img src={formData.id_image_url} alt="ID Document" className="h-32 object-contain rounded border" />
+                      <img 
+                        src={formData.id_image_url} 
+                        alt="ID Document" 
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
                       <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2"
+                        type="button"
+                        variant="destructive" 
+                        size="sm"
+                        className="absolute top-2 right-2"
                         onClick={() => setFormData({ ...formData, id_image_url: '' })}
                       >
                         Remove
@@ -515,7 +441,13 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                           </>
                         )}
                       </div>
-                      <input type="file" className="hidden" accept="image/*" onChange={handleIdImageUpload} />
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleIdImageUpload}
+                        disabled={uploadingId}
+                      />
                     </label>
                   )}
                 </div>
@@ -530,13 +462,15 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
               </h3>
 
               <div className="flex gap-4">
-                <label className={`flex-1 p-4 border rounded-lg cursor-pointer ${formData.business_type === 'individual' ? 'border-primary bg-primary/5' : ''}`}>
+                <label className={`flex-1 p-4 border rounded-lg cursor-pointer transition-colors ${
+                  formData.business_type === 'individual' ? 'border-primary bg-primary/5' : ''
+                }`}>
                   <input
                     type="radio"
                     name="business_type"
                     value="individual"
                     checked={formData.business_type === 'individual'}
-                    onChange={() => setFormData({ ...formData, business_type: 'individual', is_registered: false, tin_number: '' })}
+                    onChange={(e) => setFormData({ ...formData, business_type: e.target.value })}
                     className="sr-only"
                   />
                   <div className="flex items-center gap-2">
@@ -544,13 +478,15 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                     <span className="font-medium">Individual</span>
                   </div>
                 </label>
-                <label className={`flex-1 p-4 border rounded-lg cursor-pointer ${formData.business_type === 'company' ? 'border-primary bg-primary/5' : ''}`}>
+                <label className={`flex-1 p-4 border rounded-lg cursor-pointer transition-colors ${
+                  formData.business_type === 'company' ? 'border-primary bg-primary/5' : ''
+                }`}>
                   <input
                     type="radio"
                     name="business_type"
                     value="company"
                     checked={formData.business_type === 'company'}
-                    onChange={() => setFormData({ ...formData, business_type: 'company' })}
+                    onChange={(e) => setFormData({ ...formData, business_type: e.target.value })}
                     className="sr-only"
                   />
                   <div className="flex items-center gap-2">
@@ -561,24 +497,24 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
               </div>
 
               {formData.business_type === 'company' && (
-                <div className="space-y-4 pl-4 border-l-2">
+                <div className="space-y-4">
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="is_registered"
+                    <Checkbox 
+                      id="is_registered" 
                       checked={formData.is_registered}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_registered: checked as boolean })}
+                      onCheckedChange={(checked) => setFormData({ ...formData, is_registered: !!checked })}
                     />
-                    <Label htmlFor="is_registered">Is your business registered?</Label>
+                    <Label htmlFor="is_registered">Business is registered</Label>
                   </div>
 
                   {formData.is_registered && (
                     <div>
-                      <Label htmlFor="tin_number">Tax Identification Number (TIN) *</Label>
+                      <Label htmlFor="tin_number">TIN Number *</Label>
                       <Input
                         id="tin_number"
                         value={formData.tin_number}
                         onChange={(e) => setFormData({ ...formData, tin_number: e.target.value })}
-                        placeholder="Enter your TIN"
+                        placeholder="Enter your TIN number"
                         required
                       />
                     </div>
@@ -589,33 +525,67 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
 
             {/* Policies */}
             <div className="space-y-4 pt-4 border-t">
-              <h3 className="text-lg font-semibold">Agree to Policies</h3>
-              <p className="text-sm text-muted-foreground">You must agree to all policies to proceed.</p>
+              <h3 className="text-lg font-semibold">Agree to Policies *</h3>
+              <p className="text-sm text-muted-foreground">
+                You must agree to all policies to proceed.
+              </p>
 
               <div className="space-y-3">
-                {[
-                  { key: 'return', label: 'Return Policy', href: '/terms#return' },
-                  { key: 'refund', label: 'Refund Policy', href: '/terms#refund' },
-                  { key: 'delivery', label: 'Delivery Policy', href: '/terms#delivery' },
-                  { key: 'dispute', label: 'Dispute Resolution Policy', href: '/terms#dispute' }
-                ].map((policy) => (
-                  <div key={policy.key} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={policy.key}
-                      checked={formData.agreed_policies[policy.key as keyof typeof formData.agreed_policies]}
-                      onCheckedChange={(checked) => setFormData({
-                        ...formData,
-                        agreed_policies: { ...formData.agreed_policies, [policy.key]: checked }
-                      })}
-                    />
-                    <Label htmlFor={policy.key} className="text-sm">
-                      I agree to the{' '}
-                      <a href={policy.href} target="_blank" className="text-primary hover:underline">
-                        {policy.label}
-                      </a>
-                    </Label>
-                  </div>
-                ))}
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="return_policy" 
+                    checked={formData.agreed_policies.return}
+                    onCheckedChange={(checked) => setFormData({ 
+                      ...formData, 
+                      agreed_policies: { ...formData.agreed_policies, return: !!checked }
+                    })}
+                  />
+                  <Label htmlFor="return_policy" className="text-sm">
+                    I agree to the <a href="/terms#return" className="text-primary underline" target="_blank">Return Policy</a>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="refund_policy" 
+                    checked={formData.agreed_policies.refund}
+                    onCheckedChange={(checked) => setFormData({ 
+                      ...formData, 
+                      agreed_policies: { ...formData.agreed_policies, refund: !!checked }
+                    })}
+                  />
+                  <Label htmlFor="refund_policy" className="text-sm">
+                    I agree to the <a href="/terms#refund" className="text-primary underline" target="_blank">Refund Policy</a>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="delivery_policy" 
+                    checked={formData.agreed_policies.delivery}
+                    onCheckedChange={(checked) => setFormData({ 
+                      ...formData, 
+                      agreed_policies: { ...formData.agreed_policies, delivery: !!checked }
+                    })}
+                  />
+                  <Label htmlFor="delivery_policy" className="text-sm">
+                    I agree to the <a href="/terms#delivery" className="text-primary underline" target="_blank">Delivery Policy</a>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="dispute_policy" 
+                    checked={formData.agreed_policies.dispute}
+                    onCheckedChange={(checked) => setFormData({ 
+                      ...formData, 
+                      agreed_policies: { ...formData.agreed_policies, dispute: !!checked }
+                    })}
+                  />
+                  <Label htmlFor="dispute_policy" className="text-sm">
+                    I agree to the <a href="/terms#dispute" className="text-primary underline" target="_blank">Dispute Resolution Policy</a>
+                  </Label>
+                </div>
               </div>
             </div>
 
@@ -623,72 +593,9 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
               <Button variant="outline" onClick={() => setStep(1)}>
                 <ChevronLeft className="mr-2 h-4 w-4" /> Back
               </Button>
-              <Button onClick={() => setStep(3)} disabled={!canProceedStep2}>
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Subscription Plan */}
-        {step === 3 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Select Your Plan</h3>
-            <p className="text-sm text-muted-foreground">Choose a subscription plan that suits your business needs.</p>
-
-            <div className="grid gap-4">
-              {subscriptionPlans.map((plan) => {
-                const IconComponent = plan.icon;
-                const isSelected = formData.subscription_plan === plan.id;
-                
-                return (
-                  <Card 
-                    key={plan.id}
-                    className={`cursor-pointer transition-all ${isSelected ? 'border-primary border-2' : 'hover:border-primary/50'}`}
-                    onClick={() => setFormData({ ...formData, subscription_plan: plan.id })}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-full ${plan.color} flex items-center justify-center`}>
-                          <IconComponent className="h-6 w-6" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-semibold">{plan.name}</h4>
-                            <span className="text-lg font-bold">
-                              {plan.price === 0 ? 'Free' : `₦${plan.price.toLocaleString()}`}
-                              <span className="text-sm font-normal text-muted-foreground">/month</span>
-                            </span>
-                          </div>
-                          <ul className="mt-2 flex flex-wrap gap-2">
-                            {plan.features.map((feature, i) => (
-                              <Badge key={i} variant="secondary" className="text-xs">{feature}</Badge>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-primary bg-primary' : 'border-muted'}`}>
-                          {isSelected && <CheckCircle className="h-3 w-3 text-primary-foreground" />}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
-            {formData.subscription_plan !== 'free' && (
-              <p className="text-sm text-muted-foreground text-center">
-                You will be redirected to Paystack to complete payment of ₦{subscriptionPlans.find(p => p.id === formData.subscription_plan)?.price.toLocaleString()}
-              </p>
-            )}
-
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={() => setStep(2)}>
-                <ChevronLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-              <Button onClick={handleSubmit} disabled={loading}>
+              <Button onClick={handleSubmit} disabled={loading || !canSubmit}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {formData.subscription_plan === 'free' ? 'Submit Application' : 'Pay & Submit'}
+                Submit Application
               </Button>
             </div>
           </div>
