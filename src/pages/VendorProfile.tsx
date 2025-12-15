@@ -22,11 +22,13 @@ interface VendorProfile {
   total_products: number;
   is_active: boolean;
   created_at: string;
+  application_id: string;
   profile?: {
     full_name: string;
     avatar_url?: string;
     email: string;
   };
+  business_address?: string;
 }
 
 interface VendorProduct {
@@ -76,9 +78,22 @@ export const VendorProfile = () => {
         .eq('id', vendorId)
         .single();
 
+      // Fetch business address from shop_applications
+      let businessAddress = '';
+      if (vendorData.application_id) {
+        const { data: appData } = await supabase
+          .from('shop_applications')
+          .select('business_address')
+          .eq('id', vendorData.application_id)
+          .maybeSingle();
+        
+        businessAddress = appData?.business_address || '';
+      }
+
       setVendor({
         ...vendorData,
-        profile: profileData as any
+        profile: profileData as any,
+        business_address: businessAddress
       });
 
       // Fetch vendor's products
@@ -169,12 +184,22 @@ export const VendorProfile = () => {
                 <p className="text-sm md:text-base text-gray-600">{vendor.profile?.full_name}</p>
                 <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500">
                   <span>{vendor.product_category}</span>
-                  <span className="hidden md:inline">•</span>
-                  <div className="hidden md:flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>Lagos, Nigeria</span>
-                  </div>
+                  {vendor.business_address && (
+                    <>
+                      <span className="hidden md:inline">•</span>
+                      <div className="hidden md:flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{vendor.business_address}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
+                {vendor.business_address && (
+                  <div className="flex md:hidden items-center gap-1 text-xs text-gray-500">
+                    <MapPin className="w-3 h-3" />
+                    <span className="truncate max-w-[150px]">{vendor.business_address}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 fill-current" />
                   <span className="text-xs md:text-sm font-medium">4.8</span>

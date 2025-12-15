@@ -92,52 +92,33 @@ type PaymentMethod = 'bank_transfer' | 'paystack';
  */
 
 const calculateShipping = (items: any[]): number => {
-
   let totalShipping = 0;
-
   // Use a map to track which product IDs have already had their one-time fee applied
-
-  const shippingGroups = new Map<string, number>();
-
+  const oneTimeShippingApplied = new Set<string>();
 
   for (const item of items) {
-
-    const shippingFee = Number(item.shipping_fee) || 0;
-
+    const shippingFee = Number(item.shipping_fee);
     const shippingType = item.shipping_type || 'one_time';
+    const quantity = Number(item.quantity) || 1;
 
-
-    // Only apply shipping fee if fee > 0
-
-    if (shippingFee > 0) {
-
-      if (shippingType === 'per_product') {
-
-        // Per product: multiply by quantity
-
-        totalShipping += shippingFee * item.quantity;
-
-      } else {
-
-        // One-time shipping per product type (using product ID as the key)
-
-        if (!shippingGroups.has(item.id)) {
-
-          shippingGroups.set(item.id, shippingFee);
-
-          totalShipping += shippingFee;
-
-        }
-
-      }
-
+    // Skip if shipping fee is not a valid positive number
+    if (isNaN(shippingFee) || shippingFee <= 0) {
+      continue;
     }
 
+    if (shippingType === 'per_product') {
+      // Per product: multiply shipping fee by quantity
+      totalShipping += shippingFee * quantity;
+    } else {
+      // One-time shipping: apply once per unique product
+      if (!oneTimeShippingApplied.has(item.id)) {
+        oneTimeShippingApplied.add(item.id);
+        totalShipping += shippingFee;
+      }
+    }
   }
 
-
   return totalShipping;
-
 };
 
 

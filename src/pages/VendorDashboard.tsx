@@ -8,19 +8,28 @@ import { useVendors } from '@/hooks/useVendors';
 import { useProducts } from '@/hooks/useProducts';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText, AlertTriangle } from 'lucide-react';
+import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText, AlertTriangle, CreditCard, Wallet, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorProductForm } from '@/components/VendorProductForm';
+import { VendorSubscription } from '@/components/VendorSubscription';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
-  const { currentVendor, isVendor } = useVendors();
+  const { currentVendor, isVendor, refreshVendors } = useVendors();
   const { products, refreshProducts } = useProducts();
   const { user } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const vendorProducts = products.filter(p => p.vendor_user_id === user?.id);
+
+  // Calculate earnings (revenue - commission)
+  const commissionRate = currentVendor?.commission_rate || 15;
+  const totalRevenue = currentVendor?.total_revenue || 0;
+  const platformCommission = totalRevenue * (commissionRate / 100);
+  const vendorEarnings = totalRevenue - platformCommission;
 
   const handleDeleteProduct = async (productId: string) => {
     try {
@@ -73,6 +82,10 @@ const VendorDashboard = () => {
   const isSuspended = currentVendor.is_suspended === true;
   const isInactive = !currentVendor.is_active;
 
+  // Check product limit
+  const productLimit = (currentVendor as any).product_limit || 20;
+  const canAddProduct = productLimit === -1 || vendorProducts.length < productLimit;
+
   return (
     <div className="min-h-screen bg-background p-2 md:p-4">
       <div className="container mx-auto max-w-7xl overflow-x-hidden">
@@ -87,21 +100,70 @@ const VendorDashboard = () => {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Shop Suspended</AlertTitle>
             <AlertDescription>
-              Your shop has been suspended by the management team. You cannot add or edit products until your shop has been reactivated. 
-              Please contact support for more information.
+              Your shop has been suspended. Please renew your subscription or contact support for more information.
             </AlertDescription>
           </Alert>
         )}
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="products">My Products</TabsTrigger>
-            <TabsTrigger value="add-product" disabled={isSuspended || isInactive}>Add Product</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-          </TabsList>
+          {isMobile ? (
+            <TabsList className="grid grid-cols-5 w-full">
+              <TabsTrigger value="overview" className="p-2">
+                <LayoutGrid className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="products" className="p-2">
+                <Package className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="add-product" disabled={isSuspended || isInactive || !canAddProduct} className="p-2">
+                <Edit className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="orders" className="p-2">
+                <FileText className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="subscription" className="p-2">
+                <CreditCard className="h-4 w-4" />
+              </TabsTrigger>
+            </TabsList>
+          ) : (
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="products">My Products</TabsTrigger>
+              <TabsTrigger value="add-product" disabled={isSuspended || isInactive || !canAddProduct}>Add Product</TabsTrigger>
+              <TabsTrigger value="orders">Orders</TabsTrigger>
+              <TabsTrigger value="subscription">Subscription</TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="overview" className="space-y-4 md:space-y-6">
+            {/* Earnings Card */}
+            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-green-800">
+                  <Wallet className="h-5 w-5" />
+                  Your Earnings
+                </CardTitle>
+                <CardDescription className="text-green-600">
+                  After {commissionRate}% platform commission
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-6">
+                  <div>
+                    <p className="text-sm text-green-600">Total Revenue</p>
+                    <p className="text-lg font-semibold text-green-700">₦{totalRevenue.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-green-600">Platform Commission ({commissionRate}%)</p>
+                    <p className="text-lg font-semibold text-red-600">-₦{platformCommission.toLocaleString()}</p>
+                  </div>
+                  <div className="md:ml-auto">
+                    <p className="text-sm text-green-600">Your Earnings</p>
+                    <p className="text-3xl font-bold text-green-800">₦{vendorEarnings.toLocaleString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-4 gap-2 md:gap-6">
               <Card>
                 <CardHeader className="p-2 md:p-6 flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
@@ -129,7 +191,10 @@ const VendorDashboard = () => {
                   <Package className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground hidden md:block" />
                 </CardHeader>
                 <CardContent className="p-2 pt-0 md:p-6 md:pt-0">
-                  <div className="text-sm md:text-2xl font-bold">{vendorProducts.length}</div>
+                  <div className="text-sm md:text-2xl font-bold">
+                    {vendorProducts.length}
+                    {productLimit !== -1 && <span className="text-xs text-muted-foreground">/{productLimit}</span>}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -153,7 +218,9 @@ const VendorDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle>My Products</CardTitle>
-                <CardDescription>Manage your product listings</CardDescription>
+                <CardDescription>
+                  Manage your product listings ({vendorProducts.length}{productLimit !== -1 ? `/${productLimit}` : ''} products)
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {vendorProducts.length === 0 ? (
@@ -204,7 +271,7 @@ const VendorDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Add New Product</CardTitle>
-                <CardDescription>Add a new product to your store using the same format as admin</CardDescription>
+                <CardDescription>Add a new product to your store</CardDescription>
               </CardHeader>
               <CardContent>
                 {isSuspended || isInactive ? (
@@ -212,7 +279,15 @@ const VendorDashboard = () => {
                     <AlertTriangle className="h-4 w-4" />
                     <AlertTitle>Cannot Add Products</AlertTitle>
                     <AlertDescription>
-                      Your shop is currently suspended. You cannot add new products until your shop has been reactivated by the management team.
+                      Your shop is currently suspended. Please renew your subscription or contact support.
+                    </AlertDescription>
+                  </Alert>
+                ) : !canAddProduct ? (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Product Limit Reached</AlertTitle>
+                    <AlertDescription>
+                      You've reached your product limit ({productLimit} products). Upgrade your subscription to add more products.
                     </AlertDescription>
                   </Alert>
                 ) : (
@@ -238,6 +313,10 @@ const VendorDashboard = () => {
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="subscription" className="space-y-6">
+            <VendorSubscription onPlanChange={() => refreshVendors()} />
           </TabsContent>
         </Tabs>
       </div>
