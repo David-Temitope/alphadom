@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -8,12 +9,13 @@ import { useVendors } from '@/hooks/useVendors';
 import { useProducts } from '@/hooks/useProducts';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText, AlertTriangle, CreditCard, Wallet, LayoutGrid } from 'lucide-react';
+import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText, AlertTriangle, CreditCard, Wallet, LayoutGrid, User, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorProductForm } from '@/components/VendorProductForm';
 import { VendorSubscription } from '@/components/VendorSubscription';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
@@ -22,8 +24,9 @@ const VendorDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-
   const vendorProducts = products.filter(p => p.vendor_user_id === user?.id);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Calculate earnings (revenue - commission)
   const commissionRate = currentVendor?.commission_rate || 15;
@@ -53,6 +56,51 @@ const VendorDashboard = () => {
       });
     }
   };
+
+  const handleProfileImageUpload = async (imageUrl: string) => {
+    if (!user) return;
+    
+    setUploadingImage(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: imageUrl })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      setProfileImage(imageUrl);
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile picture",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Fetch current profile image on mount
+  React.useEffect(() => {
+    const fetchProfileImage = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.avatar_url) {
+        setProfileImage(data.avatar_url);
+      }
+    };
+    fetchProfileImage();
+  }, [user]);
 
   if (!user) {
     return (
@@ -107,7 +155,7 @@ const VendorDashboard = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           {isMobile ? (
-            <TabsList className="grid grid-cols-5 w-full">
+            <TabsList className="grid grid-cols-6 w-full">
               <TabsTrigger value="overview" className="p-2">
                 <LayoutGrid className="h-4 w-4" />
               </TabsTrigger>
@@ -120,6 +168,9 @@ const VendorDashboard = () => {
               <TabsTrigger value="orders" className="p-2">
                 <FileText className="h-4 w-4" />
               </TabsTrigger>
+              <TabsTrigger value="profile" className="p-2">
+                <User className="h-4 w-4" />
+              </TabsTrigger>
               <TabsTrigger value="subscription" className="p-2">
                 <CreditCard className="h-4 w-4" />
               </TabsTrigger>
@@ -130,6 +181,7 @@ const VendorDashboard = () => {
               <TabsTrigger value="products">My Products</TabsTrigger>
               <TabsTrigger value="add-product" disabled={isSuspended || isInactive || !canAddProduct}>Add Product</TabsTrigger>
               <TabsTrigger value="orders">Orders</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="subscription">Subscription</TabsTrigger>
             </TabsList>
           )}
@@ -311,6 +363,82 @@ const VendorDashboard = () => {
                   <FileText className="h-4 w-4 mr-2" />
                   View All Orders
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Store Profile
+                </CardTitle>
+                <CardDescription>Manage your store profile and picture</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative">
+                    <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center overflow-hidden border-4 border-primary/20">
+                      {profileImage ? (
+                        <img 
+                          src={profileImage} 
+                          alt={currentVendor.store_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-4xl font-bold text-muted-foreground">
+                          {currentVendor.store_name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="absolute bottom-0 right-0 bg-primary rounded-full p-2 cursor-pointer">
+                      <Camera className="h-4 w-4 text-primary-foreground" />
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold">{currentVendor.store_name}</h3>
+                    <p className="text-muted-foreground">{currentVendor.product_category}</p>
+                  </div>
+
+                  <div className="w-full max-w-sm">
+                    <Label className="mb-2 block">Update Profile Picture</Label>
+                    <ImageUpload 
+                      onImageUploaded={handleProfileImageUpload}
+                    />
+                    {uploadingImage && (
+                      <p className="text-sm text-muted-foreground mt-2">Uploading...</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                  <div>
+                    <Label className="text-muted-foreground">Store Name</Label>
+                    <p className="font-medium">{currentVendor.store_name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Category</Label>
+                    <p className="font-medium">{currentVendor.product_category}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Total Products</Label>
+                    <p className="font-medium">{vendorProducts.length}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Total Orders</Label>
+                    <p className="font-medium">{currentVendor.total_orders}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Member Since</Label>
+                    <p className="font-medium">{new Date(currentVendor.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Subscription Plan</Label>
+                    <Badge variant="default">{currentVendor.subscription_plan?.replace('_', ' ').toUpperCase() || 'FREE'}</Badge>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

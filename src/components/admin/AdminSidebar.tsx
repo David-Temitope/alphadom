@@ -13,7 +13,8 @@ import {
   Leaf,
   Truck,
   Store,
-  UserCog
+  UserCog,
+  Megaphone
 } from 'lucide-react';
 import { useAdmin } from '@/contexts/AdminContext';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ const sidebarItems: SidebarItem[] = [
   { name: 'Users', href: '/appleisgood/users', icon: Users, allowedRoles: ['super_admin', 'user_admin'] },
   { name: 'Transactions', href: '/appleisgood/transactions', icon: ShoppingCart, allowedRoles: ['super_admin'] },
   { name: 'Reports', href: '/appleisgood/reports', icon: BarChart3, allowedRoles: ['super_admin'] },
+  { name: 'Adverts', href: '/appleisgood/adverts', icon: Megaphone, allowedRoles: ['super_admin', 'vendor_admin'] },
   { name: 'Admin Management', href: '/appleisgood/admin-management', icon: UserCog, allowedRoles: ['super_admin'] },
   { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3, allowedRoles: ['super_admin'] },
   { name: 'Settings', href: '/appleisgood/settings', icon: Settings, allowedRoles: ['super_admin'] },

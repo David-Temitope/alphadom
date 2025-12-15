@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, Store, Truck, Star, Package, UserPlus, UserMinus, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Heart, Store, Truck, Star, Package, UserPlus, UserMinus, Eye, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserFollows } from '@/hooks/useUserFollows';
@@ -35,6 +36,7 @@ interface Pilot {
 export const Pilots = () => {
   const [pilots, setPilots] = useState<Pilot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
   const { toast } = useToast();
   const { isFollowing, getCustomerCount, toggleFollow } = useUserFollows();
@@ -190,6 +192,17 @@ export const Pilots = () => {
     fetchPilots();
   }, [user]);
 
+  // Filter pilots based on search term
+  const filteredPilots = pilots.filter(pilot => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      pilot.full_name?.toLowerCase().includes(searchLower) ||
+      pilot.vendor_info?.store_name?.toLowerCase().includes(searchLower) ||
+      pilot.vendor_info?.product_category?.toLowerCase().includes(searchLower) ||
+      pilot.dispatcher_info?.dispatch_name?.toLowerCase().includes(searchLower)
+    );
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -202,11 +215,22 @@ export const Pilots = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Pilots Directory</h1>
-        <p className="text-muted-foreground">Discover vendors and dispatchers in our marketplace</p>
+        <p className="text-muted-foreground mb-6">Discover vendors and dispatchers in our marketplace</p>
+        
+        {/* Search Bar */}
+        <div className="max-w-md mx-auto relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, store, or category..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {pilots.map(pilot => (
+        {filteredPilots.map(pilot => (
           <Card key={pilot.id} className="relative hover:shadow-lg transition-shadow cursor-pointer">
             <Link to={pilot.user_types.includes('vendor') ? `/vendor/${pilot.id}` : `/dispatcher/${pilot.id}`}>
               <CardHeader className="pb-3">
@@ -252,9 +276,11 @@ export const Pilots = () => {
         ))}
       </div>
 
-      {pilots.length === 0 && (
+      {filteredPilots.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No pilots found. Be the first to join!</p>
+          <p className="text-gray-500">
+            {searchTerm ? `No pilots found matching "${searchTerm}"` : 'No pilots found. Be the first to join!'}
+          </p>
         </div>
       )}
     </div>
