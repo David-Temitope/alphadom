@@ -3,9 +3,10 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Store, AlertTriangle, CheckCircle, XCircle, Package, DollarSign } from 'lucide-react';
+import { Loader2, Store, AlertTriangle, CheckCircle, XCircle, Package, DollarSign, Search, Crown, Star } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -16,10 +17,13 @@ interface VendorWithStats {
   store_name: string;
   product_category: string;
   is_active: boolean;
+  is_suspended: boolean;
   total_revenue: number;
   total_orders: number;
   total_products: number;
   created_at: string;
+  subscription_plan: string;
+  subscription_end_date: string | null;
   recent_activities: any[];
   user_profile: {
     email: string;
@@ -33,6 +37,7 @@ const AdminVendorMonitoring = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedVendor, setSelectedVendor] = useState<VendorWithStats | null>(null);
   const [actionNotes, setActionNotes] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   const fetchVendors = async () => {
@@ -169,6 +174,23 @@ const AdminVendorMonitoring = () => {
     );
   }
 
+  const filteredVendors = vendors.filter(vendor => 
+    vendor.store_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.product_category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.user_profile.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getSubscriptionBadge = (plan: string) => {
+    switch (plan) {
+      case 'first_class':
+        return <Badge className="bg-yellow-500"><Crown className="h-3 w-3 mr-1" />First Class</Badge>;
+      case 'economy':
+        return <Badge className="bg-blue-500"><Star className="h-3 w-3 mr-1" />Economy</Badge>;
+      default:
+        return <Badge variant="secondary">Free</Badge>;
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -179,31 +201,43 @@ const AdminVendorMonitoring = () => {
           </p>
         </div>
 
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search vendors by name, category, or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
         <div className="grid gap-6">
-          {vendors.length === 0 ? (
+          {filteredVendors.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
                 <p className="text-muted-foreground">No vendors found.</p>
               </CardContent>
             </Card>
           ) : (
-            vendors.map((vendor) => (
-              <Card key={vendor.id} className={!vendor.is_active ? 'border-red-200 bg-red-50' : ''}>
+            filteredVendors.map((vendor) => (
+              <Card key={vendor.id} className={!vendor.is_active || vendor.is_suspended ? 'border-red-200 bg-red-50' : ''}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Store className="h-5 w-5" />
                         {vendor.store_name}
-                        {!vendor.is_active && <AlertTriangle className="h-4 w-4 text-red-500" />}
+                        {(!vendor.is_active || vendor.is_suspended) && <AlertTriangle className="h-4 w-4 text-red-500" />}
                       </CardTitle>
                       <CardDescription>
                         {vendor.product_category} • {vendor.user_profile.email}
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={vendor.is_active ? 'default' : 'destructive'}>
-                        {vendor.is_active ? 'Active' : 'Suspended'}
+                      {getSubscriptionBadge(vendor.subscription_plan || 'free')}
+                      <Badge variant={vendor.is_active && !vendor.is_suspended ? 'default' : 'destructive'}>
+                        {vendor.is_suspended ? 'Suspended' : vendor.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
                   </div>

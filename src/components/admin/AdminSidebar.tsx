@@ -40,6 +40,8 @@ const sidebarItems: SidebarItem[] = [
   { name: 'Vendor Monitoring', href: '/appleisgood/vendor-monitoring', icon: BarChart3, allowedRoles: ['super_admin', 'vendor_admin'] },
   { name: 'Dispatch Monitoring', href: '/appleisgood/dispatch-monitoring', icon: Truck, allowedRoles: ['super_admin', 'dispatch_admin'] },
   { name: 'Users', href: '/appleisgood/users', icon: Users, allowedRoles: ['super_admin', 'user_admin'] },
+  { name: 'Transactions', href: '/appleisgood/transactions', icon: ShoppingCart, allowedRoles: ['super_admin'] },
+  { name: 'Reports', href: '/appleisgood/reports', icon: BarChart3, allowedRoles: ['super_admin'] },
   { name: 'Admin Management', href: '/appleisgood/admin-management', icon: UserCog, allowedRoles: ['super_admin'] },
   { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3, allowedRoles: ['super_admin'] },
   { name: 'Settings', href: '/appleisgood/settings', icon: Settings, allowedRoles: ['super_admin'] },
