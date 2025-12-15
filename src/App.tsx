@@ -34,6 +34,7 @@ import AdminVendorMonitoring from "./pages/admin/AdminVendorMonitoring";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminTransactions from "./pages/admin/AdminTransactions";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminAdverts from "./pages/admin/AdminAdverts";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Wishlist from "./pages/Wishlist";
@@ -175,6 +176,11 @@ const App = () => {
                       <Route path="/appleisgood/reports" element={
                         <AdminProtectedRoute allowedRoles={['super_admin']}>
                           <AdminReports />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/adverts" element={
+                        <AdminProtectedRoute allowedRoles={['super_admin', 'vendor_admin']}>
+                          <AdminAdverts />
                         </AdminProtectedRoute>
                       } />
 

@@ -82,6 +82,24 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
   const [processing, setProcessing] = useState(false);
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
+
+  // Load Paystack script
+  useEffect(() => {
+    if (window.PaystackPop) {
+      setPaystackLoaded(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    script.onload = () => setPaystackLoaded(true);
+    document.body.appendChild(script);
+    
+    return () => {
+      // Don't remove script as it may be used elsewhere
+    };
+  }, []);
 
   useEffect(() => {
     if (currentVendor?.subscription_end_date) {
@@ -116,19 +134,25 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
   };
 
   const handlePaystackPayment = (plan: typeof subscriptionPlans[0]) => {
-    if (!window.PaystackPop) {
+    if (!paystackLoaded || !window.PaystackPop) {
       toast({
-        title: "Error",
-        description: "Payment system is not ready. Please refresh and try again.",
-        variant: "destructive",
+        title: "Loading...",
+        description: "Payment system is loading. Please wait a moment and try again.",
+        variant: "default",
       });
+      // Try loading script again
+      const script = document.createElement('script');
+      script.src = 'https://js.paystack.co/v1/inline.js';
+      script.async = true;
+      script.onload = () => setPaystackLoaded(true);
+      document.body.appendChild(script);
       return;
     }
 
     if (!user?.email) {
       toast({
         title: "Error",
-        description: "User email not found.",
+        description: "User email not found. Please log in again.",
         variant: "destructive",
       });
       return;

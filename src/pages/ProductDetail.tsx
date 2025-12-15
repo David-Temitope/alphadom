@@ -23,7 +23,8 @@ import {
   Truck, 
   Shield, 
   RotateCcw,
-  ArrowLeft
+  ArrowLeft,
+  Share2
 } from 'lucide-react';
 
 // NOTE: Since the useIsMobile hook was missing, I'm providing a simple placeholder 
@@ -102,6 +103,30 @@ const ProductDetail = () => {
   const amountSaved = hasDiscount && product 
     ? Number(originalPrice) - Number(product.price) 
     : 0;
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareText = `Check out ${product?.name} on Alphadom!`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.name,
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (err) {
+        // User cancelled or share failed
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied!",
+        description: "Product link copied to clipboard.",
+      });
+    }
+  };
 
 
   if (loading) {
@@ -312,6 +337,14 @@ const ProductDetail = () => {
                 <div className="flex gap-3 justify-center">
                   <WishlistButton productId={product.id} size="lg" className="flex-1 h-11" />
                   <LikeButton productId={product.id} size="lg" className="flex-1 h-11" />
+                  <Button 
+                    onClick={handleShare}
+                    variant="outline"
+                    className="flex-1 h-11"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
                 </div>
               </div>
             </div>

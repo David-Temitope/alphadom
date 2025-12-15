@@ -17,12 +17,20 @@ interface VendorProductFormProps {
 }
 
 const PRODUCT_TYPES = {
-  'Clothing & Fashion': ['Men\'s Shirt', 'Women\'s Dress', 'Men\'s Trousers', 'Women\'s Skirt', 'T-Shirt', 'Jacket', 'Jeans', 'Shorts', 'Underwear', 'Socks'],
-  'Electronics': ['Phone', 'Laptop', 'Tablet', 'Headphones', 'Charger', 'Power Bank', 'Speaker', 'Smart Watch', 'Camera', 'TV'],
-  'Home & Living': ['Chair', 'Table', 'Bed', 'Sofa', 'Lamp', 'Curtain', 'Rug', 'Pillow', 'Blanket', 'Storage'],
-  'Personal Care': ['Soap', 'Shampoo', 'Lotion', 'Perfume', 'Makeup', 'Skincare', 'Hair Product', 'Deodorant'],
-  'Fashion': ['Shoes', 'Bag', 'Belt', 'Watch', 'Jewelry', 'Hat', 'Sunglasses', 'Scarf'],
-  'Sports & Fitness': ['Gym Equipment', 'Sportswear', 'Sneakers', 'Water Bottle', 'Yoga Mat', 'Weights'],
+  'Clothing & Fashion': ['Men\'s Shirt', 'Women\'s Dress', 'Men\'s Trousers', 'Women\'s Skirt', 'T-Shirt', 'Jacket', 'Jeans', 'Shorts', 'Underwear', 'Socks', 'Hoodie', 'Sweater', 'Blazer', 'Suit', 'Polo Shirt', 'Tank Top', 'Cardigan', 'Coat', 'Tracksuit', 'Swimwear'],
+  'Electronics': ['Phone', 'Laptop', 'Tablet', 'Headphones', 'Charger', 'Power Bank', 'Speaker', 'Smart Watch', 'Camera', 'TV', 'Monitor', 'Keyboard', 'Mouse', 'USB Cable', 'Earbuds', 'Gaming Console', 'Drone', 'Router', 'Hard Drive', 'Flash Drive'],
+  'Home & Living': ['Chair', 'Table', 'Bed', 'Sofa', 'Lamp', 'Curtain', 'Rug', 'Pillow', 'Blanket', 'Storage', 'Mirror', 'Clock', 'Vase', 'Picture Frame', 'Shelf', 'Mattress', 'Desk', 'Wardrobe', 'Dining Set', 'TV Stand'],
+  'Personal Care': ['Soap', 'Shampoo', 'Lotion', 'Perfume', 'Makeup', 'Skincare', 'Hair Product', 'Deodorant', 'Toothpaste', 'Face Wash', 'Body Wash', 'Hair Dryer', 'Razor', 'Nail Polish', 'Lip Balm', 'Sunscreen', 'Body Oil', 'Hair Cream', 'Facial Mask'],
+  'Shoes & Footwear': ['Sneakers', 'Sandals', 'Heels', 'Boots', 'Loafers', 'Slippers', 'Running Shoes', 'Formal Shoes', 'Canvas', 'Flip Flops', 'Wedges', 'Platforms', 'Oxford', 'Moccasins', 'Espadrilles'],
+  'Bags & Accessories': ['Handbag', 'Backpack', 'Clutch', 'Wallet', 'Belt', 'Watch', 'Jewelry', 'Hat', 'Sunglasses', 'Scarf', 'Tie', 'Bracelet', 'Necklace', 'Earrings', 'Ring', 'Cufflinks', 'Hair Accessory', 'Keychain'],
+  'Sports & Fitness': ['Gym Equipment', 'Sportswear', 'Running Shoes', 'Water Bottle', 'Yoga Mat', 'Weights', 'Resistance Band', 'Jump Rope', 'Fitness Tracker', 'Sports Bag', 'Football', 'Basketball', 'Tennis Racket', 'Swimming Goggles'],
+  'Books & Stationery': ['Novel', 'Textbook', 'Notebook', 'Pen', 'Pencil', 'Highlighter', 'Sticky Notes', 'Planner', 'File Folder', 'Diary', 'Art Supplies', 'Calculator', 'Stapler', 'Scissors'],
+  'Baby & Kids': ['Baby Clothes', 'Diapers', 'Baby Food', 'Toys', 'Stroller', 'Car Seat', 'Baby Bottle', 'Baby Monitor', 'Kids Shoes', 'School Bag', 'Kids Watch', 'Kids Accessories'],
+  'Food & Groceries': ['Snacks', 'Beverages', 'Spices', 'Cooking Oil', 'Rice', 'Pasta', 'Canned Food', 'Cereal', 'Coffee', 'Tea', 'Honey', 'Nuts', 'Dried Fruits'],
+  'Health & Wellness': ['Vitamins', 'Supplements', 'First Aid', 'Pain Relief', 'Thermometer', 'Blood Pressure Monitor', 'Face Mask', 'Hand Sanitizer', 'Essential Oil'],
+  'Automotive': ['Car Accessories', 'Phone Holder', 'Car Charger', 'Seat Cover', 'Air Freshener', 'Car Wash', 'Dash Cam', 'GPS', 'Car Mat', 'Steering Wheel Cover'],
+  'Kitchen & Dining': ['Cookware', 'Cutlery', 'Plates', 'Cups', 'Blender', 'Microwave', 'Toaster', 'Kettle', 'Food Container', 'Spice Rack', 'Apron', 'Oven Mitt'],
+  'Garden & Outdoor': ['Plants', 'Pots', 'Garden Tools', 'Seeds', 'Fertilizer', 'Outdoor Furniture', 'Umbrella', 'Camping Gear', 'BBQ Grill', 'Lantern'],
 };
 
 const COLORS = ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Pink', 'Purple', 'Orange', 'Brown', 'Grey', 'Navy', 'Beige', 'Gold', 'Silver'];

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, Package, Users, MapPin, CheckCircle, UserPlus, UserMinus } from 'lucide-react';
+import { Star, Package, Users, MapPin, CheckCircle, UserPlus, UserMinus, Share2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserFollows } from '@/hooks/useUserFollows';
@@ -129,6 +129,30 @@ export const VendorProfile = () => {
     }
   };
 
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareText = `Check out ${vendor?.store_name} on Alphadom!`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: vendor?.store_name,
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (err) {
+        // User cancelled or share failed
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied!",
+        description: "Store link copied to clipboard.",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -209,38 +233,71 @@ export const VendorProfile = () => {
             </div>
 
             {user && user.id !== vendor.user_id && (
-              isMobile ? (
-                <Button
-                  onClick={handleFollow}
-                  variant={isUserFollowing ? "outline" : "default"}
-                  size="icon"
-                  className="h-9 w-9"
-                >
-                  {isUserFollowing ? (
-                    <UserMinus className="w-4 h-4" />
-                  ) : (
-                    <UserPlus className="w-4 h-4" />
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleFollow}
-                  variant={isUserFollowing ? "outline" : "default"}
-                  className="flex items-center gap-2"
-                >
-                  {isUserFollowing ? (
-                    <>
-                      <UserMinus className="w-4 h-4" />
-                      Unfollow
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4" />
-                      Follow
-                    </>
-                  )}
-                </Button>
-              )
+              <div className="flex gap-2">
+                {isMobile ? (
+                  <>
+                    <Button
+                      onClick={handleFollow}
+                      variant={isUserFollowing ? "outline" : "default"}
+                      size="icon"
+                      className="h-9 w-9"
+                    >
+                      {isUserFollowing ? (
+                        <UserMinus className="w-4 h-4" />
+                      ) : (
+                        <UserPlus className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleShare}
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      onClick={handleFollow}
+                      variant={isUserFollowing ? "outline" : "default"}
+                      className="flex items-center gap-2"
+                    >
+                      {isUserFollowing ? (
+                        <>
+                          <UserMinus className="w-4 h-4" />
+                          Unfollow
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="w-4 h-4" />
+                          Follow
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleShare}
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+            {(!user || user.id === vendor.user_id) && (
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                size={isMobile ? "icon" : "default"}
+                className={isMobile ? "h-9 w-9" : "flex items-center gap-2"}
+              >
+                <Share2 className="w-4 h-4" />
+                {!isMobile && "Share"}
+              </Button>
             )}
           </div>
         </CardHeader>

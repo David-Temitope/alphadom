@@ -207,6 +207,7 @@ const VendorOrders = () => {
                   order={order}
                   onUpdateStatus={updateOrderStatus}
                   showActions={order.status === 'pending' || order.status === 'processing'}
+                  commissionRate={currentVendor?.commission_rate || 15}
                 />
               ))
             )}
@@ -221,9 +222,10 @@ interface OrderCardProps {
   order: Order;
   onUpdateStatus: (orderId: string, status: string) => void;
   showActions: boolean;
+  commissionRate: number;
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showActions }) => {
+const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showActions, commissionRate }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -243,8 +245,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
     }
   };
 
-  // Calculate commission (5% of order total)
-  const commission = order.total_amount * 0.05;
+  // Calculate commission based on vendor's subscription plan
+  const commission = order.total_amount * (commissionRate / 100);
   const vendorPayout = order.total_amount - commission;
 
   return (
@@ -380,7 +382,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
             <div className="text-sm">
               <p className="font-semibold text-amber-800">Platform Commission Notice</p>
               <p className="text-amber-700 mt-1">
-                A 5% commission (₦{commission.toLocaleString()}) will be deducted from this order. 
+                A {commissionRate}% commission (₦{commission.toLocaleString()}) will be deducted from this order. 
                 You will receive ₦{vendorPayout.toLocaleString()} within 24 hours after delivery confirmation.
               </p>
             </div>
