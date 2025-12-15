@@ -32,6 +32,8 @@ import AdminDispatchApplications from "./pages/admin/AdminDispatchApplications";
 import AdminDispatchMonitoring from "./pages/admin/AdminDispatchMonitoring";
 import AdminVendorMonitoring from "./pages/admin/AdminVendorMonitoring";
 import AdminManagement from "./pages/admin/AdminManagement";
+import AdminTransactions from "./pages/admin/AdminTransactions";
+import AdminReports from "./pages/admin/AdminReports";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Wishlist from "./pages/Wishlist";
@@ -40,6 +42,7 @@ import ShopApplicationStatus from "./pages/ShopApplicationStatus";
 import DispatchApplicationStatus from "./pages/DispatchApplicationStatus";
 import VendorDashboard from "./pages/VendorDashboard";
 import UserTypeSelection from "./pages/UserTypeSelection";
+import UserSettings from "./pages/UserSettings";
 import Pilots from "./pages/Pilots";
 import { VendorProfile } from "./pages/VendorProfile";
 import DispatchDashboard from "./pages/DispatchDashboard";
@@ -103,6 +106,7 @@ const App = () => {
                       <Route path="/dispatcher/:dispatchId" element={<Layout><DispatchProfile /></Layout>} />
                       <Route path="/dispatch-dashboard" element={<Layout><DispatchDashboard /></Layout>} />
                       <Route path="/dispatch-selection/:orderId" element={<Layout><DispatchSelection /></Layout>} />
+                      <Route path="/settings" element={<Layout><UserSettings /></Layout>} />
                       <Route path="/about" element={<Layout><About /></Layout>} />
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
@@ -161,6 +165,16 @@ const App = () => {
                       <Route path="/appleisgood/admin-management" element={
                         <AdminProtectedRoute allowedRoles={['super_admin']}>
                           <AdminManagement />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/transactions" element={
+                        <AdminProtectedRoute allowedRoles={['super_admin']}>
+                          <AdminTransactions />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/reports" element={
+                        <AdminProtectedRoute allowedRoles={['super_admin']}>
+                          <AdminReports />
                         </AdminProtectedRoute>
                       } />
 
