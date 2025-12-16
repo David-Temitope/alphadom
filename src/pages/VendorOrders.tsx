@@ -91,29 +91,37 @@ const VendorOrders = () => {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const updateData: any = { status };
+      const updateData: any = { 
+        status,
+        updated_at: new Date().toISOString()
+      };
       
       if (status === 'shipped') {
         updateData.self_delivery = true;
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .update(updateData)
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
         description: `Order status updated to ${status}`,
       });
 
-      fetchVendorOrders();
-    } catch (error) {
+      await fetchVendorOrders();
+    } catch (error: any) {
+      console.error('Error updating order:', error);
       toast({
         title: "Error",
-        description: "Failed to update order",
+        description: error.message || "Failed to update order",
         variant: "destructive",
       });
     }

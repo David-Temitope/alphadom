@@ -164,17 +164,12 @@ const Products = () => {
     <div className="mb-6 overflow-hidden">
       <div className="flex items-center justify-between mb-3 px-1">
         <h2 className="font-semibold text-base">{category}</h2>
-        <Button 
-          variant="link"
-          size="sm"
-          className="text-xs text-primary flex items-center gap-0.5 p-0 h-auto"
-          onClick={() => {
-            setFilters(prev => ({ ...prev, categories: [category] }));
-            setViewMode('grid');
-          }}
+        <Link 
+          to={`/category/${encodeURIComponent(category)}`}
+          className="text-xs text-primary flex items-center gap-0.5 p-0 h-auto hover:underline"
         >
           See all <ChevronRight className="h-3 w-3" />
-        </Button>
+        </Link>
       </div>
       <div className="overflow-x-auto overflow-y-hidden scrollbar-hide -mx-3 px-3">
         <div className="flex gap-3 pb-2 w-max">
