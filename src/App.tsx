@@ -37,6 +37,10 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminAdverts from "./pages/admin/AdminAdverts";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import RefundPolicy from "./pages/RefundPolicy";
+import ReturnPolicy from "./pages/ReturnPolicy";
+import DeliveryPolicy from "./pages/DeliveryPolicy";
+import DisputePolicy from "./pages/DisputePolicy";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import ShopApplicationStatus from "./pages/ShopApplicationStatus";
@@ -186,9 +190,13 @@ const App = () => {
                         </AdminProtectedRoute>
                       } />
 
-                      {/* Terms and Privacy Routes */}
+                      {/* Terms, Privacy and Policy Routes */}
                       <Route path="/terms" element={<Layout><Terms /></Layout>} />
                       <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
+                      <Route path="/refund-policy" element={<Layout><RefundPolicy /></Layout>} />
+                      <Route path="/return-policy" element={<Layout><ReturnPolicy /></Layout>} />
+                      <Route path="/delivery-policy" element={<Layout><DeliveryPolicy /></Layout>} />
+                      <Route path="/dispute-policy" element={<Layout><DisputePolicy /></Layout>} />
 
                       {/* 404 Route */}
                       <Route path="*" element={<NotFound />} />

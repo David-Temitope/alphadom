@@ -17,7 +17,7 @@ const ProductCard = memo(({ id, name, price, image }: { id: string; name: string
   return (
     <div 
       className="inline-flex items-center gap-2 bg-card border rounded-lg p-2 cursor-pointer hover:bg-accent transition-colors my-1"
-      onClick={() => navigate(`/product/${id}`)}
+      onClick={() => navigate(`/products/${id}`)}
     >
       <img 
         src={image || '/placeholder.svg'} 
