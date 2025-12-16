@@ -33,17 +33,26 @@ const ProductCard = memo(({ id, name, price, image }: { id: string; name: string
   );
 });
 
-// Vendor link component
-const VendorLink = memo(({ id, name }: { id: string; name: string }) => {
+// Vendor card component for chat (similar to ProductCard)
+const VendorCard = memo(({ id, name, image }: { id: string; name: string; image?: string }) => {
   const navigate = useNavigate();
   
   return (
-    <span 
-      className="text-primary underline cursor-pointer hover:text-primary/80"
+    <div 
+      className="inline-flex items-center gap-2 bg-card border rounded-lg p-2 cursor-pointer hover:bg-accent transition-colors my-1"
       onClick={() => navigate(`/pilots/${id}`)}
     >
-      {name}
-    </span>
+      <img 
+        src={image || '/placeholder.svg'} 
+        alt={name}
+        className="w-12 h-12 object-cover rounded-full"
+        loading="lazy"
+      />
+      <div className="flex flex-col">
+        <span className="text-xs font-medium line-clamp-1">{name}</span>
+        <span className="text-xs text-muted-foreground">View Store</span>
+      </div>
+    </div>
   );
 });
 
@@ -53,8 +62,8 @@ const MessageContent = memo(({ content }: { content: string }) => {
   
   // Parse product cards: [[PRODUCT:id:name:price:image]]
   const productRegex = /\[\[PRODUCT:([^:]+):([^:]+):([^:]+):([^\]]*)\]\]/g;
-  // Parse vendor links: [[VENDOR:id:name]]
-  const vendorRegex = /\[\[VENDOR:([^:]+):([^\]]+)\]\]/g;
+  // Parse vendor cards: [[VENDOR:id:name:image]]
+  const vendorRegex = /\[\[VENDOR:([^:]+):([^:]+):([^\]]*)\]\]/g;
   
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -77,11 +86,11 @@ const MessageContent = memo(({ content }: { content: string }) => {
   
   // Find vendor matches
   while ((match = vendorRegex.exec(tempContent)) !== null) {
-    const [fullMatch, id, name] = match;
+    const [fullMatch, id, name, image] = match;
     matches.push({
       index: match.index,
       length: fullMatch.length,
-      element: <VendorLink key={`vendor-${id}-${match.index}`} id={id} name={name} />
+      element: <VendorCard key={`vendor-${id}-${match.index}`} id={id} name={name} image={image} />
     });
   }
   

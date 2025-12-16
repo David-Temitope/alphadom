@@ -103,7 +103,14 @@ const DisputePolicy = () => {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">10. Contact Us</h2>
             <p>
-              For dispute-related assistance, contact us through our Contact page, Discord, or email. Please have your order ID ready for faster service.
+              For dispute-related assistance, please contact us through:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Email: <a href="mailto:alphadomplatform@gmail.com" className="text-primary hover:underline">alphadomplatform@gmail.com</a></li>
+              <li>Discord: <a href="https://discord.gg/rvbSEwUY" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Join our Discord Server</a></li>
+            </ul>
+            <p className="text-sm text-muted-foreground mt-2">
+              Please have your order ID ready for faster service.
             </p>
           </section>
         </CardContent>
