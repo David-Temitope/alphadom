@@ -590,7 +590,7 @@ const Checkout: React.FC = () => {
 
     // Build Paystack config
     const paystackConfig: any = {
-      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
+      key: 'pk_live_b65b60f97ee0b66e9631df6b1301ef83d383913a',
       email: user.email,
       amount: Math.round(orderTotals.total * 100), // amount in kobo
       currency: 'NGN',

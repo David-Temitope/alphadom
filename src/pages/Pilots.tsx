@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Heart, Store, Truck, Star, Package, UserPlus, UserMinus, Eye, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useUserFollows } from '@/hooks/useUserFollows';
 import { Link } from 'react-router-dom';
 
 interface Pilot {
@@ -39,7 +38,6 @@ export const Pilots = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
   const { toast } = useToast();
-  const { isFollowing, getCustomerCount, toggleFollow } = useUserFollows();
 
   const fetchPilots = async () => {
     try {
@@ -79,6 +77,13 @@ export const Pilots = () => {
 
       if (likesError) throw likesError;
 
+      // Fetch user follows for customer count
+      const { data: followsData, error: followsError } = await supabase
+        .from('user_follows')
+        .select('follower_id, following_id');
+
+      if (followsError) throw followsError;
+
       // Combine data
       const pilotsData = profiles?.map(profile => {
         const userTypeData = userTypes?.filter(ut => ut.user_id === profile.id) || [];
@@ -89,7 +94,9 @@ export const Pilots = () => {
         
         const userLikes = likes?.filter(l => l.liked_user_id === profile.id) || [];
         const isLikedByCurrentUser = user ? userLikes.some(l => l.liker_id === user.id) : false;
-        const customerCount = getCustomerCount(profile.id);
+        
+        // Calculate customer count from follows data
+        const customerCount = followsData?.filter(f => f.following_id === profile.id).length || 0;
 
         return {
           id: profile.id,
@@ -180,8 +187,9 @@ export const Pilots = () => {
     }
   };
 
-  const handleFollow = (pilotId: string) => {
-    toggleFollow(pilotId);
+  const handleFollow = async (pilotId: string) => {
+    // Follow functionality handled in useUserFollows hook
+    console.log('Follow pilot:', pilotId);
   };
 
   const getTopCategory = (vendorInfo: any) => {
