@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Download, Search, DollarSign, CreditCard, Calendar } from 'lucide-react';
@@ -155,7 +156,7 @@ const AdminTransactions = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -165,6 +166,22 @@ const AdminTransactions = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Revenue</p>
                   <p className="text-2xl font-bold">₦{totalAmount.toLocaleString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-green-500/10 p-3 rounded-lg">
+                  <DollarSign className="h-6 w-6 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Platform Commission</p>
+                  <p className="text-2xl font-bold">₦{filteredTransactions
+                    .filter(tx => tx.transaction_type === 'order_payment' && tx.metadata?.platform_commission)
+                    .reduce((sum, tx) => sum + Number(tx.metadata?.platform_commission || 0), 0)
+                    .toLocaleString()}</p>
                 </div>
               </div>
             </CardContent>
@@ -185,8 +202,8 @@ const AdminTransactions = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="bg-green-500/10 p-3 rounded-lg">
-                  <Calendar className="h-6 w-6 text-green-500" />
+                <div className="bg-purple-500/10 p-3 rounded-lg">
+                  <Calendar className="h-6 w-6 text-purple-500" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">This Month</p>
@@ -235,30 +252,71 @@ const AdminTransactions = () => {
               <p className="text-center text-muted-foreground py-8">No transactions found.</p>
             ) : (
               <div className="space-y-4">
-                {filteredTransactions.map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-muted p-2 rounded-lg">
-                        <DollarSign className="h-5 w-5" />
+                {filteredTransactions.map((tx) => {
+                  const meta = tx.metadata || {};
+                  const hasSplit = meta.split_payment === true;
+                  
+                  return (
+                    <div key={tx.id} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="bg-muted p-2 rounded-lg">
+                            <DollarSign className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{tx.description || tx.transaction_type.replace('_', ' ')}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(tx.created_at), 'PPp')}
+                            </p>
+                            {tx.reference && (
+                              <p className="text-xs text-muted-foreground">Ref: {tx.reference}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-lg">₦{Number(tx.amount).toLocaleString()}</p>
+                          <Badge variant={getTypeBadgeVariant(tx.transaction_type)}>
+                            {tx.transaction_type.replace('_', ' ')}
+                          </Badge>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{tx.description || tx.transaction_type.replace('_', ' ')}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(tx.created_at), 'PPp')}
-                        </p>
-                        {tx.reference && (
-                          <p className="text-xs text-muted-foreground">Ref: {tx.reference}</p>
-                        )}
-                      </div>
+                      
+                      {/* Commission Breakdown for order payments */}
+                      {tx.transaction_type === 'order_payment' && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Subscription Plan:</span>
+                            <Badge variant="outline" className="capitalize">
+                              {meta.subscription_plan || 'N/A'}
+                            </Badge>
+                          </div>
+                          {hasSplit ? (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Commission Rate:</span>
+                                <span className="font-medium">{meta.commission_rate}%</span>
+                              </div>
+                              <Separator className="my-2" />
+                              <div className="flex justify-between text-green-600">
+                                <span>Platform Commission:</span>
+                                <span className="font-semibold">₦{Number(meta.platform_commission || 0).toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between text-blue-600">
+                                <span>Vendor Payout ({meta.vendor_percentage}%):</span>
+                                <span className="font-semibold">₦{Number(meta.vendor_amount || 0).toLocaleString()}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex justify-between text-green-600">
+                              <span>Platform Revenue (100%):</span>
+                              <span className="font-semibold">₦{Number(tx.amount).toLocaleString()}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-lg">₦{Number(tx.amount).toLocaleString()}</p>
-                      <Badge variant={getTypeBadgeVariant(tx.transaction_type)}>
-                        {tx.transaction_type.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
