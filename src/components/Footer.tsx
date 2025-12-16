@@ -8,7 +8,7 @@ export const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -61,6 +61,17 @@ export const Footer = () => {
               <li><Link to="/products" className="text-gray-300 hover:text-white transition-colors">Products</Link></li>
               <li><Link to="/about" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+
+          {/* Policies */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Policies</h3>
+            <ul className="space-y-2">
+              <li><Link to="/refund-policy" className="text-gray-300 hover:text-white transition-colors">Refund Policy</Link></li>
+              <li><Link to="/return-policy" className="text-gray-300 hover:text-white transition-colors">Return Policy</Link></li>
+              <li><Link to="/delivery-policy" className="text-gray-300 hover:text-white transition-colors">Delivery Policy</Link></li>
+              <li><Link to="/dispute-policy" className="text-gray-300 hover:text-white transition-colors">Dispute Policy</Link></li>
             </ul>
           </div>
 

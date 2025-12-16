@@ -45,7 +45,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
           inWishlist ? "fill-current" : ""
         )} 
       />
-      {size === 'lg' && <span className="ml-2">{inWishlist ? 'In Wishlist' : 'Add to Wishlist'}</span>}
+      {size === 'lg' && <span className="ml-2">{inWishlist ? 'In Wishlist' : 'Wishlist'}</span>}
     </Button>
   );
 };

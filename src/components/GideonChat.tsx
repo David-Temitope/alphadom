@@ -40,7 +40,7 @@ const VendorLink = memo(({ id, name }: { id: string; name: string }) => {
   return (
     <span 
       className="text-primary underline cursor-pointer hover:text-primary/80"
-      onClick={() => navigate(`/vendor/${id}`)}
+      onClick={() => navigate(`/pilots/${id}`)}
     >
       {name}
     </span>

@@ -88,9 +88,9 @@ export const FeaturedProducts = () => {
       
       <div 
         ref={scrollRef}
-        className="overflow-x-auto overflow-y-hidden scrollbar-hide -mx-3 px-3"
+        className="overflow-x-auto overflow-y-hidden scrollbar-hide"
       >
-        <div className="flex gap-3 md:gap-4 pb-2 w-max">
+        <div className="flex gap-3 md:gap-4 pb-2 w-max pl-1">
           {items.map(product => (
             <div key={product.id} className={isMobile ? "w-36 flex-shrink-0" : "w-56 flex-shrink-0"}>
               {isMobile ? (
