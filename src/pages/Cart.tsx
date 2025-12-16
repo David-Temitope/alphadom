@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
+import { PlatformAd } from "@/components/PlatformAd";
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, totalSustainabilityImpact, clearCart } = useCart();
@@ -248,6 +249,7 @@ const Cart = () => {
           </div>
         </div>
       </div>
+      <PlatformAd targetPage="cart" />
     </div>
   );
 };

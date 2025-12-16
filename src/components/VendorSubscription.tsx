@@ -62,7 +62,7 @@ const subscriptionPlans = [
       'Homepage visibility',
       '1 free ad per month'
     ],
-    productLimit: -1, // unlimited
+    productLimit: -1,
     commissionRate: 5,
     homeVisibility: true,
     freeAds: 1,
@@ -86,19 +86,30 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
 
   // Load Paystack script
   useEffect(() => {
-    if (window.PaystackPop) {
-      setPaystackLoaded(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    script.onload = () => setPaystackLoaded(true);
-    document.body.appendChild(script);
-    
-    return () => {
-      // Don't remove script as it may be used elsewhere
+    const loadPaystack = () => {
+      if (window.PaystackPop) {
+        setPaystackLoaded(true);
+        return;
+      }
+      
+      const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', () => setPaystackLoaded(true));
+        return;
+      }
+      
+      const script = document.createElement('script');
+      script.src = 'https://js.paystack.co/v1/inline.js';
+      script.async = true;
+      script.onload = () => setPaystackLoaded(true);
+      script.onerror = () => {
+        console.error('Failed to load Paystack');
+        setTimeout(loadPaystack, 2000);
+      };
+      document.body.appendChild(script);
     };
+    
+    loadPaystack();
   }, []);
 
   useEffect(() => {
@@ -109,7 +120,6 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       setDaysRemaining(Math.max(0, diffDays));
       
-      // Calculate progress (31 days = 100%)
       const progress = Math.max(0, Math.min(100, (diffDays / 31) * 100));
       setProgressPercentage(progress);
     } else {
@@ -118,17 +128,67 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
     }
   }, [currentVendor]);
 
+  const canChangePlan = (targetPlanId: string): boolean => {
+    if (!currentVendor) return true;
+    
+    const currentPlanId = currentVendor.subscription_plan || 'free';
+    const isExpired = daysRemaining !== null && daysRemaining <= 0;
+    
+    // Can always change if expired
+    if (isExpired) return true;
+    
+    // Can't select same plan
+    if (currentPlanId === targetPlanId) return false;
+    
+    // Free plan users can upgrade anytime
+    if (currentPlanId === 'free') return true;
+    
+    // Paid plan users can upgrade or switch to another paid plan
+    // But cannot downgrade to free until expired
+    if (targetPlanId === 'free' && (currentPlanId === 'economy' || currentPlanId === 'first_class')) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  const getButtonText = (plan: typeof subscriptionPlans[0]): string => {
+    if (processing) return 'Processing...';
+    
+    const currentPlanId = currentVendor?.subscription_plan || 'free';
+    const isExpired = daysRemaining !== null && daysRemaining <= 0;
+    const isCurrentPlan = currentPlanId === plan.id;
+    
+    if (isCurrentPlan && !isExpired) return 'Current Plan';
+    if (isExpired) return plan.price === 0 ? 'Select Free Plan' : 'Renew Now';
+    if (!canChangePlan(plan.id)) return 'Available after expiry';
+    if (plan.price === 0) return 'Select Free Plan';
+    
+    // Determine if upgrade or switch
+    const planOrder = { 'free': 0, 'economy': 1, 'first_class': 2 };
+    const currentOrder = planOrder[currentPlanId as keyof typeof planOrder] || 0;
+    const targetOrder = planOrder[plan.id as keyof typeof planOrder] || 0;
+    
+    return targetOrder > currentOrder ? 'Upgrade Now' : 'Switch Plan';
+  };
+
   const handleSelectPlan = async (planId: string) => {
     if (!user || !currentVendor) return;
+    if (!canChangePlan(planId)) {
+      toast({
+        title: "Cannot change plan",
+        description: "You cannot downgrade to Free plan until your current subscription expires.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const selectedPlan = subscriptionPlans.find(p => p.id === planId);
     if (!selectedPlan) return;
 
     if (planId === 'free') {
-      // Free plan - activate immediately
       await activatePlan(planId);
     } else {
-      // Paid plans - open Paystack
       handlePaystackPayment(selectedPlan);
     }
   };
@@ -140,12 +200,6 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
         description: "Payment system is loading. Please wait a moment and try again.",
         variant: "default",
       });
-      // Try loading script again
-      const script = document.createElement('script');
-      script.src = 'https://js.paystack.co/v1/inline.js';
-      script.async = true;
-      script.onload = () => setPaystackLoaded(true);
-      document.body.appendChild(script);
       return;
     }
 
@@ -164,7 +218,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
       const handler = window.PaystackPop.setup({
         key: PAYSTACK_PUBLIC_KEY,
         email: user.email,
-        amount: plan.price * 100, // Convert to kobo
+        amount: plan.price * 100,
         currency: 'NGN',
         ref: `SUB_${Date.now()}_${Math.random().toString(36).slice(2)}`,
         metadata: {
@@ -176,7 +230,6 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
           if (response.status === 'success') {
             await activatePlan(plan.id, response.reference);
             
-            // Record transaction
             await supabase.from('platform_transactions').insert({
               transaction_type: 'subscription',
               amount: plan.price,
@@ -184,6 +237,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
               vendor_id: currentVendor?.id,
               reference: response.reference,
               payment_method: 'paystack',
+              status: 'completed',
               description: `${plan.name} subscription payment`,
               metadata: { plan_id: plan.id }
             });
@@ -226,7 +280,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
           commission_rate: plan.commissionRate,
           has_home_visibility: plan.homeVisibility,
           free_ads_remaining: plan.freeAds,
-          is_suspended: false // Remove suspension
+          is_suspended: false
         })
         .eq('id', currentVendor.id);
 
@@ -301,6 +355,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
         {subscriptionPlans.map((plan) => {
           const IconComponent = plan.icon;
           const isCurrentPlan = currentVendor?.subscription_plan === plan.id;
+          const canChange = canChangePlan(plan.id);
           
           return (
             <Card 
@@ -339,11 +394,9 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
                   className="w-full"
                   variant={isCurrentPlan && !isExpired ? "outline" : "default"}
                   onClick={() => handleSelectPlan(plan.id)}
-                  disabled={processing || (isCurrentPlan && !isExpired)}
+                  disabled={processing || (isCurrentPlan && !isExpired) || !canChange}
                 >
-                  {processing ? 'Processing...' : 
-                   isCurrentPlan && !isExpired ? 'Current Plan' : 
-                   plan.price === 0 ? 'Select Free Plan' : 'Subscribe Now'}
+                  {getButtonText(plan)}
                 </Button>
               </CardContent>
             </Card>

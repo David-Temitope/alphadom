@@ -6,6 +6,7 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
+import { PlatformAd } from '@/components/PlatformAd';
 
 const Wishlist = () => {
   const { wishlistItems, removeFromWishlist, loading } = useWishlist();
@@ -137,6 +138,7 @@ const Wishlist = () => {
           </div>
         )}
       </div>
+      <PlatformAd targetPage="wishlist" />
     </div>
   );
 };

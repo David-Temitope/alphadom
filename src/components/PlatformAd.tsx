@@ -40,11 +40,12 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
         return;
       }
 
+      // Query for ads targeting this page, all pages, or null (legacy)
       const { data, error } = await supabase
         .from('platform_ads')
         .select('*')
         .eq('is_active', true)
-        .or(`target_page.eq.${targetPage},target_page.is.null`)
+        .or(`target_page.eq.${targetPage},target_page.eq.all,target_page.is.null`)
         .order('priority', { ascending: false })
         .limit(1)
         .single();
@@ -71,7 +72,8 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
     fetchAd();
   }, [targetPage]);
 
-  const handleDismiss = () => {
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setVisible(false);
     // Mark as dismissed for this session
     const dismissed = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
@@ -86,7 +88,7 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
       navigate(`/product/${ad.target_product_id}`);
     } else if (ad?.target_vendor_id) {
       navigate(`/vendor/${ad.target_vendor_id}`);
-    } else if (ad?.target_page) {
+    } else if (ad?.target_page && ad.target_page !== 'all') {
       navigate(ad.target_page);
     }
   };
@@ -94,83 +96,52 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
   if (!ad || !visible) return null;
 
   return (
-    <Card className={`relative overflow-hidden ${animationClass} ${className}`}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-2 right-2 z-10 h-8 w-8 bg-background/80 hover:bg-background"
-        onClick={handleDismiss}
-      >
-        <X className="h-4 w-4" />
-      </Button>
-      
-      <CardContent className="p-0">
-        <div 
-          className="cursor-pointer"
-          onClick={handleClick}
+    <div className={`fixed bottom-20 right-4 md:bottom-24 md:right-6 z-40 max-w-sm w-full md:w-96 ${className}`}>
+      <Card className={`relative overflow-hidden shadow-2xl border-2 ${animationClass}`}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 z-10 h-8 w-8 bg-background/90 hover:bg-background rounded-full"
+          onClick={handleDismiss}
         >
-          {ad.image_url && (
-            <div className="relative">
-              <img 
-                src={ad.image_url} 
-                alt={ad.title}
-                className="w-full h-48 md:h-64 object-cover"
-              />
-              <Badge className="absolute top-2 left-2 bg-primary/90">
-                Featured
-              </Badge>
-            </div>
-          )}
-          
-          <div className="p-4">
-            <h3 className="font-semibold text-lg mb-1">{ad.title}</h3>
-            {ad.description && (
-              <p className="text-sm text-muted-foreground mb-3">{ad.description}</p>
+          <X className="h-4 w-4" />
+        </Button>
+        
+        <CardContent className="p-0">
+          <div 
+            className="cursor-pointer"
+            onClick={handleClick}
+          >
+            {ad.image_url && (
+              <div className="relative">
+                <img 
+                  src={ad.image_url} 
+                  alt={ad.title}
+                  className="w-full h-32 md:h-40 object-cover"
+                  loading="lazy"
+                />
+                <Badge className="absolute top-2 left-2 bg-primary/90">
+                  Featured
+                </Badge>
+              </div>
             )}
             
-            {ad.cta_text && (
-              <Button variant="outline" size="sm" className="gap-1">
-                {ad.cta_text}
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
+            <div className="p-3">
+              <h3 className="font-semibold text-base mb-1">{ad.title}</h3>
+              {ad.description && (
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{ad.description}</p>
+              )}
+              
+              {ad.cta_text && (
+                <Button variant="default" size="sm" className="gap-1 w-full">
+                  {ad.cta_text}
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
-
-// Add to index.css for animations
-export const adAnimationStyles = `
-@keyframes slide-in-left {
-  from { transform: translateX(-100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-@keyframes slide-in-right {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-@keyframes slide-in-top {
-  from { transform: translateY(-100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-@keyframes slide-in-bottom {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-@keyframes zoom-in {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-slide-in-left { animation: slide-in-left 0.5s ease-out; }
-.animate-slide-in-right { animation: slide-in-right 0.5s ease-out; }
-.animate-slide-in-top { animation: slide-in-top 0.5s ease-out; }
-.animate-slide-in-bottom { animation: slide-in-bottom 0.5s ease-out; }
-.animate-zoom-in { animation: zoom-in 0.5s ease-out; }
-.animate-fade-in { animation: fade-in 0.5s ease-out; }
-`;

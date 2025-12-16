@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductCardMobile } from "@/components/ProductCardMobile";
@@ -42,7 +42,7 @@ const Products = () => {
     return { categories, productTypes, colors, sizes, materials, maxPrice };
   }, [products]);
 
-  // Group products by category
+  // Group products by category for category view
   const productsByCategory = useMemo(() => {
     const grouped: Record<string, typeof products> = {};
     products.forEach(product => {
@@ -115,10 +115,31 @@ const Products = () => {
       });
   }, [products, searchTerm, filters, sortBy]);
 
-  // Check if any filter is active
-  const hasActiveFilters = filters.categories.length > 0 || filters.types.length > 0 || 
-    filters.genders.length > 0 || filters.colors.length > 0 || filters.sizes.length > 0 || 
-    filters.materials.length > 0 || filters.thickness.length > 0 || searchTerm !== '';
+  // Check if any filter is active (excluding default price range)
+  const hasActiveFilters = useMemo(() => {
+    return filters.categories.length > 0 || 
+      filters.types.length > 0 || 
+      filters.genders.length > 0 || 
+      filters.colors.length > 0 || 
+      filters.sizes.length > 0 || 
+      filters.materials.length > 0 || 
+      filters.thickness.length > 0 || 
+      searchTerm !== '';
+  }, [filters, searchTerm]);
+
+  const clearAllFilters = useCallback(() => {
+    setFilters({
+      categories: [],
+      types: [],
+      genders: [],
+      colors: [],
+      sizes: [],
+      materials: [],
+      thickness: [],
+      priceRange: [0, filterOptions.maxPrice]
+    });
+    setSearchTerm('');
+  }, [filterOptions.maxPrice]);
 
   if (loading) {
     return (
@@ -138,21 +159,25 @@ const Products = () => {
     );
   }
 
-  // Mobile Category Row Component
+  // Mobile Category Row Component with proper scroll containment
   const CategoryRow = ({ category, items }: { category: string; items: typeof products }) => (
-    <div className="mb-6">
+    <div className="mb-6 overflow-hidden">
       <div className="flex items-center justify-between mb-3 px-1">
         <h2 className="font-semibold text-base">{category}</h2>
-        <Link 
-          to={`/products?category=${encodeURIComponent(category)}`}
-          className="text-xs text-primary flex items-center gap-0.5"
-          onClick={() => setFilters(prev => ({ ...prev, categories: [category] }))}
+        <Button 
+          variant="link"
+          size="sm"
+          className="text-xs text-primary flex items-center gap-0.5 p-0 h-auto"
+          onClick={() => {
+            setFilters(prev => ({ ...prev, categories: [category] }));
+            setViewMode('grid');
+          }}
         >
           See all <ChevronRight className="h-3 w-3" />
-        </Link>
+        </Button>
       </div>
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-3 pb-2">
+      <div className="overflow-x-auto overflow-y-hidden scrollbar-hide -mx-3 px-3">
+        <div className="flex gap-3 pb-2 w-max">
           {items.slice(0, 10).map((product) => (
             <div key={product.id} className="w-36 flex-shrink-0">
               <ProductCardMobile
@@ -172,16 +197,18 @@ const Products = () => {
             </div>
           ))}
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
     </div>
   );
 
+  // Determine what to show based on view mode and filters
+  const showCategoryView = isMobile && viewMode === 'category' && !hasActiveFilters;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <div className="flex">
         {/* Sidebar Filters - Always visible */}
-        <aside className={`${isMobile ? 'w-20' : 'w-64'} flex-shrink-0 border-r bg-card min-h-screen sticky top-0`}>
+        <aside className={`${isMobile ? 'w-16' : 'w-64'} flex-shrink-0 border-r bg-card min-h-screen sticky top-0`}>
           <div className="p-2 md:p-4">
             {!isMobile && (
               <>
@@ -227,7 +254,7 @@ const Products = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-3 md:p-6">
+        <main className="flex-1 p-3 md:p-6 min-w-0 overflow-x-hidden">
           {/* Mobile Header */}
           {isMobile && (
             <div className="mb-4">
@@ -267,13 +294,28 @@ const Products = () => {
                   </SelectContent>
                 </Select>
                 <Button
-                  variant={viewMode === 'category' ? 'default' : 'outline'}
+                  variant={viewMode === 'category' && !hasActiveFilters ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'category' : 'grid')}
+                  onClick={() => {
+                    if (hasActiveFilters) {
+                      clearAllFilters();
+                    }
+                    setViewMode(viewMode === 'grid' ? 'category' : 'grid');
+                  }}
                 >
-                  {viewMode === 'category' ? 'Grid' : 'Categories'}
+                  {viewMode === 'category' && !hasActiveFilters ? 'Grid' : 'Categories'}
                 </Button>
               </div>
+              {hasActiveFilters && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="mt-2 p-0 h-auto text-xs"
+                  onClick={clearAllFilters}
+                >
+                  Clear all filters
+                </Button>
+              )}
             </div>
           )}
 
@@ -284,11 +326,28 @@ const Products = () => {
               <p className="text-sm text-muted-foreground">
                 {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
               </p>
+              {hasActiveFilters && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="p-0 h-auto text-xs"
+                  onClick={clearAllFilters}
+                >
+                  Clear all filters
+                </Button>
+              )}
             </div>
           )}
 
           {/* Products Display */}
-          {hasActiveFilters || viewMode === 'grid' ? (
+          {showCategoryView ? (
+            // Category-based horizontal scroll for mobile (no filters active)
+            <div className="overflow-hidden">
+              {Object.entries(productsByCategory).map(([category, items]) => (
+                <CategoryRow key={category} category={category} items={items} />
+              ))}
+            </div>
+          ) : (
             // Grid view when filters are active or grid mode selected
             <>
               <p className="text-sm text-muted-foreground mb-4">
@@ -297,19 +356,7 @@ const Products = () => {
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
-                  <Button variant="link" onClick={() => {
-                    setFilters({
-                      categories: [],
-                      types: [],
-                      genders: [],
-                      colors: [],
-                      sizes: [],
-                      materials: [],
-                      thickness: [],
-                      priceRange: [0, filterOptions.maxPrice]
-                    });
-                    setSearchTerm('');
-                  }}>
+                  <Button variant="link" onClick={clearAllFilters}>
                     Clear all filters
                   </Button>
                 </div>
@@ -356,37 +403,6 @@ const Products = () => {
                 </div>
               )}
             </>
-          ) : isMobile ? (
-            // Category-based horizontal scroll for mobile
-            <div>
-              {Object.entries(productsByCategory).map(([category, items]) => (
-                <CategoryRow key={category} category={category} items={items} />
-              ))}
-            </div>
-          ) : (
-            // Desktop grid view
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    price: Number(product.price),
-                    image: product.image || '/placeholder.svg',
-                    category: product.category,
-                    rating: Number(product.rating) || 0,
-                    sustainability_score: product.sustainability_score || 0,
-                    eco_features: product.eco_features || [],
-                    description: product.description || '',
-                    stock_count: product.stock_count || 0,
-                    has_discount: product.has_discount,
-                    discount_percentage: product.discount_percentage,
-                    original_price: product.original_price
-                  }}
-                />
-              ))}
-            </div>
           )}
         </main>
       </div>
