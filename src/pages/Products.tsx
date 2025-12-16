@@ -6,14 +6,17 @@ import { ProductFilters } from "@/components/ProductFilters";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, X } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Loader2, Search, X, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "react-router-dom";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [showSearch, setShowSearch] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'category'>('category');
   const isMobile = useIsMobile();
 
   const [filters, setFilters] = useState({
@@ -37,6 +40,18 @@ const Products = () => {
     const maxPrice = Math.max(...products.map(p => Number(p.price)), 100000);
 
     return { categories, productTypes, colors, sizes, materials, maxPrice };
+  }, [products]);
+
+  // Group products by category
+  const productsByCategory = useMemo(() => {
+    const grouped: Record<string, typeof products> = {};
+    products.forEach(product => {
+      if (!grouped[product.category]) {
+        grouped[product.category] = [];
+      }
+      grouped[product.category].push(product);
+    });
+    return grouped;
   }, [products]);
 
   // Filter and sort products
@@ -100,6 +115,11 @@ const Products = () => {
       });
   }, [products, searchTerm, filters, sortBy]);
 
+  // Check if any filter is active
+  const hasActiveFilters = filters.categories.length > 0 || filters.types.length > 0 || 
+    filters.genders.length > 0 || filters.colors.length > 0 || filters.sizes.length > 0 || 
+    filters.materials.length > 0 || filters.thickness.length > 0 || searchTerm !== '';
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -118,78 +138,57 @@ const Products = () => {
     );
   }
 
+  // Mobile Category Row Component
+  const CategoryRow = ({ category, items }: { category: string; items: typeof products }) => (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <h2 className="font-semibold text-base">{category}</h2>
+        <Link 
+          to={`/products?category=${encodeURIComponent(category)}`}
+          className="text-xs text-primary flex items-center gap-0.5"
+          onClick={() => setFilters(prev => ({ ...prev, categories: [category] }))}
+        >
+          See all <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <ScrollArea className="w-full whitespace-nowrap">
+        <div className="flex gap-3 pb-2">
+          {items.slice(0, 10).map((product) => (
+            <div key={product.id} className="w-36 flex-shrink-0">
+              <ProductCardMobile
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  price: Number(product.price),
+                  image: product.image || '/placeholder.svg',
+                  category: product.category,
+                  rating: Number(product.rating) || 0,
+                  stock_count: product.stock_count || 0,
+                  has_discount: product.has_discount,
+                  discount_percentage: product.discount_percentage,
+                  original_price: product.original_price
+                }}
+              />
+            </div>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl md:text-4xl font-bold">Our Products</h1>
-            {isMobile && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowSearch(!showSearch)}
-              >
-                {showSearch ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
-              </Button>
-            )}
-          </div>
-          
-          {/* Search Bar */}
-          {(showSearch || !isMobile) && (
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search products, tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          )}
-          
-          {/* Mobile Filter & Sort Row */}
-          {isMobile && (
-            <div className="flex gap-2 mb-4">
-              <ProductFilters
-                categories={filterOptions.categories}
-                productTypes={filterOptions.productTypes}
-                colors={filterOptions.colors}
-                sizes={filterOptions.sizes}
-                materials={filterOptions.materials}
-                filters={filters}
-                onFiltersChange={setFilters}
-                maxPrice={filterOptions.maxPrice}
-              />
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Sort" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Rating</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
-
-        {/* Desktop Layout with Sidebar */}
-        <div className="flex gap-6">
-          {/* Sidebar Filters - Desktop Only */}
-          {!isMobile && (
-            <aside className="w-64 flex-shrink-0">
-              <div className="sticky top-4">
+      <div className="flex">
+        {/* Sidebar Filters - Always visible */}
+        <aside className={`${isMobile ? 'w-20' : 'w-64'} flex-shrink-0 border-r bg-card min-h-screen sticky top-0`}>
+          <div className="p-2 md:p-4">
+            {!isMobile && (
+              <>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-semibold">Filters</h2>
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-28">
                       <SelectValue placeholder="Sort" />
                     </SelectTrigger>
                     <SelectContent>
@@ -201,86 +200,195 @@ const Products = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <ProductFilters
-                  categories={filterOptions.categories}
-                  productTypes={filterOptions.productTypes}
-                  colors={filterOptions.colors}
-                  sizes={filterOptions.sizes}
-                  materials={filterOptions.materials}
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                  maxPrice={filterOptions.maxPrice}
-                />
-              </div>
-            </aside>
-          )}
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            <ProductFilters
+              categories={filterOptions.categories}
+              productTypes={filterOptions.productTypes}
+              colors={filterOptions.colors}
+              sizes={filterOptions.sizes}
+              materials={filterOptions.materials}
+              filters={filters}
+              onFiltersChange={setFilters}
+              maxPrice={filterOptions.maxPrice}
+            />
+          </div>
+        </aside>
 
-          {/* Products Grid */}
-          <main className="flex-1">
-            <p className="text-sm text-muted-foreground mb-4">
-              {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-            </p>
-            
-            {filteredProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
-                <Button variant="link" onClick={() => setFilters({
-                  categories: [],
-                  types: [],
-                  genders: [],
-                  colors: [],
-                  sizes: [],
-                  materials: [],
-                  thickness: [],
-                  priceRange: [0, filterOptions.maxPrice]
-                })}>
-                  Clear all filters
+        {/* Main Content */}
+        <main className="flex-1 p-3 md:p-6">
+          {/* Mobile Header */}
+          {isMobile && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h1 className="text-xl font-bold">Products</h1>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowSearch(!showSearch)}
+                  >
+                    {showSearch ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+                  </Button>
+                </div>
+              </div>
+              {showSearch && (
+                <div className="mb-3">
+                  <Input
+                    placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Sort" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    <SelectItem value="rating">Rating</SelectItem>
+                    <SelectItem value="newest">Newest</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant={viewMode === 'category' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode(viewMode === 'grid' ? 'category' : 'grid')}
+                >
+                  {viewMode === 'category' ? 'Grid' : 'Categories'}
                 </Button>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
-                {filteredProducts.map((product) => (
-                  isMobile ? (
-                    <ProductCardMobile
-                      key={product.id}
-                      product={{
-                        id: product.id,
-                        name: product.name,
-                        price: Number(product.price),
-                        image: product.image || '/placeholder.svg',
-                        category: product.category,
-                        rating: Number(product.rating) || 0,
-                        stock_count: product.stock_count || 0,
-                        has_discount: product.has_discount,
-                        discount_percentage: product.discount_percentage,
-                        original_price: product.original_price
-                      }}
-                    />
-                  ) : (
-                    <ProductCard
-                      key={product.id}
-                      product={{
-                        id: product.id,
-                        name: product.name,
-                        price: Number(product.price),
-                        image: product.image || '/placeholder.svg',
-                        category: product.category,
-                        rating: Number(product.rating) || 0,
-                        sustainability_score: product.sustainability_score || 0,
-                        eco_features: product.eco_features || [],
-                        description: product.description || '',
-                        stock_count: product.stock_count || 0,
-                        has_discount: product.has_discount,
-                        discount_percentage: product.discount_percentage,
-                        original_price: product.original_price
-                      }}
-                    />
-                  )
-                ))}
-              </div>
-            )}
-          </main>
-        </div>
+            </div>
+          )}
+
+          {/* Desktop Header */}
+          {!isMobile && (
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold mb-2">Our Products</h1>
+              <p className="text-sm text-muted-foreground">
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+              </p>
+            </div>
+          )}
+
+          {/* Products Display */}
+          {hasActiveFilters || viewMode === 'grid' ? (
+            // Grid view when filters are active or grid mode selected
+            <>
+              <p className="text-sm text-muted-foreground mb-4">
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+              </p>
+              {filteredProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
+                  <Button variant="link" onClick={() => {
+                    setFilters({
+                      categories: [],
+                      types: [],
+                      genders: [],
+                      colors: [],
+                      sizes: [],
+                      materials: [],
+                      thickness: [],
+                      priceRange: [0, filterOptions.maxPrice]
+                    });
+                    setSearchTerm('');
+                  }}>
+                    Clear all filters
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+                  {filteredProducts.map((product) => (
+                    isMobile ? (
+                      <ProductCardMobile
+                        key={product.id}
+                        product={{
+                          id: product.id,
+                          name: product.name,
+                          price: Number(product.price),
+                          image: product.image || '/placeholder.svg',
+                          category: product.category,
+                          rating: Number(product.rating) || 0,
+                          stock_count: product.stock_count || 0,
+                          has_discount: product.has_discount,
+                          discount_percentage: product.discount_percentage,
+                          original_price: product.original_price
+                        }}
+                      />
+                    ) : (
+                      <ProductCard
+                        key={product.id}
+                        product={{
+                          id: product.id,
+                          name: product.name,
+                          price: Number(product.price),
+                          image: product.image || '/placeholder.svg',
+                          category: product.category,
+                          rating: Number(product.rating) || 0,
+                          sustainability_score: product.sustainability_score || 0,
+                          eco_features: product.eco_features || [],
+                          description: product.description || '',
+                          stock_count: product.stock_count || 0,
+                          has_discount: product.has_discount,
+                          discount_percentage: product.discount_percentage,
+                          original_price: product.original_price
+                        }}
+                      />
+                    )
+                  ))}
+                </div>
+              )}
+            </>
+          ) : isMobile ? (
+            // Category-based horizontal scroll for mobile
+            <div>
+              {Object.entries(productsByCategory).map(([category, items]) => (
+                <CategoryRow key={category} category={category} items={items} />
+              ))}
+            </div>
+          ) : (
+            // Desktop grid view
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    price: Number(product.price),
+                    image: product.image || '/placeholder.svg',
+                    category: product.category,
+                    rating: Number(product.rating) || 0,
+                    sustainability_score: product.sustainability_score || 0,
+                    eco_features: product.eco_features || [],
+                    description: product.description || '',
+                    stock_count: product.stock_count || 0,
+                    has_discount: product.has_discount,
+                    discount_percentage: product.discount_percentage,
+                    original_price: product.original_price
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

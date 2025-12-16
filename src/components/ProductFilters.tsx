@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, Shirt, Palette, Ruler, Layers, DollarSign, User } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProductFiltersProps {
@@ -44,6 +44,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const toggleFilter = (filterType: keyof typeof filters, value: string) => {
     if (filterType === 'priceRange') return;
@@ -76,6 +77,208 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     filters.materials,
     filters.thickness
   ].flat().length + (filters.priceRange[0] > 0 || filters.priceRange[1] < maxPrice ? 1 : 0);
+
+  // Mobile compact sidebar filter buttons
+  const MobileCompactFilters = () => (
+    <div className="flex flex-col gap-2">
+      {/* Category */}
+      <Button
+        variant={filters.categories.length > 0 ? 'default' : 'ghost'}
+        size="sm"
+        className="w-full h-10 flex flex-col items-center justify-center p-1"
+        onClick={() => setActiveSection('category')}
+      >
+        <Shirt className="h-4 w-4" />
+        <span className="text-[8px] mt-0.5">Category</span>
+        {filters.categories.length > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[8px] flex items-center justify-center">
+            {filters.categories.length}
+          </Badge>
+        )}
+      </Button>
+
+      {/* Gender */}
+      <Button
+        variant={filters.genders.length > 0 ? 'default' : 'ghost'}
+        size="sm"
+        className="w-full h-10 flex flex-col items-center justify-center p-1 relative"
+        onClick={() => setActiveSection('gender')}
+      >
+        <User className="h-4 w-4" />
+        <span className="text-[8px] mt-0.5">Gender</span>
+        {filters.genders.length > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[8px] flex items-center justify-center">
+            {filters.genders.length}
+          </Badge>
+        )}
+      </Button>
+
+      {/* Color */}
+      <Button
+        variant={filters.colors.length > 0 ? 'default' : 'ghost'}
+        size="sm"
+        className="w-full h-10 flex flex-col items-center justify-center p-1 relative"
+        onClick={() => setActiveSection('color')}
+      >
+        <Palette className="h-4 w-4" />
+        <span className="text-[8px] mt-0.5">Color</span>
+        {filters.colors.length > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[8px] flex items-center justify-center">
+            {filters.colors.length}
+          </Badge>
+        )}
+      </Button>
+
+      {/* Size */}
+      <Button
+        variant={filters.sizes.length > 0 ? 'default' : 'ghost'}
+        size="sm"
+        className="w-full h-10 flex flex-col items-center justify-center p-1 relative"
+        onClick={() => setActiveSection('size')}
+      >
+        <Ruler className="h-4 w-4" />
+        <span className="text-[8px] mt-0.5">Size</span>
+        {filters.sizes.length > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[8px] flex items-center justify-center">
+            {filters.sizes.length}
+          </Badge>
+        )}
+      </Button>
+
+      {/* Material */}
+      <Button
+        variant={filters.materials.length > 0 ? 'default' : 'ghost'}
+        size="sm"
+        className="w-full h-10 flex flex-col items-center justify-center p-1 relative"
+        onClick={() => setActiveSection('material')}
+      >
+        <Layers className="h-4 w-4" />
+        <span className="text-[8px] mt-0.5">Material</span>
+        {filters.materials.length > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[8px] flex items-center justify-center">
+            {filters.materials.length}
+          </Badge>
+        )}
+      </Button>
+
+      {/* Price */}
+      <Button
+        variant={(filters.priceRange[0] > 0 || filters.priceRange[1] < maxPrice) ? 'default' : 'ghost'}
+        size="sm"
+        className="w-full h-10 flex flex-col items-center justify-center p-1 relative"
+        onClick={() => setActiveSection('price')}
+      >
+        <DollarSign className="h-4 w-4" />
+        <span className="text-[8px] mt-0.5">Price</span>
+      </Button>
+
+      {/* Clear filters */}
+      {activeFilterCount > 0 && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full h-8 text-[8px] mt-2"
+          onClick={clearFilters}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      )}
+
+      {/* Filter section sheet */}
+      <Sheet open={!!activeSection} onOpenChange={(open) => !open && setActiveSection(null)}>
+        <SheetContent side="bottom" className="h-[60vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="capitalize">{activeSection?.replace('_', ' ')}</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 space-y-3">
+            {activeSection === 'category' && categories.map(cat => (
+              <div key={cat} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`mob-cat-${cat}`}
+                  checked={filters.categories.includes(cat)}
+                  onCheckedChange={() => toggleFilter('categories', cat)}
+                />
+                <Label htmlFor={`mob-cat-${cat}`} className="text-sm cursor-pointer">{cat}</Label>
+              </div>
+            ))}
+
+            {activeSection === 'gender' && GENDERS.map(gender => (
+              <div key={gender} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`mob-gender-${gender}`}
+                  checked={filters.genders.includes(gender.toLowerCase())}
+                  onCheckedChange={() => toggleFilter('genders', gender.toLowerCase())}
+                />
+                <Label htmlFor={`mob-gender-${gender}`} className="text-sm cursor-pointer">{gender}</Label>
+              </div>
+            ))}
+
+            {activeSection === 'color' && (
+              <div className="flex flex-wrap gap-2">
+                {colors.map(color => (
+                  <Badge
+                    key={color}
+                    variant={filters.colors.includes(color) ? 'default' : 'outline'}
+                    className="cursor-pointer text-sm py-1 px-3"
+                    onClick={() => toggleFilter('colors', color)}
+                  >
+                    {color}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {activeSection === 'size' && (
+              <div className="flex flex-wrap gap-2">
+                {sizes.map(size => (
+                  <Badge
+                    key={size}
+                    variant={filters.sizes.includes(size) ? 'default' : 'outline'}
+                    className="cursor-pointer text-sm py-1 px-3"
+                    onClick={() => toggleFilter('sizes', size)}
+                  >
+                    {size}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {activeSection === 'material' && materials.map(mat => (
+              <div key={mat} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`mob-mat-${mat}`}
+                  checked={filters.materials.includes(mat)}
+                  onCheckedChange={() => toggleFilter('materials', mat)}
+                />
+                <Label htmlFor={`mob-mat-${mat}`} className="text-sm cursor-pointer">{mat}</Label>
+              </div>
+            ))}
+
+            {activeSection === 'price' && (
+              <div className="space-y-4 px-2">
+                <Slider
+                  value={filters.priceRange}
+                  onValueChange={(value) => onFiltersChange({ ...filters, priceRange: value as [number, number] })}
+                  max={maxPrice}
+                  step={100}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>₦{filters.priceRange[0].toLocaleString()}</span>
+                  <span>₦{filters.priceRange[1].toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="sticky bottom-0 pt-4 bg-background">
+            <Button className="w-full" onClick={() => setActiveSection(null)}>
+              Apply
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
 
   const FilterContent = () => (
     <div className="space-y-4">
@@ -279,36 +482,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     );
   };
 
+  // Mobile compact sidebar view
   if (isMobile) {
-    return (
-      <>
-        <ActiveFilters />
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filters
-              {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="ml-1">{activeFilterCount}</Badge>
-              )}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>Filters</SheetTitle>
-            </SheetHeader>
-            <div className="mt-4">
-              <FilterContent />
-            </div>
-            <div className="sticky bottom-0 pt-4 bg-background">
-              <Button className="w-full" onClick={() => setIsOpen(false)}>
-                Apply Filters
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </>
-    );
+    return <MobileCompactFilters />;
   }
 
   return (

@@ -91,12 +91,16 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
           />
           
           {/* Rating at top right */}
-          {product.rating && product.rating > 0 && (
-            <div className="absolute top-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5">
-              <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
-              {product.rating.toFixed(1)}
-            </div>
-          )}
+          <div className="absolute top-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5">
+            {product.rating && product.rating > 0 ? (
+              <>
+                <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
+                {product.rating.toFixed(1)}
+              </>
+            ) : (
+              <span>New</span>
+            )}
+          </div>
 
           {/* Discount badge */}
           {hasDiscount && (

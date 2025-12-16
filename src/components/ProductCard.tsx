@@ -96,7 +96,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <LikeButton productId={product.id} size="sm" />
           </div>
           
-          {product.sustainability_score && product.sustainability_score > 7 && (
+          {product.sustainability_score && product.sustainability_score > 0 && product.sustainability_score > 7 && (
             <Badge className="absolute bottom-2 left-2 bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100">
               <Leaf className="w-3 h-3 mr-1" />
               Eco-Friendly
@@ -106,25 +106,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         <CardContent className="flex-1 p-4">
           {/* Rating first (Amazon style) */}
-          {product.rating && (
-            <div className="flex items-center gap-1 mb-2">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-3 h-3 ${
-                      i < Math.floor(product.rating!)
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'fill-gray-200 text-gray-200'
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-muted-foreground">
-                ({product.rating.toFixed(1)})
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-1 mb-2">
+            {product.rating && product.rating > 0 ? (
+              <>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-3 h-3 ${
+                        i < Math.floor(product.rating!)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : i < product.rating!
+                          ? 'fill-yellow-200 text-yellow-200'
+                          : 'fill-gray-200 text-gray-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  ({product.rating.toFixed(1)})
+                </span>
+              </>
+            ) : (
+              <span className="text-xs text-muted-foreground">No reviews yet</span>
+            )}
+          </div>
           
           <h3 className="font-medium text-sm mb-2 line-clamp-3 group-hover:text-primary transition-colors leading-tight">
             {product.name}
@@ -149,7 +155,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Badge variant="outline" className="text-xs border-green-200 text-green-700">
                 {product.category}
               </Badge>
-              {product.sustainability_score && (
+              {product.sustainability_score && product.sustainability_score > 0 && (
                 <div className="flex items-center gap-1">
                   <Leaf className="w-3 h-3 text-green-600" />
                   <span className="text-xs text-green-600">
