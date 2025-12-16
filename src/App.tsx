@@ -11,6 +11,7 @@ import { AdminProtectedRoute } from "@/components/admin/AdminProtectedRoute";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { GideonChat } from "@/components/GideonChat";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -85,6 +86,7 @@ const App = () => {
           <CartProvider>
             <AdminProvider>
               <BrowserRouter>
+                <ScrollToTop />
                 <div className="App">
                   <GideonChat />
                   <Toaster />

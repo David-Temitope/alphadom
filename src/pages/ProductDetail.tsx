@@ -353,8 +353,8 @@ const ProductDetail = () => {
             <div className="grid grid-cols-3 gap-4 pt-6 border-t">
               <div className="text-center">
                 <Truck className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Free Shipping</p>
-                <p className="text-xs text-muted-foreground">On orders less than NGN5000</p>
+                <p className="text-sm font-medium">Fast Delivery</p>
+                <p className="text-xs text-muted-foreground">Nationwide coverage</p>
               </div>
               <div className="text-center">
                 <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />

@@ -78,8 +78,12 @@ const DeliveryPolicy = () => {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">10. Contact Us</h2>
             <p>
-              For delivery inquiries, reach out through our Contact page, Discord, or WhatsApp channels.
+              For delivery inquiries, please contact us through:
             </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Email: <a href="mailto:alphadomplatform@gmail.com" className="text-primary hover:underline">alphadomplatform@gmail.com</a></li>
+              <li>Discord: <a href="https://discord.gg/rvbSEwUY" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Join our Discord Server</a></li>
+            </ul>
           </section>
         </CardContent>
       </Card>

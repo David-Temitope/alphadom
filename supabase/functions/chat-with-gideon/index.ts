@@ -60,7 +60,16 @@ serve(async (req) => {
     
     const { data: vendors } = await supabaseClient
       .from('approved_vendors')
-      .select('id, store_name, product_category, total_products, total_revenue, total_orders');
+      .select('id, store_name, product_category, total_products, total_revenue, total_orders, user_id');
+    
+    // Fetch vendor profile images
+    const vendorUserIds = vendors?.map(v => v.user_id) || [];
+    const { data: vendorProfiles } = await supabaseClient
+      .from('profiles')
+      .select('id, avatar_url')
+      .in('id', vendorUserIds);
+    
+    const profileMap = new Map(vendorProfiles?.map(p => [p.id, p.avatar_url]) || []);
     
     // Build context with product data including IDs and images for clickable responses
     const productList = products?.map(p => ({
@@ -79,7 +88,8 @@ serve(async (req) => {
       name: v.store_name,
       category: v.product_category,
       products: v.total_products,
-      orders: v.total_orders
+      orders: v.total_orders,
+      image: profileMap.get(v.user_id) || ''
     })) || [];
 
     const platformContext = `
@@ -89,7 +99,7 @@ PRODUCTS (${productList.length} available):
 ${productList.map(p => `[PRODUCT_ID:${p.id}] ${p.name}: ₦${p.price} (Category: ${p.category}, Stock: ${p.stock}, Rating: ${p.rating}, Image: ${p.image || 'none'})`).join('\n')}
 
 VENDORS (${vendorList.length} active):
-${vendorList.map(v => `[VENDOR_ID:${v.id}] ${v.name} (Category: ${v.category}, Products: ${v.products})`).join('\n')}
+${vendorList.map(v => `[VENDOR_ID:${v.id}] ${v.name} (Category: ${v.category}, Products: ${v.products}, Image: ${v.image || 'none'})`).join('\n')}
 
 CURRENCY: All prices are in Nigerian Naira (₦).
 `;
@@ -103,9 +113,9 @@ RESPONSE FORMAT RULES:
    [[PRODUCT:product_id:product_name:product_price:product_image_url]]
    Example: [[PRODUCT:abc123:Nike Shoes:15000:/images/shoe.jpg]]
 
-2. When mentioning vendors, use this format:
-   [[VENDOR:vendor_id:vendor_name]]
-   Example: [[VENDOR:xyz789:Fashion Hub]]
+2. When mentioning vendors, ALWAYS include clickable vendor cards in this exact format:
+   [[VENDOR:vendor_id:vendor_name:vendor_image_url]]
+   Example: [[VENDOR:xyz789:Fashion Hub:/images/avatar.jpg]]
 
 3. ONLY use products and vendors from the platform data above
 4. Always use Nigerian Naira (₦) for prices
