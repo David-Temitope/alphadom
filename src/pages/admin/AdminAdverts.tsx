@@ -40,7 +40,7 @@ const ANIMATION_TYPES = [
 ];
 
 const TARGET_PAGES = [
-  { value: '', label: 'All Pages' },
+  { value: 'all', label: 'All Pages' },
   { value: 'home', label: 'Homepage' },
   { value: 'products', label: 'Products Page' },
   { value: 'about', label: 'About Page' },
@@ -266,8 +266,8 @@ const AdminAdverts = () => {
                   <div>
                     <Label htmlFor="target_page">Display On Page</Label>
                     <Select 
-                      value={editingAd?.target_page || ''} 
-                      onValueChange={(v) => setEditingAd({ ...editingAd, target_page: v })}
+                      value={editingAd?.target_page || 'all'} 
+                      onValueChange={(v) => setEditingAd({ ...editingAd, target_page: v === 'all' ? null : v })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select page" />

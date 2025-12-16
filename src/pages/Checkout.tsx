@@ -602,6 +602,22 @@ const Checkout: React.FC = () => {
 
               await finalizeOrder('paid', 'processing');
 
+              // Record transaction
+              await supabase.from('platform_transactions').insert({
+                transaction_type: 'order_payment',
+                amount: orderTotals.total,
+                user_id: user?.id,
+                reference: response.reference,
+                payment_method: 'paystack',
+                description: `Order payment - ${items.length} item(s)`,
+                status: 'completed',
+                metadata: { 
+                  items_count: items.length,
+                  subtotal: orderTotals.subtotal,
+                  shipping: orderTotals.shipping,
+                  vat: orderTotals.vat
+                }
+              });
 
               toast({
 
