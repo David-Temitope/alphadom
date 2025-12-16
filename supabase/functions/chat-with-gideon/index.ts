@@ -20,7 +20,6 @@ serve(async (req) => {
       });
     }
 
-    // Check if user has AI access
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -36,7 +35,6 @@ serve(async (req) => {
       });
     }
 
-    // Check if user's AI access is blocked
     const { data: profile } = await supabaseClient
       .from('profiles')
       .select('ai_access_blocked')
@@ -53,40 +51,70 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Fetch actual platform data
-    const { data: products } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false }).limit(50);
-    const { data: vendors } = await supabaseClient.from('approved_vendors').select('*');
-    const { data: profiles } = await supabaseClient.from('profiles').select('id, full_name, email');
+    // Fetch actual platform data with images
+    const { data: products } = await supabaseClient
+      .from('products')
+      .select('id, name, price, category, stock_count, rating, image, description')
+      .order('created_at', { ascending: false })
+      .limit(50);
     
-    // Build context with actual data
+    const { data: vendors } = await supabaseClient
+      .from('approved_vendors')
+      .select('id, store_name, product_category, total_products, total_revenue, total_orders');
+    
+    // Build context with product data including IDs and images for clickable responses
+    const productList = products?.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      stock: p.stock_count || 0,
+      rating: p.rating || 'N/A',
+      image: p.image,
+      description: p.description?.slice(0, 100)
+    })) || [];
+
+    const vendorList = vendors?.map(v => ({
+      id: v.id,
+      name: v.store_name,
+      category: v.product_category,
+      products: v.total_products,
+      orders: v.total_orders
+    })) || [];
+
     const platformContext = `
-PLATFORM DATA (Use ONLY this information to answer questions):
+PLATFORM DATA (Use ONLY this information):
 
-PRODUCTS (${products?.length || 0} available):
-${products?.map(p => `- ${p.name}: ₦${p.price} (Category: ${p.category}, Stock: ${p.stock_count || 0}, Rating: ${p.rating || 'N/A'})`).join('\n') || 'No products available'}
+PRODUCTS (${productList.length} available):
+${productList.map(p => `[PRODUCT_ID:${p.id}] ${p.name}: ₦${p.price} (Category: ${p.category}, Stock: ${p.stock}, Rating: ${p.rating}, Image: ${p.image || 'none'})`).join('\n')}
 
-VENDORS (${vendors?.length || 0} active):
-${vendors?.map(v => `- ${v.store_name} (Category: ${v.product_category}, Products: ${v.total_products}, Revenue: ₦${v.total_revenue}, Orders: ${v.total_orders})`).join('\n') || 'No vendors available'}
+VENDORS (${vendorList.length} active):
+${vendorList.map(v => `[VENDOR_ID:${v.id}] ${v.name} (Category: ${v.category}, Products: ${v.products})`).join('\n')}
 
-CURRENCY: All prices are in Nigerian Naira (₦), never use dollars or other currencies.
-
-IMPORTANT: Only provide information from the above data. Do not make up products, vendors, or prices. If asked about something not in this data, say "I don't have that information in our current catalog."
+CURRENCY: All prices are in Nigerian Naira (₦).
 `;
 
-    const systemPrompt = `You are Gideon, a helpful AI assistant for an e-commerce platform in Nigeria. 
+    const systemPrompt = `You are Gideon, a helpful AI assistant for Alphadom, an e-commerce platform in Nigeria.
 
 ${platformContext}
 
-RULES:
-1. ONLY use the platform data provided above
-2. NEVER invent products, prices, or vendors that aren't listed
-3. Always use Nigerian Naira (₦) for prices
-4. When asked about "best" or "highest rated" items, use the actual data provided
-5. Keep answers concise and accurate
-6. If information isn't in the data, say so clearly
+RESPONSE FORMAT RULES:
+1. When mentioning products, ALWAYS include clickable product cards in this exact format:
+   [[PRODUCT:product_id:product_name:product_price:product_image_url]]
+   Example: [[PRODUCT:abc123:Nike Shoes:15000:/images/shoe.jpg]]
+
+2. When mentioning vendors, use this format:
+   [[VENDOR:vendor_id:vendor_name]]
+   Example: [[VENDOR:xyz789:Fashion Hub]]
+
+3. ONLY use products and vendors from the platform data above
+4. Always use Nigerian Naira (₦) for prices
+5. Keep answers concise and helpful
+6. If asked about products in a category, show the product cards
+7. If information isn't in the data, say so clearly
 
 You help users with:
-- Finding actual products on the platform
+- Finding actual products on the platform (show product cards!)
 - Information about real vendors
 - Platform features and usage
 - Product categories and availability
@@ -94,8 +122,7 @@ You help users with:
 You DO NOT:
 - Make up products or prices
 - Discuss technical/coding topics
-- Share confidential information
-- Answer general knowledge questions unrelated to the platform`;
+- Share confidential information`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
