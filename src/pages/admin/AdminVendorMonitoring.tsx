@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Store, AlertTriangle, CheckCircle, XCircle, Package, DollarSign, Search, Crown, Star } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Loader2, Store, AlertTriangle, CheckCircle, XCircle, Package, DollarSign, Search, Crown, Star, CreditCard } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
@@ -24,6 +24,7 @@ interface VendorWithStats {
   created_at: string;
   subscription_plan: string;
   subscription_end_date: string | null;
+  paystack_subaccount_code: string | null;
   recent_activities: any[];
   user_profile: {
     email: string;
@@ -38,6 +39,8 @@ const AdminVendorMonitoring = () => {
   const [selectedVendor, setSelectedVendor] = useState<VendorWithStats | null>(null);
   const [actionNotes, setActionNotes] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [subaccountCode, setSubaccountCode] = useState('');
+  const [subaccountDialogOpen, setSubaccountDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const fetchVendors = async () => {
@@ -157,6 +160,46 @@ const AdminVendorMonitoring = () => {
         description: "Failed to delete product",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleUpdateSubaccount = async (vendorId: string) => {
+    setActionLoading(vendorId);
+    try {
+      const { error } = await supabase
+        .from('approved_vendors')
+        .update({ paystack_subaccount_code: subaccountCode || null })
+        .eq('id', vendorId);
+
+      if (error) throw error;
+
+      // Log the action
+      await supabase
+        .from('vendor_activity_logs')
+        .insert({
+          vendor_id: vendorId,
+          activity_type: 'subaccount_updated',
+          activity_details: { subaccount_code: subaccountCode || 'removed' }
+        });
+
+      await fetchVendors();
+      setSubaccountCode('');
+      setSubaccountDialogOpen(false);
+      setSelectedVendor(null);
+      
+      toast({
+        title: "Success",
+        description: subaccountCode ? "Paystack subaccount code updated" : "Paystack subaccount code removed",
+      });
+    } catch (error: any) {
+      console.error('Error updating subaccount:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update subaccount code",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -288,7 +331,7 @@ const AdminVendorMonitoring = () => {
                     </div>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="sm">
@@ -303,6 +346,67 @@ const AdminVendorMonitoring = () => {
                           </DialogDescription>
                         </DialogHeader>
                         <VendorProducts vendorId={vendor.id} onDeleteProduct={deleteProduct} />
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Paystack Subaccount Management */}
+                    <Dialog open={subaccountDialogOpen && selectedVendor?.id === vendor.id} onOpenChange={(open) => {
+                      setSubaccountDialogOpen(open);
+                      if (open) {
+                        setSelectedVendor(vendor);
+                        setSubaccountCode(vendor.paystack_subaccount_code || '');
+                      } else {
+                        setSelectedVendor(null);
+                        setSubaccountCode('');
+                      }
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant={vendor.paystack_subaccount_code ? "default" : "outline"} 
+                          size="sm"
+                          className={vendor.paystack_subaccount_code ? "bg-green-600 hover:bg-green-700" : ""}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          {vendor.paystack_subaccount_code ? "Split Active" : "Setup Split"}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Paystack Split Payment</DialogTitle>
+                          <DialogDescription>
+                            Configure the vendor's Paystack subaccount code for automatic split payments.
+                            Commission is automatically calculated based on subscription plan:
+                            <br />• Free: 15% commission (vendor gets 85%)
+                            <br />• Economy: 9% commission (vendor gets 91%)
+                            <br />• First Class: 5% commission (vendor gets 95%)
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="subaccount-code">Paystack Subaccount Code</Label>
+                            <Input
+                              id="subaccount-code"
+                              value={subaccountCode}
+                              onChange={(e) => setSubaccountCode(e.target.value)}
+                              placeholder="e.g., ACCT_xxxxxxxxxxxxx"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Current plan: <strong>{vendor.subscription_plan || 'free'}</strong>
+                            </p>
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <DialogClose asChild>
+                              <Button variant="outline">Cancel</Button>
+                            </DialogClose>
+                            <Button
+                              onClick={() => handleUpdateSubaccount(vendor.id)}
+                              disabled={actionLoading === vendor.id}
+                            >
+                              {actionLoading === vendor.id && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                              {subaccountCode ? "Save Subaccount" : "Remove Subaccount"}
+                            </Button>
+                          </div>
+                        </div>
                       </DialogContent>
                     </Dialog>
 
