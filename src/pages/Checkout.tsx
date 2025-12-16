@@ -33,6 +33,12 @@ import { useAdminSettings } from '@/hooks/useAdminSettings';
 
 const VAT_RATE = 0.025; // 2.5% VAT
 
+// Commission rates derived from subscription plan - SINGLE SOURCE OF TRUTH
+const COMMISSION_RATES: Record<string, number> = {
+  'free': 15,
+  'economy': 9,
+  'first_class': 5
+};
 
 declare global {
 
@@ -76,6 +82,12 @@ type OrderTotals = {
 
 
 type PaymentMethod = 'bank_transfer' | 'paystack';
+
+type VendorSplitInfo = {
+  vendor_id: string;
+  subscription_plan: string;
+  paystack_subaccount_code: string | null;
+};
 
 
 // --- Utility Functions ---
@@ -180,6 +192,7 @@ const Checkout: React.FC = () => {
   });
 
   const [vendorBankDetails, setVendorBankDetails] = useState<any>(null);
+  const [vendorSplitInfo, setVendorSplitInfo] = useState<VendorSplitInfo | null>(null);
 
 
   // --- Derived Values ---
@@ -266,29 +279,35 @@ const Checkout: React.FC = () => {
 
           .from('approved_vendors')
 
-          .select('*, shop_applications!inner(vendor_bank_details)')
+          .select('id, subscription_plan, paystack_subaccount_code, shop_applications!inner(vendor_bank_details)')
 
           .eq('id', firstProduct.vendor_id)
 
-          .limit(1); // Use limit(1) instead of single()
+          .limit(1);
 
 
-        if (error || !data || data.length === 0) { // Check for empty array
+        if (error || !data || data.length === 0) {
 
           console.warn('Vendor fetch error or not found:', error);
 
           setVendorBankDetails(null);
+          setVendorSplitInfo(null);
 
           return;
 
         }
 
        
-
-        const vendorData = data[0]; // Access the first (and only) item
+        const vendorData = data[0];
+        
+        // Set vendor split info for Paystack split payments
+        setVendorSplitInfo({
+          vendor_id: vendorData.id,
+          subscription_plan: vendorData.subscription_plan || 'free',
+          paystack_subaccount_code: vendorData.paystack_subaccount_code
+        });
 
         const shopApp = (vendorData as any).shop_applications;
-
         if (shopApp && shopApp.vendor_bank_details) {
 
           setVendorBankDetails(shopApp.vendor_bank_details);
@@ -304,14 +323,16 @@ const Checkout: React.FC = () => {
         console.error('fetchVendorBankDetails error:', err);
 
         setVendorBankDetails(null);
+        setVendorSplitInfo(null);
 
       }
 
     } else {
 
-      // Product added by admin - use admin bank details (or disable bank transfer if not set)
+      // Product added by admin - no split payment (100% to platform)
 
       setVendorBankDetails(null);
+      setVendorSplitInfo(null);
 
     }
 
@@ -521,15 +542,19 @@ const Checkout: React.FC = () => {
 
 
   /**
-
-   * Initiates the Paystack payment process.
-
-   * ✅ FIX: The 'callback' function is now defined as a synchronous function,
-
-   * and the async logic is executed inside of it using a Promise/then pattern or an IIFE.
-
+   * Calculates vendor percentage based on subscription plan.
+   * Commission is derived dynamically - NOT stored in database.
    */
+  const getVendorPercentage = useCallback((subscriptionPlan: string): number => {
+    const commissionRate = COMMISSION_RATES[subscriptionPlan] || COMMISSION_RATES['free'];
+    return 100 - commissionRate; // Vendor receives this percentage
+  }, []);
 
+  /**
+   * Initiates the Paystack payment process with split payment for vendor orders.
+   * - Product sales: Split payment based on vendor subscription plan
+   * - Admin products: 100% to platform (no split)
+   */
   const handlePaystackPayment = useCallback(() => {
 
     if (!user) {
@@ -563,109 +588,114 @@ const Checkout: React.FC = () => {
 
     setProcessing(true);
 
+    // Build Paystack config
+    const paystackConfig: any = {
+      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
+      email: user.email,
+      amount: Math.round(orderTotals.total * 100), // amount in kobo
+      currency: 'NGN',
+      ref: `ALPHADOM_${Date.now()}`,
+      metadata: {
+        custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
+      },
+      
+      // Callback for successful payment
+      callback: function(response: any) {
+        (async () => {
+          setProcessing(true);
+          try {
+            await finalizeOrder('paid', 'processing');
+            
+            // Calculate commission info for transaction record
+            const subscriptionPlan = vendorSplitInfo?.subscription_plan || 'free';
+            const commissionRate = COMMISSION_RATES[subscriptionPlan] || 15;
+            const vendorPercentage = 100 - commissionRate;
+            
+            // Record transaction with split payment details
+            await supabase.from('platform_transactions').insert({
+              transaction_type: 'order_payment',
+              amount: orderTotals.total,
+              user_id: user?.id,
+              vendor_id: vendorSplitInfo?.vendor_id || null,
+              reference: response.reference,
+              payment_method: 'paystack',
+              description: `Order payment - ${items.length} item(s)`,
+              status: 'completed',
+              metadata: { 
+                items_count: items.length,
+                subtotal: orderTotals.subtotal,
+                shipping: orderTotals.shipping,
+                vat: orderTotals.vat,
+                split_payment: !!vendorSplitInfo?.paystack_subaccount_code,
+                subscription_plan: subscriptionPlan,
+                commission_rate: commissionRate,
+                vendor_percentage: vendorPercentage,
+                platform_commission: orderTotals.total * (commissionRate / 100),
+                vendor_amount: orderTotals.total * (vendorPercentage / 100)
+              }
+            });
+
+            toast({
+              title: 'Order Placed Successfully!',
+              description: `Payment reference: ${response.reference}. Your order is being processed.`
+            });
+
+            navigate('/orders');
+
+          } catch (err) {
+
+            console.error('Error creating order after payment:', err);
+
+            toast({
+
+              title: 'Order Creation Failed',
+
+              description: 'Payment succeeded but order creation failed. Please contact support.',
+
+              variant: 'destructive'
+
+            });
+
+          } finally {
+
+            setProcessing(false);
+
+          }
+
+        })();
+
+      },
+
+     
+
+      onClose: function() {
+
+        setProcessing(false);
+
+        toast({ title: 'Payment cancelled', description: 'You closed the payment popup.' });
+
+      }
+    };
+
+    // Add split payment ONLY for vendor products with valid subaccount code
+    // Subscription payments and admin products do NOT use split (100% to platform)
+    if (vendorSplitInfo?.paystack_subaccount_code) {
+      const vendorPercentage = getVendorPercentage(vendorSplitInfo.subscription_plan);
+      
+      paystackConfig.split = {
+        type: "percentage",
+        bearer_type: "account",
+        subaccounts: [{
+          subaccount: vendorSplitInfo.paystack_subaccount_code,
+          share: vendorPercentage
+        }]
+      };
+      
+      console.log(`Split payment: ${vendorSplitInfo.subscription_plan} plan - Vendor gets ${vendorPercentage}%, Platform gets ${100 - vendorPercentage}%`);
+    }
 
     try {
-
-      const handler = window.PaystackPop.setup({
-
-        key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
-
-        email: user.email,
-
-        amount: Math.round(orderTotals.total * 100), // amount in kobo
-
-        currency: 'NGN',
-
-        ref: `ALPHADOM_${Date.now()}`,
-
-        metadata: {
-
-          custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
-
-        },
-
-       
-
-        // FIX: Paystack requires a synchronous function for callback.
-
-        callback: function(response: any) {
-
-          // Use an immediately invoked async function (IIFE) to handle the async database logic
-
-          (async () => {
-
-            setProcessing(true); // Re-affirm processing state
-
-            try {
-
-              // Perform order finalization
-
-              await finalizeOrder('paid', 'processing');
-
-              // Record transaction
-              await supabase.from('platform_transactions').insert({
-                transaction_type: 'order_payment',
-                amount: orderTotals.total,
-                user_id: user?.id,
-                reference: response.reference,
-                payment_method: 'paystack',
-                description: `Order payment - ${items.length} item(s)`,
-                status: 'completed',
-                metadata: { 
-                  items_count: items.length,
-                  subtotal: orderTotals.subtotal,
-                  shipping: orderTotals.shipping,
-                  vat: orderTotals.vat
-                }
-              });
-
-              toast({
-
-                title: 'Order Placed Successfully!',
-
-                description: `Payment reference: ${response.reference}. Your order is being processed.`
-
-              });
-
-              navigate('/orders');
-
-            } catch (err) {
-
-              console.error('Error creating order after payment:', err);
-
-              toast({
-
-                title: 'Order Creation Failed',
-
-                description: 'Payment succeeded but order creation failed. Please contact support.',
-
-                variant: 'destructive'
-
-              });
-
-            } finally {
-
-              setProcessing(false);
-
-            }
-
-          })();
-
-        },
-
-       
-
-        onClose: function() {
-
-          setProcessing(false);
-
-          toast({ title: 'Payment cancelled', description: 'You closed the payment popup.' });
-
-        }
-
-      });
-
-
+      const handler = window.PaystackPop.setup(paystackConfig);
       handler.openIframe();
 
     } catch (err) {
@@ -678,7 +708,7 @@ const Checkout: React.FC = () => {
 
     }
 
-  }, [user, orderTotals, shippingInfo, navigate, toast, finalizeOrder]);
+  }, [user, orderTotals, shippingInfo, navigate, toast, finalizeOrder, vendorSplitInfo, getVendorPercentage, items]);
 
 
 

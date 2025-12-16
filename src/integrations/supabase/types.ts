@@ -313,6 +313,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_suspended: boolean | null
+          paystack_subaccount_code: string | null
           product_category: string
           product_limit: number | null
           product_slots: number | null
@@ -336,6 +337,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_suspended?: boolean | null
+          paystack_subaccount_code?: string | null
           product_category: string
           product_limit?: number | null
           product_slots?: number | null
@@ -359,6 +361,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_suspended?: boolean | null
+          paystack_subaccount_code?: string | null
           product_category?: string
           product_limit?: number | null
           product_slots?: number | null
