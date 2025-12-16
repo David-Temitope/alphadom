@@ -415,6 +415,21 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
         </div>
       </div>
 
+      {/* Eco Features */}
+      <div className="space-y-2">
+        <Label htmlFor="eco_features">Eco Features (comma-separated)</Label>
+        <Textarea 
+          id="eco_features" 
+          placeholder="e.g.: Recyclable, Organic, Biodegradable, Sustainable"
+          value={newProduct.eco_features.join(', ')}
+          onChange={(e) => setNewProduct({
+            ...newProduct, 
+            eco_features: e.target.value.split(',').map(f => f.trim()).filter(f => f)
+          })}
+          rows={2}
+        />
+      </div>
+
       <div className="space-y-2">
         <Label>Product Image</Label>
         <ImageUpload 
