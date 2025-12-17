@@ -71,10 +71,42 @@ export const useMultiVendorCheckout = () => {
 
     setLoading(true);
 
+    // Lookup missing vendor/shipping details (important for carts saved before vendor_id was included)
+    const productIdsNeedingLookup = items
+      .filter((item: any) =>
+        item.vendor_id === undefined ||
+        item.vendor_id === null ||
+        item.shipping_fee === undefined ||
+        item.shipping_type === undefined
+      )
+      .map((item: any) => item.id);
+
+    const productLookup = new Map<
+      string,
+      { vendor_id: string | null; shipping_fee: number; shipping_type: 'one_time' | 'per_product' }
+    >();
+
+    if (productIdsNeedingLookup.length > 0) {
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select('id, vendor_id, shipping_fee, shipping_type')
+        .in('id', productIdsNeedingLookup);
+
+      if (!productsError) {
+        productsData?.forEach((p: any) => {
+          productLookup.set(p.id, {
+            vendor_id: p.vendor_id ?? null,
+            shipping_fee: Number(p.shipping_fee) || 0,
+            shipping_type: (p.shipping_type as 'one_time' | 'per_product') || 'one_time'
+          });
+        });
+      }
+    }
+
     // Get unique vendor IDs (excluding null for platform products)
     const vendorIds = [...new Set(
       items
-        .map((item: any) => item.vendor_id)
+        .map((item: any) => item.vendor_id ?? productLookup.get(item.id)?.vendor_id)
         .filter((id: any): id is string => id !== null && id !== undefined)
     )];
 
@@ -85,7 +117,13 @@ export const useMultiVendorCheckout = () => {
     const groupedItems = new Map<string | null, CartItemWithVendor[]>();
 
     items.forEach((item: any) => {
-      const vendorId = item.vendor_id || null;
+      const fallback = productLookup.get(item.id);
+      const vendorId = (item.vendor_id ?? fallback?.vendor_id ?? null) as string | null;
+      const shippingFee = Number(item.shipping_fee ?? fallback?.shipping_fee ?? 0);
+      const shippingType = (item.shipping_type ?? fallback?.shipping_type ?? 'one_time') as
+        | 'one_time'
+        | 'per_product';
+
       const existing = groupedItems.get(vendorId) || [];
       existing.push({
         id: item.id,
@@ -94,8 +132,8 @@ export const useMultiVendorCheckout = () => {
         quantity: item.quantity,
         image: item.image,
         vendor_id: vendorId,
-        shipping_fee: item.shipping_fee || 0,
-        shipping_type: item.shipping_type || 'one_time'
+        shipping_fee: shippingFee,
+        shipping_type: shippingType
       });
       groupedItems.set(vendorId, existing);
     });
@@ -252,16 +290,16 @@ export const useMultiVendorCheckout = () => {
       });
 
       // Create notification for vendor about new order
-      if (vendorOwnerId) {
-        const itemsList = group.items.map(i => i.name).join(', ');
-        await supabase.from('user_notifications').insert({
-          user_id: vendorOwnerId,
-          title: 'New Order Received!',
-          message: `You have received a new order worth ₦${group.total.toLocaleString()} for: ${itemsList.substring(0, 100)}${itemsList.length > 100 ? '...' : ''}. Commission: ${commissionRate}% (₦${commissionAmount.toLocaleString()})`,
-          type: 'order',
-          related_id: order.id
-        });
-      }
+       if (vendorOwnerId) {
+         const itemsList = group.items.map(i => i.name).join(', ');
+         await supabase.from('user_notifications').insert({
+           user_id: vendorOwnerId,
+           title: 'New Order Received!',
+           message: `New order received: Products ₦${group.subtotal.toLocaleString()} (Shipping ₦${group.shipping.toLocaleString()}, VAT ₦${group.vat.toLocaleString()}). Commission: ${commissionRate}% (₦${commissionAmount.toLocaleString()}). Items: ${itemsList.substring(0, 100)}${itemsList.length > 100 ? '...' : ''}`,
+           type: 'order',
+           related_id: order.id
+         });
+       }
 
       return order.id;
     } catch (error) {

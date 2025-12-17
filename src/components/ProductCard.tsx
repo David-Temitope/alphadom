@@ -25,6 +25,11 @@ interface Product {
   original_price?: number;
   stock_count?: number;
   initial_stock_count?: number;
+
+  // Needed for correct multi-vendor checkout + shipping calculation
+  vendor_id?: string | null;
+  shipping_fee?: number | null;
+  shipping_type?: 'per_product' | 'one_time' | null;
 }
 
 interface ProductCardProps {
