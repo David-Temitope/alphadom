@@ -30,6 +30,7 @@ interface Order {
     products: {
       name: string;
       image: string;
+      vendor_id: string | null;
     };
   }>;
   profiles: {
@@ -38,202 +39,25 @@ interface Order {
   } | null;
 }
 
-const VendorOrders = () => {
-  const { user } = useAuth();
-  const { currentVendor } = useVendors();
-  const { toast } = useToast();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user && currentVendor) {
-      fetchVendorOrders();
-    }
-  }, [user, currentVendor]);
-
-  const fetchVendorOrders = async () => {
-    if (!currentVendor) return;
-
-    try {
-      const { data: orderData, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *,
-            products (
-              name,
-              image
-            )
-          ),
-          profiles:orders_user_id_fkey (
-            full_name,
-            email
-          )
-        `)
-        .eq('vendor_id', currentVendor.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setOrders(orderData as any || []);
-    } catch (error) {
-      console.error('Error fetching vendor orders:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch orders",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateOrderStatus = async (orderId: string, status: string) => {
-    try {
-      const updateData: any = { 
-        status,
-        updated_at: new Date().toISOString()
-      };
-      
-      if (status === 'shipped') {
-        updateData.self_delivery = true;
-      }
-
-      const { data, error } = await supabase
-        .from('orders')
-        .update(updateData)
-        .eq('id', orderId)
-        .select();
-
-      if (error) {
-        console.error('Update error:', error);
-        throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: `Order status updated to ${status}`,
-      });
-
-      await fetchVendorOrders();
-    } catch (error: any) {
-      console.error('Error updating order:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update order",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (!user || !currentVendor) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
-            <p className="text-muted-foreground">
-              {!user ? 'Please sign in to access vendor orders.' : 'Vendor access required.'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+// Get commission rate based on subscription plan
+const getCommissionRate = (subscriptionPlan: string | undefined): number => {
+  switch (subscriptionPlan) {
+    case 'first_class': return 5;
+    case 'economy': return 9;
+    case 'free':
+    default: return 15;
   }
-
-  const pendingOrders = orders.filter(order => order.status === 'pending');
-  const processingOrders = orders.filter(order => ['approved', 'processing'].includes(order.status));
-  const completedOrders = orders.filter(order => ['shipped', 'delivered'].includes(order.status));
-
-  return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Vendor Orders</h1>
-          <p className="text-muted-foreground">Manage orders for your products</p>
-        </div>
-
-        <div className="space-y-6">
-          <div className="grid grid-cols-3 gap-2 md:gap-4">
-            <Card>
-              <CardHeader className="p-3 md:p-6">
-                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2">
-                  <Clock className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden md:inline">Pending</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-                <div className="text-xl md:text-2xl font-bold">{pendingOrders.length}</div>
-                <p className="text-xs text-muted-foreground md:hidden">Pending</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="p-3 md:p-6">
-                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2">
-                  <Package className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden md:inline">Processing</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-                <div className="text-xl md:text-2xl font-bold">{processingOrders.length}</div>
-                <p className="text-xs text-muted-foreground md:hidden">Processing</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="p-3 md:p-6">
-                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2">
-                  <CheckCircle className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden md:inline">Completed</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-                <div className="text-xl md:text-2xl font-bold">{completedOrders.length}</div>
-                <p className="text-xs text-muted-foreground md:hidden">Completed</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">All Orders</h2>
-            
-            {loading ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">Loading orders...</p>
-                </CardContent>
-              </Card>
-            ) : orders.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No orders found</p>
-                </CardContent>
-              </Card>
-            ) : (
-              orders.map((order) => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  onUpdateStatus={updateOrderStatus}
-                  showActions={order.status === 'pending' || order.status === 'processing'}
-                  commissionRate={currentVendor?.commission_rate || 15}
-                />
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 interface OrderCardProps {
   order: Order;
   onUpdateStatus: (orderId: string, status: string) => void;
   showActions: boolean;
-  commissionRate: number;
+  subscriptionPlan: string;
+  vendorId: string;
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showActions, commissionRate }) => {
+const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showActions, subscriptionPlan, vendorId }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -253,9 +77,27 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
     }
   };
 
-  // Calculate commission based on vendor's subscription plan
-  const commission = order.total_amount * (commissionRate / 100);
-  const vendorPayout = order.total_amount - commission;
+  // Filter items to only show this vendor's products
+  const vendorItems = order.order_items.filter(
+    item => item.products?.vendor_id === vendorId
+  );
+
+  // Calculate commission based on subscription plan
+  const commissionRate = getCommissionRate(subscriptionPlan);
+  
+  // Calculate vendor's order value (only their products)
+  const vendorSubtotal = vendorItems.reduce(
+    (sum, item) => sum + (item.price * item.quantity), 0
+  );
+  const vendorShipping = order.shipping_cost || 0;
+  const vendorVat = vendorSubtotal * 0.025; // 2.5% VAT
+  const vendorOrderTotal = vendorSubtotal + vendorShipping + vendorVat;
+  
+  // Commission on subtotal only (not shipping or VAT)
+  const commission = vendorSubtotal * (commissionRate / 100);
+  const vendorPayout = vendorOrderTotal - commission;
+
+  if (vendorItems.length === 0) return null;
 
   return (
     <Card>
@@ -322,14 +164,14 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
 
         <Separator />
 
-        {/* Products Ordered */}
+        {/* Products Ordered - Only this vendor's products */}
         <div>
           <h4 className="font-semibold mb-3 flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Products Ordered
+            Your Products in This Order
           </h4>
           <div className="space-y-3">
-            {order.order_items?.map((item) => (
+            {vendorItems.map((item) => (
               <div key={item.id} className="flex items-center gap-4 p-3 bg-muted rounded-lg">
                 <img 
                   src={item.products?.image} 
@@ -349,27 +191,27 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
 
         <Separator />
 
-        {/* Order Summary */}
+        {/* Order Summary - Vendor's portion only */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h4 className="font-semibold mb-3">Order Summary</h4>
+            <h4 className="font-semibold mb-3">Your Order Value</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span>₦{(order.subtotal || order.total_amount).toLocaleString()}</span>
+                <span>Products Subtotal:</span>
+                <span>₦{vendorSubtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping:</span>
-                <span>₦{(order.shipping_cost || 0).toLocaleString()}</span>
+                <span>Shipping Fee:</span>
+                <span>₦{vendorShipping.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span>VAT (2.5%):</span>
-                <span>₦{(order.tax_amount || 0).toLocaleString()}</span>
+                <span>₦{vendorVat.toLocaleString()}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-bold">
-                <span>Total:</span>
-                <span>₦{order.total_amount.toLocaleString()}</span>
+                <span>Order Total:</span>
+                <span>₦{vendorOrderTotal.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -383,15 +225,22 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           </div>
         </div>
 
-        {/* Commission Notice */}
+        {/* Commission Notice - Based on subscription plan */}
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
             <div className="text-sm">
-              <p className="font-semibold text-amber-800">Platform Commission Notice</p>
+              <p className="font-semibold text-amber-800">
+                Platform Commission Notice ({subscriptionPlan} Plan - {commissionRate}%)
+              </p>
               <p className="text-amber-700 mt-1">
-                A {commissionRate}% commission (₦{commission.toLocaleString()}) will be deducted from this order. 
-                You will receive ₦{vendorPayout.toLocaleString()} within 24 hours after delivery confirmation.
+                Commission: ₦{commission.toLocaleString()} ({commissionRate}% of ₦{vendorSubtotal.toLocaleString()})
+              </p>
+              <p className="text-amber-700 font-medium mt-1">
+                Your Payout: ₦{vendorPayout.toLocaleString()}
+              </p>
+              <p className="text-amber-600 text-xs mt-2">
+                Payment will be sent within 24 hours after delivery confirmation on Discord.
               </p>
             </div>
           </div>
@@ -449,6 +298,199 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
         )}
       </CardContent>
     </Card>
+  );
+};
+
+const VendorOrders = () => {
+  const { user } = useAuth();
+  const { currentVendor } = useVendors();
+  const { toast } = useToast();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user && currentVendor) {
+      fetchVendorOrders();
+    }
+  }, [user, currentVendor]);
+
+  const fetchVendorOrders = async () => {
+    if (!currentVendor) return;
+
+    try {
+      // Fetch orders where vendor_id matches this vendor
+      const { data: orderData, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *,
+            products (
+              name,
+              image,
+              vendor_id
+            )
+          ),
+          profiles:orders_user_id_fkey (
+            full_name,
+            email
+          )
+        `)
+        .eq('vendor_id', currentVendor.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setOrders(orderData as any || []);
+    } catch (error) {
+      console.error('Error fetching vendor orders:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch orders",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      const updateData: any = { 
+        status,
+        updated_at: new Date().toISOString()
+      };
+      
+      if (status === 'shipped') {
+        updateData.self_delivery = true;
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updateData)
+        .eq('id', orderId)
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Order status updated to ${status}`,
+      });
+
+      await fetchVendorOrders();
+    } catch (error: any) {
+      console.error('Error updating order:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update order",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!user || !currentVendor) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">
+              {!user ? 'Please sign in to access vendor orders.' : 'Vendor access required.'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Calculate commission based on subscription plan
+  const commissionRate = getCommissionRate(currentVendor.subscription_plan);
+
+  const pendingOrders = orders.filter(order => order.status === 'pending');
+  const processingOrders = orders.filter(order => ['approved', 'processing'].includes(order.status));
+  const completedOrders = orders.filter(order => ['shipped', 'delivered'].includes(order.status));
+
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="container mx-auto max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Vendor Orders</h1>
+          <p className="text-muted-foreground">
+            Manage orders for your products • Commission Rate: {commissionRate}% ({currentVendor.subscription_plan || 'free'} plan)
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
+            <Card>
+              <CardHeader className="p-3 md:p-6">
+                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2">
+                  <Clock className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden md:inline">Pending</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+                <div className="text-xl md:text-2xl font-bold">{pendingOrders.length}</div>
+                <p className="text-xs text-muted-foreground md:hidden">Pending</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="p-3 md:p-6">
+                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2">
+                  <Package className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden md:inline">Processing</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+                <div className="text-xl md:text-2xl font-bold">{processingOrders.length}</div>
+                <p className="text-xs text-muted-foreground md:hidden">Processing</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="p-3 md:p-6">
+                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1 md:gap-2">
+                  <CheckCircle className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden md:inline">Completed</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+                <div className="text-xl md:text-2xl font-bold">{completedOrders.length}</div>
+                <p className="text-xs text-muted-foreground md:hidden">Completed</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">All Orders</h2>
+            
+            {loading ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground">Loading orders...</p>
+                </CardContent>
+              </Card>
+            ) : orders.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground">No orders found</p>
+                </CardContent>
+              </Card>
+            ) : (
+              orders.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onUpdateStatus={updateOrderStatus}
+                  showActions={order.status === 'pending' || order.status === 'processing'}
+                  subscriptionPlan={currentVendor.subscription_plan || 'free'}
+                  vendorId={currentVendor.id}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
