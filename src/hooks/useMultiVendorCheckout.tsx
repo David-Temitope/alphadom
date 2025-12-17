@@ -153,6 +153,16 @@ export const useMultiVendorCheckout = () => {
     );
   }, [vendorGroups]);
 
+  // Get commission rate based on subscription plan
+  const getCommissionRate = (subscriptionPlan: string): number => {
+    switch (subscriptionPlan) {
+      case 'first_class': return 5;
+      case 'economy': return 9;
+      case 'free':
+      default: return 15;
+    }
+  };
+
   // Create order for a specific vendor group
   const createVendorOrder = async (
     group: VendorGroup,
@@ -164,12 +174,24 @@ export const useMultiVendorCheckout = () => {
     if (!user) return null;
 
     try {
-      // Create order
+      // Get vendor user_id for notification (vendor_owner_id)
+      let vendorOwnerId: string | null = null;
+      if (group.vendor_id) {
+        const { data: vendorData } = await supabase
+          .from('approved_vendors')
+          .select('user_id')
+          .eq('id', group.vendor_id)
+          .single();
+        vendorOwnerId = vendorData?.user_id || null;
+      }
+
+      // Create order with vendor_owner_id for proper vendor lookup
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
           user_id: user.id,
           vendor_id: group.vendor_id,
+          vendor_owner_id: group.vendor_id, // This links order to vendor
           total_amount: group.total,
           subtotal: group.subtotal,
           shipping_cost: group.shipping,
@@ -184,7 +206,7 @@ export const useMultiVendorCheckout = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items
+      // Create order items - only items belonging to this vendor
       const orderItems = group.items.map(item => ({
         order_id: order.id,
         product_id: item.id,
@@ -198,7 +220,12 @@ export const useMultiVendorCheckout = () => {
 
       if (itemsError) throw itemsError;
 
-      // Record transaction
+      // Calculate commission for metadata
+      const commissionRate = getCommissionRate(group.subscription_plan);
+      const commissionAmount = group.subtotal * (commissionRate / 100);
+      const vendorPayout = group.total - commissionAmount;
+
+      // Record transaction with commission details
       await supabase.from('platform_transactions').insert({
         transaction_type: 'order_payment',
         amount: group.total,
@@ -217,9 +244,24 @@ export const useMultiVendorCheckout = () => {
           vat: group.vat,
           vendor_name: group.vendor_name,
           subscription_plan: group.subscription_plan,
+          commission_rate: commissionRate,
+          commission_amount: commissionAmount,
+          vendor_payout: vendorPayout,
           split_group: group.vendor_id ? getSplitGroupId(group.subscription_plan) : null
         }
       });
+
+      // Create notification for vendor about new order
+      if (vendorOwnerId) {
+        const itemsList = group.items.map(i => i.name).join(', ');
+        await supabase.from('user_notifications').insert({
+          user_id: vendorOwnerId,
+          title: 'New Order Received!',
+          message: `You have received a new order worth ₦${group.total.toLocaleString()} for: ${itemsList.substring(0, 100)}${itemsList.length > 100 ? '...' : ''}. Commission: ${commissionRate}% (₦${commissionAmount.toLocaleString()})`,
+          type: 'order',
+          related_id: order.id
+        });
+      }
 
       return order.id;
     } catch (error) {
