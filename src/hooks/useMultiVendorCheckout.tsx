@@ -354,18 +354,16 @@ export const useMultiVendorCheckout = () => {
         ]
       },
 
-      callback: async (response: any) => {
-        try {
-          updateGroupPaymentStatus(group.vendor_id, 'processing');
-          
-          const orderId = await createVendorOrder(
-            group,
-            shippingInfo,
-            'paystack',
-            'paid',
-            response.reference
-          );
-
+      callback: function(response: any) {
+        updateGroupPaymentStatus(group.vendor_id, 'processing');
+        
+        createVendorOrder(
+          group,
+          shippingInfo,
+          'paystack',
+          'paid',
+          response.reference
+        ).then((orderId) => {
           if (orderId) {
             updateGroupPaymentStatus(group.vendor_id, 'paid', orderId, response.reference);
             onComplete();
@@ -373,15 +371,14 @@ export const useMultiVendorCheckout = () => {
             updateGroupPaymentStatus(group.vendor_id, 'failed');
             onError(`Failed to create order for ${group.vendor_name}`);
           }
-        } catch (err) {
+        }).catch((err) => {
           console.error('Payment callback error:', err);
           updateGroupPaymentStatus(group.vendor_id, 'failed');
           onError(`Payment processing error for ${group.vendor_name}`);
-        }
+        });
       },
 
-      onClose: () => {
-        // Don't mark as failed on close - user might just be checking
+      onClose: function() {
         onError(`Payment cancelled for ${group.vendor_name}`);
       }
     };
