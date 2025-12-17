@@ -33,14 +33,21 @@ const ProductCard = memo(({ id, name, price, image }: { id: string; name: string
   );
 });
 
-// Vendor card component for chat (similar to ProductCard)
-const VendorCard = memo(({ id, name, image }: { id: string; name: string; image?: string }) => {
+// Vendor card component for chat - uses user_id for navigation since /pilots/:id expects user_id
+const VendorCard = memo(({ id, name, image, userId }: { id: string; name: string; image?: string; userId?: string }) => {
   const navigate = useNavigate();
+  
+  // Navigate using userId (the vendor's user_id) for the pilots page
+  const handleClick = () => {
+    if (userId) {
+      navigate(`/vendor/${userId}`);
+    }
+  };
   
   return (
     <div 
       className="inline-flex items-center gap-2 bg-card border rounded-lg p-2 cursor-pointer hover:bg-accent transition-colors my-1"
-      onClick={() => navigate(`/pilots/${id}`)}
+      onClick={handleClick}
     >
       <img 
         src={image || '/placeholder.svg'} 
@@ -62,8 +69,8 @@ const MessageContent = memo(({ content }: { content: string }) => {
   
   // Parse product cards: [[PRODUCT:id:name:price:image]]
   const productRegex = /\[\[PRODUCT:([^:]+):([^:]+):([^:]+):([^\]]*)\]\]/g;
-  // Parse vendor cards: [[VENDOR:id:name:image]]
-  const vendorRegex = /\[\[VENDOR:([^:]+):([^:]+):([^\]]*)\]\]/g;
+  // Parse vendor cards: [[VENDOR:id:name:image:user_id]]
+  const vendorRegex = /\[\[VENDOR:([^:]+):([^:]+):([^:]*):([^\]]*)\]\]/g;
   
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -86,11 +93,11 @@ const MessageContent = memo(({ content }: { content: string }) => {
   
   // Find vendor matches
   while ((match = vendorRegex.exec(tempContent)) !== null) {
-    const [fullMatch, id, name, image] = match;
+    const [fullMatch, id, name, image, userId] = match;
     matches.push({
       index: match.index,
       length: fullMatch.length,
-      element: <VendorCard key={`vendor-${id}-${match.index}`} id={id} name={name} image={image} />
+      element: <VendorCard key={`vendor-${id}-${match.index}`} id={id} name={name} image={image} userId={userId} />
     });
   }
   
@@ -239,7 +246,7 @@ export const GideonChat = () => {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 border-2 border-white animate-pulse z-50"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 border-2 border-white z-50 animate-[pulse_3s_ease-in-out_infinite]"
           size="icon"
         >
           <MessageCircle className="h-6 w-6 text-white drop-shadow-lg" />

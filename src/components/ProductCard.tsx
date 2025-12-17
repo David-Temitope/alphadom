@@ -101,7 +101,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <LikeButton productId={product.id} size="sm" />
           </div>
           
-          {product.sustainability_score && product.sustainability_score > 0 && product.sustainability_score > 7 && (
+          {product.sustainability_score != null && product.sustainability_score > 7 && (
             <Badge className="absolute bottom-2 left-2 bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100">
               <Leaf className="w-3 h-3 mr-1" />
               Eco-Friendly
@@ -160,7 +160,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Badge variant="outline" className="text-xs border-green-200 text-green-700">
                 {product.category}
               </Badge>
-              {product.sustainability_score && product.sustainability_score > 0 && (
+              {product.sustainability_score != null && product.sustainability_score > 0 && (
                 <div className="flex items-center gap-1">
                   <Leaf className="w-3 h-3 text-green-600" />
                   <span className="text-xs text-green-600">

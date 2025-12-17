@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
-import { ArrowRight, Leaf, Shield, Recycle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserTypes } from '@/hooks/useUserTypes';
+import { useShopApplications } from '@/hooks/useShopApplications';
+import { ArrowRight, Leaf, Shield, Recycle, ChevronLeft, ChevronRight, Store } from 'lucide-react';
 
 export const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { settings } = useAdminSettings();
+  const { user } = useAuth();
+  const { hasUserType } = useUserTypes();
+  const { userApplication } = useShopApplications();
 
   // Slide auto-advance effect
   useEffect(() => {
@@ -80,14 +86,29 @@ export const Hero = () => {
                 </Link>
               </Button>
 
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-4 text-lg rounded-xl backdrop-blur-sm bg-white/80"
-              >
-                <Link to="/about">Learn More</Link>
-              </Button>
+              {/* Show "Start Selling" for logged-in users who aren't vendors/dispatchers/applicants */}
+              {user && !hasUserType('vendor') && !hasUserType('dispatch') && !userApplication ? (
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="border-green-300 text-green-700 hover:bg-green-50 px-8 py-4 text-lg rounded-xl backdrop-blur-sm bg-white/80"
+                >
+                  <Link to="/user-types" className="flex items-center">
+                    <Store className="mr-2 w-5 h-5" />
+                    Start Selling
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-4 text-lg rounded-xl backdrop-blur-sm bg-white/80"
+                >
+                  <Link to="/about">Learn More</Link>
+                </Button>
+              )}
             </div>
 
             {/* Feature Highlights */}

@@ -89,7 +89,8 @@ serve(async (req) => {
       category: v.product_category,
       products: v.total_products,
       orders: v.total_orders,
-      image: profileMap.get(v.user_id) || ''
+      image: profileMap.get(v.user_id) || '',
+      user_id: v.user_id
     })) || [];
 
     const platformContext = `
@@ -99,7 +100,7 @@ PRODUCTS (${productList.length} available):
 ${productList.map(p => `[PRODUCT_ID:${p.id}] ${p.name}: ₦${p.price} (Category: ${p.category}, Stock: ${p.stock}, Rating: ${p.rating}, Image: ${p.image || 'none'})`).join('\n')}
 
 VENDORS (${vendorList.length} active):
-${vendorList.map(v => `[VENDOR_ID:${v.id}] ${v.name} (Category: ${v.category}, Products: ${v.products}, Image: ${v.image || 'none'})`).join('\n')}
+${vendorList.map(v => `[VENDOR_ID:${v.id}] ${v.name} (Category: ${v.category}, Products: ${v.products}, Image: ${v.image || 'none'}, UserID: ${v.user_id})`).join('\n')}
 
 CURRENCY: All prices are in Nigerian Naira (₦).
 `;
@@ -114,8 +115,8 @@ RESPONSE FORMAT RULES:
    Example: [[PRODUCT:abc123:Nike Shoes:15000:/images/shoe.jpg]]
 
 2. When mentioning vendors, ALWAYS include clickable vendor cards in this exact format:
-   [[VENDOR:vendor_id:vendor_name:vendor_image_url]]
-   Example: [[VENDOR:xyz789:Fashion Hub:/images/avatar.jpg]]
+   [[VENDOR:vendor_id:vendor_name:vendor_image_url:user_id]]
+   Example: [[VENDOR:xyz789:Fashion Hub:/images/avatar.jpg:user123]]
 
 3. ONLY use products and vendors from the platform data above
 4. Always use Nigerian Naira (₦) for prices

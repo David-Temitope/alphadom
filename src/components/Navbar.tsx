@@ -27,60 +27,88 @@ export const Navbar = () => {
   const UserTypeNavLink = () => {
     const { userApplication } = useShopApplications();
     
-    const getNavLink = () => {
-      if (hasUserType('vendor')) {
-        return { to: '/vendor-dashboard', text: 'My Shop' };
-      } else if (hasUserType('dispatch')) {
-        return { to: '/dispatch-dashboard', text: 'My Dashboard' };
-      } else if (userApplication) {
-        return { to: '/shop-application-status', text: 'Application Status' };
-      } else {
-        return { to: '/user-types', text: 'User Types' };
-      }
-    };
-    
-    const navLink = getNavLink();
-    
-    return (
-      <Link 
-        to={navLink.to} 
-        className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-          isActive(navLink.to) ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
-        }`}
-      >
-        {navLink.text}
-      </Link>
-    );
+    // Only show link if user is vendor, dispatch, or has application pending
+    if (hasUserType('vendor')) {
+      return (
+        <Link 
+          to="/vendor-dashboard" 
+          className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
+            isActive('/vendor-dashboard') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+          }`}
+        >
+          My Shop
+        </Link>
+      );
+    } else if (hasUserType('dispatch')) {
+      return (
+        <Link 
+          to="/dispatch-dashboard" 
+          className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
+            isActive('/dispatch-dashboard') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+          }`}
+        >
+          My Dashboard
+        </Link>
+      );
+    } else if (userApplication) {
+      return (
+        <Link 
+          to="/shop-application-status" 
+          className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
+            isActive('/shop-application-status') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+          }`}
+        >
+          Application Status
+        </Link>
+      );
+    }
+    // Don't show anything for regular users - they see "Start Selling" in hero
+    return null;
   };
   
   const UserTypeNavLinkMobile = () => {
     const { userApplication } = useShopApplications();
     
-    const getNavLink = () => {
-      if (hasUserType('vendor')) {
-        return { to: '/vendor-dashboard', text: 'My Shop' };
-      } else if (hasUserType('dispatch')) {
-        return { to: '/dispatch-dashboard', text: 'My Dashboard' };
-      } else if (userApplication) {
-        return { to: '/shop-application-status', text: 'Application Status' };
-      } else {
-        return { to: '/user-types', text: 'User Types' };
-      }
-    };
-    
-    const navLink = getNavLink();
-    
-    return (
-      <Link 
-        to={navLink.to} 
-        className={`block py-2 px-4 rounded-lg transition-colors ${
-          isActive(navLink.to) ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
-        }`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        {navLink.text}
-      </Link>
-    );
+    // Only show link if user is vendor, dispatch, or has application pending
+    if (hasUserType('vendor')) {
+      return (
+        <Link 
+          to="/vendor-dashboard" 
+          className={`block py-2 px-4 rounded-lg transition-colors ${
+            isActive('/vendor-dashboard') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+          }`}
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          My Shop
+        </Link>
+      );
+    } else if (hasUserType('dispatch')) {
+      return (
+        <Link 
+          to="/dispatch-dashboard" 
+          className={`block py-2 px-4 rounded-lg transition-colors ${
+            isActive('/dispatch-dashboard') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+          }`}
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          My Dashboard
+        </Link>
+      );
+    } else if (userApplication) {
+      return (
+        <Link 
+          to="/shop-application-status" 
+          className={`block py-2 px-4 rounded-lg transition-colors ${
+            isActive('/shop-application-status') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+          }`}
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          Application Status
+        </Link>
+      );
+    }
+    // Don't show anything for regular users
+    return null;
   };
 
   return (
