@@ -339,7 +339,7 @@ export const useMultiVendorCheckout = () => {
     const reference = generatePaystackReference(sessionId, index);
     
     const paystackConfig: any = {
-      key: 'pk_live_b65b60f97ee0b66e9631df6b1301ef83d383913a',
+      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
       email: user.email,
       amount: Math.round(group.total * 100), // Amount in kobo
       currency: 'NGN',
