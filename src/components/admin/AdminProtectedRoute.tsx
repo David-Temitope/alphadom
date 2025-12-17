@@ -5,7 +5,7 @@ import { useAdmin } from '@/contexts/AdminContext';
 import { Loader2, ShieldX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-type AdminRole = 'super_admin' | 'vendor_admin' | 'dispatch_admin' | 'user_admin' | 'orders_admin';
+type AdminRole = 'super_admin' | 'vendor_admin' | 'dispatch_admin' | 'user_admin' | 'orders_admin' | 'customer_service';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;

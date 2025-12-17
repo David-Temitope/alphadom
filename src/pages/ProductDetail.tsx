@@ -174,7 +174,7 @@ const ProductDetail = () => {
                 alt={product.name}
                 className="w-full h-96 lg:h-[500px] object-cover"
               />
-              {product.sustainability_score && product.sustainability_score > 7 && (
+              {product.sustainability_score != null && product.sustainability_score > 7 && (
                 <Badge className="absolute top-4 left-4 bg-green-100 text-green-800 border-green-200">
                   <Leaf className="w-3 h-3 mr-1" />
                   Eco-Friendly
@@ -203,7 +203,7 @@ const ProductDetail = () => {
                     </Badge>
                   </>
                 )}
-                {product.sustainability_score && product.sustainability_score > 7 && (
+                {product.sustainability_score != null && product.sustainability_score > 7 && (
                   <Badge className="bg-green-100 text-green-800 border-green-200">
                     <Leaf className="w-3 h-3 mr-1" />
                     Eco-Friendly
@@ -272,14 +272,14 @@ const ProductDetail = () => {
                 </p>
               </div>
 
-              {product.eco_features && product.eco_features.length > 0 && (
+              {product.eco_features && product.eco_features.length > 0 && product.eco_features.some(f => f && f.trim()) && (
                 <div>
                   <h3 className="font-semibold mb-2 flex items-center">
                     <Leaf className="w-4 h-4 mr-2 text-green-600" />
                     Eco Features
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {product.eco_features.map((feature, index) => (
+                    {product.eco_features.filter(f => f && f.trim()).map((feature, index) => (
                       <Badge key={index} variant="outline" className="text-green-700 border-green-200">
                         {feature}
                       </Badge>
@@ -288,7 +288,7 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              {product.sustainability_score && (
+              {product.sustainability_score != null && product.sustainability_score > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">Sustainability Score:</span>
                   <div className="flex items-center gap-1">

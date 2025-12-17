@@ -203,8 +203,8 @@ const Products = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <div className="flex">
         {/* Sidebar Filters - Always visible */}
-        <aside className={`${isMobile ? 'w-16' : 'w-64'} flex-shrink-0 border-r bg-card h-screen sticky top-0 overflow-y-auto`}>
-          <div className="p-2 md:p-4">
+        <aside className={`${isMobile ? 'w-16' : 'w-64'} flex-shrink-0 border-r bg-card h-screen sticky top-0`}>
+          <div className="p-2 md:p-4 h-full overflow-y-auto overscroll-contain">
             {!isMobile && (
               <>
                 <div className="flex items-center justify-between mb-4">

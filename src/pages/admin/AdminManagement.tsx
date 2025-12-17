@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-type AdminRole = 'super_admin' | 'vendor_admin' | 'dispatch_admin' | 'user_admin' | 'orders_admin';
+type AdminRole = 'super_admin' | 'vendor_admin' | 'dispatch_admin' | 'user_admin' | 'orders_admin' | 'customer_service';
 
 interface AdminUser {
   id: string;
@@ -34,6 +34,7 @@ const roleLabels: Record<AdminRole, string> = {
   dispatch_admin: 'Dispatch Admin',
   user_admin: 'User Admin',
   orders_admin: 'Orders Admin',
+  customer_service: 'Customer Service',
 };
 
 const roleBadgeColors: Record<AdminRole, string> = {
@@ -42,6 +43,7 @@ const roleBadgeColors: Record<AdminRole, string> = {
   dispatch_admin: 'bg-orange-500 text-white',
   user_admin: 'bg-green-500 text-white',
   orders_admin: 'bg-purple-500 text-white',
+  customer_service: 'bg-cyan-500 text-white',
 };
 
 const AdminManagement: React.FC = () => {
@@ -280,6 +282,7 @@ const AdminManagement: React.FC = () => {
                       <SelectItem value="dispatch_admin">Dispatch Admin</SelectItem>
                       <SelectItem value="user_admin">User Admin</SelectItem>
                       <SelectItem value="orders_admin">Orders Admin</SelectItem>
+                      <SelectItem value="customer_service">Customer Service</SelectItem>
                       <SelectItem value="super_admin">Super Admin</SelectItem>
                     </SelectContent>
                   </Select>
@@ -357,6 +360,7 @@ const AdminManagement: React.FC = () => {
                           <SelectItem value="dispatch_admin">Dispatch Admin</SelectItem>
                           <SelectItem value="user_admin">User Admin</SelectItem>
                           <SelectItem value="orders_admin">Orders Admin</SelectItem>
+                          <SelectItem value="customer_service">Customer Service</SelectItem>
                           <SelectItem value="super_admin">Super Admin</SelectItem>
                         </SelectContent>
                       </Select>
