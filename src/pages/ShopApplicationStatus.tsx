@@ -146,8 +146,8 @@ const ShopApplicationStatus = () => {
         amount: plan.price * 100,
         currency: 'NGN',
         ref: `SUB_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-        callback: (response: any) => {
-          if (response.status === 'success') {
+        callback: function (response: any) {
+          if (response?.status === 'success') {
             // Record transaction
             supabase.from('platform_transactions').insert({
               user_id: user?.id,
@@ -163,7 +163,7 @@ const ShopApplicationStatus = () => {
             resolve(false);
           }
         },
-        onClose: () => {
+        onClose: function () {
           toast({ title: "Payment cancelled" });
           resolve(false);
         }
