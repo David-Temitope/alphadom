@@ -79,7 +79,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         quantity: requestedQuantity,
         category: product.category || 'General',
         sustainabilityScore: product.sustainability_score || 0,
-        vendor_id: product.vendor_id || null
+        vendor_id: product.vendor_id || null,
+        shipping_fee: product.shipping_fee || 0,
+        shipping_type: product.shipping_type || 'one_time'
       }];
     });
   };
