@@ -20,6 +20,12 @@ interface Product {
   has_discount?: boolean;
   discount_percentage?: number;
   original_price?: number;
+
+  // Needed for correct multi-vendor checkout + shipping calculation
+  vendor_id?: string | null;
+  shipping_fee?: number | null;
+  shipping_type?: 'per_product' | 'one_time' | null;
+  sustainability_score?: number;
 }
 
 interface ProductCardMobileProps {
