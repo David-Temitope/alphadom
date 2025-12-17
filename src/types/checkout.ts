@@ -4,7 +4,7 @@ export const VAT_RATE = 0.025; // 2.5% VAT
 
 // Split Group IDs - Paystack handles commission automatically
 export const SPLIT_GROUPS: Record<string, string> = {
-  'first_class': 'SPL_vNGYPJAeYT',
+  'first_class': 'SPL_8gS5l7yHHn',
   'economy': 'SPL_ZQ4ZNIim9v',
   'free': 'SPL_XJkCuVmoHw'
 };
