@@ -226,25 +226,38 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
           vendor_id: currentVendor?.id,
           user_id: user.id
         },
-        callback: async (response: any) => {
-          if (response.status === 'success') {
-            await activatePlan(plan.id, response.reference);
-            
-            await supabase.from('platform_transactions').insert({
-              transaction_type: 'subscription',
-              amount: plan.price,
-              user_id: user.id,
-              vendor_id: currentVendor?.id,
-              reference: response.reference,
-              payment_method: 'paystack',
-              status: 'completed',
-              description: `${plan.name} subscription payment`,
-              metadata: { plan_id: plan.id }
-            });
+        callback: function (response: any) {
+          if (response?.status === 'success') {
+            (async () => {
+              await activatePlan(plan.id, response.reference);
+
+              await supabase.from('platform_transactions').insert({
+                transaction_type: 'subscription',
+                amount: plan.price,
+                user_id: user.id,
+                vendor_id: currentVendor?.id,
+                reference: response.reference,
+                payment_method: 'paystack',
+                status: 'completed',
+                description: `${plan.name} subscription payment`,
+                metadata: { plan_id: plan.id }
+              });
+            })()
+              .catch(() => {
+                toast({
+                  title: "Error",
+                  description: "Payment succeeded, but we couldn't activate your plan. Please contact support.",
+                  variant: "destructive",
+                });
+              })
+              .finally(() => {
+                setProcessing(false);
+              });
+          } else {
+            setProcessing(false);
           }
-          setProcessing(false);
         },
-        onClose: () => {
+        onClose: function () {
           setProcessing(false);
         }
       });
