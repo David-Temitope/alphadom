@@ -1,1291 +1,496 @@
- import React, { useState, useEffect, useCallback, useMemo } from 'react';
-
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { useCart } from '@/contexts/CartContext';
-
 import { useAuth } from '@/contexts/AuthContext';
-
-import { useOrders } from '@/hooks/useOrders';
-
-import { supabase } from '@/integrations/supabase/client';
-
+import { useCart } from '@/contexts/CartContext';
+import { useMultiVendorCheckout } from '@/hooks/useMultiVendorCheckout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
 import { Button } from '@/components/ui/button';
-
 import { Input } from '@/components/ui/input';
-
 import { Label } from '@/components/ui/label';
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 import { Separator } from '@/components/ui/separator';
-
-import { ShoppingCart, CreditCard, Truck, Lock } from 'lucide-react';
-
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { 
+  ShoppingCart, 
+  CreditCard, 
+  Truck, 
+  Lock, 
+  Store, 
+  CheckCircle2, 
+  XCircle, 
+  Loader2,
+  RefreshCw
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-import { useAdminSettings } from '@/hooks/useAdminSettings';
-
-
-// --- Types & Constants ---
-
-const VAT_RATE = 0.025; // 2.5% VAT
-
-// Commission rates derived from subscription plan - SINGLE SOURCE OF TRUTH
-const COMMISSION_RATES: Record<string, number> = {
-  'free': 15,
-  'economy': 9,
-  'first_class': 5
-};
+import { ShippingInfo, VAT_RATE, VendorGroup } from '@/types/checkout';
 
 declare global {
-
   interface Window {
-
     PaystackPop?: any;
-
   }
-
 }
 
-
-type ShippingInfo = {
-
-  street: string;
-
-  city: string;
-
-  state: string;
-
-  zipCode: string;
-
-  country: string; // Assuming 'NG'
-
-  phone: string;
-
-};
-
-
-type OrderTotals = {
-
-  subtotal: number;
-
-  shipping: number;
-
-  vat: number;
-
-  total: number;
-
-};
-
-
-type PaymentMethod = 'bank_transfer' | 'paystack';
-
-type VendorSplitInfo = {
-  vendor_id: string;
-  subscription_plan: string;
-  paystack_subaccount_code: string | null;
-};
-
-
-// --- Utility Functions ---
-
-
-/**
-
- * Calculates the shipping cost for all items in the cart.
-
- * @param items - The items in the shopping cart.
-
- * @returns The total shipping cost.
-
- */
-
-const calculateShipping = (items: any[]): number => {
-  let totalShipping = 0;
-  // Use a map to track which product IDs have already had their one-time fee applied
-  const oneTimeShippingApplied = new Set<string>();
-
-  for (const item of items) {
-    const shippingFee = Number(item.shipping_fee);
-    const shippingType = item.shipping_type || 'one_time';
-    const quantity = Number(item.quantity) || 1;
-
-    // Skip if shipping fee is not a valid positive number
-    if (isNaN(shippingFee) || shippingFee <= 0) {
-      continue;
-    }
-
-    if (shippingType === 'per_product') {
-      // Per product: multiply shipping fee by quantity
-      totalShipping += shippingFee * quantity;
-    } else {
-      // One-time shipping: apply once per unique product
-      if (!oneTimeShippingApplied.has(item.id)) {
-        oneTimeShippingApplied.add(item.id);
-        totalShipping += shippingFee;
-      }
-    }
-  }
-
-  return totalShipping;
-};
-
-
-
-// --- Component ---
-
 const Checkout: React.FC = () => {
-
-  // --- Hooks and Context ---
-
-  const { items, total, clearCart } = useCart();
-
   const { user } = useAuth();
-
-  const { createOrder } = useOrders();
-
+  const { items } = useCart();
   const navigate = useNavigate();
-
   const { toast } = useToast();
 
-  // const { settings } = useAdminSettings(); // Not used in provided logic, keeping for context
-
-
-  // --- State ---
+  const {
+    vendorGroups,
+    grandTotals,
+    loading,
+    processing,
+    currentPaymentIndex,
+    processAllPayments,
+    retryPayment,
+    allPaymentsComplete,
+    failedGroups
+  } = useMultiVendorCheckout();
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
-
     street: '',
-
     city: '',
-
     state: '',
-
     zipCode: '',
-
     country: 'NG',
-
     phone: ''
-
   });
 
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer');
-
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
-
-  const [processing, setProcessing] = useState(false);
-
-  const [orderTotals, setOrderTotals] = useState<OrderTotals>({
-
-    subtotal: 0,
-
-    shipping: 0,
-
-    vat: 0,
-
-    total: 0
-
-  });
-
-  const [vendorBankDetails, setVendorBankDetails] = useState<any>(null);
-  const [vendorSplitInfo, setVendorSplitInfo] = useState<VendorSplitInfo | null>(null);
-
-
-  // --- Derived Values ---
-
-  const isBankTransferAvailable = !!vendorBankDetails;
-
- 
-
-  const validateShippingInfo = useMemo(() => {
-
+  // Validate shipping info
+  const isShippingValid = useMemo(() => {
     return (
-
-      shippingInfo.street &&
-
-      shippingInfo.city &&
-
-      shippingInfo.state &&
-
-      shippingInfo.zipCode &&
-
-      shippingInfo.phone
-
+      shippingInfo.street.trim() &&
+      shippingInfo.city.trim() &&
+      shippingInfo.state.trim() &&
+      shippingInfo.zipCode.trim() &&
+      shippingInfo.phone.trim()
     );
-
   }, [shippingInfo]);
 
-
-  // --- Effects and Callbacks ---
-
-
-  /**
-
-   * Calculates all order totals (subtotal, shipping, VAT, total).
-
-   */
-
-  const calculateTotals = useCallback(() => {
-
-    const subtotal = total;
-
-    const totalShipping = calculateShipping(items);
-
-    const vat = subtotal * VAT_RATE; // 2.5% VAT
-
-
-    setOrderTotals({
-
-      subtotal,
-
-      shipping: totalShipping,
-
-      vat,
-
-      total: subtotal + totalShipping + vat
-
-    });
-
-  }, [items, total]);
-
-
-  /**
-
-   * Fetches vendor's bank details for bank transfer option.
-
-   * FIX: Replaced .single() with .limit(1) and array indexing for robust Supabase fetching.
-
-   */
-
-  const fetchVendorBankDetails = useCallback(async () => {
-
-    if (items.length === 0) return;
-
-
-    // Assuming single vendor checkout: get the first product's vendor
-
-    const firstProduct = items[0] as any;
-
-
-    if (firstProduct.vendor_id) {
-
-      try {
-
-        const { data, error } = await supabase
-
-          .from('approved_vendors')
-
-          .select('id, subscription_plan, paystack_subaccount_code, shop_applications!inner(vendor_bank_details)')
-
-          .eq('id', firstProduct.vendor_id)
-
-          .limit(1);
-
-
-        if (error || !data || data.length === 0) {
-
-          console.warn('Vendor fetch error or not found:', error);
-
-          setVendorBankDetails(null);
-          setVendorSplitInfo(null);
-
-          return;
-
-        }
-
-       
-        const vendorData = data[0];
-        
-        // Set vendor split info for Paystack split payments
-        setVendorSplitInfo({
-          vendor_id: vendorData.id,
-          subscription_plan: vendorData.subscription_plan || 'free',
-          paystack_subaccount_code: vendorData.paystack_subaccount_code
-        });
-
-        const shopApp = (vendorData as any).shop_applications;
-        if (shopApp && shopApp.vendor_bank_details) {
-
-          setVendorBankDetails(shopApp.vendor_bank_details);
-
-        } else {
-
-          setVendorBankDetails(null);
-
-        }
-
-      } catch (err) {
-
-        console.error('fetchVendorBankDetails error:', err);
-
-        setVendorBankDetails(null);
-        setVendorSplitInfo(null);
-
-      }
-
-    } else {
-
-      // Product added by admin - no split payment (100% to platform)
-
-      setVendorBankDetails(null);
-      setVendorSplitInfo(null);
-
-    }
-
-  }, [items]);
-
-
-  // Initial load and dependency monitoring
-
+  // Redirect if not authenticated or no items
   useEffect(() => {
-
     if (!user) {
-
       navigate('/auth');
-
       return;
-
     }
-
     if (!items || items.length === 0) {
-
       navigate('/cart');
-
-      return;
-
     }
-
-   
-
-    calculateTotals();
-
-    fetchVendorBankDetails();
-
-  }, [user, items, navigate, calculateTotals, fetchVendorBankDetails]);
-
-
-  // Disable bank_transfer if vendor details are missing
-
-  useEffect(() => {
-
-    if (!isBankTransferAvailable && paymentMethod === 'bank_transfer') {
-
-      setPaymentMethod('paystack');
-
-    }
-
-  }, [isBankTransferAvailable, paymentMethod]);
-
+  }, [user, items, navigate]);
 
   // Load Paystack script
-
   useEffect(() => {
-
-    if (window.PaystackPop) return;
-
+    if (window.PaystackPop) {
+      setPaystackLoaded(true);
+      return;
+    }
 
     const script = document.createElement('script');
-
     script.src = 'https://js.paystack.co/v1/inline.js';
-
     script.async = true;
-
-    script.onload = () => console.log('Paystack script loaded');
-
-    script.onerror = () => console.error('Failed to load Paystack script');
-
+    script.onload = () => setPaystackLoaded(true);
+    script.onerror = () => {
+      console.error('Failed to load Paystack script');
+      toast({
+        title: 'Payment Error',
+        description: 'Failed to load payment system. Please refresh.',
+        variant: 'destructive'
+      });
+    };
     document.body.appendChild(script);
 
-
     return () => {
-
-      document.body.removeChild(script);
-
-    };
-
-  }, []);
-
-
-  /**
-
-   * Uploads the payment receipt file to Supabase storage.
-
-   */
-
-  const uploadReceipt = async (file: File): Promise<string> => {
-
-    const fileExt = file.name.split('.').pop();
-
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-
-    const filePath = `receipts/${fileName}`;
-
-
-    const { error: uploadError } = await supabase.storage
-
-      .from('product-images')
-
-      .upload(filePath, file);
-
-
-    if (uploadError) throw uploadError;
-
-
-    const { data } = supabase.storage
-
-      .from('product-images')
-
-      .getPublicUrl(filePath);
-
-
-    if (!data || !data.publicUrl) {
-
-        throw new Error('Failed to get public URL for the uploaded receipt.');
-
-    }
-
-    return data.publicUrl;
-
-  };
-
-
-  /**
-
-   * Handles the successful creation and update of an order in the database.
-
-   */
-
-  const finalizeOrder = async (
-
-    paymentStatus: 'paid' | 'pending',
-
-    orderStatus: 'processing' | 'pending',
-
-    uploadedReceiptUrl: string = ''
-
-  ) => {
-
-    const orderItems = items.map(item => ({
-
-      product_id: item.id,
-
-      quantity: item.quantity,
-
-      price: item.price
-
-    }));
-
-
-    const { order, error: createError } = await createOrder({
-
-      total_amount: orderTotals.total,
-
-      shipping_address: shippingInfo,
-
-      payment_method: paymentMethod,
-
-      items: orderItems
-
-    });
-
-
-    if (createError) throw createError;
-
-   
-
-    if (order) {
-
-      const updateData: any = {
-
-        subtotal: orderTotals.subtotal,
-
-        shipping_cost: orderTotals.shipping,
-
-        tax_amount: orderTotals.vat,
-
-        payment_status: paymentStatus,
-
-        status: orderStatus
-
-      };
-
-
-      if (uploadedReceiptUrl) {
-
-        updateData.receipt_image = uploadedReceiptUrl;
-
-      }
-
-
-      const { error: updateError } = await supabase
-
-        .from('orders')
-
-        .update(updateData)
-
-        .eq('id', order.id);
-
-       
-
-      if (updateError) throw updateError;
-
-    }
-
-
-    clearCart();
-
-  };
-
-
-  /**
-   * Calculates vendor percentage based on subscription plan.
-   * Commission is derived dynamically - NOT stored in database.
-   */
-  const getVendorPercentage = useCallback((subscriptionPlan: string): number => {
-    const commissionRate = COMMISSION_RATES[subscriptionPlan] || COMMISSION_RATES['free'];
-    return 100 - commissionRate; // Vendor receives this percentage
-  }, []);
-
-  /**
-   * Initiates the Paystack payment process with split payment for vendor orders.
-   * - Product sales: Split payment based on vendor subscription plan
-   * - Admin products: 100% to platform (no split)
-   */
-  const handlePaystackPayment = useCallback(() => {
-
-    if (!user) {
-
-      toast({ title: 'Sign in required', variant: 'destructive' });
-
-      return;
-
-    }
-
-   
-
-    if (!window.PaystackPop) {
-
-      toast({ title: 'Paystack not loaded. Please refresh the page.', variant: 'destructive' });
-
-      return;
-
-    }
-
-   
-
-    if (orderTotals.total <= 0) {
-
-      toast({ title: 'Invalid amount', variant: 'destructive' });
-
-      return;
-
-    }
-
-
-    setProcessing(true);
-
-    // Build Paystack config
-    const paystackConfig: any = {
-      key: 'pk_live_b65b60f97ee0b66e9631df6b1301ef83d383913a',
-      email: user.email,
-      amount: Math.round(orderTotals.total * 100), // amount in kobo
-      currency: 'NGN',
-      ref: `ALPHADOM_${Date.now()}`,
-      metadata: {
-        custom_fields: [{ display_name: 'Phone', variable_name: 'phone', value: shippingInfo.phone }]
-      },
-      
-      // Callback for successful payment
-      callback: function(response: any) {
-        (async () => {
-          setProcessing(true);
-          try {
-            await finalizeOrder('paid', 'processing');
-            
-            // Calculate commission info for transaction record
-            const subscriptionPlan = vendorSplitInfo?.subscription_plan || 'free';
-            const commissionRate = COMMISSION_RATES[subscriptionPlan] || 15;
-            const vendorPercentage = 100 - commissionRate;
-            
-            // Record transaction with split payment details
-            await supabase.from('platform_transactions').insert({
-              transaction_type: 'order_payment',
-              amount: orderTotals.total,
-              user_id: user?.id,
-              vendor_id: vendorSplitInfo?.vendor_id || null,
-              reference: response.reference,
-              payment_method: 'paystack',
-              description: `Order payment - ${items.length} item(s)`,
-              status: 'completed',
-              metadata: { 
-                items_count: items.length,
-                subtotal: orderTotals.subtotal,
-                shipping: orderTotals.shipping,
-                vat: orderTotals.vat,
-                split_payment: !!vendorSplitInfo?.paystack_subaccount_code,
-                subscription_plan: subscriptionPlan,
-                commission_rate: commissionRate,
-                vendor_percentage: vendorPercentage,
-                platform_commission: orderTotals.total * (commissionRate / 100),
-                vendor_amount: orderTotals.total * (vendorPercentage / 100)
-              }
-            });
-
-            toast({
-              title: 'Order Placed Successfully!',
-              description: `Payment reference: ${response.reference}. Your order is being processed.`
-            });
-
-            navigate('/orders');
-
-          } catch (err) {
-
-            console.error('Error creating order after payment:', err);
-
-            toast({
-
-              title: 'Order Creation Failed',
-
-              description: 'Payment succeeded but order creation failed. Please contact support.',
-
-              variant: 'destructive'
-
-            });
-
-          } finally {
-
-            setProcessing(false);
-
-          }
-
-        })();
-
-      },
-
-     
-
-      onClose: function() {
-
-        setProcessing(false);
-
-        toast({ title: 'Payment cancelled', description: 'You closed the payment popup.' });
-
+      if (script.parentNode) {
+        document.body.removeChild(script);
       }
     };
+  }, [toast]);
 
-    // Add split payment ONLY for vendor products with valid subaccount code
-    // Subscription payments and admin products do NOT use split (100% to platform)
-    if (vendorSplitInfo?.paystack_subaccount_code) {
-      const vendorPercentage = getVendorPercentage(vendorSplitInfo.subscription_plan);
-      
-      paystackConfig.split = {
-        type: "percentage",
-        bearer_type: "account",
-        subaccounts: [{
-          subaccount: vendorSplitInfo.paystack_subaccount_code,
-          share: vendorPercentage
-        }]
-      };
-      
-      console.log(`Split payment: ${vendorSplitInfo.subscription_plan} plan - Vendor gets ${vendorPercentage}%, Platform gets ${100 - vendorPercentage}%`);
-    }
-
-    try {
-      const handler = window.PaystackPop.setup(paystackConfig);
-      handler.openIframe();
-
-    } catch (err) {
-
-      console.error('Paystack setup error:', err);
-
-      toast({ title: 'Payment initialization failed', variant: 'destructive' });
-
-      setProcessing(false);
-
-    }
-
-  }, [user, orderTotals, shippingInfo, navigate, toast, finalizeOrder, vendorSplitInfo, getVendorPercentage, items]);
-
-
-
-  /**
-
-   * Main handler for placing the order.
-
-   */
-
-  const handlePlaceOrder = async () => {
-
-    if (!user) return;
-
-
-    if (!validateShippingInfo) {
-
+  // Navigate to orders when all payments complete
+  useEffect(() => {
+    if (allPaymentsComplete && !processing) {
       toast({
-
-        title: 'Missing Information',
-
-        description: 'Please fill in all shipping details including phone number.',
-
-        variant: 'destructive'
-
+        title: 'All Orders Placed Successfully!',
+        description: `${vendorGroups.length} order(s) have been created.`
       });
-
-      return;
-
-    }
-
-
-    // 1. Paystack Flow
-
-    if (paymentMethod === 'paystack') {
-
-      handlePaystackPayment();
-
-      return;
-
-    }
-
-
-    // 2. Bank Transfer Flow
-
-    if (paymentMethod === 'bank_transfer') {
-
-      if (!isBankTransferAvailable) {
-
-        toast({
-
-          title: 'Payment Method Unavailable',
-
-          description: 'Bank transfer is not available for this vendor. Choose Paystack instead.',
-
-          variant: 'destructive'
-
-        });
-
-        setPaymentMethod('paystack');
-
-        return;
-
-      }
-
-
-      if (!receiptFile) {
-
-        toast({
-
-          title: 'Missing Receipt',
-
-          description: 'Please upload your payment receipt.',
-
-          variant: 'destructive'
-
-        });
-
-        return;
-
-      }
-
-    }
-
-
-    // Proceed with order creation (Bank Transfer)
-
-    setProcessing(true);
-
-
-    try {
-
-      let uploadedReceiptUrl = '';
-
-     
-
-      // Upload receipt if bank transfer
-
-      if (paymentMethod === 'bank_transfer' && receiptFile) {
-
-        uploadedReceiptUrl = await uploadReceipt(receiptFile);
-
-      }
-
-
-      // Finalize order with pending status
-
-      await finalizeOrder('pending', 'pending', uploadedReceiptUrl);
-
-
-      toast({
-
-        title: 'Order Placed Successfully!',
-
-        description: 'Your order has been received and is awaiting payment confirmation.'
-
-      });
-
-
       navigate('/orders');
+    }
+  }, [allPaymentsComplete, processing, vendorGroups.length, navigate, toast]);
 
-    } catch (err) {
-
-      console.error('Error placing order:', err);
-
+  // Handle payment initiation
+  const handlePayNow = async () => {
+    if (!isShippingValid) {
       toast({
-
-        title: 'Order Failed',
-
-        description: 'There was an error processing your order. Please try again.',
-
+        title: 'Missing Information',
+        description: 'Please fill in all shipping details.',
         variant: 'destructive'
-
       });
-
-    } finally {
-
-      setProcessing(false);
-
+      return;
     }
 
+    if (!paystackLoaded) {
+      toast({
+        title: 'Payment Not Ready',
+        description: 'Please wait for payment system to load.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const result = await processAllPayments(shippingInfo);
+    
+    if (!result.success && failedGroups.length > 0) {
+      toast({
+        title: 'Some Payments Failed',
+        description: result.message,
+        variant: 'destructive'
+      });
+    }
   };
 
+  // Handle retry for failed payment
+  const handleRetry = async (vendorId: string | null) => {
+    const success = await retryPayment(vendorId, shippingInfo);
+    if (success) {
+      toast({ title: 'Payment Successful!' });
+    } else {
+      toast({
+        title: 'Payment Failed',
+        description: 'Please try again.',
+        variant: 'destructive'
+      });
+    }
+  };
 
-  // --- Render Logic ---
+  // Get status badge for vendor group
+  const getStatusBadge = (group: VendorGroup, index: number) => {
+    switch (group.payment_status) {
+      case 'paid':
+        return (
+          <Badge className="bg-green-500">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Paid
+          </Badge>
+        );
+      case 'processing':
+        return (
+          <Badge className="bg-blue-500">
+            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+            Processing
+          </Badge>
+        );
+      case 'failed':
+        return (
+          <Badge variant="destructive">
+            <XCircle className="h-3 w-3 mr-1" />
+            Failed
+          </Badge>
+        );
+      default:
+        if (processing && index === currentPaymentIndex) {
+          return (
+            <Badge className="bg-yellow-500">
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              Paying...
+            </Badge>
+          );
+        }
+        return <Badge variant="secondary">Pending</Badge>;
+    }
+  };
 
-  if (!user) return null; // Redirect handled in useEffect
+  if (!user || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  if (!items || items.length === 0) return null; // Redirect handled in useEffect
+  if (vendorGroups.length === 0) {
+    return null;
+  }
 
+  const progress = processing 
+    ? ((currentPaymentIndex + 1) / vendorGroups.length) * 100 
+    : 0;
 
   return (
-
     <div className="min-h-screen bg-gray-50 py-8">
-
-      <div className="max-w-4xl mx-auto px-4">
-
+      <div className="max-w-5xl mx-auto px-4">
         <div className="mb-8">
-
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-
-          <p className="text-gray-600">Complete your purchase</p>
-
+          <p className="text-gray-600">
+            {vendorGroups.length > 1 
+              ? `Your cart contains items from ${vendorGroups.length} vendors. Each vendor will be processed separately.`
+              : 'Complete your purchase'
+            }
+          </p>
         </div>
 
+        {/* Progress bar during multi-payment */}
+        {processing && vendorGroups.length > 1 && (
+          <Card className="mb-6">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Processing Payments</span>
+                <span className="text-sm text-muted-foreground">
+                  {currentPaymentIndex + 1} of {vendorGroups.length}
+                </span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </CardContent>
+          </Card>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-          {/* 1. Order Summary */}
-
-          <div className="space-y-6">
-
-            <Card>
-
-              <CardHeader>
-
-                <CardTitle className="flex items-center gap-2">
-
-                  <ShoppingCart className="h-5 w-5" />
-
-                  Order Summary
-
-                </CardTitle>
-
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-
-                {items.map((item) => {
-
-                  const shippingFee = Number(item.shipping_fee) || 0;
-
-                  const shippingType = item.shipping_type || 'one_time';
-
-                  const hasShipping = shippingFee > 0;
-
-                  const itemShippingCost = shippingType === 'per_product'
-
-                    ? shippingFee * item.quantity
-
-                    : shippingFee;
-
-
-                  return (
-
-                    <div key={item.id} className="space-y-2">
-
-                      <div className="flex justify-between items-center">
-
-                        <div className="flex items-center gap-3">
-
-                          <img
-
-                            src={item.image}
-
-                            alt={item.name}
-
-                            className="w-12 h-12 rounded-lg object-cover"
-
-                          />
-
-                          <div>
-
-                            <p className="font-medium">{item.name}</p>
-
-                            <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-
-                          </div>
-
-                        </div>
-
-                        <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
-
-                      </div>
-
-                      {hasShipping && (
-
-                        <div className="text-xs text-muted-foreground ml-15">
-
-                          Shipping: ₦{itemShippingCost.toLocaleString()} ({shippingType === 'per_product' ? `₦${shippingFee.toLocaleString()} × ${item.quantity}` : 'one-time'})
-
-                        </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Vendor Groups */}
+          <div className="lg:col-span-2 space-y-6">
+            {vendorGroups.map((group, index) => (
+              <Card key={group.vendor_id || 'platform'} className={
+                group.payment_status === 'paid' ? 'border-green-200 bg-green-50/50' :
+                group.payment_status === 'failed' ? 'border-red-200 bg-red-50/50' :
+                ''
+              }>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Store className="h-5 w-5" />
+                      {group.vendor_name}
+                      {group.vendor_id && (
+                        <Badge variant="outline" className="text-xs">
+                          {group.subscription_plan}
+                        </Badge>
                       )}
-
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(group, index)}
+                      {group.payment_status === 'failed' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRetry(group.vendor_id)}
+                          disabled={processing}
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Retry
+                        </Button>
+                      )}
                     </div>
-
-                  );
-
-                })}
-
-
-                <Separator />
-
-
-                <div className="space-y-2">
-
-                  <div className="flex justify-between">
-
-                    <span>Subtotal</span>
-
-                    <span>₦{orderTotals.subtotal.toLocaleString()}</span>
-
                   </div>
-
-                  <div className="flex justify-between">
-
-                    <span>Shipping</span>
-
-                    <span>{orderTotals.shipping === 0 ? 'FREE' : `₦${orderTotals.shipping.toLocaleString()}`}</span>
-
-                  </div>
-
-                  <div className="flex justify-between">
-
-                    <span>VAT ({VAT_RATE * 100}%)</span>
-
-                    <span>₦{orderTotals.vat.toLocaleString()}</span>
-
-                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Items */}
+                  {group.items.map((item) => (
+                    <div key={item.id} className="flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
+                        <div>
+                          <p className="font-medium text-sm">{item.name}</p>
+                          <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                        </div>
+                      </div>
+                      <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                  ))}
 
                   <Separator />
 
-                  <div className="flex justify-between font-bold text-lg">
-
-                    <span>Total</span>
-
-                    <span>₦{orderTotals.total.toLocaleString()}</span>
-
+                  {/* Group Totals */}
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span>₦{group.subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Shipping</span>
+                      <span>{group.shipping === 0 ? 'FREE' : `₦${group.shipping.toLocaleString()}`}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">VAT ({VAT_RATE * 100}%)</span>
+                      <span>₦{group.vat.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between font-bold pt-2 border-t">
+                      <span>Vendor Total</span>
+                      <span>₦{group.total.toLocaleString()}</span>
+                    </div>
                   </div>
-
-                </div>
-
-              </CardContent>
-
-            </Card>
-
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
-
-          {/* 2. Checkout Form (Shipping & Payment) */}
-
+          {/* Right Column: Shipping & Payment */}
           <div className="space-y-6">
-
             {/* Shipping Information */}
-
             <Card>
-
               <CardHeader>
-
                 <CardTitle className="flex items-center gap-2">
-
                   <Truck className="h-5 w-5" />
-
                   Shipping Information
-
                 </CardTitle>
-
               </CardHeader>
-
               <CardContent className="space-y-4">
-
-                {/* ... Shipping Input Fields ... */}
-
                 <div>
-
                   <Label htmlFor="street">Street Address</Label>
-
                   <Input
-
                     id="street"
-
                     value={shippingInfo.street}
-
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, street: e.target.value })}
-
+                    onChange={(e) => setShippingInfo(prev => ({ ...prev, street: e.target.value }))}
                     placeholder="123 Main St"
-
+                    disabled={processing}
                   />
-
                 </div>
-
 
                 <div className="grid grid-cols-2 gap-4">
-
                   <div>
-
                     <Label htmlFor="city">City</Label>
-
                     <Input
-
                       id="city"
-
                       value={shippingInfo.city}
-
-                      onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
-
-                      placeholder="San Francisco"
-
+                      onChange={(e) => setShippingInfo(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Lagos"
+                      disabled={processing}
                     />
-
                   </div>
-
                   <div>
-
                     <Label htmlFor="state">State</Label>
-
                     <Input
-
                       id="state"
-
                       value={shippingInfo.state}
-
-                      onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
-
-                      placeholder="CA"
-
+                      onChange={(e) => setShippingInfo(prev => ({ ...prev, state: e.target.value }))}
+                      placeholder="Lagos"
+                      disabled={processing}
                     />
-
                   </div>
-
                 </div>
 
-
                 <div>
-
                   <Label htmlFor="zipCode">ZIP Code</Label>
-
                   <Input
-
                     id="zipCode"
-
                     value={shippingInfo.zipCode}
-
-                    onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
-
-                    placeholder="12345"
-
+                    onChange={(e) => setShippingInfo(prev => ({ ...prev, zipCode: e.target.value }))}
+                    placeholder="100001"
+                    disabled={processing}
                   />
-
                 </div>
-
 
                 <div>
-
                   <Label htmlFor="phone">Phone Number</Label>
-
                   <Input
-
                     id="phone"
-
                     value={shippingInfo.phone}
-
-                    onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
-
+                    onChange={(e) => setShippingInfo(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="+234 800 000 0000"
-
+                    disabled={processing}
                   />
+                </div>
+              </CardContent>
+            </Card>
 
+            {/* Order Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Order Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Vendors</span>
+                  <span>{vendorGroups.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Items</span>
+                  <span>{vendorGroups.reduce((sum, g) => sum + g.items.length, 0)}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>₦{grandTotals.subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Shipping</span>
+                  <span>{grandTotals.shipping === 0 ? 'FREE' : `₦${grandTotals.shipping.toLocaleString()}`}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total VAT</span>
+                  <span>₦{grandTotals.vat.toLocaleString()}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Grand Total</span>
+                  <span>₦{grandTotals.total.toLocaleString()}</span>
                 </div>
 
+                {vendorGroups.length > 1 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    You will be charged {vendorGroups.length} separate transactions, one for each vendor.
+                  </p>
+                )}
               </CardContent>
-
             </Card>
 
-
-            {/* Payment Method */}
-
+            {/* Payment Section */}
             <Card>
-
               <CardHeader>
-
                 <CardTitle className="flex items-center gap-2">
-
                   <CreditCard className="h-5 w-5" />
-
-                  Payment Method
-
+                  Payment
                 </CardTitle>
-
               </CardHeader>
-
-              <CardContent className="space-y-4">
-
-                <Select
-
-                  value={paymentMethod}
-
-                  onValueChange={(value: PaymentMethod) => setPaymentMethod(value)}
-
-                >
-
-                  <SelectTrigger>
-
-                    <SelectValue placeholder="Select payment method" />
-
-                  </SelectTrigger>
-
-                  <SelectContent>
-
-                    <SelectItem value="paystack">Pay with Paystack (Card/Bank/USSD)</SelectItem>
-
-                    {isBankTransferAvailable && (
-
-                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-
+              <CardContent>
+                <div className="bg-muted p-4 rounded-lg mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    Pay securely with Paystack (Card, Bank, or USSD).
+                    {vendorGroups.length > 1 && (
+                      <span className="block mt-1 text-xs">
+                        Each vendor payment will open separately.
+                      </span>
                     )}
+                  </p>
+                </div>
 
-                  </SelectContent>
+                <Button
+                  onClick={handlePayNow}
+                  disabled={processing || grandTotals.total <= 0 || !paystackLoaded}
+                  className="w-full"
+                  size="lg"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing {currentPaymentIndex + 1} of {vendorGroups.length}...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4 mr-2" />
+                      Pay ₦{grandTotals.total.toLocaleString()}
+                    </>
+                  )}
+                </Button>
 
-                </Select>
-
-
-                {paymentMethod === 'bank_transfer' && isBankTransferAvailable && (
-
-                  <div className="bg-muted p-4 rounded-lg space-y-2">
-
-                    <h4 className="font-medium">Bank Transfer Details</h4>
-
-                    <p className="text-sm">Bank: **{vendorBankDetails.bank_name}**</p>
-
-                    <p className="text-sm">Account Name: **{vendorBankDetails.account_name}**</p>
-
-                    <p className="text-sm">Account Number: **{vendorBankDetails.account_number}**</p>
-
-                    <p className="text-sm font-medium text-primary mt-3">
-
-                      Amount to Transfer: ₦{orderTotals.total.toLocaleString()}
-
-                    </p>
-
-                    <Separator className="my-3" />
-
-                    <div>
-
-                      <Label htmlFor="receipt">Upload Payment Receipt</Label>
-
-                      <Input
-
-                        id="receipt"
-
-                        type="file"
-
-                        accept="image/*"
-
-                        onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-
-                        className="mt-2"
-
-                      />
-
-                    </div>
-
-                  </div>
-
+                {failedGroups.length > 0 && !processing && (
+                  <p className="text-xs text-destructive mt-2 text-center">
+                    {failedGroups.length} payment(s) failed. Use the Retry button above.
+                  </p>
                 )}
-
-
-                {paymentMethod === 'paystack' && (
-
-                  <div className="bg-muted p-4 rounded-lg">
-
-                    <p className="text-sm text-muted-foreground">
-
-                      You'll be redirected to Paystack to complete your payment securely via Card, Bank, or USSD.
-
-                    </p>
-
-                  </div>
-
-                )}
-
               </CardContent>
-
             </Card>
-
-
-            <Button
-
-              onClick={handlePlaceOrder}
-
-              disabled={processing || orderTotals.total <= 0}
-
-              className="w-full"
-
-              size="lg"
-
-            >
-
-              {processing ? (
-
-                'Processing...'
-
-              ) : (
-
-                <>
-
-                  <Lock className="h-4 w-4 mr-2" />
-
-                  {paymentMethod === 'paystack' ? 'Pay Now' : 'Place Order'}
-
-                </>
-
-              )}
-
-            </Button>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 };
 
-
-export default Checkout; 
+export default Checkout;

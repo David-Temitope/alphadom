@@ -9,8 +9,9 @@ interface CartItem {
   image: string;
   category: string;
   sustainabilityScore: number;
-  shipping_fee?: number;       // optional
-  shipping_type?: 'per_product' | 'one_time'; // optional
+  shipping_fee?: number;
+  shipping_type?: 'per_product' | 'one_time';
+  vendor_id?: string | null; // For multi-vendor checkout
 }
 
 
@@ -77,7 +78,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...product, 
         quantity: requestedQuantity,
         category: product.category || 'General',
-        sustainabilityScore: product.sustainability_score || 0
+        sustainabilityScore: product.sustainability_score || 0,
+        vendor_id: product.vendor_id || null
       }];
     });
   };
