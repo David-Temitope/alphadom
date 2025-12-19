@@ -116,7 +116,7 @@ const AdminVendorMonitoring = () => {
       const vendor = vendors.find(v => v.id === vendorId);
       
       if (action === 'close' && vendor) {
-        // For closing shop: delete all products, remove vendor record, remove user_type
+        // For closing shop: delete all products, remove vendor record, remove user_type, delete shop_application
         
         // 1. Delete all products from this vendor
         const { error: deleteProductsError } = await supabase
@@ -142,13 +142,28 @@ const AdminVendorMonitoring = () => {
             activity_details: { admin_notes: notes, action }
           });
 
-        // 4. Delete the approved_vendors record entirely
+        // 4. Get the application_id before deleting vendor
+        const { data: vendorData } = await supabase
+          .from('approved_vendors')
+          .select('application_id')
+          .eq('id', vendorId)
+          .single();
+
+        // 5. Delete the approved_vendors record entirely
         const { error: deleteVendorError } = await supabase
           .from('approved_vendors')
           .delete()
           .eq('id', vendorId);
 
         if (deleteVendorError) throw deleteVendorError;
+
+        // 6. Delete the shop_application so user can reapply
+        if (vendorData?.application_id) {
+          await supabase
+            .from('shop_applications')
+            .delete()
+            .eq('id', vendorData.application_id);
+        }
 
       } else {
         // For suspend/activate: just update the is_active/is_suspended flag

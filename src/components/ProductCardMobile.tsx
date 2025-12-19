@@ -88,12 +88,14 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
   return (
     <Card className="group h-full flex flex-col transition-all duration-200 hover:shadow-md border bg-card overflow-hidden">
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
-        <div className="relative">
+        <div className="relative bg-muted">
           <img
             src={product.image || '/placeholder.svg'}
             alt={product.name}
             className="w-full h-28 object-cover"
             loading="lazy"
+            decoding="async"
+            onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
           />
           
           {/* Rating at top right */}
