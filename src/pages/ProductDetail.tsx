@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { WishlistButton } from '@/components/WishlistButton';
@@ -24,7 +25,8 @@ import {
   Shield, 
   RotateCcw,
   ArrowLeft,
-  Share2
+  Share2,
+  X
 } from 'lucide-react';
 
 // NOTE: Since the useIsMobile hook was missing, I'm providing a simple placeholder 
@@ -48,6 +50,7 @@ const ProductDetail = () => {
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
   const [vendorName, setVendorName] = useState<string>('');
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const isMobile = useIsMobile(); // ✅ FIX: Added missing hook call
 
   // FIX: Ensure 'products' is treated as an array before using find
@@ -168,11 +171,14 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Product Image */}
           <div className="space-y-4">
-            <div className="relative overflow-hidden rounded-2xl bg-white shadow-lg">
+            <div 
+              className="relative overflow-hidden rounded-2xl bg-white shadow-lg cursor-pointer group"
+              onClick={() => setIsImageModalOpen(true)}
+            >
               <img
                 src={product.image || '/placeholder.svg'}
                 alt={product.name}
-                className="w-full h-96 lg:h-[500px] object-cover"
+                className="w-full h-96 lg:h-[500px] object-cover transition-transform duration-300 group-hover:scale-90"
               />
               {product.sustainability_score != null && product.sustainability_score > 7 && (
                 <Badge className="absolute top-4 left-4 bg-green-100 text-green-800 border-green-200">
@@ -180,8 +186,32 @@ const ProductDetail = () => {
                   Eco-Friendly
                 </Badge>
               )}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50 px-4 py-2 rounded-lg text-sm">
+                  Click to view full image
+                </span>
+              </div>
             </div>
           </div>
+
+          {/* Full Image Modal */}
+          <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
+            <DialogContent className="max-w-4xl w-full p-0 bg-transparent border-none">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-10 bg-white/90 hover:bg-white rounded-full"
+                onClick={() => setIsImageModalOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <img
+                src={product.image || '/placeholder.svg'}
+                alt={product.name}
+                className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+              />
+            </DialogContent>
+          </Dialog>
 
           {/* Product Info */}
           <div className="space-y-6">

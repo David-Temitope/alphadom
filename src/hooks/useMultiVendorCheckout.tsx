@@ -23,7 +23,7 @@ type VendorInfo = {
 };
 
 export const useMultiVendorCheckout = () => {
-  const { items, total, clearCart } = useCart();
+  const { items, total, clearCart, removeItemsByVendor } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -339,7 +339,7 @@ export const useMultiVendorCheckout = () => {
     const reference = generatePaystackReference(sessionId, index);
     
     const paystackConfig: any = {
-      key: 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581',
+      key: 'pk_live_b65b60f97ee0b66e9631df6b1301ef83d383913a',
       email: user.email,
       amount: Math.round(group.total * 100), // Amount in kobo
       currency: 'NGN',
@@ -366,6 +366,8 @@ export const useMultiVendorCheckout = () => {
         ).then((orderId) => {
           if (orderId) {
             updateGroupPaymentStatus(group.vendor_id, 'paid', orderId, response.reference);
+            // Remove the paid vendor's items from cart
+            removeItemsByVendor(group.vendor_id);
             onComplete();
           } else {
             updateGroupPaymentStatus(group.vendor_id, 'failed');

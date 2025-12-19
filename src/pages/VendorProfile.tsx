@@ -303,8 +303,8 @@ export const VendorProfile = () => {
         </CardHeader>
       </Card>
 
-      {/* Stats Cards - 3 on mobile (no total sales), 4 on desktop */}
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+      {/* Stats Cards - 3 on mobile, 3 on desktop (removed total sales) */}
+      <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8">
         <Card>
           <CardContent className="p-3 md:p-6 text-center">
             <div className="text-lg md:text-2xl font-bold text-primary">{customerCount}</div>
@@ -321,17 +321,10 @@ export const VendorProfile = () => {
         
         <Card>
           <CardContent className="p-3 md:p-6 text-center">
-            <div className="text-lg md:text-2xl font-bold text-primary">{vendor.total_orders}</div>
-            <div className="text-[10px] md:text-sm text-gray-600">Reviews</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="hidden md:block">
-          <CardContent className="p-3 md:p-6 text-center">
             <div className="text-lg md:text-2xl font-bold text-primary">
-              ₦{vendor.total_revenue.toLocaleString()}
+              {new Date(vendor.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
             </div>
-            <div className="text-[10px] md:text-sm text-gray-600">Total Sales</div>
+            <div className="text-[10px] md:text-sm text-gray-600">Vendor Since</div>
           </CardContent>
         </Card>
       </div>

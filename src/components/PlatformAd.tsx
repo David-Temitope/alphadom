@@ -41,12 +41,14 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
       }
 
       // Query for ads targeting this page, all pages, or null (legacy)
+      // Sort by priority (highest first), then by created_at (oldest first for same priority)
       const { data, error } = await supabase
         .from('platform_ads')
         .select('*')
         .eq('is_active', true)
         .or(`target_page.eq.${targetPage},target_page.eq.all,target_page.is.null`)
         .order('priority', { ascending: false })
+        .order('created_at', { ascending: true })
         .limit(1)
         .single();
 
@@ -96,8 +98,8 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
   if (!ad || !visible) return null;
 
   return (
-    <div className={`fixed bottom-20 right-4 md:bottom-24 md:right-6 z-40 max-w-sm w-full md:w-96 ${className}`}>
-      <Card className={`relative overflow-hidden shadow-2xl border-2 ${animationClass}`}>
+    <div className={`fixed inset-0 z-40 flex items-center justify-center p-4 pointer-events-none ${className}`}>
+      <Card className={`relative overflow-hidden shadow-2xl border-2 max-w-sm w-full md:w-96 pointer-events-auto ${animationClass}`}>
         <Button
           variant="ghost"
           size="icon"
