@@ -282,36 +282,49 @@ const AdminTransactions = () => {
                       </div>
                       
                       {/* Commission Breakdown for order payments */}
-                      {tx.transaction_type === 'order_payment' && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Subscription Plan:</span>
-                            <Badge variant="outline" className="capitalize">
-                              {meta.subscription_plan || 'N/A'}
-                            </Badge>
-                          </div>
-                          {hasSplit ? (
-                            <>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Commission Rate:</span>
-                                <span className="font-medium">{meta.commission_rate}%</span>
-                              </div>
-                              <Separator className="my-2" />
-                              <div className="flex justify-between text-green-600">
-                                <span>Platform Commission:</span>
-                                <span className="font-semibold">₦{Number(meta.platform_commission || 0).toLocaleString()}</span>
-                              </div>
-                              <div className="flex justify-between text-blue-600">
-                                <span>Vendor Payout ({meta.vendor_percentage}%):</span>
-                                <span className="font-semibold">₦{Number(meta.vendor_amount || 0).toLocaleString()}</span>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="flex justify-between text-green-600">
-                              <span>Platform Revenue (100%):</span>
-                              <span className="font-semibold">₦{Number(tx.amount).toLocaleString()}</span>
+                      {tx.transaction_type === 'order_payment' && (() => {
+                        // Calculate commission based on subscription plan
+                        const subscriptionPlan = meta.subscription_plan || 'free';
+                        let commissionRate = 15; // default free
+                        if (subscriptionPlan === 'economy') commissionRate = 9;
+                        if (subscriptionPlan === 'first_class') commissionRate = 5;
+                        
+                        const vendorPercentage = 100 - commissionRate;
+                        const platformCommission = Number(tx.amount) * (commissionRate / 100);
+                        const vendorPayout = Number(tx.amount) * (vendorPercentage / 100);
+                        
+                        return (
+                          <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted-foreground">Subscription Plan:</span>
+                              <Badge variant="outline" className="capitalize">
+                                {subscriptionPlan}
+                              </Badge>
                             </div>
-                          )}
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Commission Rate:</span>
+                              <span className="font-medium">{commissionRate}%</span>
+                            </div>
+                            <Separator className="my-2" />
+                            <div className="flex justify-between text-green-600">
+                              <span>Platform Revenue ({commissionRate}%):</span>
+                              <span className="font-semibold">₦{platformCommission.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-blue-600">
+                              <span>Vendor Payout ({vendorPercentage}%):</span>
+                              <span className="font-semibold">₦{vendorPayout.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      
+                      {/* Subscription payments - 100% platform revenue */}
+                      {tx.transaction_type === 'subscription' && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                          <div className="flex justify-between text-green-600">
+                            <span>Platform Revenue (100%):</span>
+                            <span className="font-semibold">₦{Number(tx.amount).toLocaleString()}</span>
+                          </div>
                         </div>
                       )}
                     </div>

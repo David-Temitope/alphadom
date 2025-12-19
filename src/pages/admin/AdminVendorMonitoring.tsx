@@ -69,8 +69,26 @@ const AdminVendorMonitoring = () => {
             .eq('id', vendor.user_id)
             .single();
 
+          // Fetch actual products count
+          const { count: productsCount } = await supabase
+            .from('products')
+            .select('*', { count: 'exact', head: true })
+            .eq('vendor_id', vendor.id);
+
+          // Fetch actual orders and revenue
+          const { data: ordersData } = await supabase
+            .from('orders')
+            .select('total_amount, status')
+            .eq('vendor_id', vendor.id);
+
+          const totalOrders = ordersData?.length || 0;
+          const totalRevenue = ordersData?.reduce((sum, order) => sum + Number(order.total_amount || 0), 0) || 0;
+
           return {
             ...vendor,
+            total_products: productsCount || 0,
+            total_orders: totalOrders,
+            total_revenue: totalRevenue,
             recent_activities: activities || [],
             user_profile: profile || { email: '', full_name: '' }
           };
@@ -93,6 +111,9 @@ const AdminVendorMonitoring = () => {
   const handleVendorAction = async (vendorId: string, action: 'suspend' | 'activate' | 'close', notes?: string) => {
     setActionLoading(vendorId);
     try {
+      // Find the vendor to get user_id
+      const vendor = vendors.find(v => v.id === vendorId);
+      
       let updateData: any = {};
       
       if (action === 'suspend' || action === 'close') {
@@ -107,6 +128,15 @@ const AdminVendorMonitoring = () => {
         .eq('id', vendorId);
 
       if (error) throw error;
+
+      // If closing shop, remove the user's vendor user_type
+      if (action === 'close' && vendor?.user_id) {
+        await supabase
+          .from('user_types')
+          .delete()
+          .eq('user_id', vendor.user_id)
+          .eq('user_type', 'vendor');
+      }
 
       // Log the action
       await supabase
@@ -298,7 +328,7 @@ const AdminVendorMonitoring = () => {
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-green-500" />
                       <div>
-                        <p className="text-sm font-medium">${vendor.total_revenue}</p>
+                        <p className="text-sm font-medium">₦{vendor.total_revenue.toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground">Revenue</p>
                       </div>
                     </div>

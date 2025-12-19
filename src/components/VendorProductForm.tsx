@@ -418,16 +418,24 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
       {/* Eco Features */}
       <div className="space-y-2">
         <Label htmlFor="eco_features">Eco Features (comma-separated)</Label>
-        <Textarea 
+        <Input 
           id="eco_features" 
-          placeholder="e.g.: Recyclable, Organic, Biodegradable, Sustainable"
+          placeholder="e.g.: Recyclable, Organic, Biodegradable"
           value={newProduct.eco_features.join(', ')}
-          onChange={(e) => setNewProduct({
+          onBlur={(e) => setNewProduct({
             ...newProduct, 
             eco_features: e.target.value.split(',').map(f => f.trim()).filter(f => f)
           })}
-          rows={2}
+          onChange={(e) => {
+            // Allow typing freely, only parse on blur
+            const input = e.target;
+            const cursorPosition = input.selectionStart;
+            setNewProduct(prev => ({ ...prev, eco_features: [e.target.value] }));
+            // Restore cursor position
+            setTimeout(() => input.setSelectionRange(cursorPosition, cursorPosition), 0);
+          }}
         />
+        <p className="text-xs text-muted-foreground">Press Tab or click outside to save</p>
       </div>
 
       <div className="space-y-2">
