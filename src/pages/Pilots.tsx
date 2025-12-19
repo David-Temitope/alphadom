@@ -243,12 +243,15 @@ export const Pilots = () => {
             <Link to={pilot.user_types.includes('vendor') ? `/vendor/${pilot.id}` : `/dispatcher/${pilot.id}`}>
               <CardHeader className="pb-3">
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-muted rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-muted rounded-full flex items-center justify-center overflow-hidden">
                     {pilot.avatar_url ? (
                       <img 
                         src={pilot.avatar_url} 
                         alt={pilot.full_name}
                         className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
                       <span className="font-semibold text-2xl text-muted-foreground">
