@@ -12,22 +12,22 @@ const Cart = () => {
   const calculateTotals = () => {
     let subtotal = totalPrice;
     let shipping = 0;
-    
+
     // Using a Set for tracking one-time fees by ID and Type.
     // This ensures that products with 'one_time' shipping fees are only charged once.
-    const shippingGroups = new Set(); 
+    const shippingGroups = new Set();
 
     for (const item of items) {
       // Ensure shippingFee is a number
-      const shippingFee = parseFloat(item.shipping_fee?.toString() || '0');
-      const shippingType = item.shipping_type || 'one_time';
+      const shippingFee = parseFloat(item.shipping_fee?.toString() || "0");
+      const shippingType = item.shipping_type || "one_time";
       // Create a unique key using product ID and shipping type for 'one_time' tracking
       const uniqueShippingKey = `${item.id}-${shippingType}`;
 
       // FIX APPLIED: Only check if a specific shipping fee is defined (shippingFee > 0).
       // The restrictive 'item.price >= 10' condition is removed.
       if (shippingFee > 0) {
-        if (shippingType === 'per_product') {
+        if (shippingType === "per_product") {
           // Per product: multiply the fee by the quantity
           shipping += shippingFee * item.quantity;
         } else {
@@ -54,7 +54,6 @@ const Cart = () => {
 
   const { subtotal, shipping, vat, total } = calculateTotals();
 
-
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
@@ -77,9 +76,7 @@ const Cart = () => {
         </div>
       </div>
     );
-  };
-
-  
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -101,7 +98,7 @@ const Cart = () => {
                       alt={item.name}
                       className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                     />
-                    
+
                     <div className="flex-1 space-y-2">
                       <div className="flex items-start justify-between">
                         <div>
@@ -115,10 +112,7 @@ const Cart = () => {
                             ₦{(item.price * item.quantity).toLocaleString()}
                           </div>
 
-                          <div className="text-sm text-gray-500">
-                            ₦{item.price.toLocaleString()} each
-                          </div>
-
+                          <div className="text-sm text-gray-500">₦{item.price.toLocaleString()} each</div>
                         </div>
                       </div>
 
@@ -195,18 +189,17 @@ const Cart = () => {
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium text-green-600">
                       {/* Display FREE if shipping is exactly 0, otherwise display the amount */}
-                      {shipping === 0 ? 'FREE' : `₦${shipping.toLocaleString()}`}
+                      {shipping === 0 ? "FREE" : `₦${shipping.toLocaleString()}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tax</span>
+                    <span className="text-gray-600">Service Charge</span>
                     <span className="font-medium">₦{vat.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-4 border-t border-gray-200">
                     <span>Total</span>
                     <span className="text-green-600">₦{total.toLocaleString()}</span>
                   </div>
-
                 </div>
 
                 {/* Sustainability Impact */}
@@ -217,7 +210,9 @@ const Cart = () => {
                       <span className="font-medium text-green-800">Sustainability Impact</span>
                     </div>
                     <div className="text-sm text-green-700">
-                      <p>Total Impact Score: <span className="font-bold">{totalSustainabilityImpact}/10</span></p>
+                      <p>
+                        Total Impact Score: <span className="font-bold">{totalSustainabilityImpact}/10</span>
+                      </p>
                       <p className="mt-1">🌱 You're making a positive environmental impact!</p>
                     </div>
                   </CardContent>

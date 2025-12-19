@@ -1,21 +1,34 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useVendors } from '@/hooks/useVendors';
-import { useProducts } from '@/hooks/useProducts';
-import { useAuth } from '@/contexts/AuthContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, TrendingUp, ShoppingCart, Edit, Trash2, FileText, AlertTriangle, CreditCard, Wallet, LayoutGrid, User, Camera } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { VendorProductForm } from '@/components/VendorProductForm';
-import { VendorSubscription } from '@/components/VendorSubscription';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { ImageUpload } from '@/components/admin/ImageUpload';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useVendors } from "@/hooks/useVendors";
+import { useProducts } from "@/hooks/useProducts";
+import { useAuth } from "@/contexts/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Package,
+  TrendingUp,
+  ShoppingCart,
+  Edit,
+  Trash2,
+  FileText,
+  AlertTriangle,
+  CreditCard,
+  Wallet,
+  LayoutGrid,
+  User,
+  Camera,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { VendorProductForm } from "@/components/VendorProductForm";
+import { VendorSubscription } from "@/components/VendorSubscription";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
@@ -24,7 +37,7 @@ const VendorDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const vendorProducts = products.filter(p => p.vendor_user_id === user?.id);
+  const vendorProducts = products.filter((p) => p.vendor_user_id === user?.id);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -36,10 +49,7 @@ const VendorDashboard = () => {
 
   const handleDeleteProduct = async (productId: string) => {
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId);
+      const { error } = await supabase.from("products").delete().eq("id", productId);
 
       if (error) throw error;
 
@@ -59,16 +69,13 @@ const VendorDashboard = () => {
 
   const handleProfileImageUpload = async (imageUrl: string) => {
     if (!user) return;
-    
+
     setUploadingImage(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ avatar_url: imageUrl })
-        .eq('id', user.id);
-      
+      const { error } = await supabase.from("profiles").update({ avatar_url: imageUrl }).eq("id", user.id);
+
       if (error) throw error;
-      
+
       setProfileImage(imageUrl);
       toast({
         title: "Success",
@@ -89,12 +96,8 @@ const VendorDashboard = () => {
   React.useEffect(() => {
     const fetchProfileImage = async () => {
       if (!user) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('avatar_url')
-        .eq('id', user.id)
-        .single();
-      
+      const { data } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).single();
+
       if (data?.avatar_url) {
         setProfileImage(data.avatar_url);
       }
@@ -139,7 +142,9 @@ const VendorDashboard = () => {
       <div className="container mx-auto max-w-7xl overflow-x-hidden">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Vendor Dashboard</h1>
-          <p className="text-muted-foreground">{currentVendor.store_name} - {currentVendor.product_category}</p>
+          <p className="text-muted-foreground">
+            {currentVendor.store_name} - {currentVendor.product_category}
+          </p>
         </div>
 
         {/* Suspension/Inactive Alert */}
@@ -148,7 +153,8 @@ const VendorDashboard = () => {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Shop Suspended</AlertTitle>
             <AlertDescription>
-              Your shop has been suspended. Please renew your subscription or contact support for more information.
+              Your shop has been suspended. This is either because your subscriptio expired or you violated a rule and
+              you got suspended. Please contact our support for more information.
             </AlertDescription>
           </Alert>
         )}
@@ -179,7 +185,9 @@ const VendorDashboard = () => {
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="products">My Products</TabsTrigger>
-              <TabsTrigger value="add-product" disabled={isSuspended || isInactive || !canAddProduct}>Add Product</TabsTrigger>
+              <TabsTrigger value="add-product" disabled={isSuspended || isInactive || !canAddProduct}>
+                Add Product
+              </TabsTrigger>
               <TabsTrigger value="orders">Orders</TabsTrigger>
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="subscription">Subscription</TabsTrigger>
@@ -255,8 +263,8 @@ const VendorDashboard = () => {
                   <CardTitle className="text-[10px] md:text-sm font-medium">Status</CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 pt-0 md:p-6 md:pt-0">
-                  <Badge 
-                    variant={isSuspended ? "destructive" : currentVendor.is_active ? "default" : "destructive"} 
+                  <Badge
+                    variant={isSuspended ? "destructive" : currentVendor.is_active ? "default" : "destructive"}
                     className="text-[10px] md:text-xs"
                   >
                     {isSuspended ? "Suspended" : currentVendor.is_active ? "Active" : "Inactive"}
@@ -271,12 +279,15 @@ const VendorDashboard = () => {
               <CardHeader>
                 <CardTitle>My Products</CardTitle>
                 <CardDescription>
-                  Manage your product listings ({vendorProducts.length}{productLimit !== -1 ? `/${productLimit}` : ''} products)
+                  Manage your product listings ({vendorProducts.length}
+                  {productLimit !== -1 ? `/${productLimit}` : ""} products)
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {vendorProducts.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No products added yet. Add your first product to get started!</p>
+                  <p className="text-muted-foreground text-center py-8">
+                    No products added yet. Add your first product to get started!
+                  </p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {vendorProducts.map((product) => (
@@ -291,17 +302,17 @@ const VendorDashboard = () => {
                                 Stock: {product.stock_count}
                               </Badge>
                             </div>
-                            {parseFloat(product.shipping_fee?.toString() || '0') > 0 && (
+                            {parseFloat(product.shipping_fee?.toString() || "0") > 0 && (
                               <div className="text-xs text-muted-foreground">
-                                Shipping: ₦{product.shipping_fee} ({product.shipping_type?.replace('_', ' ')})
+                                Shipping: ₦{product.shipping_fee} ({product.shipping_type?.replace("_", " ")})
                               </div>
                             )}
                             <div className="flex gap-2">
                               <Button size="sm" variant="outline" disabled={isSuspended || isInactive}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="destructive"
                                 onClick={() => handleDeleteProduct(product.id)}
                                 disabled={isSuspended || isInactive}
@@ -339,7 +350,8 @@ const VendorDashboard = () => {
                     <AlertTriangle className="h-4 w-4" />
                     <AlertTitle>Product Limit Reached</AlertTitle>
                     <AlertDescription>
-                      You've reached your product limit ({productLimit} products). Upgrade your subscription to add more products.
+                      You've reached your product limit ({productLimit} products). Upgrade your subscription to add more
+                      products.
                     </AlertDescription>
                   </Alert>
                 ) : (
@@ -359,7 +371,7 @@ const VendorDashboard = () => {
                 <CardDescription>View and manage orders for your products</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => navigate('/vendor-orders')}>
+                <Button onClick={() => navigate("/vendor-orders")}>
                   <FileText className="h-4 w-4 mr-2" />
                   View All Orders
                 </Button>
@@ -381,11 +393,7 @@ const VendorDashboard = () => {
                   <div className="relative">
                     <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center overflow-hidden border-4 border-primary/20">
                       {profileImage ? (
-                        <img 
-                          src={profileImage} 
-                          alt={currentVendor.store_name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={profileImage} alt={currentVendor.store_name} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-4xl font-bold text-muted-foreground">
                           {currentVendor.store_name.charAt(0).toUpperCase()}
@@ -396,7 +404,7 @@ const VendorDashboard = () => {
                       <Camera className="h-4 w-4 text-primary-foreground" />
                     </div>
                   </div>
-                  
+
                   <div className="text-center">
                     <h3 className="text-xl font-semibold">{currentVendor.store_name}</h3>
                     <p className="text-muted-foreground">{currentVendor.product_category}</p>
@@ -404,12 +412,8 @@ const VendorDashboard = () => {
 
                   <div className="w-full max-w-sm">
                     <Label className="mb-2 block">Update Profile Picture</Label>
-                    <ImageUpload 
-                      onImageUploaded={handleProfileImageUpload}
-                    />
-                    {uploadingImage && (
-                      <p className="text-sm text-muted-foreground mt-2">Uploading...</p>
-                    )}
+                    <ImageUpload onImageUploaded={handleProfileImageUpload} />
+                    {uploadingImage && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
                   </div>
                 </div>
 
@@ -436,7 +440,9 @@ const VendorDashboard = () => {
                   </div>
                   <div>
                     <Label className="text-muted-foreground">Subscription Plan</Label>
-                    <Badge variant="default">{currentVendor.subscription_plan?.replace('_', ' ').toUpperCase() || 'FREE'}</Badge>
+                    <Badge variant="default">
+                      {currentVendor.subscription_plan?.replace("_", " ").toUpperCase() || "FREE"}
+                    </Badge>
                   </div>
                 </div>
               </CardContent>

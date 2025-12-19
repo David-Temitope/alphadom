@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Crown, Star, Zap, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-import { useVendors } from '@/hooks/useVendors';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Crown, Star, Zap, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { useVendors } from "@/hooks/useVendors";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
@@ -15,60 +15,45 @@ declare global {
   }
 }
 
-const PAYSTACK_PUBLIC_KEY = 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581';
+const PAYSTACK_PUBLIC_KEY = "pk_live_b65b60f97ee0b66e9631df6b1301ef83d383913a";
 
 const subscriptionPlans = [
   {
-    id: 'free',
-    name: 'Free Plan',
+    id: "free",
+    name: "Free Plan",
     price: 0,
-    features: [
-      'Upload up to 20 products',
-      '15% commission rate',
-      'Low visibility',
-      'No ads included'
-    ],
+    features: ["Upload up to 20 products", "15% commission rate", "Low visibility", "No ads included"],
     productLimit: 20,
     commissionRate: 15,
     homeVisibility: false,
     freeAds: 0,
     icon: Zap,
-    color: 'bg-gray-100 text-gray-800'
+    color: "bg-gray-100 text-gray-800",
   },
   {
-    id: 'economy',
-    name: 'Economy Plan',
+    id: "economy",
+    name: "Economy Plan",
     price: 7000,
-    features: [
-      'Upload up to 50 products',
-      '9% commission rate',
-      'Standard visibility',
-      'No ads included'
-    ],
+    features: ["Upload up to 50 products", "9% commission rate", "Standard visibility", "No ads included"],
     productLimit: 50,
     commissionRate: 9,
     homeVisibility: false,
     freeAds: 0,
     icon: Star,
-    color: 'bg-blue-100 text-blue-800'
+    color: "bg-blue-100 text-blue-800",
   },
   {
-    id: 'first_class',
-    name: 'First Class Plan',
+    id: "first_class",
+    name: "First Class Plan",
     price: 15000,
-    features: [
-      'Unlimited products',
-      '5% commission rate',
-      'Homepage visibility',
-      '1 free ad per month'
-    ],
+    features: ["Unlimited products", "5% commission rate", "Homepage visibility", "1 free ad per month"],
     productLimit: -1,
     commissionRate: 5,
     homeVisibility: true,
     freeAds: 1,
     icon: Crown,
-    color: 'bg-yellow-100 text-yellow-800'
-  }
+    color: "bg-yellow-100 text-yellow-800",
+  },
 ];
 
 interface VendorSubscriptionProps {
@@ -91,24 +76,24 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
         setPaystackLoaded(true);
         return;
       }
-      
+
       const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
       if (existingScript) {
-        existingScript.addEventListener('load', () => setPaystackLoaded(true));
+        existingScript.addEventListener("load", () => setPaystackLoaded(true));
         return;
       }
-      
-      const script = document.createElement('script');
-      script.src = 'https://js.paystack.co/v1/inline.js';
+
+      const script = document.createElement("script");
+      script.src = "https://js.paystack.co/v1/inline.js";
       script.async = true;
       script.onload = () => setPaystackLoaded(true);
       script.onerror = () => {
-        console.error('Failed to load Paystack');
+        console.error("Failed to load Paystack");
         setTimeout(loadPaystack, 2000);
       };
       document.body.appendChild(script);
     };
-    
+
     loadPaystack();
   }, []);
 
@@ -119,7 +104,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
       const diffTime = endDate.getTime() - now.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       setDaysRemaining(Math.max(0, diffDays));
-      
+
       const progress = Math.max(0, Math.min(100, (diffDays / 31) * 100));
       setProgressPercentage(progress);
     } else {
@@ -130,46 +115,46 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
 
   const canChangePlan = (targetPlanId: string): boolean => {
     if (!currentVendor) return true;
-    
-    const currentPlanId = currentVendor.subscription_plan || 'free';
+
+    const currentPlanId = currentVendor.subscription_plan || "free";
     const isExpired = daysRemaining !== null && daysRemaining <= 0;
-    
+
     // Can always change if expired
     if (isExpired) return true;
-    
+
     // Can't select same plan
     if (currentPlanId === targetPlanId) return false;
-    
+
     // Free plan users can upgrade anytime
-    if (currentPlanId === 'free') return true;
-    
+    if (currentPlanId === "free") return true;
+
     // Paid plan users can upgrade or switch to another paid plan
     // But cannot downgrade to free until expired
-    if (targetPlanId === 'free' && (currentPlanId === 'economy' || currentPlanId === 'first_class')) {
+    if (targetPlanId === "free" && (currentPlanId === "economy" || currentPlanId === "first_class")) {
       return false;
     }
-    
+
     return true;
   };
 
-  const getButtonText = (plan: typeof subscriptionPlans[0]): string => {
-    if (processing) return 'Processing...';
-    
-    const currentPlanId = currentVendor?.subscription_plan || 'free';
+  const getButtonText = (plan: (typeof subscriptionPlans)[0]): string => {
+    if (processing) return "Processing...";
+
+    const currentPlanId = currentVendor?.subscription_plan || "free";
     const isExpired = daysRemaining !== null && daysRemaining <= 0;
     const isCurrentPlan = currentPlanId === plan.id;
-    
-    if (isCurrentPlan && !isExpired) return 'Current Plan';
-    if (isExpired) return plan.price === 0 ? 'Select Free Plan' : 'Renew Now';
-    if (!canChangePlan(plan.id)) return 'Available after expiry';
-    if (plan.price === 0) return 'Select Free Plan';
-    
+
+    if (isCurrentPlan && !isExpired) return "Current Plan";
+    if (isExpired) return plan.price === 0 ? "Select Free Plan" : "Renew Now";
+    if (!canChangePlan(plan.id)) return "Available after expiry";
+    if (plan.price === 0) return "Select Free Plan";
+
     // Determine if upgrade or switch
-    const planOrder = { 'free': 0, 'economy': 1, 'first_class': 2 };
+    const planOrder = { free: 0, economy: 1, first_class: 2 };
     const currentOrder = planOrder[currentPlanId as keyof typeof planOrder] || 0;
     const targetOrder = planOrder[plan.id as keyof typeof planOrder] || 0;
-    
-    return targetOrder > currentOrder ? 'Upgrade Now' : 'Switch Plan';
+
+    return targetOrder > currentOrder ? "Upgrade Now" : "Switch Plan";
   };
 
   const handleSelectPlan = async (planId: string) => {
@@ -183,17 +168,17 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
       return;
     }
 
-    const selectedPlan = subscriptionPlans.find(p => p.id === planId);
+    const selectedPlan = subscriptionPlans.find((p) => p.id === planId);
     if (!selectedPlan) return;
 
-    if (planId === 'free') {
+    if (planId === "free") {
       await activatePlan(planId);
     } else {
       handlePaystackPayment(selectedPlan);
     }
   };
 
-  const handlePaystackPayment = (plan: typeof subscriptionPlans[0]) => {
+  const handlePaystackPayment = (plan: (typeof subscriptionPlans)[0]) => {
     if (!paystackLoaded || !window.PaystackPop) {
       toast({
         title: "Loading...",
@@ -219,28 +204,28 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
         key: PAYSTACK_PUBLIC_KEY,
         email: user.email,
         amount: plan.price * 100,
-        currency: 'NGN',
+        currency: "NGN",
         ref: `SUB_${Date.now()}_${Math.random().toString(36).slice(2)}`,
         metadata: {
           plan_id: plan.id,
           vendor_id: currentVendor?.id,
-          user_id: user.id
+          user_id: user.id,
         },
         callback: function (response: any) {
-          if (response?.status === 'success') {
+          if (response?.status === "success") {
             (async () => {
               await activatePlan(plan.id, response.reference);
 
-              await supabase.from('platform_transactions').insert({
-                transaction_type: 'subscription',
+              await supabase.from("platform_transactions").insert({
+                transaction_type: "subscription",
                 amount: plan.price,
                 user_id: user.id,
                 vendor_id: currentVendor?.id,
                 reference: response.reference,
-                payment_method: 'paystack',
-                status: 'completed',
+                payment_method: "paystack",
+                status: "completed",
                 description: `${plan.name} subscription payment`,
-                metadata: { plan_id: plan.id }
+                metadata: { plan_id: plan.id },
               });
             })()
               .catch(() => {
@@ -259,12 +244,12 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
         },
         onClose: function () {
           setProcessing(false);
-        }
+        },
       });
 
       handler.openIframe();
     } catch (error) {
-      console.error('Paystack error:', error);
+      console.error("Paystack error:", error);
       setProcessing(false);
       toast({
         title: "Error",
@@ -275,7 +260,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
   };
 
   const activatePlan = async (planId: string, reference?: string) => {
-    const plan = subscriptionPlans.find(p => p.id === planId);
+    const plan = subscriptionPlans.find((p) => p.id === planId);
     if (!plan || !currentVendor) return;
 
     try {
@@ -284,7 +269,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
       endDate.setDate(endDate.getDate() + 31);
 
       const { error } = await supabase
-        .from('approved_vendors')
+        .from("approved_vendors")
         .update({
           subscription_plan: planId,
           subscription_start_date: startDate.toISOString(),
@@ -293,9 +278,9 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
           commission_rate: plan.commissionRate,
           has_home_visibility: plan.homeVisibility,
           free_ads_remaining: plan.freeAds,
-          is_suspended: false
+          is_suspended: false,
         })
-        .eq('id', currentVendor.id);
+        .eq("id", currentVendor.id);
 
       if (error) throw error;
 
@@ -307,7 +292,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
       await refreshVendors();
       onPlanChange?.();
     } catch (error) {
-      console.error('Error activating plan:', error);
+      console.error("Error activating plan:", error);
       toast({
         title: "Error",
         description: "Failed to activate plan. Please try again.",
@@ -316,32 +301,26 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
     }
   };
 
-  const currentPlan = subscriptionPlans.find(p => p.id === (currentVendor?.subscription_plan || 'free'));
+  const currentPlan = subscriptionPlans.find((p) => p.id === (currentVendor?.subscription_plan || "free"));
   const isExpired = daysRemaining !== null && daysRemaining <= 0;
 
   return (
     <div className="space-y-6">
       {/* Current Subscription Status */}
       {currentVendor?.subscription_start_date && (
-        <Card className={isExpired ? 'border-destructive' : ''}>
+        <Card className={isExpired ? "border-destructive" : ""}>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  {isExpired ? (
-                    <AlertTriangle className="h-5 w-5 text-destructive" />
-                  ) : (
-                    <Clock className="h-5 w-5" />
-                  )}
+                  {isExpired ? <AlertTriangle className="h-5 w-5 text-destructive" /> : <Clock className="h-5 w-5" />}
                   Current Subscription
                 </CardTitle>
                 <CardDescription>
-                  {currentPlan?.name} - {isExpired ? 'Expired' : `${daysRemaining} days remaining`}
+                  {currentPlan?.name} - {isExpired ? "Expired" : `${daysRemaining} days remaining`}
                 </CardDescription>
               </div>
-              <Badge className={currentPlan?.color}>
-                {currentPlan?.name}
-              </Badge>
+              <Badge className={currentPlan?.color}>{currentPlan?.name}</Badge>
             </div>
           </CardHeader>
           <CardContent>
@@ -369,12 +348,9 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
           const IconComponent = plan.icon;
           const isCurrentPlan = currentVendor?.subscription_plan === plan.id;
           const canChange = canChangePlan(plan.id);
-          
+
           return (
-            <Card 
-              key={plan.id} 
-              className={`relative ${isCurrentPlan && !isExpired ? 'border-primary border-2' : ''}`}
-            >
+            <Card key={plan.id} className={`relative ${isCurrentPlan && !isExpired ? "border-primary border-2" : ""}`}>
               {isCurrentPlan && !isExpired && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <Badge className="bg-primary">Current Plan</Badge>
@@ -403,7 +379,7 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
                     </li>
                   ))}
                 </ul>
-                <Button 
+                <Button
                   className="w-full"
                   variant={isCurrentPlan && !isExpired ? "outline" : "default"}
                   onClick={() => handleSelectPlan(plan.id)}
