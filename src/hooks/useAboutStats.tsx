@@ -12,11 +12,11 @@ export const useAboutStats = () => {
 
   const fetchStats = async () => {
     try {
-      // Get total products sold from orders
+      // Get total products sold from orders marked as shipped or delivered
       const { data: orders } = await supabase
         .from('orders')
         .select('id')
-        .eq('status', 'delivered');
+        .in('status', ['shipped', 'delivered']);
 
       // Get total users
       const { data: profiles } = await supabase

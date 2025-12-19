@@ -247,9 +247,9 @@ const Checkout: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Vendor Groups */}
+          {/* Left Column: Vendor Groups (hide paid vendors) */}
           <div className="lg:col-span-2 space-y-6">
-            {vendorGroups.map((group, index) => (
+            {vendorGroups.filter(g => g.payment_status !== 'paid').map((group, index) => (
               <Card key={group.vendor_id || 'platform'} className={
                 group.payment_status === 'paid' ? 'border-green-200 bg-green-50/50' :
                 group.payment_status === 'failed' ? 'border-red-200 bg-red-50/50' :
