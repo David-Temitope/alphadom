@@ -3,6 +3,7 @@ import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { About } from "@/components/About";
 import { NewsletterSubscription } from "@/components/NewsletterSubscription";
 import { PlatformAd } from "@/components/PlatformAd";
+import { WelcomeCard } from "@/components/WelcomeCard";
 
 const Index = () => {
   return (
@@ -20,6 +21,9 @@ const Index = () => {
       
       {/* Floating Ad */}
       <PlatformAd targetPage="home" />
+      
+      {/* Welcome Card for new users */}
+      <WelcomeCard />
     </div>
   );
 };

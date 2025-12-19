@@ -58,9 +58,11 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .limit(50);
     
+    // Fetch only active vendors (not closed/suspended)
     const { data: vendors } = await supabaseClient
       .from('approved_vendors')
-      .select('id, store_name, product_category, total_products, total_revenue, total_orders, user_id');
+      .select('id, store_name, product_category, total_products, total_revenue, total_orders, user_id')
+      .eq('is_active', true);
     
     // Fetch vendor profile images
     const vendorUserIds = vendors?.map(v => v.user_id) || [];

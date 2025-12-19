@@ -44,16 +44,22 @@ const VendorCard = memo(({ id, name, image, userId }: { id: string; name: string
     }
   };
   
+  // Use placeholder if image is empty, 'none', or undefined
+  const displayImage = image && image !== 'none' && image.trim() !== '' ? image : '/placeholder.svg';
+  
   return (
     <div 
       className="inline-flex items-center gap-2 bg-card border rounded-lg p-2 cursor-pointer hover:bg-accent transition-colors my-1"
       onClick={handleClick}
     >
       <img 
-        src={image || '/placeholder.svg'} 
+        src={displayImage} 
         alt={name}
         className="w-12 h-12 object-cover rounded-full"
         loading="lazy"
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = '/placeholder.svg';
+        }}
       />
       <div className="flex flex-col">
         <span className="text-xs font-medium line-clamp-1">{name}</span>

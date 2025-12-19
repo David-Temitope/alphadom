@@ -178,7 +178,7 @@ const ProductDetail = () => {
               <img
                 src={product.image || '/placeholder.svg'}
                 alt={product.name}
-                className="w-full h-96 lg:h-[500px] object-cover transition-transform duration-300 group-hover:scale-90"
+                className="w-full h-96 lg:h-[500px] object-cover transition-transform duration-300 group-hover:scale-110"
               />
               {product.sustainability_score != null && product.sustainability_score > 7 && (
                 <Badge className="absolute top-4 left-4 bg-green-100 text-green-800 border-green-200">
@@ -256,7 +256,7 @@ const ProductDetail = () => {
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    ({product.rating.toFixed(1)}) • {product.reviews || 1247} reviews
+                    ({product.rating.toFixed(1)}) • {product.reviews && product.reviews > 0 ? `${product.reviews} reviews` : 'No Reviews Yet'}
                   </span>
                 </div>
               )}

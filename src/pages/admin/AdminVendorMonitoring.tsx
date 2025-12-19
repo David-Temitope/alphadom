@@ -45,10 +45,11 @@ const AdminVendorMonitoring = () => {
 
   const fetchVendors = async () => {
     try {
-      // Get all vendors with their profiles
+      // Get only active vendors (not closed) with their profiles
       const { data: vendorsData, error: vendorsError } = await supabase
         .from('approved_vendors')
         .select('*')
+        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (vendorsError) throw vendorsError;
@@ -114,38 +115,69 @@ const AdminVendorMonitoring = () => {
       // Find the vendor to get user_id
       const vendor = vendors.find(v => v.id === vendorId);
       
-      let updateData: any = {};
-      
-      if (action === 'suspend' || action === 'close') {
-        updateData.is_active = false;
-      } else if (action === 'activate') {
-        updateData.is_active = true;
-      }
+      if (action === 'close' && vendor) {
+        // For closing shop: delete all products, remove vendor record, remove user_type
+        
+        // 1. Delete all products from this vendor
+        const { error: deleteProductsError } = await supabase
+          .from('products')
+          .delete()
+          .eq('vendor_id', vendorId);
+        
+        if (deleteProductsError) throw deleteProductsError;
 
-      const { error } = await supabase
-        .from('approved_vendors')
-        .update(updateData)
-        .eq('id', vendorId);
-
-      if (error) throw error;
-
-      // If closing shop, remove the user's vendor user_type
-      if (action === 'close' && vendor?.user_id) {
+        // 2. Remove the user's vendor user_type
         await supabase
           .from('user_types')
           .delete()
           .eq('user_id', vendor.user_id)
           .eq('user_type', 'vendor');
-      }
 
-      // Log the action
-      await supabase
-        .from('vendor_activity_logs')
-        .insert({
-          vendor_id: vendorId,
-          activity_type: action === 'close' ? 'shop_closed' : action === 'suspend' ? 'shop_suspended' : 'shop_activated',
-          activity_details: { admin_notes: notes, action }
-        });
+        // 3. Log the action before deleting vendor
+        await supabase
+          .from('vendor_activity_logs')
+          .insert({
+            vendor_id: vendorId,
+            activity_type: 'shop_closed',
+            activity_details: { admin_notes: notes, action }
+          });
+
+        // 4. Delete the approved_vendors record entirely
+        const { error: deleteVendorError } = await supabase
+          .from('approved_vendors')
+          .delete()
+          .eq('id', vendorId);
+
+        if (deleteVendorError) throw deleteVendorError;
+
+      } else {
+        // For suspend/activate: just update the is_active/is_suspended flag
+        let updateData: any = {};
+        
+        if (action === 'suspend') {
+          updateData.is_suspended = true;
+          updateData.is_active = false;
+        } else if (action === 'activate') {
+          updateData.is_suspended = false;
+          updateData.is_active = true;
+        }
+
+        const { error } = await supabase
+          .from('approved_vendors')
+          .update(updateData)
+          .eq('id', vendorId);
+
+        if (error) throw error;
+
+        // Log the action
+        await supabase
+          .from('vendor_activity_logs')
+          .insert({
+            vendor_id: vendorId,
+            activity_type: action === 'suspend' ? 'shop_suspended' : 'shop_activated',
+            activity_details: { admin_notes: notes, action }
+          });
+      }
 
       await fetchVendors();
       setActionNotes('');
