@@ -153,8 +153,8 @@ const VendorDashboard = () => {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Shop Suspended</AlertTitle>
             <AlertDescription>
-              Your shop has been suspended. This is either because your subscriptio expired or you violated a rule and
-              you got suspended. Please contact our support for more information.
+              Your accout have been suspended. This either because your susbscription plan has expired or you violated a
+              rule. Please contact our support team for more information
             </AlertDescription>
           </Alert>
         )}
