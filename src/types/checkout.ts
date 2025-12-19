@@ -4,9 +4,9 @@ export const VAT_RATE = 0.025; // 2.5% VAT
 
 // Split Group IDs - Paystack handles commission automatically
 export const SPLIT_GROUPS: Record<string, string> = {
-  'first_class': 'SPL_8gS5l7yHHn',
-  'economy': 'SPL_XUMhZGKgrG',
-  'free': 'SPL_XJkCuVmoHw'
+  first_class: "SPL_vNGYPJAeYT",
+  economy: "SPL_iIuyLk9ghh",
+  free: "SPL_VMVciFxPCP",
 };
 
 export type ShippingInfo = {
@@ -18,9 +18,9 @@ export type ShippingInfo = {
   phone: string;
 };
 
-export type PaymentMethod = 'bank_transfer' | 'paystack';
+export type PaymentMethod = "bank_transfer" | "paystack";
 
-export type PaymentStatus = 'pending' | 'processing' | 'paid' | 'failed';
+export type PaymentStatus = "pending" | "processing" | "paid" | "failed";
 
 export type VendorGroup = {
   vendor_id: string | null; // null for admin/platform products
@@ -45,7 +45,7 @@ export type CartItemWithVendor = {
   image: string;
   vendor_id: string | null;
   shipping_fee: number;
-  shipping_type: 'one_time' | 'per_product';
+  shipping_type: "one_time" | "per_product";
 };
 
 export type CheckoutSession = {
@@ -63,12 +63,12 @@ export const calculateGroupShipping = (items: CartItemWithVendor[]): number => {
 
   for (const item of items) {
     const shippingFee = Number(item.shipping_fee) || 0;
-    const shippingType = item.shipping_type || 'one_time';
+    const shippingType = item.shipping_type || "one_time";
     const quantity = Number(item.quantity) || 1;
 
     if (shippingFee <= 0) continue;
 
-    if (shippingType === 'per_product') {
+    if (shippingType === "per_product") {
       totalShipping += shippingFee * quantity;
     } else {
       if (!oneTimeShippingApplied.has(item.id)) {
@@ -83,7 +83,7 @@ export const calculateGroupShipping = (items: CartItemWithVendor[]): number => {
 
 // Get split group ID based on subscription plan
 export const getSplitGroupId = (subscriptionPlan: string): string => {
-  return SPLIT_GROUPS[subscriptionPlan] || SPLIT_GROUPS['free'];
+  return SPLIT_GROUPS[subscriptionPlan] || SPLIT_GROUPS["free"];
 };
 
 // Generate unique checkout session ID
