@@ -12,25 +12,23 @@ const RefundPolicy = () => {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">1. Overview</h2>
             <p>
-              At Alphadom, we want you to be completely satisfied with your purchase. This refund policy outlines the conditions under which refunds may be issued for products purchased through our platform.
+              At Alphadom, we are committed to ensuring customer satisfaction. This refund policy outlines the specific conditions under which refunds will be issued for products purchased through our platform.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">2. Eligibility for Refunds</h2>
-            <p>You may be eligible for a refund if:</p>
+            <p>We will only issue refunds under the following conditions:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>The product received is significantly different from the description</li>
-              <li>The product is damaged or defective upon arrival</li>
-              <li>The wrong product was delivered</li>
-              <li>The product was not delivered within the promised timeframe</li>
+              <li><strong>Product not delivered within 7 days:</strong> If the product ordered is not delivered within 7 days of the order being placed, you are eligible for a full refund.</li>
+              <li><strong>Product returned in good condition:</strong> The product must be returned to the vendor in its original, undamaged condition for a refund to be processed.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">3. Refund Request Timeline</h2>
             <p>
-              Refund requests must be submitted within 7 days of receiving your order. Requests made after this period may not be eligible for consideration.
+              Refund requests must be submitted within 7 days of the expected delivery date if the product has not arrived. Requests made after this period may not be eligible for consideration.
             </p>
           </section>
 
@@ -38,9 +36,9 @@ const RefundPolicy = () => {
             <h2 className="text-lg font-semibold">4. How to Request a Refund</h2>
             <p>To request a refund:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Contact our support team via the Contact page</li>
-              <li>Provide your order ID and reason for the refund request</li>
-              <li>Include photos or evidence if the product is damaged or defective</li>
+              <li>Contact our support team via email at <a href="mailto:alphadominity@gmail.com" className="text-primary hover:underline">alphadominity@gmail.com</a></li>
+              <li>Provide your order ID and proof that the product was not delivered within 7 days</li>
+              <li>If applicable, provide evidence that the product has been returned to the vendor</li>
               <li>Wait for our team to review your request (usually within 2-3 business days)</li>
             </ul>
           </section>
@@ -53,31 +51,23 @@ const RefundPolicy = () => {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold">6. Non-Refundable Items</h2>
-            <p>The following items are generally not eligible for refunds:</p>
+            <h2 className="text-lg font-semibold">6. Non-Refundable Situations</h2>
+            <p>Refunds will <strong>not</strong> be issued for:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Perishable goods (food items)</li>
-              <li>Personal care items that have been opened</li>
-              <li>Customized or personalized products</li>
-              <li>Products damaged due to misuse by the customer</li>
+              <li>Products delivered within 7 days of order placement</li>
+              <li>Products returned in damaged or used condition</li>
+              <li>Products where the customer provided an incorrect delivery address</li>
+              <li>Change of mind after the product has been delivered</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold">7. Vendor Responsibility</h2>
+            <h2 className="text-lg font-semibold">7. Contact Us</h2>
             <p>
-              Vendors on Alphadom are required to honor this refund policy. Disputes between customers and vendors will be mediated by our platform team to ensure fair resolution.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">8. Contact Us</h2>
-            <p>
-              For refund-related inquiries, please contact us through:
+              For refund-related inquiries, please contact us at:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Email: <a href="mailto:alphadomplatform@gmail.com" className="text-primary hover:underline">alphadomplatform@gmail.com</a></li>
-              <li>Discord: <a href="https://discord.gg/rvbSEwUY" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Join our Discord Server</a></li>
+              <li>Email: <a href="mailto:alphadominity@gmail.com" className="text-primary hover:underline">alphadominity@gmail.com</a></li>
             </ul>
           </section>
         </CardContent>

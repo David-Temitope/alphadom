@@ -106,9 +106,9 @@ export const FeaturedProducts = () => {
   );
 
   return (
-    <section className="py-8 md:py-16 px-4 bg-background">
-      <div className="container mx-auto">
-        <div className="flex items-center justify-between mb-6">
+    <section className="py-8 md:py-16 px-1 md:px-4 bg-background">
+      <div className="container mx-auto px-1 md:px-0">
+        <div className="flex items-center justify-between mb-6 px-2 md:px-0">
           <h2 className="text-xl md:text-2xl font-bold">Featured Products</h2>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[140px] md:w-[180px]"><SelectValue placeholder="Category" /></SelectTrigger>
@@ -117,7 +117,7 @@ export const FeaturedProducts = () => {
         </div>
 
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 px-2 md:px-0">
             <div className="flex items-center gap-2"><Crown className="h-5 w-5 text-yellow-500" /><h3 className="text-lg md:text-xl font-semibold">Best Selling Products</h3></div>
             <Link to="/products"><Button variant="ghost" size="sm">See All <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
           </div>
@@ -125,7 +125,7 @@ export const FeaturedProducts = () => {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 px-2 md:px-0">
             <div className="flex items-center gap-2"><Flame className="h-5 w-5 text-orange-500" /><h3 className="text-lg md:text-xl font-semibold">Hot Sales</h3></div>
             <Link to="/products"><Button variant="ghost" size="sm">See All <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
           </div>
