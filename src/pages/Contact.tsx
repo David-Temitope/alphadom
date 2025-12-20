@@ -101,7 +101,7 @@ const Contact = () => {
     {
       question: "How To...",
       answer: "Check out our YouTube channel for tutorials and guides on how to use the platform effectively.",
-      link: "https://www.youtube.com/@Alphadominity"
+      link: "https://youtube.com/@alphadominity?si=RjHCMVnXgyvL5q7W"
     }
   ];
 
@@ -272,18 +272,6 @@ const Contact = () => {
           </div>
         </section>
 
-        {/* Map Section */}
-        <section className="mt-20">
-          <Card className="overflow-hidden">
-            <div className="bg-gray-200 h-64 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <MapPin className="h-12 w-12 mx-auto mb-4" />
-                <p className="text-lg font-medium">Interactive Map</p>
-                <p className="text-sm">Visit us at our San Francisco location</p>
-              </div>
-            </div>
-          </Card>
-        </section>
       </div>
     </div>
   );

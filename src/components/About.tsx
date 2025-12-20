@@ -8,19 +8,19 @@ export const About = () => {
       description: "From tech gadgets to sustainable products and everything in between"
     },
     {
-      icon: Truck,
-      title: "Fast Delivery",
-      description: "Quick and reliable shipping to your doorstep"
+      icon: Shield,
+      title: "Verified Vendors",
+      description: "All sellers are verified to ensure trust and reliability"
     },
     {
-      icon: Shield,
+      icon: Truck,
       title: "Secure Shopping",
       description: "Safe and secure payment processing with buyer protection"
     },
     {
       icon: Award,
-      title: "Quality Assured",
-      description: "Premium quality products you can trust"
+      title: "Curated Listings",
+      description: "Carefully selected products from trusted sellers"
     }
   ];
 
