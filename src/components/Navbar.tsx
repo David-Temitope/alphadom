@@ -119,9 +119,9 @@ export const Navbar = () => {
             
             {/* Logo - Now on the far left, hidden on desktop (md:hidden removed) */}
             <Link to="/" className="flex items-center space-x-3 group">
-              <div className="h-10 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 overflow-hidden">
+              <div className="h-10 rounded-xl flex items-center justify-center transition-all duration-200 overflow-hidden">
                 <img 
-                  src={user ? (settings.navbar_logo || "/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png") : "/favicon.ico"} 
+                  src={user ? (settings.navbar_logo || "/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png") : "/favicon.png"} 
                   alt={`${user ? settings.site_name : 'Alphadom'} Logo`} 
                   className="h-8 w-auto object-contain max-w-[120px]"
                 />
