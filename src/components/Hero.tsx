@@ -92,13 +92,13 @@ export const Hero = () => {
                 Buy & Sell Online with Ease
               </div>
 
-              {/* Hero Title - Uses guest or admin settings */}
-              <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 leading-tight">
-                {heroTitle}
+              {/* Hero Title */}
+              <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
+                {settings.hero_title || settings.site_name}
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                  {heroMainText}
+                  {settings.hero_main_text || "Store"}
                 </span>
-                {heroSecondaryText}
+                {settings.hero_secondary_text || "for Modern Living"}
               </h1>
 
               {/* Hero Subtitle */}
