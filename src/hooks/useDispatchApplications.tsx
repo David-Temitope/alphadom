@@ -43,11 +43,7 @@ export const useDispatchApplications = () => {
       setApplications(data || []);
     } catch (error) {
       console.error('Error fetching dispatch applications:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch dispatch applications",
-        variant: "destructive",
-      });
+      // Silent fail - regular users don't need to see this error
     } finally {
       setLoading(false);
     }

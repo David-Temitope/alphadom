@@ -1,8 +1,13 @@
+# Alphadom Robots.txt
+# https://alphadom.online
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +17,30 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Disallow private/admin pages
+Disallow: /cart
+Disallow: /checkout
+Disallow: /auth
+Disallow: /appleisgood
+Disallow: /appleisgood/*
+Disallow: /admin-login
+Disallow: /user-settings
+Disallow: /orders
+Disallow: /wishlist
+Disallow: /vendor-dashboard
+Disallow: /vendor-orders
+Disallow: /vendor-profile
+Disallow: /dispatch-dashboard
+Disallow: /dispatch-profile
+Disallow: /dispatch-selection
+Disallow: /shop-application-status
+Disallow: /dispatch-application-status
+
+# Disallow filter URLs to prevent duplicate content
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*?*page=
+
+# Sitemap location
+Sitemap: https://alphadom.online/sitemap.xml

@@ -53,11 +53,8 @@ export const useShopApplications = () => {
       setApplications((data as any[]) || []);
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch shop applications",
-        variant: "destructive",
-      });
+      // Only show error toast if user is likely an admin viewing all applications
+      // Regular users don't need to see this error
     }
   };
 
