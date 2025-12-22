@@ -51,7 +51,8 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [vendorName, setVendorName] = useState<string>('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const isMobile = useIsMobile(); // ✅ FIX: Added missing hook call
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const isMobile = useIsMobile();
 
   // FIX: Ensure 'products' is treated as an array before using find
   const product = products?.find(p => p.id === id); 
@@ -169,17 +170,38 @@ const ProductDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          {/* Product Image */}
+          {/* Product Images */}
           <div className="space-y-4">
+            {/* Main Image */}
             <div 
               className="relative overflow-hidden rounded-2xl bg-white shadow-lg cursor-pointer group"
               onClick={() => setIsImageModalOpen(true)}
             >
-              <img
-                src={product.image || '/placeholder.svg'}
-                alt={product.name}
-                className="w-full h-96 lg:h-[500px] object-cover transition-transform duration-300 group-hover:scale-110"
-              />
+              {(() => {
+                // Parse images - could be stored as JSON string or single URL
+                let images: string[] = [];
+                if (product.image) {
+                  try {
+                    // Check if it's a JSON array string
+                    if (product.image.startsWith('[')) {
+                      images = JSON.parse(product.image);
+                    } else {
+                      images = [product.image];
+                    }
+                  } catch {
+                    images = [product.image];
+                  }
+                }
+                const currentImage = images[selectedImageIndex] || images[0] || '/placeholder.svg';
+                
+                return (
+                  <img
+                    src={currentImage}
+                    alt={product.name}
+                    className="w-full h-96 lg:h-[500px] object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                );
+              })()}
               {product.sustainability_score != null && product.sustainability_score > 7 && (
                 <Badge className="absolute top-4 left-4 bg-green-100 text-green-800 border-green-200">
                   <Leaf className="w-3 h-3 mr-1" />
@@ -192,6 +214,47 @@ const ProductDetail = () => {
                 </span>
               </div>
             </div>
+
+            {/* Thumbnail Gallery */}
+            {(() => {
+              let images: string[] = [];
+              if (product.image) {
+                try {
+                  if (product.image.startsWith('[')) {
+                    images = JSON.parse(product.image);
+                  } else {
+                    images = [product.image];
+                  }
+                } catch {
+                  images = [product.image];
+                }
+              }
+              
+              if (images.length > 1) {
+                return (
+                  <div className="flex gap-2">
+                    {images.map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedImageIndex === index 
+                            ? 'border-primary ring-2 ring-primary/20' 
+                            : 'border-transparent hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <img
+                          src={img}
+                          alt={`${product.name} ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           {/* Full Image Modal */}
@@ -205,11 +268,29 @@ const ProductDetail = () => {
               >
                 <X className="h-4 w-4" />
               </Button>
-              <img
-                src={product.image || '/placeholder.svg'}
-                alt={product.name}
-                className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
-              />
+              {(() => {
+                let images: string[] = [];
+                if (product.image) {
+                  try {
+                    if (product.image.startsWith('[')) {
+                      images = JSON.parse(product.image);
+                    } else {
+                      images = [product.image];
+                    }
+                  } catch {
+                    images = [product.image];
+                  }
+                }
+                const currentImage = images[selectedImageIndex] || images[0] || '/placeholder.svg';
+                
+                return (
+                  <img
+                    src={currentImage}
+                    alt={product.name}
+                    className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+                  />
+                );
+              })()}
             </DialogContent>
           </Dialog>
 

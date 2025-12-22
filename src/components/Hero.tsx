@@ -57,19 +57,30 @@ export const Hero = () => {
                 Built for students, by students 🎓
               </div>
 
-              {/* Hero Title */}
+              {/* Hero Title - Different text for logged out users */}
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
-                {settings.hero_title || "Your Campus"}
-                <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                  {settings.hero_main_text || "Marketplace"}
-                </span>
-                {settings.hero_secondary_text || "Shop Smart, Save Big"}
+                {user ? (
+                  <>
+                    {settings.hero_title || "Your Campus"}
+                    <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                      {settings.hero_main_text || "Marketplace"}
+                    </span>
+                    {settings.hero_secondary_text || "Shop Smart, Save Big"}
+                  </>
+                ) : (
+                  <>
+                    Welcome to
+                    <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                      Alphadom
+                    </span>
+                    The Students e-Commerce Platform
+                  </>
+                )}
               </h1>
 
-              {/* Hero Subtitle */}
+              {/* Hero Subtitle - Uses setting */}
               <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                Find budget-friendly products from verified vendors. 
-                Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰
+                {settings.hero_subtitle || "Find budget-friendly products from verified vendors. Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰"}
               </p>
             </div>
 
