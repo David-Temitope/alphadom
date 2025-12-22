@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useMultiVendorCheckout } from '@/hooks/useMultiVendorCheckout';
+import { useBanStatus } from '@/hooks/useBanStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +20,8 @@ import {
   CheckCircle2, 
   XCircle, 
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Ban
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ShippingInfo, VAT_RATE, VendorGroup } from '@/types/checkout';
@@ -33,6 +35,7 @@ declare global {
 const Checkout: React.FC = () => {
   const { user } = useAuth();
   const { items } = useCart();
+  const { isBanned } = useBanStatus();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -70,16 +73,25 @@ const Checkout: React.FC = () => {
     );
   }, [shippingInfo]);
 
-  // Redirect if not authenticated or no items
+  // Redirect if not authenticated, banned, or no items
   useEffect(() => {
     if (!user) {
       navigate('/auth');
       return;
     }
+    if (isBanned) {
+      toast({
+        title: "Account Restricted",
+        description: "Your account has been suspended. You cannot checkout.",
+        variant: "destructive",
+      });
+      navigate('/');
+      return;
+    }
     if (!items || items.length === 0) {
       navigate('/cart');
     }
-  }, [user, items, navigate]);
+  }, [user, items, navigate, isBanned]);
 
   // Load Paystack script
   useEffect(() => {

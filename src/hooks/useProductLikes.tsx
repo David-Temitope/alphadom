@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useBanStatus } from '@/hooks/useBanStatus';
 
 export const useProductLikes = (productId?: string) => {
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isBanned } = useBanStatus();
 
   useEffect(() => {
     if (user) {
@@ -42,6 +44,15 @@ export const useProductLikes = (productId?: string) => {
       toast({
         title: "Authentication required",
         description: "Please sign in to like products.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isBanned) {
+      toast({
+        title: "Account Restricted",
+        description: "Your account has been suspended. You cannot like products.",
         variant: "destructive",
       });
       return;

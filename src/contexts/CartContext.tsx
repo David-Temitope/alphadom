@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useBanStatus } from '@/hooks/useBanStatus';
+import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
   id: string;
@@ -11,7 +13,7 @@ interface CartItem {
   sustainabilityScore: number;
   shipping_fee?: number;
   shipping_type?: 'per_product' | 'one_time';
-  vendor_id?: string | null; // For multi-vendor checkout
+  vendor_id?: string | null;
 }
 
 
@@ -26,6 +28,7 @@ interface CartContextType {
   totalPrice: number;
   totalSustainabilityImpact: number;
   itemCount: number;
+  isBanned: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -35,6 +38,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const savedCart = localStorage.getItem('cart_items');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+  const { isBanned } = useBanStatus();
+  const { toast } = useToast();
 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
@@ -54,6 +59,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     : 0;
 
   const addToCart = (product: any, requestedQuantity: number = 1) => {
+    if (isBanned) {
+      toast({
+        title: "Account Restricted",
+        description: "Your account has been suspended. You cannot add items to cart.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       const currentQuantity = existingItem ? existingItem.quantity : 0;
@@ -63,7 +77,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (product.stock_count < totalRequested) {
         const maxAvailable = Math.max(0, product.stock_count - currentQuantity);
         if (maxAvailable === 0) {
-          return prevItems; // Cannot add any more
+          return prevItems;
         }
         requestedQuantity = maxAvailable;
       }
@@ -127,6 +141,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalPrice,
       totalSustainabilityImpact,
       itemCount,
+      isBanned,
     }}>
       {children}
     </CartContext.Provider>

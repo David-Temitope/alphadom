@@ -12,12 +12,12 @@ export const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <img src="/favicon.png" alt="Alphadom Logo" className="w-10 h-10" />
-              <span className="text-xl font-bold">Alphadom</span>
+              <img src="/favicon.png" alt="Alphadom Logo" className="w-8 h-8" />
+              <span className="text-lg font-bold">Alphadom</span>
             </div>
             <p className="text-gray-300 text-sm">
-              Your trusted partner in online shopping. We connect buyers to verified vendors 
-              to help you find quality products easily.
+              Your campus marketplace! We connect students to verified vendors 
+              for budget-friendly products. 🎓
             </p>
             <div className="flex space-x-4">
               <Button 
