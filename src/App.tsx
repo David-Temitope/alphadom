@@ -58,6 +58,7 @@ import VendorOrders from "./pages/VendorOrders";
 import DispatchProfile from "./pages/DispatchProfile";
 import CategoryProducts from "./pages/CategoryProducts";
 import Sitemap from "./pages/Sitemap";
+import ResetPassword from "./pages/ResetPassword";
 
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({

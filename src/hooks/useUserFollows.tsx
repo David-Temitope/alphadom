@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useBanStatus } from '@/hooks/useBanStatus';
 
 export const useUserFollows = () => {
   const [follows, setFollows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isBanned } = useBanStatus();
 
   const fetchFollows = async () => {
     try {
@@ -40,6 +42,15 @@ export const useUserFollows = () => {
       toast({
         title: "Login Required",
         description: "Please login to follow users",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isBanned) {
+      toast({
+        title: "Account Restricted",
+        description: "Your account has been suspended. You cannot follow vendors.",
         variant: "destructive",
       });
       return;

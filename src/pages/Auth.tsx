@@ -16,6 +16,7 @@ const Auth = () => {
   const [error, setError] = useState('');
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Redirect if already authenticated
   if (user) {
@@ -53,6 +54,19 @@ const Auth = () => {
     const password = formData.get('password') as string;
     const fullName = formData.get('fullName') as string;
 
+    // Password match validation
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
     const { error } = await signUp(email, password, fullName);
     
     if (error) {
@@ -60,6 +74,7 @@ const Auth = () => {
       toast.error('Sign up failed: ' + error.message);
     } else {
       toast.success('Account created! Please check your email to verify your account.');
+      setConfirmPassword('');
     }
     
     setLoading(false);
@@ -87,11 +102,11 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Branding Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 via-green-700 to-emerald-800 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 via-green-600 to-teal-700 relative overflow-hidden">
         {/* Decorative Elements */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-300 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-300 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-green-400 rounded-full blur-2xl" />
         </div>
         
@@ -102,26 +117,28 @@ const Auth = () => {
         }} />
 
         <div className="relative z-10 flex flex-col justify-center items-center w-full p-12 text-white">
-          {/* Logo */}
+          {/* Logo with white background */}
           <div className="mb-8 flex flex-col items-center">
-            <img 
-              src="/favicon.png" 
-              alt="Alphadom Logo" 
-              className="w-24 h-24 mb-4"
-            />
+            <div className="w-28 h-28 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-xl">
+              <img 
+                src="/favicon.png" 
+                alt="Alphadom Logo" 
+                className="w-20 h-20 object-contain"
+              />
+            </div>
             <h1 className="text-5xl font-bold tracking-tight">Alphadom</h1>
-            <p className="text-green-100 text-lg mt-2">Your Trusted Online Marketplace</p>
+            <p className="text-green-100 text-lg mt-2">Your Campus Marketplace 🎓</p>
           </div>
 
-          {/* Features */}
+          {/* Features for students */}
           <div className="space-y-6 max-w-sm">
             <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                 <ShoppingCart className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold">500K+ Sellers</h3>
-                <p className="text-sm text-green-100">Join Africa's growing marketplace</p>
+                <h3 className="font-semibold">Budget-Friendly</h3>
+                <p className="text-sm text-green-100">Prices that fit student wallets</p>
               </div>
             </div>
             
@@ -130,8 +147,8 @@ const Auth = () => {
                 <Shield className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold">Secure Payments</h3>
-                <p className="text-sm text-green-100">Protected transactions always</p>
+                <h3 className="font-semibold">Verified Vendors</h3>
+                <p className="text-sm text-green-100">Shop with confidence</p>
               </div>
             </div>
             
@@ -140,8 +157,8 @@ const Auth = () => {
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold">Curated Products</h3>
-                <p className="text-sm text-green-100">Quality verified listings</p>
+                <h3 className="font-semibold">Start Selling Today</h3>
+                <p className="text-sm text-green-100">Turn your hustle into income 💰</p>
               </div>
             </div>
           </div>
@@ -149,26 +166,28 @@ const Auth = () => {
       </div>
 
       {/* Right Side - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-background p-6 sm:p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-6 sm:p-8">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="inline-flex flex-col items-center">
-              <img 
-                src="/favicon.png" 
-                alt="Alphadom Logo" 
-                className="w-16 h-16 mb-3"
-              />
-              <h1 className="text-3xl font-bold text-foreground">Alphadom</h1>
-              <p className="text-muted-foreground text-sm">Your Trusted Online Marketplace</p>
+              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-3 shadow-sm border border-gray-100">
+                <img 
+                  src="/favicon.png" 
+                  alt="Alphadom Logo" 
+                  className="w-10 h-10 object-contain"
+                />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">Alphadom</h1>
+              <p className="text-gray-600 text-sm">Your Campus Marketplace 🎓</p>
             </div>
           </div>
 
-          <div className="bg-card rounded-2xl border border-border shadow-lg p-6 sm:p-8">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-6 sm:p-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
-              <p className="text-muted-foreground text-sm mt-1">
-                Sign in to continue shopping
+              <h2 className="text-2xl font-bold text-gray-900">Welcome, Student! 👋</h2>
+              <p className="text-gray-600 text-sm mt-1">
+                Sign in to start shopping or selling
               </p>
             </div>
 
@@ -309,12 +328,12 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="signup-password"
                         name="password"
                         type="password"
-                        placeholder="Create a password"
+                        placeholder="Create a password (min 6 characters)"
                         className="pl-10"
                         required
                         minLength={6}
@@ -322,7 +341,24 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <div className="text-xs text-muted-foreground">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="signup-confirm-password"
+                        type="password"
+                        placeholder="Re-enter your password"
+                        className="pl-10"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-gray-500">
                     By creating an account, you agree to our{' '}
                     <Link to="/terms" className="text-green-600 hover:underline">
                       Terms of Service

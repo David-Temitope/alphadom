@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useBanStatus } from '@/hooks/useBanStatus';
 
 interface Comment {
   id: string;
@@ -20,6 +21,7 @@ export const useProductComments = (productId: string) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { isBanned } = useBanStatus();
 
   const fetchComments = async () => {
     try {
@@ -88,6 +90,15 @@ export const useProductComments = (productId: string) => {
         return;
       }
 
+      if (isBanned) {
+        toast({
+          title: "Account Restricted",
+          description: "Your account has been suspended. You cannot add comments.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('product_comments')
         .insert({
@@ -121,6 +132,15 @@ export const useProductComments = (productId: string) => {
         toast({
           title: "Authentication required",
           description: "Please log in to react to comments",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (isBanned) {
+        toast({
+          title: "Account Restricted",
+          description: "Your account has been suspended. You cannot react to comments.",
           variant: "destructive",
         });
         return;

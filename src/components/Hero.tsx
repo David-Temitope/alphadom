@@ -54,22 +54,22 @@ export const Hero = () => {
               {/* Site Description Badge */}
               <div className="inline-flex items-center px-4 py-2 bg-green-100/80 text-green-700 rounded-full text-sm font-medium backdrop-blur-sm border border-green-200/50">
                 <Shield className="w-4 h-4 mr-2" />
-                {settings.site_description}
+                Built for students, by students 🎓
               </div>
 
               {/* Hero Title */}
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
-                {settings.hero_title || settings.site_name}
+                {settings.hero_title || "Your Campus"}
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                  {settings.hero_main_text || "Store"}
+                  {settings.hero_main_text || "Marketplace"}
                 </span>
-                {settings.hero_secondary_text || "for Modern Living"}
+                {settings.hero_secondary_text || "Shop Smart, Save Big"}
               </h1>
 
               {/* Hero Subtitle */}
               <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                {settings.hero_subtitle ||
-                  "Discover high-quality products that combine style, functionality, and reliability for your everyday needs."}
+                Find budget-friendly products from verified vendors. 
+                Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰
               </p>
             </div>
 
@@ -117,21 +117,21 @@ export const Hero = () => {
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors duration-200">
                   <Leaf className="w-6 h-6 text-green-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">100% Eco-Friendly</p>
+                <p className="text-sm font-medium text-slate-700">Student Discounts</p>
               </div>
 
               <div className="text-center group">
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors duration-200">
                   <Shield className="w-6 h-6 text-blue-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Quality Guaranteed</p>
+                <p className="text-sm font-medium text-slate-700">Verified Vendors</p>
               </div>
 
               <div className="text-center group">
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors duration-200">
                   <Recycle className="w-6 h-6 text-green-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Sustainable Impact</p>
+                <p className="text-sm font-medium text-slate-700">Campus Delivery</p>
               </div>
             </div>
           </div>
