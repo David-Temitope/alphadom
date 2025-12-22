@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { ImageUpload } from '@/components/admin/ImageUpload';
+import { MultiImageUpload } from '@/components/MultiImageUpload';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -60,6 +60,7 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
     discount_percentage: 0,
     original_price: 0,
     image: '',
+    images: [] as string[],
     description: '',
     full_description: '',
     shipping_fee: '',
@@ -83,6 +84,16 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
       toast({
         title: "Error",
         description: "Please fill in all required fields including Category, Type, and Tags",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate at least 1 image
+    if (newProduct.images.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please upload at least 1 product image",
         variant: "destructive",
       });
       return;
@@ -119,7 +130,7 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
           stock_count: parseInt(newProduct.stock_count) || 0,
           initial_stock_count: parseInt(newProduct.stock_count) || 0,
           sustainability_score: parseInt(newProduct.sustainability_score) || 0,
-          image: newProduct.image,
+          image: newProduct.images.length > 1 ? JSON.stringify(newProduct.images) : (newProduct.images[0] || newProduct.image),
           eco_features: newProduct.eco_features,
           has_discount: newProduct.discount_percentage > 0,
           discount_percentage: newProduct.discount_percentage,
@@ -157,6 +168,7 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
         discount_percentage: 0,
         original_price: 0,
         image: '',
+        images: [],
         description: '',
         full_description: '',
         shipping_fee: '',
@@ -438,12 +450,12 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
         <p className="text-xs text-muted-foreground">Press Tab or click outside to save</p>
       </div>
 
-      <div className="space-y-2">
-        <Label>Product Image</Label>
-        <ImageUpload 
-          onImageUploaded={(url) => setNewProduct({...newProduct, image: url})}
-        />
-      </div>
+      <MultiImageUpload 
+        onImagesChanged={(urls) => setNewProduct({...newProduct, images: urls, image: urls[0] || ''})}
+        currentImages={newProduct.images}
+        maxImages={3}
+        maxTotalSizeMB={8}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="description">Short Description</Label>
