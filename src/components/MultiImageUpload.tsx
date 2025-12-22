@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X, Image, Plus } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface MultiImageUploadProps {
@@ -22,6 +22,11 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<string[]>(currentImages);
   const { toast } = useToast();
+
+  // Sync with parent state when currentImages changes
+  useEffect(() => {
+    setImages(currentImages);
+  }, [currentImages]);
 
   const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
