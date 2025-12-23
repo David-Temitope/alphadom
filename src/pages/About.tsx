@@ -1,8 +1,7 @@
 
-import { Leaf, Users, Award, Target, Globe } from "lucide-react";
+import { Leaf, Users, Award, Target, GraduationCap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useAboutStats } from "@/hooks/useAboutStats";
 
@@ -64,19 +63,19 @@ const About = () => {
                 ) : (
                   <>
                     <p>
-                      {settings.site_name} was born from a simple belief: that quality products shouldn't be hard to find. 
-                      Founded in 2020 by a team of product enthusiasts, we started as a small collection 
-                      of carefully curated items spanning technology, lifestyle, and sustainable goods.
+                      Alphadom was born from a simple belief: that students deserve a platform where they can learn 
+                      to manage their own brands — right from campus. Founded in 2025, we started with a vision 
+                      to transform how young entrepreneurs approach business.
                     </p>
                     <p>
-                      Today, we've grown into a comprehensive platform that connects discerning consumers with 
-                      quality brands from around the world. Every product in our catalog is evaluated 
-                      for its design, functionality, sustainability, and value proposition.
+                      We believe that learning doesn't have to wait until after graduation. With Alphadom, students 
+                      can start building their entrepreneurial journey today, gaining real-world experience in 
+                      product management, customer service, and business operations.
                     </p>
                     <p>
-                      Our unique rating system helps customers make informed choices, while 
-                      our fast shipping and customer service initiatives ensure that every purchase 
-                      contributes to a positive shopping experience.
+                      Now students can boldly add years of experience to their resumes because they started right 
+                      from campus. We're not just building a marketplace — we're building the next generation of 
+                      business leaders, one student entrepreneur at a time.
                     </p>
                   </>
                 )}
@@ -89,9 +88,9 @@ const About = () => {
                 className="rounded-lg shadow-xl"
               />
               <div className="absolute -bottom-6 -right-6 bg-green-600 text-white p-4 rounded-lg shadow-lg">
-                <Globe className="h-8 w-8 mb-2" />
+                <GraduationCap className="h-8 w-8 mb-2" />
                 <div className="text-lg font-bold">Global Impact</div>
-                <div className="text-sm">Worldwide Shipping</div>
+                <div className="text-sm">Educational Journey</div>
               </div>
             </div>
           </div>

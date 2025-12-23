@@ -56,6 +56,7 @@ const Terms = () => {
                 <li>False advertising or misleading product information</li>
                 <li>Activities that violate local laws and regulations</li>
                 <li>Discrimination based on race, gender, religion, or nationality</li>
+                <li><strong>False accusations are highly punishable</strong> - Filing false claims against vendors, customers, or the platform may result in immediate account termination and potential legal action</li>
               </ul>
             </section>
 
@@ -93,12 +94,21 @@ const Terms = () => {
             <section>
               <h2 className="text-2xl font-semibold mb-4">7. Limitation of Liability</h2>
               <p>
-                The platform acts as an intermediary between buyers, sellers, and dispatchers. We are not responsible for:
+                The platform acts as an intermediary between buyers, sellers, and dispatchers. While we are not directly responsible for:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Quality or condition of products sold</li>
                 <li>Disputes between customers and vendors</li>
                 <li>Loss or damage during delivery</li>
+              </ul>
+              <p className="mt-4">
+                <strong>Your safety matters to us.</strong> We have comprehensive policies in place to protect our users:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>Our <a href="/dispute-policy" className="text-primary hover:underline">Dispute Resolution Policy</a> ensures fair handling of all complaints</li>
+                <li>Our <a href="/refund-policy" className="text-primary hover:underline">Refund Policy</a> protects buyers from fraudulent transactions</li>
+                <li>All vendors are verified before they can sell on our platform</li>
+                <li>We actively monitor and take action against bad actors</li>
               </ul>
             </section>
 

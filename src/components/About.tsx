@@ -1,26 +1,26 @@
-import { ShoppingCart, Truck, Shield, Award } from "lucide-react";
+import { ShoppingCart, Truck, CreditCard, Award } from "lucide-react";
 
 export const About = () => {
   const features = [
     {
       icon: ShoppingCart,
       title: "Wide Selection",
-      description: "From tech gadgets to sustainable products and everything in between"
+      description: "From tech gadgets to fashion essentials — everything you need for campus life"
     },
     {
-      icon: Shield,
+      icon: Award,
       title: "Verified Vendors",
-      description: "All sellers are verified to ensure trust and reliability"
+      description: "All sellers are verified students and businesses you can trust"
     },
     {
-      icon: Truck,
+      icon: CreditCard,
       title: "Secure Shopping",
       description: "Safe and secure payment processing with buyer protection"
     },
     {
-      icon: Award,
-      title: "Curated Listings",
-      description: "Carefully selected products from trusted sellers"
+      icon: Truck,
+      title: "Campus Delivery",
+      description: "Quick delivery right to your hostel or faculty building"
     }
   ];
 
@@ -30,10 +30,11 @@ export const About = () => {
         {/* Section Header */}
         <div className="text-center mb-12 px-2 sm:px-0">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Why Choose Us
+            Built for Campus Life
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base max-w-md sm:max-w-2xl mx-auto leading-relaxed">
-            We're your one-stop destination for everything from cutting-edge technology to eco-friendly alternatives. Quality, variety, and customer satisfaction are at the heart of everything we do.
+            Whether you're buying textbooks, selling handmade crafts, or looking for the best deals on campus — 
+            Alphadom connects you with fellow students and verified vendors. Shop smart, save more, and support your campus community! 🎓
           </p>
         </div>
 

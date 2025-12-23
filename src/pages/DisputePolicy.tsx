@@ -42,10 +42,10 @@ const DisputePolicy = () => {
               If direct communication does not resolve the issue, you may file a formal dispute through our platform:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Navigate to your Orders page</li>
-              <li>Select the relevant order</li>
-              <li>Contact us through the Contact page with your complaint</li>
-              <li>Provide detailed information and evidence (photos, screenshots, etc.)</li>
+              <li>Navigate to your <strong>Orders page</strong> and copy the Order ID for the affected order</li>
+              <li>Go to the <a href="/contact" className="text-primary hover:underline font-medium">Contact page</a> and submit your complaint with the Order ID</li>
+              <li>For faster response or if you need to share images, <a href="https://discord.gg/9nKy89ww" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">join our Discord server</a></li>
+              <li>Provide detailed information and any available evidence</li>
             </ul>
           </section>
 
