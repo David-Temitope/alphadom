@@ -23,7 +23,7 @@ export const Footer = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-gray-300 hover:text-white p-1"
+                className="text-gray-300 hover:text-purple-500 p-1 transition-colors duration-200"
                 onClick={() => window.open('https://discord.gg/9nKy89ww', '_blank')}
               >
                 <MessageCircle className="h-5 w-5" />
@@ -31,7 +31,7 @@ export const Footer = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-gray-300 hover:text-white p-1"
+                className="text-gray-300 hover:text-blue-500 p-1 transition-colors duration-200"
                 onClick={() => window.open('https://www.facebook.com/share/16WJUWkNS6/', '_blank')}
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@ export const Footer = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-gray-300 hover:text-white p-1"
+                className="text-gray-300 hover:text-green-500 p-1 transition-colors duration-200"
                 onClick={() => window.open('https://whatsapp.com/channel/0029VbBMmq2G8l5Nl5k5r201', '_blank')}
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ export const Footer = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-gray-300 hover:text-white p-1"
+                className="text-gray-300 hover:text-red-500 p-1 transition-colors duration-200"
                 onClick={() => window.open('https://youtube.com/@alphadominity?si=RjHCMVnXgyvL5q7W', '_blank')}
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">

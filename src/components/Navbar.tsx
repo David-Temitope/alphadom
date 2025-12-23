@@ -121,14 +121,14 @@ export const Navbar = () => {
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="h-10 rounded-xl flex items-center justify-center transition-all duration-200 overflow-hidden">
                 <img 
-                  src={user ? (settings.navbar_logo || "/lovable-uploads/b58904b8-8d81-4393-a765-af4fc0eea4f8.png") : "/favicon.png"} 
-                  alt={`${user ? settings.site_name : 'Alphadom'} Logo`} 
+                  src={settings.navbar_logo || "/favicon.png"} 
+                  alt={`${settings.site_name} Logo`} 
                   className="h-8 w-auto object-contain max-w-[120px]"
                 />
               </div>
               <div className="hidden sm:block">
                 <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                  {user ? settings.site_name : 'Alphadom'}
+                  {settings.site_name}
                 </span>
                 <div className="text-xs text-muted-foreground -mt-1">{settings.site_description}</div>
               </div>
