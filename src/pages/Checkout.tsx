@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useCart } from '@/contexts/CartContext';
-import { useMultiVendorCheckout } from '@/hooks/useMultiVendorCheckout';
-import { useBanStatus } from '@/hooks/useBanStatus';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { 
-  ShoppingCart, 
-  CreditCard, 
-  Truck, 
-  Lock, 
-  Store, 
-  CheckCircle2, 
-  XCircle, 
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import { useMultiVendorCheckout } from "@/hooks/useMultiVendorCheckout";
+import { useBanStatus } from "@/hooks/useBanStatus";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  ShoppingCart,
+  CreditCard,
+  Truck,
+  Lock,
+  Store,
+  CheckCircle2,
+  XCircle,
   Loader2,
   RefreshCw,
-  Ban
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { ShippingInfo, VAT_RATE, VendorGroup } from '@/types/checkout';
+  Ban,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ShippingInfo, VAT_RATE, VendorGroup } from "@/types/checkout";
 
 declare global {
   interface Window {
@@ -48,16 +48,16 @@ const Checkout: React.FC = () => {
     processAllPayments,
     retryPayment,
     allPaymentsComplete,
-    failedGroups
+    failedGroups,
   } = useMultiVendorCheckout();
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: 'NG',
-    phone: ''
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "NG",
+    phone: "",
   });
 
   const [paystackLoaded, setPaystackLoaded] = useState(false);
@@ -76,7 +76,7 @@ const Checkout: React.FC = () => {
   // Redirect if not authenticated, banned, or no items
   useEffect(() => {
     if (!user) {
-      navigate('/auth');
+      navigate("/auth");
       return;
     }
     if (isBanned) {
@@ -85,11 +85,11 @@ const Checkout: React.FC = () => {
         description: "Your account has been suspended. You cannot checkout.",
         variant: "destructive",
       });
-      navigate('/');
+      navigate("/");
       return;
     }
     if (!items || items.length === 0) {
-      navigate('/cart');
+      navigate("/cart");
     }
   }, [user, items, navigate, isBanned]);
 
@@ -100,16 +100,16 @@ const Checkout: React.FC = () => {
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
     script.async = true;
     script.onload = () => setPaystackLoaded(true);
     script.onerror = () => {
-      console.error('Failed to load Paystack script');
+      console.error("Failed to load Paystack script");
       toast({
-        title: 'Payment Error',
-        description: 'Failed to load payment system. Please refresh.',
-        variant: 'destructive'
+        title: "Payment Error",
+        description: "Failed to load payment system. Please refresh.",
+        variant: "destructive",
       });
     };
     document.body.appendChild(script);
@@ -125,10 +125,10 @@ const Checkout: React.FC = () => {
   useEffect(() => {
     if (allPaymentsComplete && !processing) {
       toast({
-        title: 'All Orders Placed Successfully!',
-        description: `${vendorGroups.length} order(s) have been created.`
+        title: "All Orders Placed Successfully!",
+        description: `${vendorGroups.length} order(s) have been created.`,
       });
-      navigate('/orders');
+      navigate("/orders");
     }
   }, [allPaymentsComplete, processing, vendorGroups.length, navigate, toast]);
 
@@ -136,29 +136,29 @@ const Checkout: React.FC = () => {
   const handlePayNow = async () => {
     if (!isShippingValid) {
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in all shipping details.',
-        variant: 'destructive'
+        title: "Missing Information",
+        description: "Please fill in all shipping details.",
+        variant: "destructive",
       });
       return;
     }
 
     if (!paystackLoaded) {
       toast({
-        title: 'Payment Not Ready',
-        description: 'Please wait for payment system to load.',
-        variant: 'destructive'
+        title: "Payment Not Ready",
+        description: "Please wait for payment system to load.",
+        variant: "destructive",
       });
       return;
     }
 
     const result = await processAllPayments(shippingInfo);
-    
+
     if (!result.success && failedGroups.length > 0) {
       toast({
-        title: 'Some Payments Failed',
+        title: "Some Payments Failed",
         description: result.message,
-        variant: 'destructive'
+        variant: "destructive",
       });
     }
   };
@@ -167,12 +167,12 @@ const Checkout: React.FC = () => {
   const handleRetry = async (vendorId: string | null) => {
     const success = await retryPayment(vendorId, shippingInfo);
     if (success) {
-      toast({ title: 'Payment Successful!' });
+      toast({ title: "Payment Successful!" });
     } else {
       toast({
-        title: 'Payment Failed',
-        description: 'Please try again.',
-        variant: 'destructive'
+        title: "Payment Failed",
+        description: "Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -180,21 +180,21 @@ const Checkout: React.FC = () => {
   // Get status badge for vendor group
   const getStatusBadge = (group: VendorGroup, index: number) => {
     switch (group.payment_status) {
-      case 'paid':
+      case "paid":
         return (
           <Badge className="bg-green-500">
             <CheckCircle2 className="h-3 w-3 mr-1" />
             Paid
           </Badge>
         );
-      case 'processing':
+      case "processing":
         return (
           <Badge className="bg-blue-500">
             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
             Processing
           </Badge>
         );
-      case 'failed':
+      case "failed":
         return (
           <Badge variant="destructive">
             <XCircle className="h-3 w-3 mr-1" />
@@ -226,9 +226,7 @@ const Checkout: React.FC = () => {
     return null;
   }
 
-  const progress = processing 
-    ? ((currentPaymentIndex + 1) / vendorGroups.length) * 100 
-    : 0;
+  const progress = processing ? ((currentPaymentIndex + 1) / vendorGroups.length) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -236,10 +234,9 @@ const Checkout: React.FC = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
           <p className="text-gray-600">
-            {vendorGroups.length > 1 
+            {vendorGroups.length > 1
               ? `Your cart contains items from ${vendorGroups.length} vendors. Each vendor will be processed separately.`
-              : 'Complete your purchase'
-            }
+              : "Complete your purchase"}
           </p>
         </div>
 
@@ -261,82 +258,85 @@ const Checkout: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Vendor Groups (hide paid vendors) */}
           <div className="lg:col-span-2 space-y-6">
-            {vendorGroups.filter(g => g.payment_status !== 'paid').map((group, index) => (
-              <Card key={group.vendor_id || 'platform'} className={
-                group.payment_status === 'paid' ? 'border-green-200 bg-green-50/50' :
-                group.payment_status === 'failed' ? 'border-red-200 bg-red-50/50' :
-                ''
-              }>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Store className="h-5 w-5" />
-                      {group.vendor_name}
-                      {group.vendor_id && (
-                        <Badge variant="outline" className="text-xs">
-                          {group.subscription_plan}
-                        </Badge>
-                      )}
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(group, index)}
-                      {group.payment_status === 'failed' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleRetry(group.vendor_id)}
-                          disabled={processing}
-                        >
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Retry
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Items */}
-                  {group.items.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                        <div>
-                          <p className="font-medium text-sm">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
-                        </div>
+            {vendorGroups
+              .filter((g) => g.payment_status !== "paid")
+              .map((group, index) => (
+                <Card
+                  key={group.vendor_id || "platform"}
+                  className={
+                    group.payment_status === "paid"
+                      ? "border-green-200 bg-green-50/50"
+                      : group.payment_status === "failed"
+                        ? "border-red-200 bg-red-50/50"
+                        : ""
+                  }
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Store className="h-5 w-5" />
+                        {group.vendor_name}
+                        {group.vendor_id && (
+                          <Badge variant="outline" className="text-xs">
+                            {group.subscription_plan}
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(group, index)}
+                        {group.payment_status === "failed" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRetry(group.vendor_id)}
+                            disabled={processing}
+                          >
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                            Retry
+                          </Button>
+                        )}
                       </div>
-                      <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
                     </div>
-                  ))}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Items */}
+                    {group.items.map((item) => (
+                      <div key={item.id} className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                          <div>
+                            <p className="font-medium text-sm">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                        <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
+                      </div>
+                    ))}
 
-                  <Separator />
+                    <Separator />
 
-                  {/* Group Totals */}
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Subtotal</span>
-                      <span>₦{group.subtotal.toLocaleString()}</span>
+                    {/* Group Totals */}
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <span>₦{group.subtotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Shipping</span>
+                        <span>{group.shipping === 0 ? "FREE" : `₦${group.shipping.toLocaleString()}`}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">VAT ({VAT_RATE * 100}%)</span>
+                        <span>₦{group.vat.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between font-bold pt-2 border-t">
+                        <span>Vendor Total</span>
+                        <span>₦{group.total.toLocaleString()}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span>{group.shipping === 0 ? 'FREE' : `₦${group.shipping.toLocaleString()}`}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">VAT ({VAT_RATE * 100}%)</span>
-                      <span>₦{group.vat.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between font-bold pt-2 border-t">
-                      <span>Vendor Total</span>
-                      <span>₦{group.total.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
           </div>
 
           {/* Right Column: Shipping & Payment */}
@@ -355,7 +355,7 @@ const Checkout: React.FC = () => {
                   <Input
                     id="street"
                     value={shippingInfo.street}
-                    onChange={(e) => setShippingInfo(prev => ({ ...prev, street: e.target.value }))}
+                    onChange={(e) => setShippingInfo((prev) => ({ ...prev, street: e.target.value }))}
                     placeholder="123 Main St"
                     disabled={processing}
                   />
@@ -367,7 +367,7 @@ const Checkout: React.FC = () => {
                     <Input
                       id="city"
                       value={shippingInfo.city}
-                      onChange={(e) => setShippingInfo(prev => ({ ...prev, city: e.target.value }))}
+                      onChange={(e) => setShippingInfo((prev) => ({ ...prev, city: e.target.value }))}
                       placeholder="Lagos"
                       disabled={processing}
                     />
@@ -377,7 +377,7 @@ const Checkout: React.FC = () => {
                     <Input
                       id="state"
                       value={shippingInfo.state}
-                      onChange={(e) => setShippingInfo(prev => ({ ...prev, state: e.target.value }))}
+                      onChange={(e) => setShippingInfo((prev) => ({ ...prev, state: e.target.value }))}
                       placeholder="Lagos"
                       disabled={processing}
                     />
@@ -389,7 +389,7 @@ const Checkout: React.FC = () => {
                   <Input
                     id="zipCode"
                     value={shippingInfo.zipCode}
-                    onChange={(e) => setShippingInfo(prev => ({ ...prev, zipCode: e.target.value }))}
+                    onChange={(e) => setShippingInfo((prev) => ({ ...prev, zipCode: e.target.value }))}
                     placeholder="100001"
                     disabled={processing}
                   />
@@ -400,7 +400,7 @@ const Checkout: React.FC = () => {
                   <Input
                     id="phone"
                     value={shippingInfo.phone}
-                    onChange={(e) => setShippingInfo(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) => setShippingInfo((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="+234 800 000 0000"
                     disabled={processing}
                   />
@@ -432,10 +432,10 @@ const Checkout: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Shipping</span>
-                  <span>{grandTotals.shipping === 0 ? 'FREE' : `₦${grandTotals.shipping.toLocaleString()}`}</span>
+                  <span>{grandTotals.shipping === 0 ? "FREE" : `₦${grandTotals.shipping.toLocaleString()}`}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total VAT</span>
+                  <span className="text-muted-foreground">Service Charge</span>
                   <span>₦{grandTotals.vat.toLocaleString()}</span>
                 </div>
                 <Separator />
@@ -465,9 +465,7 @@ const Checkout: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     Pay securely with Paystack (Card, Bank, or USSD).
                     {vendorGroups.length > 1 && (
-                      <span className="block mt-1 text-xs">
-                        Each vendor payment will open separately.
-                      </span>
+                      <span className="block mt-1 text-xs">Each vendor payment will open separately.</span>
                     )}
                   </p>
                 </div>
