@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,11 +7,9 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { WishlistButton } from '@/components/WishlistButton';
 import { LikeButton } from '@/components/LikeButton';
-// NOTE: ProductCardMobile and ProductCard were imported but not used, 
-// since 'isMobile' hook was missing in the original file.
-// If the hook is available, ensure it is imported: import { useIsMobile } from '@/hooks/use-mobile'; 
 import { ProductCard } from '@/components/ProductCard'; 
 import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { ProductComments } from '@/components/ProductComments';
@@ -47,7 +45,9 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { products, loading } = useProducts();
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [vendorName, setVendorName] = useState<string>('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -86,6 +86,16 @@ const ProductDetail = () => {
   const originalPrice = hasDiscount ? product!.original_price : 0;
 
   const handleAddToCart = () => {
+    // Require login to add to cart
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login or sign up to add items to your cart.",
+      });
+      navigate('/auth');
+      return;
+    }
+    
     if (product && (product.stock_count || 0) > 0) {
       for (let i = 0; i < quantity; i++) {
         addToCart(product);

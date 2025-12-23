@@ -33,7 +33,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Search, Edit, Trash2, Star, Loader2, Package, AlertTriangle } from 'lucide-react';
 import { useAdminProducts } from '@/hooks/useAdminProducts';
 import { useStockAlerts } from '@/hooks/useStockAlerts';
-import { ImageUpload } from '@/components/admin/ImageUpload';
+import { MultiImageUpload } from '@/components/MultiImageUpload';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminProducts = () => {
@@ -443,8 +443,13 @@ const AdminProducts = () => {
                   </p>
                 </div>
                 <div className="col-span-2 space-y-2">
-                  <ImageUpload
-                    onImageUploaded={(url) => setNewProduct({...newProduct, image: url})}
+                  <MultiImageUpload
+                    onImagesChanged={(urls) => {
+                      const imageValue = urls.length > 1 ? JSON.stringify(urls) : urls[0] || '';
+                      setNewProduct({...newProduct, image: imageValue});
+                    }}
+                    maxImages={3}
+                    maxTotalSizeMB={8}
                   />
                 </div>
                 <div className="col-span-2 space-y-2">
@@ -615,14 +620,25 @@ const AdminProducts = () => {
                   </Select>
                 </div>
               <div className="col-span-2 space-y-2">
-                <ImageUpload
-                  onImageUploaded={(url) => setEditingProduct({...editingProduct, image: url})}
+                <MultiImageUpload
+                  onImagesChanged={(urls) => {
+                    const imageValue = urls.length > 1 ? JSON.stringify(urls) : urls[0] || '';
+                    setEditingProduct({...editingProduct, image: imageValue});
+                  }}
+                  currentImages={(() => {
+                    if (!editingProduct?.image) return [];
+                    try {
+                      if (editingProduct.image.startsWith('[')) {
+                        return JSON.parse(editingProduct.image);
+                      }
+                      return [editingProduct.image];
+                    } catch {
+                      return [editingProduct.image];
+                    }
+                  })()}
+                  maxImages={3}
+                  maxTotalSizeMB={8}
                 />
-                {editingProduct?.image && (
-                  <div className="mt-2">
-                    <img src={editingProduct.image} alt="Current" className="w-20 h-20 object-cover rounded" />
-                  </div>
-                )}
               </div>
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="edit-description">Description</Label>

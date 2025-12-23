@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Leaf, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { WishlistButton } from './WishlistButton';
 import { LikeButton } from './LikeButton';
 import { useToast } from '@/hooks/use-toast';
@@ -38,11 +39,23 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Require login to add to cart
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login or sign up to add items to your cart.",
+      });
+      navigate('/auth');
+      return;
+    }
     
     if (product.stock_count <= 0) {
       toast({

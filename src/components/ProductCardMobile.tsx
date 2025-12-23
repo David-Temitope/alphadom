@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, ThumbsUp, Star } from 'lucide-react';
@@ -36,6 +36,7 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
   const { addToCart } = useCart();
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { toggleLike, isLiked } = useProductLikes();
 
@@ -45,6 +46,16 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Require login to add to cart
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login or sign up to add items to your cart.",
+      });
+      navigate('/auth');
+      return;
+    }
     
     if ((product.stock_count || 0) <= 0) {
       toast({
