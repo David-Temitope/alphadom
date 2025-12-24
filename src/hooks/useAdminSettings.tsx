@@ -60,10 +60,25 @@ export const useAdminSettings = () => {
         return acc;
       }, {} as Record<string, any>);
 
+      // hero_images can be stored as a JSON array or a JSON-stringified array
+      const rawHeroImages = settingsMap.hero_images;
+      const parsedHeroImages: string[] = (() => {
+        if (Array.isArray(rawHeroImages)) return rawHeroImages;
+        if (typeof rawHeroImages === 'string') {
+          try {
+            const parsed = JSON.parse(rawHeroImages);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return [];
+      })();
+
       setSettings({
         site_name: settingsMap.site_config?.name || 'Alphadom',
         site_description: settingsMap.site_config?.description || 'The Student Marketplace',
-        hero_images: Array.isArray(settingsMap.hero_images) && settingsMap.hero_images.length > 0 ? settingsMap.hero_images : [],
+        hero_images: parsedHeroImages.filter((u) => typeof u === 'string' && u.length > 0),
         navbar_logo: settingsMap.navbar_config?.logo || "/favicon.png",
         hero_title: settingsMap.hero_config?.title || "Your Campus",
         hero_subtitle: settingsMap.hero_config?.subtitle || "Find budget-friendly products from verified vendors. Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰",
