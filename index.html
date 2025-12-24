@@ -12,9 +12,6 @@
       name="description"
       content="Alphadom is the #1 online marketplace for university students. Buy affordable fashion, electronics, books, dorm essentials & more."
     />
-
-    <script src="/cookie-consent.js" defer></script>
-
     <meta name="keywords" content="Alphadom, student marketplace, campus shopping, university store, student deals" />
     <meta name="author" content="Alphadom" />
     <meta name="robots" content="index, follow" />
@@ -54,12 +51,12 @@
       }
     </script>
 
-    <!-- ================== SECURITY (CSP FIXED) ================== -->
+    <!-- Security Headers (CSP fixed for GTM + Paystack) -->
     <meta
       http-equiv="Content-Security-Policy"
       content="
         default-src 'self';
-        script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://js.paystack.co;
+        script-src 'self' 'unsafe-inline' https://js.paystack.co https://www.googletagmanager.com;
         connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https:;
         img-src 'self' data: https:;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
@@ -76,24 +73,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- ================== COOKIE CONSENT ================== -->
-    <!-- PLACE: end of <head> -->
+    <!-- Cookie Consent (must call loadGTM() after accept) -->
     <script src="/cookie-consent.js" defer></script>
   </head>
 
   <body>
-    <!-- ================== GTM NOSCRIPT ================== -->
-    <!-- PLACE: immediately after body -->
+    <!-- Google Tag Manager (noscript) -->
     <noscript>
       <iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-5H2RW89Q"
+        src="https://www.googletagmanager.com/ns.html?id=G-BCHGE2H6YN"
         height="0"
         width="0"
         style="display:none;visibility:hidden"
       ></iframe>
     </noscript>
-
-    <!-- ================== END GTM NOSCRIPT ================== -->
+    <!-- End Google Tag Manager -->
 
     <div id="root"></div>
 
