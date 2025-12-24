@@ -63,7 +63,7 @@ export const useAdminSettings = () => {
       setSettings({
         site_name: settingsMap.site_config?.name || 'Alphadom',
         site_description: settingsMap.site_config?.description || 'The Student Marketplace',
-        hero_images: settingsMap.hero_images?.length > 0 ? settingsMap.hero_images : [],
+        hero_images: Array.isArray(settingsMap.hero_images) && settingsMap.hero_images.length > 0 ? settingsMap.hero_images : [],
         navbar_logo: settingsMap.navbar_config?.logo || "/favicon.png",
         hero_title: settingsMap.hero_config?.title || "Your Campus",
         hero_subtitle: settingsMap.hero_config?.subtitle || "Find budget-friendly products from verified vendors. Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰",
