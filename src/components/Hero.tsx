@@ -13,6 +13,12 @@ import heroDefault2 from '@/assets/hero-default-2.jpg';
 
 const DEFAULT_HERO_IMAGES = [heroDefault1, heroDefault2];
 
+// Fixed guest hero content - never flashes or waits for settings
+const GUEST_HERO_TITLE = "Your Campus";
+const GUEST_HERO_MAIN_TEXT = "Marketplace";
+const GUEST_HERO_SECONDARY_TEXT = "Shop Smart, Save Big";
+const GUEST_HERO_SUBTITLE = "Discover amazing deals from student vendors. Join thousands of students buying and selling on the largest campus marketplace!";
+
 export const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { settings } = useAdminSettings();
@@ -20,8 +26,18 @@ export const Hero = () => {
   const { hasUserType } = useUserTypes();
   const { userApplication } = useShopApplications();
 
-  // Use admin-uploaded images if available, otherwise use default static images
-  const heroImages = settings.hero_images.length > 0 ? settings.hero_images : DEFAULT_HERO_IMAGES;
+  // For guests: ALWAYS use fixed defaults immediately (no flash)
+  // For logged-in users: use admin settings or defaults as fallback
+  const isGuest = !user;
+  const heroImages = isGuest 
+    ? DEFAULT_HERO_IMAGES 
+    : (settings.hero_images.length > 0 ? settings.hero_images : DEFAULT_HERO_IMAGES);
+
+  // Use fixed text for guests, admin settings for logged-in users
+  const heroTitle = isGuest ? GUEST_HERO_TITLE : (settings.hero_title || GUEST_HERO_TITLE);
+  const heroMainText = isGuest ? GUEST_HERO_MAIN_TEXT : (settings.hero_main_text || GUEST_HERO_MAIN_TEXT);
+  const heroSecondaryText = isGuest ? GUEST_HERO_SECONDARY_TEXT : (settings.hero_secondary_text || GUEST_HERO_SECONDARY_TEXT);
+  const heroSubtitle = isGuest ? GUEST_HERO_SUBTITLE : (settings.hero_subtitle || GUEST_HERO_SUBTITLE);
 
   // Slide auto-advance effect
   useEffect(() => {
@@ -73,18 +89,18 @@ export const Hero = () => {
                 Built for students, by students 🎓
               </div>
 
-              {/* Hero Title - Same for all users */}
+              {/* Hero Title - Uses guest or admin settings */}
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
-                {settings.hero_title || "Your Campus"}
+                {heroTitle}
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                  {settings.hero_main_text || "Marketplace"}
+                  {heroMainText}
                 </span>
-                {settings.hero_secondary_text || "Shop Smart, Save Big"}
+                {heroSecondaryText}
               </h1>
 
-              {/* Hero Subtitle - Uses setting */}
+              {/* Hero Subtitle */}
               <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                {settings.hero_subtitle || "Find budget-friendly products from verified vendors. Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰"}
+                {heroSubtitle}
               </p>
             </div>
 

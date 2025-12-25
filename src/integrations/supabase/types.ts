@@ -1639,6 +1639,13 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]
       }
+      get_order_customer_contact: {
+        Args: { _order_id: string }
+        Returns: {
+          customer_name: string
+          customer_phone: string
+        }[]
+      }
       has_admin_role: {
         Args: {
           _role: Database["public"]["Enums"]["admin_role"]

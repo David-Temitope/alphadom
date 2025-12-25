@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVendors } from '@/hooks/useVendors';
 import { useToast } from '@/hooks/use-toast';
-import { Truck, CheckCircle, Clock, Package, User, Mail, Phone, MapPin, AlertCircle } from 'lucide-react';
+import { Truck, CheckCircle, Clock, Package, User, Phone, MapPin, AlertCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface Order {
@@ -120,7 +120,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Customer Information */}
+        {/* Customer Information - Now uses shipping_address for contact info (secure) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h4 className="font-semibold mb-3 flex items-center gap-2">
@@ -130,13 +130,15 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
             <div className="space-y-2 text-sm">
               <p className="flex items-center gap-2">
                 <span className="font-medium">Name:</span>
-                {order.profiles?.full_name || 'N/A'}
+                {order.profiles?.full_name || order.shipping_address?.name || 'N/A'}
               </p>
-              <p className="flex items-center gap-2">
-                <Mail className="h-3 w-3" />
-                <span className="font-medium">Email:</span>
-                {order.profiles?.email || 'N/A'}
-              </p>
+              {order.shipping_address?.phone && (
+                <p className="flex items-center gap-2">
+                  <Phone className="h-3 w-3" />
+                  <span className="font-medium">Phone:</span>
+                  {order.shipping_address.phone}
+                </p>
+              )}
             </div>
           </div>
           
@@ -150,13 +152,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
                 <p>{order.shipping_address.street}</p>
                 <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zipCode}</p>
                 <p>{order.shipping_address.country}</p>
-                {order.shipping_address.phone && (
-                  <p className="flex items-center gap-2 mt-2">
-                    <Phone className="h-3 w-3" />
-                    <span className="font-medium">Phone:</span>
-                    {order.shipping_address.phone}
-                  </p>
-                )}
               </div>
             </div>
           )}
