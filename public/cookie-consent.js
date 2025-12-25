@@ -28,16 +28,34 @@
     return null;
   }
 
+  // Storage helpers (cookie + localStorage fallback)
+  function safeGetLocalStorage(key) {
+    try {
+      return window.localStorage ? window.localStorage.getItem(key) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function safeSetLocalStorage(key, value) {
+    try {
+      if (window.localStorage) window.localStorage.setItem(key, value);
+    } catch (e) {
+      // ignore
+    }
+  }
+
   // Check if consent has already been given
   function hasConsent() {
-    return getCookie("cookiesAccepted") !== null;
+    return getCookie("cookiesAccepted") !== null || safeGetLocalStorage("cookiesAccepted") !== null;
   }
 
   // Get consent value
   function getConsentValue() {
+    var ls = safeGetLocalStorage("cookiesAccepted");
+    if (ls !== null) return ls === "true";
     return getCookie("cookiesAccepted") === "true";
   }
-
   // Initialize Google Tag Manager only after consent
   function initGTM() {
     if (window.gtmInitialized) return;
