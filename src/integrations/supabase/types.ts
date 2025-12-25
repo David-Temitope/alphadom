@@ -117,6 +117,38 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_password_hashes: {
+        Row: {
+          admin_role_id: string
+          created_at: string | null
+          id: string
+          password_hash: string
+          updated_at: string | null
+        }
+        Insert: {
+          admin_role_id: string
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          updated_at?: string | null
+        }
+        Update: {
+          admin_role_id?: string
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_password_hashes_admin_role_id_fkey"
+            columns: ["admin_role_id"]
+            isOneToOne: true
+            referencedRelation: "admin_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_password_resets: {
         Row: {
           admin_id: string
@@ -157,7 +189,6 @@ export type Database = {
           is_active: boolean | null
           is_locked: boolean | null
           last_login: string | null
-          password_hash: string | null
           role: Database["public"]["Enums"]["admin_role"]
           user_id: string
         }
@@ -168,7 +199,6 @@ export type Database = {
           is_active?: boolean | null
           is_locked?: boolean | null
           last_login?: string | null
-          password_hash?: string | null
           role: Database["public"]["Enums"]["admin_role"]
           user_id: string
         }
@@ -179,7 +209,6 @@ export type Database = {
           is_active?: boolean | null
           is_locked?: boolean | null
           last_login?: string | null
-          password_hash?: string | null
           role?: Database["public"]["Enums"]["admin_role"]
           user_id?: string
         }
@@ -382,6 +411,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "shop_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approved_vendors_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "shop_applications_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1485,6 +1521,81 @@ export type Database = {
       }
     }
     Views: {
+      shop_applications_safe: {
+        Row: {
+          admin_notes: string | null
+          agreed_policies: Json | null
+          approved_at: string | null
+          business_address: string | null
+          business_description: string | null
+          business_type: string | null
+          contact_phone: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          is_registered: boolean | null
+          payment_countdown_expires_at: string | null
+          payment_due_date: string | null
+          payment_received_at: string | null
+          price_range_max: number | null
+          price_range_min: number | null
+          product_category: string | null
+          status: string | null
+          store_name: string | null
+          subscription_plan: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          agreed_policies?: Json | null
+          approved_at?: string | null
+          business_address?: string | null
+          business_description?: string | null
+          business_type?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          is_registered?: boolean | null
+          payment_countdown_expires_at?: string | null
+          payment_due_date?: string | null
+          payment_received_at?: string | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          product_category?: string | null
+          status?: string | null
+          store_name?: string | null
+          subscription_plan?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          agreed_policies?: Json | null
+          approved_at?: string | null
+          business_address?: string | null
+          business_description?: string | null
+          business_type?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          is_registered?: boolean | null
+          payment_countdown_expires_at?: string | null
+          payment_due_date?: string | null
+          payment_received_at?: string | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          product_category?: string | null
+          status?: string | null
+          store_name?: string | null
+          subscription_plan?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       vendor_profiles_public: {
         Row: {
           avatar_url: string | null
@@ -1509,6 +1620,10 @@ export type Database = {
           tax_amount: number
           total_amount: number
         }[]
+      }
+      can_access_sensitive_shop_data: {
+        Args: { app_user_id: string }
+        Returns: boolean
       }
       cleanup_expired_admin_invitations: { Args: never; Returns: undefined }
       generate_sitemap_data: {
