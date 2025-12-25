@@ -22,6 +22,7 @@ import {
   Loader2,
   RefreshCw,
   Ban,
+  Phone,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShippingInfo, VAT_RATE, VendorGroup } from "@/types/checkout";
@@ -396,7 +397,7 @@ const Checkout: React.FC = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">Phone Number *</Label>
                   <Input
                     id="phone"
                     value={shippingInfo.phone}
@@ -404,6 +405,14 @@ const Checkout: React.FC = () => {
                     placeholder="+234 800 000 0000"
                     disabled={processing}
                   />
+                  <div className="flex items-start gap-2 mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <Phone className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-800">
+                      <strong>Important:</strong> Please provide an active phone number. 
+                      Vendors and delivery riders will use this number to contact you 
+                      about your order. Orders with unreachable numbers may be delayed.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
