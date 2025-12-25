@@ -7,6 +7,12 @@ import { useUserTypes } from '@/hooks/useUserTypes';
 import { useShopApplications } from '@/hooks/useShopApplications';
 import { ArrowRight, Leaf, Shield, Recycle, ChevronLeft, ChevronRight, Store } from 'lucide-react';
 
+// Default hero images for guests/fallback
+import heroDefault1 from '@/assets/hero-default-1.jpg';
+import heroDefault2 from '@/assets/hero-default-2.jpg';
+
+const DEFAULT_HERO_IMAGES = [heroDefault1, heroDefault2];
+
 export const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { settings } = useAdminSettings();
@@ -14,8 +20,8 @@ export const Hero = () => {
   const { hasUserType } = useUserTypes();
   const { userApplication } = useShopApplications();
 
-  // Only show slider if there are admin-uploaded images
-  const heroImages = settings.hero_images.length > 0 ? settings.hero_images : [];
+  // Use admin-uploaded images if available, otherwise use default static images
+  const heroImages = settings.hero_images.length > 0 ? settings.hero_images : DEFAULT_HERO_IMAGES;
 
   // Slide auto-advance effect
   useEffect(() => {
@@ -145,69 +151,67 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Right Hero Image / Slider - Only show if admin uploaded images */}
-          {heroImages.length > 0 && (
-            <div className="relative">
-              <div className="relative z-10 h-96 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
-                <div className="relative w-full h-full">
-                  {heroImages.map((image, index) => (
-                    <div
-                      key={index}
-                      className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
-                        index === currentSlide
-                          ? 'translate-x-0'
-                          : index < currentSlide
-                          ? '-translate-x-full'
-                          : 'translate-x-full'
-                      }`}
+          {/* Right Hero Image / Slider - Always show (uses defaults for guests) */}
+          <div className="relative">
+            <div className="relative z-10 h-96 lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
+              <div className="relative w-full h-full">
+                {heroImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
+                      index === currentSlide
+                        ? 'translate-x-0'
+                        : index < currentSlide
+                        ? '-translate-x-full'
+                        : 'translate-x-full'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Hero slide ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      fetchPriority={index === 0 ? "high" : "low"}
+                    />
+                  </div>
+                ))}
+
+                {/* Navigation Arrows - Only show if multiple images */}
+                {heroImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevSlide}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
                     >
-                      <img
-                        src={image}
-                        alt={`Hero slide ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        loading={index === 0 ? "eager" : "lazy"}
-                        decoding="async"
-                        fetchPriority={index === 0 ? "high" : "low"}
-                      />
+                      <ChevronLeft className="w-5 h-5 text-slate-700" />
+                    </button>
+                    <button
+                      onClick={nextSlide}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
+                    >
+                      <ChevronRight className="w-5 h-5 text-slate-700" />
+                    </button>
+
+                    {/* Dots Indicator */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                      {heroImages.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentSlide(index)}
+                          className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                            index === currentSlide ? 'bg-white shadow-lg' : 'bg-white/50'
+                          }`}
+                        />
+                      ))}
                     </div>
-                  ))}
-
-                  {/* Navigation Arrows - Only show if multiple images */}
-                  {heroImages.length > 1 && (
-                    <>
-                      <button
-                        onClick={prevSlide}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
-                      >
-                        <ChevronLeft className="w-5 h-5 text-slate-700" />
-                      </button>
-                      <button
-                        onClick={nextSlide}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200"
-                      >
-                        <ChevronRight className="w-5 h-5 text-slate-700" />
-                      </button>
-
-                      {/* Dots Indicator */}
-                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                        {heroImages.map((_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentSlide(index)}
-                            className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                              index === currentSlide ? 'bg-white shadow-lg' : 'bg-white/50'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
+                  </>
+                )}
               </div>
-
-              <div className="absolute -inset-4 bg-gradient-to-r from-green-200/30 to-blue-200/30 rounded-3xl blur-xl"></div>
             </div>
-          )}
+
+            <div className="absolute -inset-4 bg-gradient-to-r from-green-200/30 to-blue-200/30 rounded-3xl blur-xl"></div>
+          </div>
         </div>
       </div>
     </section>
