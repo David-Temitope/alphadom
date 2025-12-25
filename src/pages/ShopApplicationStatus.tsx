@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { useShopApplications } from '@/hooks/useShopApplications';
-import { useVendors } from '@/hooks/useVendors';
-import { useAuth } from '@/contexts/AuthContext';
-import { Clock, CheckCircle, XCircle, Timer, CreditCard, Crown, Star, Zap, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useShopApplications } from "@/hooks/useShopApplications";
+import { useVendors } from "@/hooks/useVendors";
+import { useAuth } from "@/contexts/AuthContext";
+import { Clock, CheckCircle, XCircle, Timer, CreditCard, Crown, Star, Zap, AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
@@ -16,39 +16,39 @@ declare global {
   }
 }
 
-const PAYSTACK_PUBLIC_KEY = 'pk_test_138ebaa183ec16342d00c7eee0ad68862d438581';
+const PAYSTACK_PUBLIC_KEY = "pk_live_b65b60f97ee0b66e9631df6b1301ef83d383913a";
 
 const subscriptionPlans = [
   {
-    id: 'free',
-    name: 'Free Plan',
+    id: "free",
+    name: "Free Plan",
     price: 0,
-    features: ['Up to 20 products', '15% commission', 'Low visibility', 'No ads'],
+    features: ["Up to 20 products", "15% commission", "Low visibility", "No ads"],
     icon: Zap,
-    color: 'border-gray-300 bg-gray-50',
+    color: "border-gray-300 bg-gray-50",
     productLimit: 20,
-    commission: 15
+    commission: 15,
   },
   {
-    id: 'economy',
-    name: 'Economy Plan',
+    id: "economy",
+    name: "Economy Plan",
     price: 7000,
-    features: ['Up to 50 products', '9% commission', 'Standard visibility', 'No ads'],
+    features: ["Up to 50 products", "9% commission", "Standard visibility", "No ads"],
     icon: Star,
-    color: 'border-blue-300 bg-blue-50',
+    color: "border-blue-300 bg-blue-50",
     productLimit: 50,
-    commission: 9
+    commission: 9,
   },
   {
-    id: 'first_class',
-    name: 'First Class Plan',
+    id: "first_class",
+    name: "First Class Plan",
     price: 15000,
-    features: ['Unlimited products', '5% commission', 'Homepage visibility', '1 free ad/month'],
+    features: ["Unlimited products", "5% commission", "Homepage visibility", "1 free ad/month"],
     icon: Crown,
-    color: 'border-yellow-300 bg-yellow-50',
+    color: "border-yellow-300 bg-yellow-50",
     productLimit: -1,
-    commission: 5
-  }
+    commission: 5,
+  },
 ];
 
 const ShopApplicationStatus = () => {
@@ -67,8 +67,8 @@ const ShopApplicationStatus = () => {
   // Load Paystack script
   useEffect(() => {
     if (window.PaystackPop) return;
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
     document.body.appendChild(script);
   }, []);
 
@@ -83,17 +83,22 @@ const ShopApplicationStatus = () => {
     }
   }, [currentVendor]);
 
-  const handleSelectPlan = async (plan: typeof subscriptionPlans[0]) => {
+  const handleSelectPlan = async (plan: (typeof subscriptionPlans)[0]) => {
     if (!user || !userApplication) return;
-    
+
     // Check if user is trying to downgrade from paid to free while subscription is active
-    if (currentVendor && plan.id === 'free' && 
-        (currentVendor.subscription_plan === 'economy' || currentVendor.subscription_plan === 'first_class') &&
-        daysLeft && daysLeft > 0) {
+    if (
+      currentVendor &&
+      plan.id === "free" &&
+      (currentVendor.subscription_plan === "economy" || currentVendor.subscription_plan === "first_class") &&
+      daysLeft &&
+      daysLeft > 0
+    ) {
       toast({
         title: "Cannot Downgrade",
-        description: "You cannot switch to Free plan while your current subscription is active. Please wait until it expires.",
-        variant: "destructive"
+        description:
+          "You cannot switch to Free plan while your current subscription is active. Please wait until it expires.",
+        variant: "destructive",
       });
       return;
     }
@@ -112,27 +117,27 @@ const ShopApplicationStatus = () => {
 
       // Activate the plan
       await activatePlan(plan);
-      
+
       toast({
         title: "Plan Activated",
-        description: `Your ${plan.name} has been activated successfully!`
+        description: `Your ${plan.name} has been activated successfully!`,
       });
-      
+
       refreshUserApplication();
       refreshVendors();
     } catch (error) {
-      console.error('Error selecting plan:', error);
+      console.error("Error selecting plan:", error);
       toast({
         title: "Error",
         description: "Failed to activate plan. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setProcessing(false);
     }
   };
 
-  const handlePaystackPayment = (plan: typeof subscriptionPlans[0]): Promise<boolean> => {
+  const handlePaystackPayment = (plan: (typeof subscriptionPlans)[0]): Promise<boolean> => {
     return new Promise((resolve) => {
       if (!window.PaystackPop) {
         toast({ title: "Payment system not loaded", variant: "destructive" });
@@ -144,19 +149,19 @@ const ShopApplicationStatus = () => {
         key: PAYSTACK_PUBLIC_KEY,
         email: user?.email,
         amount: plan.price * 100,
-        currency: 'NGN',
+        currency: "NGN",
         ref: `SUB_${Date.now()}_${Math.random().toString(36).slice(2)}`,
         callback: function (response: any) {
-          if (response?.status === 'success') {
+          if (response?.status === "success") {
             // Record transaction
-            supabase.from('platform_transactions').insert({
+            supabase.from("platform_transactions").insert({
               user_id: user?.id,
               amount: plan.price,
-              transaction_type: 'subscription',
-              payment_method: 'paystack',
+              transaction_type: "subscription",
+              payment_method: "paystack",
               reference: response.reference,
               description: `${plan.name} subscription payment`,
-              status: 'completed'
+              status: "completed",
             });
             resolve(true);
           } else {
@@ -166,21 +171,21 @@ const ShopApplicationStatus = () => {
         onClose: function () {
           toast({ title: "Payment cancelled" });
           resolve(false);
-        }
+        },
       });
 
       handler.openIframe();
     });
   };
 
-  const activatePlan = async (plan: typeof subscriptionPlans[0]) => {
+  const activatePlan = async (plan: (typeof subscriptionPlans)[0]) => {
     const now = new Date();
     const endDate = new Date(now.getTime() + 31 * 24 * 60 * 60 * 1000); // 31 days from now
 
     if (currentVendor) {
       // Update existing vendor
       await supabase
-        .from('approved_vendors')
+        .from("approved_vendors")
         .update({
           subscription_plan: plan.id,
           subscription_start_date: now.toISOString(),
@@ -189,13 +194,13 @@ const ShopApplicationStatus = () => {
           is_active: true,
           product_limit: plan.productLimit === -1 ? 9999 : plan.productLimit,
           commission_rate: plan.commission,
-          has_home_visibility: plan.id === 'first_class',
-          free_ads_remaining: plan.id === 'first_class' ? 1 : 0
+          has_home_visibility: plan.id === "first_class",
+          free_ads_remaining: plan.id === "first_class" ? 1 : 0,
         })
-        .eq('id', currentVendor.id);
+        .eq("id", currentVendor.id);
     } else if (userApplication) {
       // Create new vendor from approved application
-      await supabase.from('approved_vendors').insert({
+      await supabase.from("approved_vendors").insert({
         user_id: user?.id,
         application_id: userApplication.id,
         store_name: userApplication.store_name,
@@ -207,15 +212,15 @@ const ShopApplicationStatus = () => {
         is_suspended: false,
         product_limit: plan.productLimit === -1 ? 9999 : plan.productLimit,
         commission_rate: plan.commission,
-        has_home_visibility: plan.id === 'first_class',
-        free_ads_remaining: plan.id === 'first_class' ? 1 : 0
+        has_home_visibility: plan.id === "first_class",
+        free_ads_remaining: plan.id === "first_class" ? 1 : 0,
       });
 
       // Update application status
       await supabase
-        .from('shop_applications')
-        .update({ status: 'payment', subscription_plan: plan.id })
-        .eq('id', userApplication.id);
+        .from("shop_applications")
+        .update({ status: "payment", subscription_plan: plan.id })
+        .eq("id", userApplication.id);
     }
   };
 
@@ -251,24 +256,33 @@ const ShopApplicationStatus = () => {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'approved': return 'default';
-      case 'rejected': return 'destructive';
-      case 'payment': return 'secondary';
-      default: return 'outline';
+      case "approved":
+        return "default";
+      case "rejected":
+        return "destructive";
+      case "payment":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved': return <CheckCircle className="h-4 w-4" />;
-      case 'rejected': return <XCircle className="h-4 w-4" />;
-      case 'payment': return <CheckCircle className="h-4 w-4" />;
-      default: return <Clock className="h-4 w-4" />;
+      case "approved":
+        return <CheckCircle className="h-4 w-4" />;
+      case "rejected":
+        return <XCircle className="h-4 w-4" />;
+      case "payment":
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
     }
   };
 
-  const showSubscriptionSelection = userApplication.status === 'approved' || 
-    (currentVendor?.is_suspended) ||
+  const showSubscriptionSelection =
+    userApplication.status === "approved" ||
+    currentVendor?.is_suspended ||
     (currentVendor && daysLeft !== null && daysLeft <= 0);
 
   return (
@@ -292,9 +306,7 @@ const ShopApplicationStatus = () => {
                   Applied on {new Date(userApplication.created_at).toLocaleDateString()}
                 </CardDescription>
               </div>
-              <Badge variant={getStatusBadgeVariant(userApplication.status)}>
-                {userApplication.status}
-              </Badge>
+              <Badge variant={getStatusBadgeVariant(userApplication.status)}>{userApplication.status}</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -305,11 +317,14 @@ const ShopApplicationStatus = () => {
               </div>
               <div>
                 <span className="text-muted-foreground">Price Range:</span>
-                <span className="ml-2 font-medium">₦{userApplication.price_range_min?.toLocaleString()} - ₦{userApplication.price_range_max?.toLocaleString()}</span>
+                <span className="ml-2 font-medium">
+                  ₦{userApplication.price_range_min?.toLocaleString()} - ₦
+                  {userApplication.price_range_max?.toLocaleString()}
+                </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Contact:</span>
-                <span className="ml-2 font-medium">{userApplication.contact_phone || 'N/A'}</span>
+                <span className="ml-2 font-medium">{userApplication.contact_phone || "N/A"}</span>
               </div>
             </div>
 
@@ -318,7 +333,9 @@ const ShopApplicationStatus = () => {
               <div className="p-4 bg-muted rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">Current Plan: {currentVendor.subscription_plan?.replace('_', ' ').toUpperCase() || 'None'}</p>
+                    <p className="font-medium">
+                      Current Plan: {currentVendor.subscription_plan?.replace("_", " ").toUpperCase() || "None"}
+                    </p>
                     {daysLeft !== null && daysLeft > 0 && (
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
                         <Timer className="h-4 w-4" />
@@ -351,7 +368,7 @@ const ShopApplicationStatus = () => {
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold">Select Your Subscription Plan</h2>
               <p className="text-muted-foreground">
-                {currentVendor?.is_suspended 
+                {currentVendor?.is_suspended
                   ? "Your subscription has expired. Select a plan to reactivate your shop."
                   : "Choose a plan to activate your shop and start selling."}
               </p>
@@ -361,24 +378,25 @@ const ShopApplicationStatus = () => {
               {subscriptionPlans.map((plan) => {
                 const Icon = plan.icon;
                 const isCurrentPlan = currentVendor?.subscription_plan === plan.id;
-                const cannotDowngrade = currentVendor && 
-                  plan.id === 'free' && 
-                  (currentVendor.subscription_plan === 'economy' || currentVendor.subscription_plan === 'first_class') &&
-                  daysLeft && daysLeft > 0;
+                const cannotDowngrade =
+                  currentVendor &&
+                  plan.id === "free" &&
+                  (currentVendor.subscription_plan === "economy" ||
+                    currentVendor.subscription_plan === "first_class") &&
+                  daysLeft &&
+                  daysLeft > 0;
 
                 return (
-                  <Card 
-                    key={plan.id} 
-                    className={`relative ${plan.color} ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}
+                  <Card
+                    key={plan.id}
+                    className={`relative ${plan.color} ${isCurrentPlan ? "ring-2 ring-primary" : ""}`}
                   >
-                    {isCurrentPlan && (
-                      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">Current</Badge>
-                    )}
+                    {isCurrentPlan && <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">Current</Badge>}
                     <CardHeader className="text-center">
                       <Icon className="h-10 w-10 mx-auto mb-2" />
                       <CardTitle>{plan.name}</CardTitle>
                       <CardDescription className="text-2xl font-bold">
-                        {plan.price === 0 ? 'Free' : `₦${plan.price.toLocaleString()}`}
+                        {plan.price === 0 ? "Free" : `₦${plan.price.toLocaleString()}`}
                         {plan.price > 0 && <span className="text-sm font-normal">/31 days</span>}
                       </CardDescription>
                     </CardHeader>
@@ -391,16 +409,21 @@ const ShopApplicationStatus = () => {
                           </li>
                         ))}
                       </ul>
-                      <Button 
-                        className="w-full" 
+                      <Button
+                        className="w-full"
                         onClick={() => handleSelectPlan(plan)}
                         disabled={processing || (isCurrentPlan && daysLeft && daysLeft > 0) || !!cannotDowngrade}
-                        variant={plan.id === 'first_class' ? 'default' : 'outline'}
+                        variant={plan.id === "first_class" ? "default" : "outline"}
                       >
-                        {processing ? 'Processing...' : (
-                          cannotDowngrade ? 'Cannot Downgrade' :
-                          isCurrentPlan && daysLeft && daysLeft > 0 ? 'Current Plan' :
-                          plan.price === 0 ? 'Activate Free' : 
+                        {processing ? (
+                          "Processing..."
+                        ) : cannotDowngrade ? (
+                          "Cannot Downgrade"
+                        ) : isCurrentPlan && daysLeft && daysLeft > 0 ? (
+                          "Current Plan"
+                        ) : plan.price === 0 ? (
+                          "Activate Free"
+                        ) : (
                           <span className="flex items-center gap-2">
                             <CreditCard className="h-4 w-4" />
                             Pay ₦{plan.price.toLocaleString()}
@@ -416,7 +439,7 @@ const ShopApplicationStatus = () => {
         )}
 
         {/* Pending Status Message */}
-        {userApplication.status === 'pending' && (
+        {userApplication.status === "pending" && (
           <Card>
             <CardContent className="p-8 text-center">
               <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -429,7 +452,7 @@ const ShopApplicationStatus = () => {
         )}
 
         {/* Rejected Status */}
-        {userApplication.status === 'rejected' && (
+        {userApplication.status === "rejected" && (
           <Card className="border-destructive">
             <CardContent className="p-8 text-center">
               <XCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
@@ -442,14 +465,12 @@ const ShopApplicationStatus = () => {
         )}
 
         {/* Active Shop */}
-        {userApplication.status === 'payment' && currentVendor && !currentVendor.is_suspended && (
+        {userApplication.status === "payment" && currentVendor && !currentVendor.is_suspended && (
           <Card className="border-green-500">
             <CardContent className="p-8 text-center">
               <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-600" />
               <h3 className="text-lg font-medium mb-2">Shop Active</h3>
-              <p className="text-muted-foreground mb-4">
-                Your shop is active. Start adding products and selling!
-              </p>
+              <p className="text-muted-foreground mb-4">Your shop is active. Start adding products and selling!</p>
               <Button asChild>
                 <Link to="/vendor-dashboard">Go to Dashboard</Link>
               </Button>
