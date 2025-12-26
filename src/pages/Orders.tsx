@@ -9,6 +9,7 @@ import { Loader2, ShoppingBag, Calendar, CreditCard, CheckCircle } from 'lucide-
 import { Link, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { OrderChat } from '@/components/OrderChat';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -151,7 +152,8 @@ const Orders = () => {
                         </span>
                       </CardDescription>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                      <OrderChat orderId={order.id} orderNumber={order.id} />
                       <Badge className={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>

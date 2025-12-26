@@ -96,12 +96,28 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
 
   const hasDiscount = product.has_discount && product.discount_percentage && product.original_price;
 
+  // Extract first image from potential JSON array
+  const getDisplayImage = (imageField: string | undefined | null): string => {
+    if (!imageField) return '/placeholder.svg';
+    try {
+      if (imageField.startsWith('[')) {
+        const images = JSON.parse(imageField);
+        return images[0] || '/placeholder.svg';
+      }
+      return imageField;
+    } catch {
+      return imageField;
+    }
+  };
+
+  const displayImage = getDisplayImage(product.image);
+
   return (
     <Card className="group h-full flex flex-col transition-all duration-200 hover:shadow-md border bg-card overflow-hidden">
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
         <div className="relative bg-muted">
           <img
-            src={product.image || '/placeholder.svg'}
+            src={displayImage}
             alt={product.name}
             className="w-full h-28 object-cover"
             loading="lazy"

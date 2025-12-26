@@ -85,13 +85,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   });
 };
 
+  // Extract first image from potential JSON array
+  const getDisplayImage = (imageField: string | undefined | null): string => {
+    if (!imageField) return '/placeholder.svg';
+    try {
+      if (imageField.startsWith('[')) {
+        const images = JSON.parse(imageField);
+        return images[0] || '/placeholder.svg';
+      }
+      return imageField;
+    } catch {
+      return imageField;
+    }
+  };
+
+  const displayImage = getDisplayImage(product.image);
 
   return (
     <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg border bg-white dark:bg-card">
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
         <div className="relative overflow-hidden bg-muted">
           <img
-            src={product.image || '/placeholder.svg'}
+            src={displayImage}
             alt={product.name}
             className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
