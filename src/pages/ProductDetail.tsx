@@ -85,7 +85,7 @@ const ProductDetail = () => {
   const discountPercentage = hasDiscount ? product!.discount_percentage : 0;
   const originalPrice = hasDiscount ? product!.original_price : 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     // Require login to add to cart
     if (!user) {
       toast({
@@ -105,11 +105,27 @@ const ProductDetail = () => {
         description: `${quantity} x ${product.name} added to your cart.`,
       });
     } else {
+      // Show out of stock message
       toast({
-        title: "Out of stock",
-        description: "This product is currently out of stock.",
+        title: "Out of Stock",
+        description: "This product is currently out of stock. The vendor has been notified to restock.",
         variant: "destructive",
       });
+      
+      // Notify vendor about the out of stock product
+      if (product?.vendor_user_id) {
+        try {
+          await supabase.from('user_notifications').insert({
+            user_id: product.vendor_user_id,
+            title: 'Product Out of Stock - Restock Required!',
+            message: `Your product "${product.name}" is out of stock and a customer tried to purchase it. Please restock within 7 days or the product will be automatically deleted.`,
+            type: 'stock_alert',
+            related_id: product.id,
+          });
+        } catch (error) {
+          console.error('Failed to notify vendor:', error);
+        }
+      }
     }
   };
   

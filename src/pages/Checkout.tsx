@@ -301,18 +301,29 @@ const Checkout: React.FC = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Items */}
-                    {group.items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                          <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
-                          <div>
-                            <p className="font-medium text-sm">{item.name}</p>
-                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                    {group.items.map((item) => {
+                      const displayImage = (() => {
+                        if (!item.image) return '/placeholder.svg';
+                        try {
+                          const parsed = JSON.parse(item.image);
+                          return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : item.image;
+                        } catch {
+                          return item.image;
+                        }
+                      })();
+                      return (
+                        <div key={item.id} className="flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <img src={displayImage} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                            <div>
+                              <p className="font-medium text-sm">{item.name}</p>
+                              <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                            </div>
                           </div>
+                          <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
                         </div>
-                        <p className="font-medium">₦{(item.price * item.quantity).toLocaleString()}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                     <Separator />
 
@@ -324,7 +335,7 @@ const Checkout: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Shipping</span>
-                        <span>{group.shipping === 0 ? "FREE" : `₦${group.shipping.toLocaleString()}`}</span>
+                        <span>₦{group.shipping.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">VAT ({VAT_RATE * 100}%)</span>
@@ -441,7 +452,7 @@ const Checkout: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Shipping</span>
-                  <span>{grandTotals.shipping === 0 ? "FREE" : `₦${grandTotals.shipping.toLocaleString()}`}</span>
+                  <span>₦{grandTotals.shipping.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Service Charge</span>
