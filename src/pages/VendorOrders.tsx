@@ -8,6 +8,7 @@ import { useVendors } from '@/hooks/useVendors';
 import { useToast } from '@/hooks/use-toast';
 import { Truck, CheckCircle, Clock, Package, User, Phone, MapPin, AlertCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { OrderChat } from '@/components/OrderChat';
 
 interface Order {
   id: string;
@@ -109,7 +110,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
               {new Date(order.created_at).toLocaleString()}
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <OrderChat orderId={order.id} orderNumber={order.id} />
             <Badge className={getStatusColor(order.status)}>
               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
             </Badge>
