@@ -22,10 +22,12 @@ import {
   LayoutGrid,
   User,
   Camera,
+  RefreshCw,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { VendorProductForm } from "@/components/VendorProductForm";
+import { VendorProductEditForm } from "@/components/VendorProductEditForm";
 import { VendorSubscription } from "@/components/VendorSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -40,6 +42,7 @@ const VendorDashboard = () => {
   const vendorProducts = products.filter((p) => p.vendor_user_id === user?.id);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
   // Calculate earnings (revenue - commission)
   const commissionRate = currentVendor?.commission_rate || 15;
@@ -290,44 +293,82 @@ const VendorDashboard = () => {
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                    {vendorProducts.map((product) => (
-                      <Card key={product.id}>
-                        <CardContent className="p-4">
-                          <div className="space-y-2">
-                            <h3 className="font-medium">{product.name}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
-                            <div className="flex justify-between items-center">
-                              <span className="font-bold">₦{product.price}</span>
-                              <Badge variant={product.in_stock ? "default" : "destructive"}>
-                                Stock: {product.stock_count}
-                              </Badge>
-                            </div>
-                            {parseFloat(product.shipping_fee?.toString() || "0") > 0 && (
-                              <div className="text-xs text-muted-foreground">
-                                Shipping: ₦{product.shipping_fee} ({product.shipping_type?.replace("_", " ")})
+                    {vendorProducts.map((product) => {
+                      const isOutOfStock = !product.in_stock || (product.stock_count || 0) <= 0;
+                      return (
+                        <Card key={product.id} className={isOutOfStock ? "border-red-200 bg-red-50/50" : ""}>
+                          <CardContent className="p-4">
+                            <div className="space-y-2">
+                              {isOutOfStock && (
+                                <Alert variant="destructive" className="py-2">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  <AlertDescription className="text-xs">
+                                    Out of stock! Restock within 7 days or product will be deleted.
+                                  </AlertDescription>
+                                </Alert>
+                              )}
+                              <h3 className="font-medium">{product.name}</h3>
+                              <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold">₦{product.price}</span>
+                                <Badge variant={product.in_stock ? "default" : "destructive"}>
+                                  Stock: {product.stock_count}
+                                </Badge>
                               </div>
-                            )}
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" disabled={isSuspended || isInactive}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleDeleteProduct(product.id)}
-                                disabled={isSuspended || isInactive}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              {parseFloat(product.shipping_fee?.toString() || "0") > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  Shipping: ₦{product.shipping_fee} ({product.shipping_type?.replace("_", " ")})
+                                </div>
+                              )}
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  disabled={isSuspended || isInactive}
+                                  onClick={() => setEditingProduct(product)}
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                                {isOutOfStock && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="secondary"
+                                    disabled={isSuspended || isInactive}
+                                    onClick={() => setEditingProduct(product)}
+                                  >
+                                    <RefreshCw className="h-4 w-4 mr-1" />
+                                    Restock
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                  disabled={isSuspended || isInactive}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Edit Product Dialog */}
+            {editingProduct && (
+              <VendorProductEditForm
+                product={editingProduct}
+                open={!!editingProduct}
+                onClose={() => setEditingProduct(null)}
+                onProductUpdated={refreshProducts}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="add-product" className="space-y-6">

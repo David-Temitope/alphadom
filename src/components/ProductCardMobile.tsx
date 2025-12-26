@@ -8,6 +8,7 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useProductLikes } from '@/hooks/useProductLikes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Product {
   id: string;
@@ -26,6 +27,7 @@ interface Product {
   shipping_fee?: number | null;
   shipping_type?: 'per_product' | 'one_time' | null;
   sustainability_score?: number;
+  vendor_user_id?: string | null;
 }
 
 interface ProductCardMobileProps {
@@ -43,7 +45,7 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
   const productInWishlist = isInWishlist(product.id);
   const productIsLiked = isLiked(product.id);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -59,10 +61,25 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
     
     if ((product.stock_count || 0) <= 0) {
       toast({
-        title: "Out of stock",
-        description: "This product is currently out of stock.",
+        title: "Out of Stock",
+        description: "This product is out of stock. The vendor has been notified to restock.",
         variant: "destructive",
       });
+      
+      // Notify vendor about out of stock
+      if (product.vendor_user_id) {
+        try {
+          await supabase.from('user_notifications').insert({
+            user_id: product.vendor_user_id,
+            title: 'Product Out of Stock - Restock Required!',
+            message: `Your product "${product.name}" is out of stock and a customer tried to purchase it. Please restock within 7 days or the product will be automatically deleted.`,
+            type: 'stock_alert',
+            related_id: product.id,
+          });
+        } catch (error) {
+          console.error('Failed to notify vendor:', error);
+        }
+      }
       return;
     }
     

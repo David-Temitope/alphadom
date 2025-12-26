@@ -68,6 +68,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    // Parse image to get first image if it's a JSON array
+    const getDisplayImage = (image: string | null | undefined): string => {
+      if (!image) return '/placeholder.svg';
+      try {
+        const parsed = JSON.parse(image);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed[0];
+        }
+        return image;
+      } catch {
+        return image;
+      }
+    };
+
     setItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       const currentQuantity = existingItem ? existingItem.quantity : 0;
@@ -92,6 +106,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return [...prevItems, { 
         ...product, 
         quantity: requestedQuantity,
+        image: getDisplayImage(product.image),
         category: product.category || 'General',
         sustainabilityScore: product.sustainability_score || 0,
         vendor_id: product.vendor_id || null,

@@ -6,6 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { PlatformAd } from "@/components/PlatformAd";
 
+// Helper function to extract first image from JSON array or single image
+const getDisplayImage = (image: string | null | undefined): string => {
+  if (!image) return '/placeholder.svg';
+  try {
+    const parsed = JSON.parse(image);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed[0];
+    }
+    return image;
+  } catch {
+    return image;
+  }
+};
+
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, totalSustainabilityImpact, clearCart } = useCart();
 
@@ -94,7 +108,7 @@ const Cart = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
                     <img
-                      src={item.image}
+                      src={getDisplayImage(item.image)}
                       alt={item.name}
                       className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                     />
@@ -187,10 +201,7 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium text-green-600">
-                      {/* Display FREE if shipping is exactly 0, otherwise display the amount */}
-                      {shipping === 0 ? "FREE" : `₦${shipping.toLocaleString()}`}
-                    </span>
+                    <span className="font-medium">₦{shipping.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Service Charge</span>
