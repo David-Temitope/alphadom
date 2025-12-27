@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useVendors } from '@/hooks/useVendors';
-import { useToast } from '@/hooks/use-toast';
-import { Truck, CheckCircle, Clock, Package, User, Phone, MapPin, AlertCircle } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { OrderChat } from '@/components/OrderChat';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useVendors } from "@/hooks/useVendors";
+import { useToast } from "@/hooks/use-toast";
+import { Truck, CheckCircle, Clock, Package, User, Phone, MapPin, AlertCircle } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { OrderChat } from "@/components/OrderChat";
 
 interface Order {
   id: string;
@@ -43,10 +43,13 @@ interface Order {
 // Get commission rate based on subscription plan
 const getCommissionRate = (subscriptionPlan: string | undefined): number => {
   switch (subscriptionPlan) {
-    case 'first_class': return 5;
-    case 'economy': return 9;
-    case 'free':
-    default: return 15;
+    case "first_class":
+      return 5;
+    case "economy":
+      return 9;
+    case "free":
+    default:
+      return 15;
   }
 };
 
@@ -61,39 +64,44 @@ interface OrderCardProps {
 const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showActions, subscriptionPlan, vendorId }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-blue-100 text-blue-800';
-      case 'processing': return 'bg-purple-100 text-purple-800';
-      case 'shipped': return 'bg-green-100 text-green-800';
-      case 'delivered': return 'bg-emerald-100 text-emerald-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "approved":
+        return "bg-blue-100 text-blue-800";
+      case "processing":
+        return "bg-purple-100 text-purple-800";
+      case "shipped":
+        return "bg-green-100 text-green-800";
+      case "delivered":
+        return "bg-emerald-100 text-emerald-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   // Filter items to only show this vendor's products
-  const vendorItems = order.order_items.filter(
-    item => item.products?.vendor_id === vendorId
-  );
+  const vendorItems = order.order_items.filter((item) => item.products?.vendor_id === vendorId);
 
   // Calculate commission based on subscription plan
   const commissionRate = getCommissionRate(subscriptionPlan);
-  
+
   // Calculate vendor's order value (only their products)
-  const vendorSubtotal = vendorItems.reduce(
-    (sum, item) => sum + (item.price * item.quantity), 0
-  );
+  const vendorSubtotal = vendorItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const vendorShipping = order.shipping_cost || 0;
   const vendorVat = vendorSubtotal * 0.025; // 2.5% VAT
   const vendorOrderTotal = vendorSubtotal + vendorShipping + vendorVat;
-  
+
   // Commission on subtotal only (not shipping or VAT)
   const commission = vendorSubtotal * (commissionRate / 100);
   const vendorPayout = vendorOrderTotal - commission;
@@ -106,17 +114,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
         <div className="flex justify-between items-start flex-wrap gap-2">
           <div>
             <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
-            <CardDescription>
-              {new Date(order.created_at).toLocaleString()}
-            </CardDescription>
+            <CardDescription>{new Date(order.created_at).toLocaleString()}</CardDescription>
           </div>
           <div className="flex gap-2 items-center">
             <OrderChat orderId={order.id} orderNumber={order.id} />
             <Badge className={getStatusColor(order.status)}>
               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
             </Badge>
-            <Badge className={getPaymentStatusColor(order.payment_status || 'pending')}>
-              {(order.payment_status || 'pending').charAt(0).toUpperCase() + (order.payment_status || 'pending').slice(1)}
+            <Badge className={getPaymentStatusColor(order.payment_status || "pending")}>
+              {(order.payment_status || "pending").charAt(0).toUpperCase() +
+                (order.payment_status || "pending").slice(1)}
             </Badge>
           </div>
         </div>
@@ -132,7 +139,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
             <div className="space-y-2 text-sm">
               <p className="flex items-center gap-2">
                 <span className="font-medium">Name:</span>
-                {order.profiles?.full_name || order.shipping_address?.name || 'N/A'}
+                {order.profiles?.full_name || order.shipping_address?.name || "N/A"}
               </p>
               {order.shipping_address?.phone && (
                 <p className="flex items-center gap-2">
@@ -143,7 +150,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
               )}
             </div>
           </div>
-          
+
           {order.shipping_address && (
             <div>
               <h4 className="font-semibold mb-3 flex items-center gap-2">
@@ -152,7 +159,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
               </h4>
               <div className="text-sm space-y-1">
                 <p>{order.shipping_address.street}</p>
-                <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zipCode}</p>
+                <p>
+                  {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zipCode}
+                </p>
                 <p>{order.shipping_address.country}</p>
               </div>
             </div>
@@ -170,15 +179,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           <div className="space-y-3">
             {vendorItems.map((item) => (
               <div key={item.id} className="flex items-center gap-4 p-3 bg-muted rounded-lg">
-                <img 
-                  src={item.products?.image} 
-                  alt={item.products?.name}
-                  className="w-16 h-16 object-cover rounded"
-                />
+                <img src={item.products?.image} alt={item.products?.name} className="w-16 h-16 object-cover rounded" />
                 <div className="flex-1">
                   <p className="font-medium">{item.products?.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    Quantity: {item.quantity} × ₦{item.price.toLocaleString()} = ₦{(item.quantity * item.price).toLocaleString()}
+                    Quantity: {item.quantity} × ₦{item.price.toLocaleString()} = ₦
+                    {(item.quantity * item.price).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -202,7 +208,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
                 <span>₦{vendorShipping.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span>VAT (2.5%):</span>
+                <span>Service Charge (2.5%):</span>
                 <span>₦{vendorVat.toLocaleString()}</span>
               </div>
               <Separator />
@@ -216,8 +222,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           <div>
             <h4 className="font-semibold mb-3">Payment Information</h4>
             <div className="space-y-2 text-sm">
-              <p><span className="font-medium">Method:</span> {order.payment_method?.replace('_', ' ')}</p>
-              <p><span className="font-medium">Status:</span> {order.payment_status || 'pending'}</p>
+              <p>
+                <span className="font-medium">Method:</span> {order.payment_method?.replace("_", " ")}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span> {order.payment_status || "pending"}
+              </p>
             </div>
           </div>
         </div>
@@ -233,9 +243,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
               <p className="text-amber-700 mt-1">
                 Commission: ₦{commission.toLocaleString()} ({commissionRate}% of ₦{vendorSubtotal.toLocaleString()})
               </p>
-              <p className="text-amber-700 font-medium mt-1">
-                Your Payout: ₦{vendorPayout.toLocaleString()}
-              </p>
+              <p className="text-amber-700 font-medium mt-1">Your Payout: ₦{vendorPayout.toLocaleString()}</p>
               <p className="text-amber-600 text-xs mt-2">
                 Payment will be sent within 24 hours after delivery confirmation on Discord.
               </p>
@@ -247,11 +255,11 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
         {order.receipt_image && (
           <div>
             <h4 className="font-semibold mb-3">Payment Receipt</h4>
-            <img 
-              src={order.receipt_image} 
-              alt="Payment receipt" 
+            <img
+              src={order.receipt_image}
+              alt="Payment receipt"
               className="w-40 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => window.open(order.receipt_image, '_blank')}
+              onClick={() => window.open(order.receipt_image, "_blank")}
             />
           </div>
         )}
@@ -259,30 +267,20 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
         {/* Action Buttons */}
         {showActions && (
           <div className="flex flex-wrap gap-2 pt-4 border-t">
-            {order.status === 'pending' && (
-              <Button 
-                onClick={() => onUpdateStatus(order.id, 'processing')}
-                size="sm"
-              >
+            {order.status === "pending" && (
+              <Button onClick={() => onUpdateStatus(order.id, "processing")} size="sm">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Approve Order
               </Button>
             )}
-            {order.status === 'processing' && (
-              <Button 
-                onClick={() => onUpdateStatus(order.id, 'shipped')}
-                size="sm"
-              >
+            {order.status === "processing" && (
+              <Button onClick={() => onUpdateStatus(order.id, "shipped")} size="sm">
                 <Truck className="h-4 w-4 mr-2" />
                 Self Deliver
               </Button>
             )}
-            {order.status === 'pending' && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => onUpdateStatus(order.id, 'shipped')}
-              >
+            {order.status === "pending" && (
+              <Button variant="outline" size="sm" onClick={() => onUpdateStatus(order.id, "shipped")}>
                 <Truck className="h-4 w-4 mr-2" />
                 Self Deliver
               </Button>
@@ -317,8 +315,9 @@ const VendorOrders = () => {
     try {
       // Fetch orders where vendor_id matches this vendor
       const { data: orderData, error } = await supabase
-        .from('orders')
-        .select(`
+        .from("orders")
+        .select(
+          `
           *,
           order_items (
             *,
@@ -332,15 +331,16 @@ const VendorOrders = () => {
             full_name,
             email
           )
-        `)
-        .eq('vendor_id', currentVendor.id)
-        .order('created_at', { ascending: false });
+        `,
+        )
+        .eq("vendor_id", currentVendor.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      setOrders(orderData as any || []);
+      setOrders((orderData as any) || []);
     } catch (error) {
-      console.error('Error fetching vendor orders:', error);
+      console.error("Error fetching vendor orders:", error);
       toast({
         title: "Error",
         description: "Failed to fetch orders",
@@ -353,20 +353,16 @@ const VendorOrders = () => {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const updateData: any = { 
+      const updateData: any = {
         status,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-      
-      if (status === 'shipped') {
+
+      if (status === "shipped") {
         updateData.self_delivery = true;
       }
 
-      const { error } = await supabase
-        .from('orders')
-        .update(updateData)
-        .eq('id', orderId)
-        .select();
+      const { error } = await supabase.from("orders").update(updateData).eq("id", orderId).select();
 
       if (error) throw error;
 
@@ -377,7 +373,7 @@ const VendorOrders = () => {
 
       await fetchVendorOrders();
     } catch (error: any) {
-      console.error('Error updating order:', error);
+      console.error("Error updating order:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to update order",
@@ -392,7 +388,7 @@ const VendorOrders = () => {
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">
-              {!user ? 'Please sign in to access vendor orders.' : 'Vendor access required.'}
+              {!user ? "Please sign in to access vendor orders." : "Vendor access required."}
             </p>
           </CardContent>
         </Card>
@@ -403,9 +399,9 @@ const VendorOrders = () => {
   // Calculate commission based on subscription plan
   const commissionRate = getCommissionRate(currentVendor.subscription_plan);
 
-  const pendingOrders = orders.filter(order => order.status === 'pending');
-  const processingOrders = orders.filter(order => ['approved', 'processing'].includes(order.status));
-  const completedOrders = orders.filter(order => ['shipped', 'delivered'].includes(order.status));
+  const pendingOrders = orders.filter((order) => order.status === "pending");
+  const processingOrders = orders.filter((order) => ["approved", "processing"].includes(order.status));
+  const completedOrders = orders.filter((order) => ["shipped", "delivered"].includes(order.status));
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -413,7 +409,8 @@ const VendorOrders = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Vendor Orders</h1>
           <p className="text-muted-foreground">
-            Manage orders for your products • Commission Rate: {commissionRate}% ({currentVendor.subscription_plan || 'free'} plan)
+            Manage orders for your products • Commission Rate: {commissionRate}% (
+            {currentVendor.subscription_plan || "free"} plan)
           </p>
         </div>
 
@@ -459,7 +456,7 @@ const VendorOrders = () => {
 
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">All Orders</h2>
-            
+
             {loading ? (
               <Card>
                 <CardContent className="p-8 text-center">
@@ -478,8 +475,8 @@ const VendorOrders = () => {
                   key={order.id}
                   order={order}
                   onUpdateStatus={updateOrderStatus}
-                  showActions={order.status === 'pending' || order.status === 'processing'}
-                  subscriptionPlan={currentVendor.subscription_plan || 'free'}
+                  showActions={order.status === "pending" || order.status === "processing"}
+                  subscriptionPlan={currentVendor.subscription_plan || "free"}
                   vendorId={currentVendor.id}
                 />
               ))

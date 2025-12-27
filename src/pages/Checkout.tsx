@@ -71,7 +71,7 @@ const Checkout: React.FC = () => {
 
   // Validate shipping info - for off-campus, need address; for on-campus, just phone
   const isShippingValid = useMemo(() => {
-    if (shippingInfo.deliveryMethod === 'on_campus') {
+    if (shippingInfo.deliveryMethod === "on_campus") {
       return shippingInfo.phone.trim() && shippingInfo.street.trim(); // Just need phone and pickup location
     }
     return (
@@ -325,7 +325,7 @@ const Checkout: React.FC = () => {
                     {/* Items */}
                     {group.items.map((item) => {
                       const displayImage = (() => {
-                        if (!item.image) return '/placeholder.svg';
+                        if (!item.image) return "/placeholder.svg";
                         try {
                           const parsed = JSON.parse(item.image);
                           return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : item.image;
@@ -360,7 +360,7 @@ const Checkout: React.FC = () => {
                         <span>₦{group.shipping.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">VAT ({VAT_RATE * 100}%)</span>
+                        <span className="text-muted-foreground">Service ({VAT_RATE * 100}%)</span>
                         <span>₦{group.vat.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between font-bold pt-2 border-t">
@@ -386,8 +386,8 @@ const Checkout: React.FC = () => {
               <CardContent>
                 <RadioGroup
                   value={shippingInfo.deliveryMethod}
-                  onValueChange={(value: 'on_campus' | '2km_5km' | 'over_5km') => 
-                    setShippingInfo(prev => ({ ...prev, deliveryMethod: value }))
+                  onValueChange={(value: "on_campus" | "2km_5km" | "over_5km") =>
+                    setShippingInfo((prev) => ({ ...prev, deliveryMethod: value }))
                   }
                   className="space-y-3"
                   disabled={processing}
@@ -400,7 +400,7 @@ const Checkout: React.FC = () => {
                     </Label>
                     <Badge className="bg-green-500">FREE</Badge>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
                     <RadioGroupItem value="2km_5km" id="2km_5km" />
                     <Label htmlFor="2km_5km" className="flex-1 cursor-pointer">
@@ -409,7 +409,7 @@ const Checkout: React.FC = () => {
                     </Label>
                     <Badge variant="secondary">Paid</Badge>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
                     <RadioGroupItem value="over_5km" id="over_5km" />
                     <Label htmlFor="over_5km" className="flex-1 cursor-pointer">
@@ -427,24 +427,26 @@ const Checkout: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Truck className="h-5 w-5" />
-                  {shippingInfo.deliveryMethod === 'on_campus' ? 'Pickup Information' : 'Shipping Information'}
+                  {shippingInfo.deliveryMethod === "on_campus" ? "Pickup Information" : "Shipping Information"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="street">
-                    {shippingInfo.deliveryMethod === 'on_campus' ? 'Pickup Location / Landmark' : 'Street Address'}
+                    {shippingInfo.deliveryMethod === "on_campus" ? "Pickup Location / Landmark" : "Street Address"}
                   </Label>
                   <Input
                     id="street"
                     value={shippingInfo.street}
                     onChange={(e) => setShippingInfo((prev) => ({ ...prev, street: e.target.value }))}
-                    placeholder={shippingInfo.deliveryMethod === 'on_campus' ? 'e.g., Campus Gate, Library, etc.' : '123 Main St'}
+                    placeholder={
+                      shippingInfo.deliveryMethod === "on_campus" ? "e.g., Campus Gate, Library, etc." : "123 Main St"
+                    }
                     disabled={processing}
                   />
                 </div>
 
-                {shippingInfo.deliveryMethod !== 'on_campus' && (
+                {shippingInfo.deliveryMethod !== "on_campus" && (
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -494,9 +496,9 @@ const Checkout: React.FC = () => {
                   <div className="flex items-start gap-2 mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <Phone className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-amber-800">
-                      <strong>Important:</strong> Please provide an active phone number. 
-                      Vendors and delivery riders will use this number to contact you 
-                      about your order. Orders with unreachable numbers may be delayed.
+                      <strong>Important:</strong> Please provide an active phone number. Vendors and delivery riders
+                      will use this number to contact you about your order. Orders with unreachable numbers may be
+                      delayed.
                     </p>
                   </div>
                 </div>
@@ -594,12 +596,9 @@ const Checkout: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Order Success Modal with Safety Reminder */}
-      <OrderSuccessModal 
-        open={showSuccessModal} 
-        onClose={handleSuccessModalClose} 
-      />
+      <OrderSuccessModal open={showSuccessModal} onClose={handleSuccessModalClose} />
     </div>
   );
 };
