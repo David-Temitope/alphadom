@@ -13,6 +13,7 @@ import { LikeButton } from '@/components/LikeButton';
 import { ProductCard } from '@/components/ProductCard'; 
 import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { ProductComments } from '@/components/ProductComments';
+import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -50,6 +51,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [vendorName, setVendorName] = useState<string>('');
+  const [vendorPhone, setVendorPhone] = useState<string>('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const isMobile = useIsMobile();
@@ -61,23 +63,37 @@ const ProductDetail = () => {
     : [];
 
   useEffect(() => {
-    const fetchVendorName = async () => {
+    const fetchVendorInfo = async () => {
       if (product?.vendor_id) {
-        // ✅ Supabase fetch fix: Use limit(1) instead of single() for safer queries if vendor might not exist
-        const { data, error } = await supabase 
+        // Fetch vendor store name
+        const { data: vendorData, error: vendorError } = await supabase 
           .from('approved_vendors')
-          .select('store_name')
+          .select('store_name, application_id')
           .eq('id', product.vendor_id)
           .limit(1); 
         
-        if (error) console.error("Error fetching vendor:", error);
+        if (vendorError) console.error("Error fetching vendor:", vendorError);
         
-        // Check if data is an array and has content, then use the first item
-        if (data && data.length > 0) setVendorName(data[0].store_name);
+        if (vendorData && vendorData.length > 0) {
+          setVendorName(vendorData[0].store_name);
+          
+          // Fetch vendor phone from shop_applications
+          if (vendorData[0].application_id) {
+            const { data: appData } = await supabase
+              .from('shop_applications')
+              .select('contact_phone')
+              .eq('id', vendorData[0].application_id)
+              .limit(1);
+            
+            if (appData && appData.length > 0 && appData[0].contact_phone) {
+              setVendorPhone(appData[0].contact_phone);
+            }
+          }
+        }
       }
     };
     
-    fetchVendorName();
+    fetchVendorInfo();
   }, [product?.vendor_id]);
 
   // Use admin-set discount if available
@@ -396,7 +412,7 @@ const ProductDetail = () => {
               </p>
               
               {/* Vendor Info */}
-              <div className="mt-4 p-3 bg-muted rounded-lg">
+              <div className="mt-4 p-3 bg-muted rounded-lg space-y-3">
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold">Product From: </span>
                   {product.vendor_user_id ? (
@@ -407,6 +423,17 @@ const ProductDetail = () => {
                     <span className="text-primary font-semibold">Alphadom</span>
                   )}
                 </p>
+                
+                {/* WhatsApp Chat Button */}
+                {vendorPhone && (
+                  <WhatsAppButton
+                    phoneNumber={vendorPhone}
+                    vendorName={vendorName}
+                    productName={product.name}
+                    variant="product"
+                    className="w-full"
+                  />
+                )}
               </div>
 
               {product.eco_features && product.eco_features.length > 0 && product.eco_features.some(f => f && f.trim()) && (

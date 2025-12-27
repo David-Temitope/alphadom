@@ -16,6 +16,7 @@ export type ShippingInfo = {
   zipCode: string;
   country: string;
   phone: string;
+  deliveryMethod?: 'on_campus' | '2km_5km' | 'over_5km';
 };
 
 export type PaymentMethod = "bank_transfer" | "paystack";
@@ -45,6 +46,8 @@ export type CartItemWithVendor = {
   image: string;
   vendor_id: string | null;
   shipping_fee: number;
+  shipping_fee_2km_5km?: number;
+  shipping_fee_over_5km?: number;
   shipping_type: "one_time" | "per_product";
 };
 
@@ -56,13 +59,28 @@ export type CheckoutSession = {
   created_at: Date;
 };
 
-// Calculate shipping for a group of items
-export const calculateGroupShipping = (items: CartItemWithVendor[]): number => {
+// Calculate shipping for a group of items based on delivery method
+export const calculateGroupShipping = (
+  items: CartItemWithVendor[], 
+  deliveryMethod: 'on_campus' | '2km_5km' | 'over_5km' = 'on_campus'
+): number => {
+  // On-campus pickup is FREE
+  if (deliveryMethod === 'on_campus') {
+    return 0;
+  }
+
   let totalShipping = 0;
   const oneTimeShippingApplied = new Set<string>();
 
   for (const item of items) {
-    const shippingFee = Number(item.shipping_fee) || 0;
+    // Get the appropriate shipping fee based on delivery method
+    let shippingFee = 0;
+    if (deliveryMethod === '2km_5km') {
+      shippingFee = Number(item.shipping_fee_2km_5km) || Number(item.shipping_fee) || 0;
+    } else if (deliveryMethod === 'over_5km') {
+      shippingFee = Number(item.shipping_fee_over_5km) || Number(item.shipping_fee) || 0;
+    }
+    
     const shippingType = item.shipping_type || "one_time";
     const quantity = Number(item.quantity) || 1;
 
