@@ -30,6 +30,8 @@ interface Product {
   description: string | null;
   full_description: string | null;
   shipping_fee: number | null;
+  shipping_fee_2km_5km: number | null;
+  shipping_fee_over_5km: number | null;
   shipping_type: string | null;
   in_stock: boolean | null;
 }
@@ -63,6 +65,8 @@ export const VendorProductEditForm: React.FC<VendorProductEditFormProps> = ({
     discount_percentage: product.discount_percentage || 0,
     original_price: product.original_price || 0,
     shipping_fee: (product.shipping_fee || 0).toString(),
+    shipping_fee_2km_5km: (product.shipping_fee_2km_5km || 0).toString(),
+    shipping_fee_over_5km: (product.shipping_fee_over_5km || 0).toString(),
     shipping_type: (product.shipping_type || 'one_time') as 'one_time' | 'per_product',
   });
 
@@ -78,6 +82,8 @@ export const VendorProductEditForm: React.FC<VendorProductEditFormProps> = ({
       discount_percentage: product.discount_percentage || 0,
       original_price: product.original_price || 0,
       shipping_fee: (product.shipping_fee || 0).toString(),
+      shipping_fee_2km_5km: (product.shipping_fee_2km_5km || 0).toString(),
+      shipping_fee_over_5km: (product.shipping_fee_over_5km || 0).toString(),
       shipping_type: (product.shipping_type || 'one_time') as 'one_time' | 'per_product',
     });
   }, [product]);
@@ -120,6 +126,8 @@ export const VendorProductEditForm: React.FC<VendorProductEditFormProps> = ({
           original_price: formData.original_price,
           has_discount: formData.discount_percentage > 0,
           shipping_fee: parseFloat(formData.shipping_fee) || 0,
+          shipping_fee_2km_5km: parseFloat(formData.shipping_fee_2km_5km) || 0,
+          shipping_fee_over_5km: parseFloat(formData.shipping_fee_over_5km) || 0,
           shipping_type: formData.shipping_type,
           last_stock_update: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -195,13 +203,39 @@ export const VendorProductEditForm: React.FC<VendorProductEditFormProps> = ({
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="shipping_fee">Shipping Fee (₦)</Label>
+              <Label htmlFor="shipping_fee">On-Campus / Free Pickup (₦)</Label>
               <Input 
                 id="shipping_fee" 
                 type="number" 
                 step="0.01"
                 value={formData.shipping_fee}
                 onChange={(e) => setFormData({...formData, shipping_fee: e.target.value})}
+                placeholder="0 for free pickup"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="shipping_fee_2km_5km">2km - 5km from Campus (₦)</Label>
+              <Input 
+                id="shipping_fee_2km_5km" 
+                type="number" 
+                step="0.01"
+                value={formData.shipping_fee_2km_5km}
+                onChange={(e) => setFormData({...formData, shipping_fee_2km_5km: e.target.value})}
+                placeholder="e.g. 500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shipping_fee_over_5km">Over 5km from Campus (₦)</Label>
+              <Input 
+                id="shipping_fee_over_5km" 
+                type="number" 
+                step="0.01"
+                value={formData.shipping_fee_over_5km}
+                onChange={(e) => setFormData({...formData, shipping_fee_over_5km: e.target.value})}
+                placeholder="e.g. 1000"
               />
             </div>
           </div>
