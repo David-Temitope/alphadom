@@ -64,6 +64,8 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
     description: '',
     full_description: '',
     shipping_fee: '',
+    shipping_fee_2km_5km: '',
+    shipping_fee_over_5km: '',
     shipping_type: 'one_time' as 'one_time' | 'per_product',
   });
 
@@ -141,6 +143,8 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
           rating: 0,
           reviews: 0,
           shipping_fee: parseFloat(newProduct.shipping_fee) || 0,
+          shipping_fee_2km_5km: parseFloat(newProduct.shipping_fee_2km_5km) || 0,
+          shipping_fee_over_5km: parseFloat(newProduct.shipping_fee_over_5km) || 0,
           shipping_type: newProduct.shipping_type,
         });
 
@@ -172,6 +176,8 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
         description: '',
         full_description: '',
         shipping_fee: '',
+        shipping_fee_2km_5km: '',
+        shipping_fee_over_5km: '',
         shipping_type: 'one_time',
       });
       
@@ -366,19 +372,51 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="shipping_fee">Shipping Fee (₦) *</Label>
-          <Input 
-            id="shipping_fee" 
-            type="number" 
-            step="0.01"
-            placeholder="500"
-            value={newProduct.shipping_fee}
-            onChange={(e) => setNewProduct({...newProduct, shipping_fee: e.target.value})}
-            required
-          />
+      <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
+        <h4 className="font-semibold text-sm">Shipping & Delivery Fees</h4>
+        <p className="text-xs text-muted-foreground">
+          Set different shipping fees based on delivery distance. On-Campus pickup is always free.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="shipping_fee">On-Campus / Free Pickup (₦)</Label>
+            <Input 
+              id="shipping_fee" 
+              type="number" 
+              step="0.01"
+              placeholder="0 (Free)"
+              value={newProduct.shipping_fee}
+              onChange={(e) => setNewProduct({...newProduct, shipping_fee: e.target.value})}
+            />
+            <p className="text-xs text-muted-foreground">Usually 0 for campus pickup</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shipping_fee_2km_5km">2km - 5km from Campus (₦) *</Label>
+            <Input 
+              id="shipping_fee_2km_5km" 
+              type="number" 
+              step="0.01"
+              placeholder="500"
+              value={newProduct.shipping_fee_2km_5km}
+              onChange={(e) => setNewProduct({...newProduct, shipping_fee_2km_5km: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shipping_fee_over_5km">Over 5km from Campus (₦) *</Label>
+            <Input 
+              id="shipping_fee_over_5km" 
+              type="number" 
+              step="0.01"
+              placeholder="1000"
+              value={newProduct.shipping_fee_over_5km}
+              onChange={(e) => setNewProduct({...newProduct, shipping_fee_over_5km: e.target.value})}
+              required
+            />
+          </div>
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="shipping_type">Shipping Fee Type *</Label>
           <Select 

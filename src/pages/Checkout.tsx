@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { OrderSuccessModal } from "@/components/OrderSuccessModal";
 import {
   ShoppingCart,
   CreditCard,
@@ -23,6 +25,7 @@ import {
   RefreshCw,
   Ban,
   Phone,
+  MapPin,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShippingInfo, VAT_RATE, VendorGroup } from "@/types/checkout";
@@ -50,6 +53,7 @@ const Checkout: React.FC = () => {
     retryPayment,
     allPaymentsComplete,
     failedGroups,
+    recalculateWithDeliveryMethod,
   } = useMultiVendorCheckout();
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
@@ -59,12 +63,17 @@ const Checkout: React.FC = () => {
     zipCode: "",
     country: "NG",
     phone: "",
+    deliveryMethod: "on_campus",
   });
 
   const [paystackLoaded, setPaystackLoaded] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Validate shipping info
+  // Validate shipping info - for off-campus, need address; for on-campus, just phone
   const isShippingValid = useMemo(() => {
+    if (shippingInfo.deliveryMethod === 'on_campus') {
+      return shippingInfo.phone.trim() && shippingInfo.street.trim(); // Just need phone and pickup location
+    }
     return (
       shippingInfo.street.trim() &&
       shippingInfo.city.trim() &&
@@ -73,6 +82,13 @@ const Checkout: React.FC = () => {
       shippingInfo.phone.trim()
     );
   }, [shippingInfo]);
+
+  // Recalculate shipping when delivery method changes
+  useEffect(() => {
+    if (recalculateWithDeliveryMethod && shippingInfo.deliveryMethod) {
+      recalculateWithDeliveryMethod(shippingInfo.deliveryMethod);
+    }
+  }, [shippingInfo.deliveryMethod, recalculateWithDeliveryMethod]);
 
   // Redirect if not authenticated, banned, or no items
   useEffect(() => {
@@ -125,13 +141,19 @@ const Checkout: React.FC = () => {
   // Navigate to orders when all payments complete
   useEffect(() => {
     if (allPaymentsComplete && !processing) {
-      toast({
-        title: "All Orders Placed Successfully!",
-        description: `${vendorGroups.length} order(s) have been created.`,
-      });
-      navigate("/orders");
+      // Show success modal first
+      setShowSuccessModal(true);
     }
-  }, [allPaymentsComplete, processing, vendorGroups.length, navigate, toast]);
+  }, [allPaymentsComplete, processing]);
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    toast({
+      title: "All Orders Placed Successfully!",
+      description: `${vendorGroups.length} order(s) have been created.`,
+    });
+    navigate("/orders");
+  };
 
   // Handle payment initiation
   const handlePayNow = async () => {
@@ -353,59 +375,112 @@ const Checkout: React.FC = () => {
 
           {/* Right Column: Shipping & Payment */}
           <div className="space-y-6">
-            {/* Shipping Information */}
+            {/* Delivery Method Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Delivery Method
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup
+                  value={shippingInfo.deliveryMethod}
+                  onValueChange={(value: 'on_campus' | '2km_5km' | 'over_5km') => 
+                    setShippingInfo(prev => ({ ...prev, deliveryMethod: value }))
+                  }
+                  className="space-y-3"
+                  disabled={processing}
+                >
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="on_campus" id="on_campus" />
+                    <Label htmlFor="on_campus" className="flex-1 cursor-pointer">
+                      <div className="font-medium">On-Campus Pickup</div>
+                      <div className="text-sm text-muted-foreground">Meet seller on campus</div>
+                    </Label>
+                    <Badge className="bg-green-500">FREE</Badge>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="2km_5km" id="2km_5km" />
+                    <Label htmlFor="2km_5km" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Local Courier (2km - 5km)</div>
+                      <div className="text-sm text-muted-foreground">Delivery within 2-5km from campus</div>
+                    </Label>
+                    <Badge variant="secondary">Paid</Badge>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="over_5km" id="over_5km" />
+                    <Label htmlFor="over_5km" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Local Courier (Over 5km)</div>
+                      <div className="text-sm text-muted-foreground">Delivery beyond 5km from campus</div>
+                    </Label>
+                    <Badge variant="secondary">Paid</Badge>
+                  </div>
+                </RadioGroup>
+              </CardContent>
+            </Card>
+
+            {/* Shipping/Pickup Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Truck className="h-5 w-5" />
-                  Shipping Information
+                  {shippingInfo.deliveryMethod === 'on_campus' ? 'Pickup Information' : 'Shipping Information'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="street">Street Address</Label>
+                  <Label htmlFor="street">
+                    {shippingInfo.deliveryMethod === 'on_campus' ? 'Pickup Location / Landmark' : 'Street Address'}
+                  </Label>
                   <Input
                     id="street"
                     value={shippingInfo.street}
                     onChange={(e) => setShippingInfo((prev) => ({ ...prev, street: e.target.value }))}
-                    placeholder="123 Main St"
+                    placeholder={shippingInfo.deliveryMethod === 'on_campus' ? 'e.g., Campus Gate, Library, etc.' : '123 Main St'}
                     disabled={processing}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      value={shippingInfo.city}
-                      onChange={(e) => setShippingInfo((prev) => ({ ...prev, city: e.target.value }))}
-                      placeholder="Lagos"
-                      disabled={processing}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="state">State</Label>
-                    <Input
-                      id="state"
-                      value={shippingInfo.state}
-                      onChange={(e) => setShippingInfo((prev) => ({ ...prev, state: e.target.value }))}
-                      placeholder="Lagos"
-                      disabled={processing}
-                    />
-                  </div>
-                </div>
+                {shippingInfo.deliveryMethod !== 'on_campus' && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="city">City</Label>
+                        <Input
+                          id="city"
+                          value={shippingInfo.city}
+                          onChange={(e) => setShippingInfo((prev) => ({ ...prev, city: e.target.value }))}
+                          placeholder="Lagos"
+                          disabled={processing}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="state">State</Label>
+                        <Input
+                          id="state"
+                          value={shippingInfo.state}
+                          onChange={(e) => setShippingInfo((prev) => ({ ...prev, state: e.target.value }))}
+                          placeholder="Lagos"
+                          disabled={processing}
+                        />
+                      </div>
+                    </div>
 
-                <div>
-                  <Label htmlFor="zipCode">ZIP Code</Label>
-                  <Input
-                    id="zipCode"
-                    value={shippingInfo.zipCode}
-                    onChange={(e) => setShippingInfo((prev) => ({ ...prev, zipCode: e.target.value }))}
-                    placeholder="100001"
-                    disabled={processing}
-                  />
-                </div>
+                    <div>
+                      <Label htmlFor="zipCode">ZIP Code</Label>
+                      <Input
+                        id="zipCode"
+                        value={shippingInfo.zipCode}
+                        onChange={(e) => setShippingInfo((prev) => ({ ...prev, zipCode: e.target.value }))}
+                        placeholder="100001"
+                        disabled={processing}
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <Label htmlFor="phone">Phone Number *</Label>
@@ -519,6 +594,12 @@ const Checkout: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Order Success Modal with Safety Reminder */}
+      <OrderSuccessModal 
+        open={showSuccessModal} 
+        onClose={handleSuccessModalClose} 
+      />
     </div>
   );
 };

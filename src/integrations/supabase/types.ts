@@ -1066,6 +1066,8 @@ export type Database = {
           rating: number | null
           reviews: number | null
           shipping_fee: number | null
+          shipping_fee_2km_5km: number | null
+          shipping_fee_over_5km: number | null
           shipping_type: string | null
           sizes: string[] | null
           specifications: Json | null
@@ -1102,6 +1104,8 @@ export type Database = {
           rating?: number | null
           reviews?: number | null
           shipping_fee?: number | null
+          shipping_fee_2km_5km?: number | null
+          shipping_fee_over_5km?: number | null
           shipping_type?: string | null
           sizes?: string[] | null
           specifications?: Json | null
@@ -1138,6 +1142,8 @@ export type Database = {
           rating?: number | null
           reviews?: number | null
           shipping_fee?: number | null
+          shipping_fee_2km_5km?: number | null
+          shipping_fee_over_5km?: number | null
           shipping_type?: string | null
           sizes?: string[] | null
           specifications?: Json | null

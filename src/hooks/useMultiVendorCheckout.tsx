@@ -83,13 +83,13 @@ export const useMultiVendorCheckout = () => {
 
     const productLookup = new Map<
       string,
-      { vendor_id: string | null; shipping_fee: number; shipping_type: 'one_time' | 'per_product' }
+      { vendor_id: string | null; shipping_fee: number; shipping_fee_2km_5km: number; shipping_fee_over_5km: number; shipping_type: 'one_time' | 'per_product' }
     >();
 
     if (productIdsNeedingLookup.length > 0) {
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('id, vendor_id, shipping_fee, shipping_type')
+        .select('id, vendor_id, shipping_fee, shipping_fee_2km_5km, shipping_fee_over_5km, shipping_type')
         .in('id', productIdsNeedingLookup);
 
       if (!productsError) {
@@ -97,6 +97,8 @@ export const useMultiVendorCheckout = () => {
           productLookup.set(p.id, {
             vendor_id: p.vendor_id ?? null,
             shipping_fee: Number(p.shipping_fee) || 0,
+            shipping_fee_2km_5km: Number(p.shipping_fee_2km_5km) || 0,
+            shipping_fee_over_5km: Number(p.shipping_fee_over_5km) || 0,
             shipping_type: (p.shipping_type as 'one_time' | 'per_product') || 'one_time'
           });
         });
@@ -120,6 +122,8 @@ export const useMultiVendorCheckout = () => {
       const fallback = productLookup.get(item.id);
       const vendorId = (item.vendor_id ?? fallback?.vendor_id ?? null) as string | null;
       const shippingFee = Number(item.shipping_fee ?? fallback?.shipping_fee ?? 0);
+      const shippingFee2km5km = Number(item.shipping_fee_2km_5km ?? fallback?.shipping_fee_2km_5km ?? 0);
+      const shippingFeeOver5km = Number(item.shipping_fee_over_5km ?? fallback?.shipping_fee_over_5km ?? 0);
       const shippingType = (item.shipping_type ?? fallback?.shipping_type ?? 'one_time') as
         | 'one_time'
         | 'per_product';
@@ -133,6 +137,8 @@ export const useMultiVendorCheckout = () => {
         image: item.image,
         vendor_id: vendorId,
         shipping_fee: shippingFee,
+        shipping_fee_2km_5km: shippingFee2km5km,
+        shipping_fee_over_5km: shippingFeeOver5km,
         shipping_type: shippingType
       });
       groupedItems.set(vendorId, existing);

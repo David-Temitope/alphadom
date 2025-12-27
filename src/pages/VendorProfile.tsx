@@ -11,6 +11,7 @@ import { useUserFollows } from '@/hooks/useUserFollows';
 import { ProductCard } from '@/components/ProductCard';
 import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { WhatsAppButton } from '@/components/WhatsAppButton';
 
 interface VendorProfile {
   id: string;
@@ -29,6 +30,7 @@ interface VendorProfile {
     email: string;
   };
   business_address?: string;
+  contact_phone?: string;
 }
 
 interface VendorProduct {
@@ -78,22 +80,25 @@ export const VendorProfile = () => {
         .eq('id', vendorId)
         .single();
 
-      // Fetch business address from shop_applications
+      // Fetch business address and phone from shop_applications
       let businessAddress = '';
+      let contactPhone = '';
       if (vendorData.application_id) {
         const { data: appData } = await supabase
           .from('shop_applications')
-          .select('business_address')
+          .select('business_address, contact_phone')
           .eq('id', vendorData.application_id)
           .maybeSingle();
         
         businessAddress = appData?.business_address || '';
+        contactPhone = appData?.contact_phone || '';
       }
 
       setVendor({
         ...vendorData,
         profile: profileData as any,
-        business_address: businessAddress
+        business_address: businessAddress,
+        contact_phone: contactPhone
       });
 
       // Fetch vendor's products
@@ -233,7 +238,7 @@ export const VendorProfile = () => {
             </div>
 
             {user && user.id !== vendor.user_id && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {isMobile ? (
                   <>
                     <Button
@@ -256,6 +261,13 @@ export const VendorProfile = () => {
                     >
                       <Share2 className="w-4 h-4" />
                     </Button>
+                    {vendor.contact_phone && (
+                      <WhatsAppButton
+                        phoneNumber={vendor.contact_phone}
+                        variant="vendor"
+                        className="h-9 text-xs px-3"
+                      />
+                    )}
                   </>
                 ) : (
                   <>
@@ -284,6 +296,12 @@ export const VendorProfile = () => {
                       <Share2 className="w-4 h-4" />
                       Share
                     </Button>
+                    {vendor.contact_phone && (
+                      <WhatsAppButton
+                        phoneNumber={vendor.contact_phone}
+                        variant="vendor"
+                      />
+                    )}
                   </>
                 )}
               </div>
