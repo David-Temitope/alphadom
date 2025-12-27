@@ -496,6 +496,22 @@ export const useMultiVendorCheckout = () => {
     return vendorGroups.filter(g => g.payment_status === 'pending');
   }, [vendorGroups]);
 
+  // Recalculate shipping based on delivery method
+  const recalculateWithDeliveryMethod = useCallback((deliveryMethod: 'on_campus' | '2km_5km' | 'over_5km') => {
+    setVendorGroups(prev => prev.map(group => {
+      const shipping = calculateGroupShipping(group.items, deliveryMethod);
+      const vat = group.subtotal * VAT_RATE;
+      const groupTotal = group.subtotal + shipping + vat;
+      
+      return {
+        ...group,
+        shipping,
+        vat,
+        total: groupTotal
+      };
+    }));
+  }, []);
+
   return {
     vendorGroups,
     grandTotals,
@@ -509,6 +525,7 @@ export const useMultiVendorCheckout = () => {
     failedGroups,
     pendingGroups,
     createVendorOrder, // For bank transfer
-    updateGroupPaymentStatus
+    updateGroupPaymentStatus,
+    recalculateWithDeliveryMethod
   };
 };
