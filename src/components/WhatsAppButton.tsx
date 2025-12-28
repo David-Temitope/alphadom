@@ -8,6 +8,7 @@ interface WhatsAppButtonProps {
   productName?: string;
   variant?: 'product' | 'vendor';
   className?: string;
+  iconOnly?: boolean;
 }
 
 // Format phone number for WhatsApp API
@@ -30,7 +31,8 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   vendorName,
   productName,
   variant = 'vendor',
-  className = ''
+  className = '',
+  iconOnly = false
 }) => {
   if (!phoneNumber || phoneNumber.trim() === '') return null;
 
@@ -47,6 +49,19 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   const whatsappUrl = message 
     ? `https://wa.me/${formattedPhone}?text=${message}`
     : `https://wa.me/${formattedPhone}`;
+
+  if (iconOnly) {
+    return (
+      <Button
+        onClick={() => window.open(whatsappUrl, '_blank')}
+        size="icon"
+        className={`bg-[#25D366] hover:bg-[#128C7E] text-white ${className}`}
+        title="Message on WhatsApp"
+      >
+        <MessageCircle className="w-4 h-4" />
+      </Button>
+    );
+  }
 
   return (
     <Button

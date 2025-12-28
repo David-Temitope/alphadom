@@ -99,12 +99,13 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
   // Calculate vendor's order value (only their products)
   const vendorSubtotal = vendorItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const vendorShipping = order.shipping_cost || 0;
-  const vendorVat = vendorSubtotal * 0.025; // 2.5% VAT
-  const vendorOrderTotal = vendorSubtotal + vendorShipping + vendorVat;
+  const vendorServiceCharge = vendorSubtotal * 0.025; // 2.5% Service Charge
+  const vendorOrderTotal = vendorSubtotal + vendorShipping + vendorServiceCharge;
 
-  // Commission on subtotal only (not shipping or VAT)
+  // Commission on subtotal only (not shipping or service charge)
+  // Vendor payout = subtotal - commission + shipping (shipping goes to vendor)
   const commission = vendorSubtotal * (commissionRate / 100);
-  const vendorPayout = vendorOrderTotal - commission;
+  const vendorPayout = (vendorSubtotal - commission) + vendorShipping;
 
   if (vendorItems.length === 0) return null;
 
@@ -204,12 +205,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
                 <span>₦{vendorSubtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping Fee:</span>
+                <span>Shipping Fee (goes to you):</span>
                 <span>₦{vendorShipping.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span>Service Charge (2.5%):</span>
-                <span>₦{vendorVat.toLocaleString()}</span>
+                <span>₦{vendorServiceCharge.toLocaleString()}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-bold">

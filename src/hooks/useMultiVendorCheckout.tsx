@@ -273,9 +273,10 @@ export const useMultiVendorCheckout = () => {
       if (itemsError) throw itemsError;
 
       // Calculate commission for metadata
+      // Vendor payout = subtotal - commission + shipping (shipping goes to vendor, not platform)
       const commissionRate = getCommissionRate(group.subscription_plan);
       const commissionAmount = group.subtotal * (commissionRate / 100);
-      const vendorPayout = group.total - commissionAmount;
+      const vendorPayout = (group.subtotal - commissionAmount) + group.shipping;
 
       // Record transaction with commission details
       await supabase.from("platform_transactions").insert({

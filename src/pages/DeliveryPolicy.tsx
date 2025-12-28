@@ -54,6 +54,13 @@ const DeliveryPolicy = () => {
             </p>
           </section>
 
+          <section className="space-y-3 bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-amber-800">⚠️ Safety Reminder</h2>
+            <p className="text-amber-700">
+              <strong>Always meet in a public place for pickups and stay safe.</strong> When collecting orders in person, choose busy, well-lit locations. Verify the product before completing any payment. Do not share personal financial details with sellers or delivery personnel.
+            </p>
+          </section>
+
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">7. Failed Delivery Attempts</h2>
             <p>

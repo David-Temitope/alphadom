@@ -181,140 +181,198 @@ export const VendorProfile = () => {
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Vendor Header */}
       <Card className="mb-8">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 md:space-x-6">
+        <CardHeader className="p-4 md:p-6">
+          {/* Mobile Layout */}
+          <div className="flex md:hidden gap-3">
+            {/* Left: Avatar + Verified */}
+            <div className="flex-shrink-0 flex flex-col items-center">
               <div className="relative">
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                   {vendor.profile?.avatar_url ? (
                     <img 
                       src={vendor.profile.avatar_url} 
                       alt={vendor.store_name}
-                      className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover"
+                      className="w-16 h-16 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-xl md:text-2xl font-semibold text-gray-600">
+                    <span className="text-xl font-semibold text-gray-600">
                       {vendor.store_name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5 md:p-1">
-                  <CheckCircle className="w-3 h-3 md:w-5 md:h-5 text-white" />
+                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
+                  <CheckCircle className="w-3 h-3 text-white" />
+                </div>
+              </div>
+              <Badge variant="default" className="bg-green-100 text-green-800 text-[8px] mt-1 px-1.5 py-0">
+                Verified
+              </Badge>
+            </div>
+
+            {/* Center: Info */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              <h2 className="font-bold text-base truncate" title={vendor.store_name}>
+                {vendor.store_name}
+              </h2>
+              <p className="text-xs text-gray-600 truncate">
+                by {vendor.profile?.full_name || 'Vendor'}
+              </p>
+              {vendor.business_address && (
+                <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                  <MapPin className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{vendor.business_address}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 mt-1">
+                <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                <span className="text-xs font-medium">4.8</span>
+                <span className="text-xs text-gray-500">({vendor.total_orders})</span>
+              </div>
+            </div>
+
+            {/* Right: Action Buttons (vertical) */}
+            {user && user.id !== vendor.user_id && (
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <Button
+                  onClick={handleFollow}
+                  variant={isUserFollowing ? "outline" : "default"}
+                  size="icon"
+                  className="h-8 w-8"
+                  title={isUserFollowing ? "Unfollow" : "Follow"}
+                >
+                  {isUserFollowing ? (
+                    <UserMinus className="w-3.5 h-3.5" />
+                  ) : (
+                    <UserPlus className="w-3.5 h-3.5" />
+                  )}
+                </Button>
+                {vendor.contact_phone && (
+                  <WhatsAppButton
+                    phoneNumber={vendor.contact_phone}
+                    variant="vendor"
+                    iconOnly
+                    className="h-8 w-8"
+                  />
+                )}
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  title="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            )}
+            {(!user || user.id === vendor.user_id) && (
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  title="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                  {vendor.profile?.avatar_url ? (
+                    <img 
+                      src={vendor.profile.avatar_url} 
+                      alt={vendor.store_name}
+                      className="w-24 h-24 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-semibold text-gray-600">
+                      {vendor.store_name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                  <CheckCircle className="w-5 h-5 text-white" />
                 </div>
               </div>
               
-              <div className="space-y-1 md:space-y-2">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <CardTitle className="text-lg md:text-3xl">{vendor.store_name}</CardTitle>
-                  <Badge variant="default" className="bg-green-100 text-green-800 text-[10px] md:text-xs">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="text-3xl">{vendor.store_name}</CardTitle>
+                  <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
                     Verified
                   </Badge>
                 </div>
-                <p className="text-sm md:text-base text-gray-600">{vendor.profile?.full_name}</p>
-                <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-500">
+                <p className="text-base text-gray-600">{vendor.profile?.full_name}</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span>{vendor.product_category}</span>
                   {vendor.business_address && (
                     <>
-                      <span className="hidden md:inline">•</span>
-                      <div className="hidden md:flex items-center gap-1">
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
                         <span>{vendor.business_address}</span>
                       </div>
                     </>
                   )}
                 </div>
-                {vendor.business_address && (
-                  <div className="flex md:hidden items-center gap-1 text-xs text-gray-500">
-                    <MapPin className="w-3 h-3" />
-                    <span className="truncate max-w-[150px]">{vendor.business_address}</span>
-                  </div>
-                )}
                 <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 fill-current" />
-                  <span className="text-xs md:text-sm font-medium">4.8</span>
-                  <span className="text-xs md:text-sm text-gray-500">({vendor.total_orders} reviews)</span>
+                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                  <span className="text-sm font-medium">4.8</span>
+                  <span className="text-sm text-gray-500">({vendor.total_orders} reviews)</span>
                 </div>
               </div>
             </div>
 
             {user && user.id !== vendor.user_id && (
-              <div className="flex gap-2 flex-wrap">
-                {isMobile ? (
-                  <>
-                    <Button
-                      onClick={handleFollow}
-                      variant={isUserFollowing ? "outline" : "default"}
-                      size="icon"
-                      className="h-9 w-9"
-                    >
-                      {isUserFollowing ? (
-                        <UserMinus className="w-4 h-4" />
-                      ) : (
-                        <UserPlus className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      onClick={handleShare}
-                      variant="outline"
-                      size="icon"
-                      className="h-9 w-9"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </Button>
-                    {vendor.contact_phone && (
-                      <WhatsAppButton
-                        phoneNumber={vendor.contact_phone}
-                        variant="vendor"
-                        className="h-9 text-xs px-3"
-                      />
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      onClick={handleFollow}
-                      variant={isUserFollowing ? "outline" : "default"}
-                      className="flex items-center gap-2"
-                    >
-                      {isUserFollowing ? (
-                        <>
-                          <UserMinus className="w-4 h-4" />
-                          Unfollow
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="w-4 h-4" />
-                          Follow
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={handleShare}
-                      variant="outline"
-                      className="flex items-center gap-2"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      Share
-                    </Button>
-                    {vendor.contact_phone && (
-                      <WhatsAppButton
-                        phoneNumber={vendor.contact_phone}
-                        variant="vendor"
-                      />
-                    )}
-                  </>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleFollow}
+                  variant={isUserFollowing ? "outline" : "default"}
+                  className="flex items-center gap-2"
+                >
+                  {isUserFollowing ? (
+                    <>
+                      <UserMinus className="w-4 h-4" />
+                      Unfollow
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Follow
+                    </>
+                  )}
+                </Button>
+                {vendor.contact_phone && (
+                  <WhatsAppButton
+                    phoneNumber={vendor.contact_phone}
+                    variant="vendor"
+                  />
                 )}
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
               </div>
             )}
             {(!user || user.id === vendor.user_id) && (
               <Button
                 onClick={handleShare}
                 variant="outline"
-                size={isMobile ? "icon" : "default"}
-                className={isMobile ? "h-9 w-9" : "flex items-center gap-2"}
+                className="flex items-center gap-2"
               >
                 <Share2 className="w-4 h-4" />
-                {!isMobile && "Share"}
+                Share
               </Button>
             )}
           </div>
