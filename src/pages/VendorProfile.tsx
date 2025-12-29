@@ -31,6 +31,7 @@ interface VendorProfile {
   };
   business_address?: string;
   contact_phone?: string;
+  is_registered?: boolean;
 }
 
 interface VendorProduct {
@@ -80,25 +81,28 @@ export const VendorProfile = () => {
         .eq('id', vendorId)
         .single();
 
-      // Fetch business address and phone from shop_applications
+      // Fetch business address, phone, and is_registered from shop_applications
       let businessAddress = '';
       let contactPhone = '';
+      let isRegistered = false;
       if (vendorData.application_id) {
         const { data: appData } = await supabase
           .from('shop_applications')
-          .select('business_address, contact_phone')
+          .select('business_address, contact_phone, is_registered')
           .eq('id', vendorData.application_id)
           .maybeSingle();
         
         businessAddress = appData?.business_address || '';
         contactPhone = appData?.contact_phone || '';
+        isRegistered = appData?.is_registered || false;
       }
 
       setVendor({
         ...vendorData,
         profile: profileData as any,
         business_address: businessAddress,
-        contact_phone: contactPhone
+        contact_phone: contactPhone,
+        is_registered: isRegistered
       });
 
       // Fetch vendor's products
@@ -207,6 +211,11 @@ export const VendorProfile = () => {
               <Badge variant="default" className="bg-green-100 text-green-800 text-[8px] mt-1 px-1.5 py-0">
                 Verified
               </Badge>
+              {vendor.is_registered && (
+                <Badge variant="default" className="bg-blue-100 text-blue-800 text-[8px] mt-0.5 px-1.5 py-0">
+                  Registered
+                </Badge>
+              )}
             </div>
 
             {/* Center: Info */}
@@ -308,6 +317,11 @@ export const VendorProfile = () => {
                   <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
                     Verified
                   </Badge>
+                  {vendor.is_registered && (
+                    <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs">
+                      Registered Business
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-base text-gray-600">{vendor.profile?.full_name}</p>
                 <div className="flex items-center gap-4 text-sm text-gray-500">

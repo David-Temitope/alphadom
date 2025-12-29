@@ -14,10 +14,10 @@ import heroDefault2 from '@/assets/hero-default-2.jpg';
 const DEFAULT_HERO_IMAGES = [heroDefault1, heroDefault2];
 
 // Fixed guest hero content - never flashes or waits for settings
-const GUEST_HERO_TITLE = "Your Campus";
+const GUEST_HERO_TITLE = "Your Online";
 const GUEST_HERO_MAIN_TEXT = "Marketplace";
 const GUEST_HERO_SECONDARY_TEXT = "Shop Smart, Save Big";
-const GUEST_HERO_SUBTITLE = "Discover amazing deals from student vendors. Join thousands of students buying and selling on the largest campus marketplace!";
+const GUEST_HERO_SUBTITLE = "Discover amazing deals from verified vendors. Join thousands of buyers and sellers on Africa's growing e-commerce platform!";
 
 export const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -64,7 +64,10 @@ export const Hero = () => {
   };
 
   // Show "Start Selling" button only for logged-in users who aren't vendors/dispatchers/applicants
-  const showStartSelling = user && !hasUserType('vendor') && !hasUserType('dispatch') && !userApplication;
+  // Show "Start Selling" button only for logged-in users who aren't approved vendors/dispatchers
+  // Still show if they have a rejected application so they can reapply
+  const showStartSelling = user && !hasUserType('vendor') && !hasUserType('dispatch') && 
+    (!userApplication || userApplication.status === 'rejected');
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-blue-50 to-slate-50 min-h-[90vh] flex items-center pb-16">
@@ -86,7 +89,7 @@ export const Hero = () => {
               {/* Site Description Badge */}
               <div className="inline-flex items-center px-4 py-2 bg-green-100/80 text-green-700 rounded-full text-sm font-medium backdrop-blur-sm border border-green-200/50">
                 <Shield className="w-4 h-4 mr-2" />
-                Built for students, by students 🎓
+                Buy & Sell Online with Ease 🛍️
               </div>
 
               {/* Hero Title - Uses guest or admin settings */}
@@ -148,7 +151,7 @@ export const Hero = () => {
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors duration-200">
                   <Leaf className="w-6 h-6 text-green-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Student Discounts</p>
+                <p className="text-sm font-medium text-slate-700">Great Deals</p>
               </div>
 
               <div className="text-center group">
@@ -162,7 +165,7 @@ export const Hero = () => {
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors duration-200">
                   <Recycle className="w-6 h-6 text-green-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Campus Delivery</p>
+                <p className="text-sm font-medium text-slate-700">Fast Delivery</p>
               </div>
             </div>
           </div>

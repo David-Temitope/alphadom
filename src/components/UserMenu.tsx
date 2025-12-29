@@ -75,8 +75,8 @@ export const UserMenu = () => {
               </Link>
             </DropdownMenuItem>
 
-            {/* Shop/Dispatch Application/Status */}
-            {shopApplication && !isVendor && (
+            {/* Shop/Dispatch Application/Status - only show if application exists, not rejected, and user is not yet vendor */}
+            {shopApplication && !isVendor && shopApplication.status !== 'rejected' && (
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link to="/shop-application-status">
                   <Store className="mr-2 h-4 w-4" />

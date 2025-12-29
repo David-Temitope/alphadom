@@ -1068,6 +1068,9 @@ export type Database = {
           shipping_fee: number | null
           shipping_fee_2km_5km: number | null
           shipping_fee_over_5km: number | null
+          shipping_fee_zone1: number | null
+          shipping_fee_zone2: number | null
+          shipping_fee_zone3: number | null
           shipping_type: string | null
           sizes: string[] | null
           specifications: Json | null
@@ -1106,6 +1109,9 @@ export type Database = {
           shipping_fee?: number | null
           shipping_fee_2km_5km?: number | null
           shipping_fee_over_5km?: number | null
+          shipping_fee_zone1?: number | null
+          shipping_fee_zone2?: number | null
+          shipping_fee_zone3?: number | null
           shipping_type?: string | null
           sizes?: string[] | null
           specifications?: Json | null
@@ -1144,6 +1150,9 @@ export type Database = {
           shipping_fee?: number | null
           shipping_fee_2km_5km?: number | null
           shipping_fee_over_5km?: number | null
+          shipping_fee_zone1?: number | null
+          shipping_fee_zone2?: number | null
+          shipping_fee_zone3?: number | null
           shipping_type?: string | null
           sizes?: string[] | null
           specifications?: Json | null

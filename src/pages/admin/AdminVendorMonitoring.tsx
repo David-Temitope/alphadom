@@ -621,30 +621,44 @@ const VendorProducts = ({ vendorId, onDeleteProduct }: { vendorId: string; onDel
       {products.length === 0 ? (
         <p className="text-center text-muted-foreground">No products found.</p>
       ) : (
-        products.map((product) => (
-          <div key={product.id} className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center gap-3">
-              {product.image && (
+        products.map((product) => {
+          // Helper to extract first image from JSON array or single URL
+          const getDisplayImage = (image: string | null | undefined): string => {
+            if (!image) return '/placeholder.svg';
+            try {
+              const parsed = JSON.parse(image);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed[0];
+              }
+              return image;
+            } catch {
+              return image;
+            }
+          };
+
+          return (
+            <div key={product.id} className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center gap-3">
                 <img 
-                  src={product.image} 
+                  src={getDisplayImage(product.image)} 
                   alt={product.name}
                   className="w-12 h-12 object-cover rounded"
                 />
-              )}
-              <div>
-                <p className="font-medium">{product.name}</p>
-                <p className="text-sm text-muted-foreground">${product.price}</p>
+                <div>
+                  <p className="font-medium">{product.name}</p>
+                  <p className="text-sm text-muted-foreground">₦{product.price?.toLocaleString()}</p>
+                </div>
               </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onDeleteProduct(product.id)}
+              >
+                Delete
+              </Button>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onDeleteProduct(product.id)}
-            >
-              Delete
-            </Button>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );

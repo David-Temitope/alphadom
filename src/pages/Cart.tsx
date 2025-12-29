@@ -105,55 +105,54 @@ const Cart = () => {
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
               <Card key={item.id} className="bg-white">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex gap-3 sm:gap-4">
                     <img
                       src={getDisplayImage(item.image)}
                       alt={item.name}
-                      className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                      className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-gray-200 flex-shrink-0"
                     />
 
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{item.name}</h3>
                           <Badge variant="secondary" className="text-xs mt-1">
                             {item.category}
                           </Badge>
                         </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-green-600">
+                        <div className="text-left sm:text-right flex-shrink-0">
+                          <div className="text-base sm:text-lg font-bold text-green-600">
                             ₦{(item.price * item.quantity).toLocaleString()}
                           </div>
-
-                          <div className="text-sm text-gray-500">₦{item.price.toLocaleString()} each</div>
+                          <div className="text-xs sm:text-sm text-gray-500">₦{item.price.toLocaleString()} each</div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         {/* Quantity Controls */}
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <div className="flex items-center border border-gray-300 rounded-lg">
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="p-2 hover:bg-gray-100 transition-colors"
+                              className="p-1.5 sm:p-2 hover:bg-gray-100 transition-colors"
                             >
-                              <Minus className="h-4 w-4" />
+                              <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
                             </button>
-                            <span className="px-4 py-2 border-x border-gray-300 min-w-[60px] text-center">
+                            <span className="px-2 sm:px-4 py-1 sm:py-2 border-x border-gray-300 min-w-[40px] sm:min-w-[60px] text-center text-sm">
                               {item.quantity}
                             </span>
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="p-2 hover:bg-gray-100 transition-colors"
+                              className="p-1.5 sm:p-2 hover:bg-gray-100 transition-colors"
                             >
-                              <Plus className="h-4 w-4" />
+                              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                             </button>
                           </div>
 
-                          <Badge className="bg-green-100 text-green-800 flex items-center space-x-1">
+                          <Badge className="bg-green-100 text-green-800 flex items-center gap-1 text-xs">
                             <Leaf className="h-3 w-3" />
-                            <span>Score: {item.sustainabilityScore}/10</span>
+                            <span>{item.sustainabilityScore}/10</span>
                           </Badge>
                         </div>
 
@@ -162,7 +161,7 @@ const Cart = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeFromCart(item.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 self-start sm:self-center"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
