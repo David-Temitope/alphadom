@@ -63,19 +63,18 @@ const About = () => {
                 ) : (
                   <>
                     <p>
-                      Alphadom was born from a simple belief: that students deserve a platform where they can learn 
-                      to manage their own brands — right from campus. Founded in 2025, we started with a vision 
-                      to transform how young entrepreneurs approach business.
+                      Alphadom was born from a simple belief: that everyone deserves a platform where they can 
+                      build and manage their own brands online. Founded in 2025, we started with a vision 
+                      to transform how entrepreneurs approach e-commerce in Africa.
                     </p>
                     <p>
-                      We believe that learning doesn't have to wait until after graduation. With Alphadom, students 
+                      We believe that starting a business shouldn't be complicated. With Alphadom, sellers 
                       can start building their entrepreneurial journey today, gaining real-world experience in 
                       product management, customer service, and business operations.
                     </p>
                     <p>
-                      Now students can boldly add years of experience to their resumes because they started right 
-                      from campus. We're not just building a marketplace — we're building the next generation of 
-                      business leaders, one student entrepreneur at a time.
+                      We're not just building a marketplace — we're building the next generation of 
+                      business leaders across Africa, one entrepreneur at a time.
                     </p>
                   </>
                 )}
@@ -90,7 +89,7 @@ const About = () => {
               <div className="absolute -bottom-6 -right-6 bg-green-600 text-white p-4 rounded-lg shadow-lg">
                 <GraduationCap className="h-8 w-8 mb-2" />
                 <div className="text-lg font-bold">Global Impact</div>
-                <div className="text-sm">Educational Journey</div>
+                <div className="text-sm">Business Journey</div>
               </div>
             </div>
           </div>

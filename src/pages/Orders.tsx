@@ -5,11 +5,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, ShoppingBag, Calendar, CreditCard, CheckCircle } from 'lucide-react';
+import { Loader2, ShoppingBag, Calendar, CreditCard, CheckCircle, MessageCircle } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { OrderChat } from '@/components/OrderChat';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -153,7 +152,13 @@ const Orders = () => {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2 items-center">
-                      <OrderChat orderId={order.id} orderNumber={order.id} />
+                      <Badge className={getStatusColor(order.status)}>
+                        {order.status}
+                      </Badge>
+                      <Badge className={getPaymentStatusColor(order.payment_status || 'pending')}>
+                        {order.payment_status || 'pending'}
+                      </Badge>
+                    </div>
                       <Badge className={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>

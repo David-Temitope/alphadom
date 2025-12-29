@@ -373,47 +373,52 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
       </div>
 
       <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
-        <h4 className="font-semibold text-sm">Shipping & Delivery Fees</h4>
+        <h4 className="font-semibold text-sm">Shipping & Delivery Fees (Zone-Based)</h4>
         <p className="text-xs text-muted-foreground">
-          Set different shipping fees based on delivery distance. On-Campus pickup is always free.
+          Set different shipping fees based on delivery zones. Buyers will see your business location to determine their zone.
         </p>
+        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-xs text-blue-700 font-medium">
+            💡 Pro tip: Include shipping in your price and list as "free shipping". This increases sales by 30% because customers hate extra fees at checkout!
+          </p>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="shipping_fee">On-Campus / Free Pickup (₦)</Label>
+            <Label htmlFor="shipping_fee">Zone 1 - Local (Same City/State) (₦)</Label>
             <Input 
               id="shipping_fee" 
               type="number" 
               step="0.01"
-              placeholder="0 (Free)"
+              placeholder="500"
               value={newProduct.shipping_fee}
               onChange={(e) => setNewProduct({...newProduct, shipping_fee: e.target.value})}
             />
-            <p className="text-xs text-muted-foreground">Usually 0 for campus pickup</p>
+            <p className="text-xs text-muted-foreground">Buyer is in same city as you</p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="shipping_fee_2km_5km">2km - 5km from Campus (₦) *</Label>
+            <Label htmlFor="shipping_fee_2km_5km">Zone 2 - Regional (Neighboring States) (₦)</Label>
             <Input 
               id="shipping_fee_2km_5km" 
               type="number" 
               step="0.01"
-              placeholder="500"
+              placeholder="1000"
               value={newProduct.shipping_fee_2km_5km}
               onChange={(e) => setNewProduct({...newProduct, shipping_fee_2km_5km: e.target.value})}
-              required
             />
+            <p className="text-xs text-muted-foreground">Buyer is in a nearby state</p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="shipping_fee_over_5km">Over 5km from Campus (₦) *</Label>
+            <Label htmlFor="shipping_fee_over_5km">Zone 3 - National (Far-Away States) (₦)</Label>
             <Input 
               id="shipping_fee_over_5km" 
               type="number" 
               step="0.01"
-              placeholder="1000"
+              placeholder="2000"
               value={newProduct.shipping_fee_over_5km}
               onChange={(e) => setNewProduct({...newProduct, shipping_fee_over_5km: e.target.value})}
-              required
             />
+            <p className="text-xs text-muted-foreground">Buyer is far from your location</p>
           </div>
         </div>
 

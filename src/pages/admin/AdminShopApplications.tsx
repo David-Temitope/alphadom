@@ -189,6 +189,14 @@ const AdminShopApplications = () => {
                             </div>
                           )}
 
+                          {/* Show TIN for companies */}
+                          {application.business_type === 'company' && (application as any).tin_number && (
+                            <div>
+                              <Label>TIN Number</Label>
+                              <p className="text-sm font-medium text-green-600">{(application as any).tin_number}</p>
+                            </div>
+                          )}
+
                           {application.id_image_url && (
                             <div>
                               <Label>ID Image</Label>

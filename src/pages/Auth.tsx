@@ -127,18 +127,18 @@ const Auth = () => {
               />
             </div>
             <h1 className="text-5xl font-bold tracking-tight">Alphadom</h1>
-            <p className="text-green-100 text-lg mt-2">Your Campus Marketplace 🎓</p>
+            <p className="text-green-100 text-lg mt-2">Your Online Marketplace 🛍️</p>
           </div>
 
-          {/* Features for students */}
+          {/* Features for everyone */}
           <div className="space-y-6 max-w-sm">
             <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                 <ShoppingCart className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold">Budget-Friendly</h3>
-                <p className="text-sm text-green-100">Prices that fit student wallets</p>
+                <h3 className="font-semibold">Great Prices</h3>
+                <p className="text-sm text-green-100">Affordable products for everyone</p>
               </div>
             </div>
             
@@ -179,13 +179,13 @@ const Auth = () => {
                 />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">Alphadom</h1>
-              <p className="text-gray-600 text-sm">Your Campus Marketplace 🎓</p>
+              <p className="text-gray-600 text-sm">Your Online Marketplace 🛍️</p>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-6 sm:p-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome, Student! 👋</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Welcome! 👋</h2>
               <p className="text-gray-600 text-sm mt-1">
                 Sign in to start shopping or selling
               </p>
