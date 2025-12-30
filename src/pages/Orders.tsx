@@ -159,13 +159,6 @@ const Orders = () => {
                         {order.payment_status || 'pending'}
                       </Badge>
                     </div>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status}
-                      </Badge>
-                      <Badge className={getPaymentStatusColor(order.payment_status || 'pending')}>
-                        {order.payment_status || 'pending'}
-                      </Badge>
-                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
