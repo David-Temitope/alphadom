@@ -16,8 +16,8 @@ export const Footer = () => {
               <span className="text-lg font-bold">Alphadom</span>
             </div>
             <p className="text-gray-300 text-sm">
-              Your campus marketplace! We connect students to verified vendors 
-              for budget-friendly products. 🎓
+              Your trusted online marketplace. We connect buyers to verified vendors 
+              for quality products at great prices.
             </p>
             <div className="flex space-x-4">
               <Button 

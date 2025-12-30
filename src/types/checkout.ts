@@ -26,6 +26,7 @@ export type PaymentStatus = "pending" | "processing" | "paid" | "failed";
 export type VendorGroup = {
   vendor_id: string | null; // null for admin/platform products
   vendor_name: string;
+  vendor_location: string | null; // Business address/location
   subscription_plan: string;
   paystack_subaccount_code: string | null;
   items: CartItemWithVendor[];

@@ -89,11 +89,11 @@ export const Hero = () => {
               {/* Site Description Badge */}
               <div className="inline-flex items-center px-4 py-2 bg-green-100/80 text-green-700 rounded-full text-sm font-medium backdrop-blur-sm border border-green-200/50">
                 <Shield className="w-4 h-4 mr-2" />
-                Buy & Sell Online with Ease 🛍️
+                Buy & Sell Online with Ease
               </div>
 
               {/* Hero Title - Uses guest or admin settings */}
-              <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
+              <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 leading-tight">
                 {heroTitle}
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   {heroMainText}

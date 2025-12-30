@@ -411,12 +411,12 @@ const ProductDetail = () => {
                 {product.full_description || product.description}
               </p>
               
-              {/* Vendor Info */}
-              <div className="mt-4 p-3 bg-muted rounded-lg space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold">Product From: </span>
+              {/* Vendor Info - Moved higher for visibility */}
+              <div className="p-4 bg-muted rounded-lg space-y-3 border">
+                <p className="text-sm">
+                  <span className="font-semibold">Sold by: </span>
                   {product.vendor_user_id ? (
-                  <Link to={`/vendor/${product.vendor_user_id}`} className="text-primary hover:underline">
+                  <Link to={`/vendor/${product.vendor_user_id}`} className="text-primary hover:underline font-medium">
                     {vendorName || 'Vendor'}
                   </Link>
                   ) : (
@@ -442,13 +442,14 @@ const ProductDetail = () => {
                     <Leaf className="w-4 h-4 mr-2 text-green-600" />
                     Eco Features
                   </h3>
-                  <div className="flex flex-wrap gap-2">
+                  <ul className="space-y-1">
                     {product.eco_features.filter(f => f && f.trim()).map((feature, index) => (
-                      <Badge key={index} variant="outline" className="text-green-700 border-green-200">
+                      <li key={index} className="flex items-center gap-2 text-sm text-green-700">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                         {feature}
-                      </Badge>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
 
