@@ -121,11 +121,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg border bg-white dark:bg-card">
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
-        <div className="relative overflow-hidden bg-muted">
+        <div className="relative overflow-hidden bg-muted aspect-square">
           <img
             src={displayImage}
             alt={product.name}
-            className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
             decoding="async"
             onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
@@ -227,8 +227,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className="w-full bg-green-600 hover:bg-green-700 text-white border-0 disabled:opacity-50"
           size="sm"
         >
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          {(product.stock_count || 0) <= 0 ? 'Out of Stock' : 'Add to Cart'}
+          <ShoppingCart className="w-4 h-4 mr-1" />
+          {(product.stock_count || 0) <= 0 ? 'Out of Stock' : 'Add'}
         </Button>
       </CardFooter>
     </Card>

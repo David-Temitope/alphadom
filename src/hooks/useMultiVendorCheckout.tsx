@@ -20,6 +20,7 @@ type VendorInfo = {
   store_name: string;
   subscription_plan: string;
   paystack_subaccount_code: string | null;
+  business_address: string | null;
 };
 
 export const useMultiVendorCheckout = () => {
@@ -39,14 +40,32 @@ export const useMultiVendorCheckout = () => {
 
     if (vendorIds.length === 0) return vendorMap;
 
+    // Fetch vendor info with business address from shop_applications
     const { data, error } = await supabase
       .from("approved_vendors")
-      .select("id, store_name, subscription_plan, paystack_subaccount_code")
+      .select("id, store_name, subscription_plan, paystack_subaccount_code, application_id")
       .in("id", vendorIds);
 
     if (error) {
       console.error("Error fetching vendor info:", error);
       return vendorMap;
+    }
+
+    // Fetch business addresses from shop_applications
+    const applicationIds = data?.map(v => v.application_id).filter(Boolean) || [];
+    let addressMap = new Map<string, string>();
+    
+    if (applicationIds.length > 0) {
+      const { data: appData } = await supabase
+        .from("shop_applications")
+        .select("id, business_address")
+        .in("id", applicationIds);
+      
+      appData?.forEach((app) => {
+        if (app.business_address) {
+          addressMap.set(app.id, app.business_address);
+        }
+      });
     }
 
     data?.forEach((vendor) => {
@@ -55,6 +74,7 @@ export const useMultiVendorCheckout = () => {
         store_name: vendor.store_name,
         subscription_plan: vendor.subscription_plan || "free",
         paystack_subaccount_code: vendor.paystack_subaccount_code,
+        business_address: vendor.application_id ? addressMap.get(vendor.application_id) || null : null,
       });
     });
 
@@ -165,6 +185,7 @@ export const useMultiVendorCheckout = () => {
       groups.push({
         vendor_id: vendorId,
         vendor_name: vendorInfo?.store_name || "Alphadom",
+        vendor_location: vendorInfo?.business_address || null,
         subscription_plan: vendorInfo?.subscription_plan || "free",
         paystack_subaccount_code: vendorInfo?.paystack_subaccount_code || null,
         items: groupItems,

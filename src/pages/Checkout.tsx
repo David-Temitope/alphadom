@@ -293,15 +293,23 @@ const Checkout: React.FC = () => {
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <Store className="h-5 w-5" />
-                        {group.vendor_name}
-                        {group.vendor_id && (
-                          <Badge variant="outline" className="text-xs">
-                            {group.subscription_plan}
-                          </Badge>
+                      <div>
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          <Store className="h-5 w-5" />
+                          {group.vendor_name}
+                          {group.vendor_id && (
+                            <Badge variant="outline" className="text-xs">
+                              {group.subscription_plan}
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        {group.vendor_location && (
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <MapPin className="h-3 w-3" />
+                            {group.vendor_location}
+                          </p>
                         )}
-                      </CardTitle>
+                      </div>
                       <div className="flex items-center gap-2">
                         {getStatusBadge(group, index)}
                         {group.payment_status === "failed" && (
@@ -395,28 +403,25 @@ const Checkout: React.FC = () => {
                   <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
                     <RadioGroupItem value="on_campus" id="on_campus" />
                     <Label htmlFor="on_campus" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Zone 1 - Local (Same City/State)</div>
-                      <div className="text-sm text-muted-foreground">You're in the same city as the vendor</div>
+                      <div className="font-medium">Zone 1 - Local</div>
+                      <div className="text-sm text-muted-foreground">Same city or state as the vendor</div>
                     </Label>
-                    <Badge variant="secondary">Lowest Fee</Badge>
                   </div>
 
                   <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
                     <RadioGroupItem value="2km_5km" id="2km_5km" />
                     <Label htmlFor="2km_5km" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Zone 2 - Regional (Neighboring States)</div>
-                      <div className="text-sm text-muted-foreground">You're in a state close to the vendor</div>
+                      <div className="font-medium">Zone 2 - Regional</div>
+                      <div className="text-sm text-muted-foreground">Neighboring states</div>
                     </Label>
-                    <Badge variant="secondary">Medium Fee</Badge>
                   </div>
 
                   <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
                     <RadioGroupItem value="over_5km" id="over_5km" />
                     <Label htmlFor="over_5km" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Zone 3 - National (Far-Away States)</div>
-                      <div className="text-sm text-muted-foreground">You're far from the vendor's location</div>
+                      <div className="font-medium">Zone 3 - National</div>
+                      <div className="text-sm text-muted-foreground">Far-away states</div>
                     </Label>
-                    <Badge variant="secondary">Highest Fee</Badge>
                   </div>
                 </RadioGroup>
               </CardContent>

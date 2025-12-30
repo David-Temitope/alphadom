@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Heart, Store, Truck, Star, Package, UserPlus, UserMinus, Eye, Search } from 'lucide-react';
+import { Star, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -123,8 +123,10 @@ export const Pilots = () => {
       }) || [];
 
       // Filter out regular users without vendor or dispatcher info
+      // Only include approved vendors (those with vendor_info) or approved dispatchers (those with dispatcher_info)
       const filteredPilots = pilotsData.filter(pilot => 
-        pilot.user_types.includes('vendor') || pilot.user_types.includes('dispatch')
+        (pilot.user_types.includes('vendor') && pilot.vendor_info) || 
+        (pilot.user_types.includes('dispatch') && pilot.dispatcher_info)
       );
 
       setPilots(filteredPilots);
@@ -273,7 +275,11 @@ export const Pilots = () => {
                 
                 {/* Customer Count and Rating */}
                 <div className="flex items-center justify-between mt-2 text-sm">
-                  <span className="text-muted-foreground">{pilot.customer_count || 0} Customers</span>
+                  <span className="text-muted-foreground">
+                    {(pilot.customer_count || 0) >= 5 
+                      ? `${pilot.customer_count} Customers` 
+                      : 'Newly Joined'}
+                  </span>
                   {(pilot.vendor_info || pilot.dispatcher_info) && (
                     <div className="flex items-center">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -282,6 +288,13 @@ export const Pilots = () => {
                   )}
                 </div>
               </CardHeader>
+              <CardContent className="pt-0 pb-3">
+                <Button asChild variant="default" size="sm" className="w-full">
+                  <Link to={pilot.user_types.includes('vendor') ? `/vendor/${pilot.id}` : `/dispatcher/${pilot.id}`}>
+                    View Store
+                  </Link>
+                </Button>
+              </CardContent>
             </Link>
           </Card>
         ))}
