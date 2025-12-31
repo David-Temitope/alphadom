@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, Menu, X, Shield, ChevronDown, ChevronUp } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-import { UserMenu } from './UserMenu';
-import { useAuth } from '@/contexts/AuthContext';
-import { useAdminSettings } from '@/hooks/useAdminSettings';
-import { useUserTypes } from '@/hooks/useUserTypes';
-import { useShopApplications } from '@/hooks/useShopApplications';
-import { NotificationCenter } from '@/components/NotificationCenter';
-import { useAdmin } from '@/contexts/AdminContext';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, User, Menu, X, Shield, ChevronDown, ChevronUp } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { UserMenu } from "./UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAdminSettings } from "@/hooks/useAdminSettings";
+import { useUserTypes } from "@/hooks/useUserTypes";
+import { useShopApplications } from "@/hooks/useShopApplications";
+import { NotificationCenter } from "@/components/NotificationCenter";
+import { useAdmin } from "@/contexts/AdminContext";
 
 export const Navbar = () => {
   const { items } = useCart();
@@ -20,32 +20,32 @@ export const Navbar = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  
+
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
-  
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+
   const UserTypeNavLink = () => {
     const { userApplication } = useShopApplications();
-    
+
     // Only show link if user is vendor, dispatch, or has application pending
-    if (hasUserType('vendor')) {
+    if (hasUserType("vendor")) {
       return (
-        <Link 
-          to="/vendor-dashboard" 
+        <Link
+          to="/vendor-dashboard"
           className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-            isActive('/vendor-dashboard') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+            isActive("/vendor-dashboard") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
           }`}
         >
           My Shop
         </Link>
       );
-    } else if (hasUserType('dispatch')) {
+    } else if (hasUserType("dispatch")) {
       return (
-        <Link 
-          to="/dispatch-dashboard" 
+        <Link
+          to="/dispatch-dashboard"
           className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-            isActive('/dispatch-dashboard') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+            isActive("/dispatch-dashboard") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
           }`}
         >
           My Dashboard
@@ -53,10 +53,10 @@ export const Navbar = () => {
       );
     } else if (userApplication) {
       return (
-        <Link 
-          to="/shop-application-status" 
+        <Link
+          to="/shop-application-status"
           className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-            isActive('/shop-application-status') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+            isActive("/shop-application-status") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
           }`}
         >
           Application Status
@@ -66,29 +66,29 @@ export const Navbar = () => {
     // Don't show anything for regular users - they see "Start Selling" in hero
     return null;
   };
-  
+
   const UserTypeNavLinkMobile = () => {
     const { userApplication } = useShopApplications();
-    
+
     // Only show link if user is vendor, dispatch, or has application pending
-    if (hasUserType('vendor')) {
+    if (hasUserType("vendor")) {
       return (
-        <Link 
-          to="/vendor-dashboard" 
+        <Link
+          to="/vendor-dashboard"
           className={`block py-2 px-4 rounded-lg transition-colors ${
-            isActive('/vendor-dashboard') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+            isActive("/vendor-dashboard") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
           }`}
           onClick={() => setIsMobileMenuOpen(false)}
         >
           My Shop
         </Link>
       );
-    } else if (hasUserType('dispatch')) {
+    } else if (hasUserType("dispatch")) {
       return (
-        <Link 
-          to="/dispatch-dashboard" 
+        <Link
+          to="/dispatch-dashboard"
           className={`block py-2 px-4 rounded-lg transition-colors ${
-            isActive('/dispatch-dashboard') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+            isActive("/dispatch-dashboard") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
           }`}
           onClick={() => setIsMobileMenuOpen(false)}
         >
@@ -97,10 +97,12 @@ export const Navbar = () => {
       );
     } else if (userApplication) {
       return (
-        <Link 
-          to="/shop-application-status" 
+        <Link
+          to="/shop-application-status"
           className={`block py-2 px-4 rounded-lg transition-colors ${
-            isActive('/shop-application-status') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+            isActive("/shop-application-status")
+              ? "bg-primary text-primary-foreground"
+              : "text-foreground hover:bg-accent"
           }`}
           onClick={() => setIsMobileMenuOpen(false)}
         >
@@ -117,13 +119,12 @@ export const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            
             {/* Logo - Now on the far left, hidden on desktop (md:hidden removed) */}
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="h-10 rounded-xl flex items-center justify-center transition-all duration-200 overflow-hidden">
-                <img 
-                  src={settings.navbar_logo || "/favicon.png"} 
-                  alt={`${settings.site_name} Logo`} 
+                <img
+                  src={settings.navbar_logo || "/favicon.png"}
+                  alt={`${settings.site_name} Logo`}
                   className="h-8 w-auto object-contain max-w-[120px]"
                 />
               </div>
@@ -137,54 +138,52 @@ export const Navbar = () => {
 
             {/* Navigation Links - Desktop (Center) */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-                  isActive('/') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                  isActive("/") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
                 }`}
               >
                 Home
               </Link>
-              <Link 
-                to="/products" 
+              <Link
+                to="/products"
                 className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-                  isActive('/products') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                  isActive("/products") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
                 }`}
               >
                 Products
               </Link>
-              <Link 
-                to="/pilots" 
+              <Link
+                to="/pilots"
                 className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-                  isActive('/pilots') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                  isActive("/pilots") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
                 }`}
               >
                 Pilots
               </Link>
-              {user && (
-                <UserTypeNavLink />
-              )}
-              <Link 
-                to="/about" 
+              {user && <UserTypeNavLink />}
+              <Link
+                to="/about"
                 className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-                  isActive('/about') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                  isActive("/about") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
                 }`}
               >
                 About
               </Link>
-              <Link 
-                to="/contact" 
+              <Link
+                to="/contact"
                 className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
-                  isActive('/contact') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                  isActive("/contact") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
                 }`}
               >
                 Contact
               </Link>
               {admin && (
-                <Link 
-                  to="/appleisgood" 
+                <Link
+                  to="/appleisgood"
                   className={`text-sm font-medium transition-colors duration-200 hover:text-primary flex items-center gap-1 ${
-                    isActive('/appleisgood') ? 'text-primary border-b-2 border-primary pb-1' : 'text-foreground'
+                    isActive("/appleisgood") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
                   }`}
                 >
                   <Shield className="h-4 w-4" />
@@ -195,7 +194,6 @@ export const Navbar = () => {
 
             {/* Right Side Actions (Cart, Notifications, User Menu, Mobile Menu Button) */}
             <div className="flex items-center space-x-4">
-              
               {/* Cart */}
               <Button variant="ghost" size="sm" asChild className="relative hover:bg-accent">
                 <Link to="/cart">
@@ -216,9 +214,9 @@ export const Navbar = () => {
                 {user ? (
                   <UserMenu />
                 ) : (
-                  <Button 
-                    asChild 
-                    size="sm" 
+                  <Button
+                    asChild
+                    size="sm"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     <Link to="/auth" className="flex items-center">
@@ -228,7 +226,7 @@ export const Navbar = () => {
                   </Button>
                 )}
               </div>
-              
+
               {/* Mobile Menu Button - Now on the far right on mobile */}
               <Button
                 variant="ghost"
@@ -238,7 +236,6 @@ export const Navbar = () => {
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
-
             </div>
           </div>
         </div>
@@ -256,18 +253,18 @@ export const Navbar = () => {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <div className="space-y-2">
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   className={`block py-2 px-4 rounded-lg transition-colors ${
-                    isActive('/') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                    isActive("/") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Home
                 </Link>
-                
+
                 {/* Profile with dropdown for logged in users */}
                 {user ? (
                   <div className="space-y-1">
@@ -276,30 +273,26 @@ export const Navbar = () => {
                       className="w-full flex items-center justify-between py-2 px-4 rounded-lg transition-colors text-foreground hover:bg-accent"
                     >
                       <span>Profile</span>
-                      {isProfileDropdownOpen ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
+                      {isProfileDropdownOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </button>
                     {isProfileDropdownOpen && (
                       <div className="pl-4 space-y-1">
-                        <Link 
-                          to="/orders" 
+                        <Link
+                          to="/orders"
                           className="block py-2 px-4 rounded-lg transition-colors text-sm text-foreground hover:bg-accent"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           My Orders
                         </Link>
-                        <Link 
-                          to="/wishlist" 
+                        <Link
+                          to="/wishlist"
                           className="block py-2 px-4 rounded-lg transition-colors text-sm text-foreground hover:bg-accent"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           My Wishlist
                         </Link>
-                        <Link 
-                          to="/user-settings" 
+                        <Link
+                          to="/settings"
                           className="block py-2 px-4 rounded-lg transition-colors text-sm text-foreground hover:bg-accent"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
@@ -310,39 +303,41 @@ export const Navbar = () => {
                     )}
                   </div>
                 ) : null}
-                
-                <Link 
-                  to="/pilots" 
+
+                <Link
+                  to="/pilots"
                   className={`block py-2 px-4 rounded-lg transition-colors ${
-                    isActive('/pilots') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                    isActive("/pilots") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Pilots
                 </Link>
-                <Link 
-                  to="/about" 
+                <Link
+                  to="/about"
                   className={`block py-2 px-4 rounded-lg transition-colors ${
-                    isActive('/about') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                    isActive("/about") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   About
                 </Link>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   className={`block py-2 px-4 rounded-lg transition-colors ${
-                    isActive('/contact') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                    isActive("/contact") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Contact
                 </Link>
                 {admin && (
-                  <Link 
-                    to="/appleisgood" 
+                  <Link
+                    to="/appleisgood"
                     className={`block py-2 px-4 rounded-lg transition-colors flex items-center gap-2 ${
-                      isActive('/appleisgood') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
+                      isActive("/appleisgood")
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-accent"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -354,8 +349,8 @@ export const Navbar = () => {
 
               <div className="pt-4 border-t border-border">
                 {!user && (
-                  <Button 
-                    asChild 
+                  <Button
+                    asChild
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
