@@ -305,6 +305,15 @@ export const Navbar = () => {
                 ) : null}
 
                 <Link
+                  to="/products"
+                  className={`block py-2 px-4 rounded-lg transition-colors ${
+                    isActive("/products") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Products
+                </Link>
+                <Link
                   to="/pilots"
                   className={`block py-2 px-4 rounded-lg transition-colors ${
                     isActive("/pilots") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
