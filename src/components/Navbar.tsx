@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, Menu, X, Shield } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Shield, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { UserMenu } from './UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +19,7 @@ export const Navbar = () => {
   const { hasUserType } = useUserTypes();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -243,11 +244,11 @@ export const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Sidebar (remains the same) */}
+      {/* Mobile Sidebar */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
-          <div className="fixed left-0 top-0 h-full w-64 bg-background border-r border-border shadow-xl">
+          <div className="fixed left-0 top-0 h-full w-64 bg-background border-r border-border shadow-xl overflow-y-auto">
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-primary">Menu</span>
@@ -266,15 +267,50 @@ export const Navbar = () => {
                 >
                   Home
                 </Link>
-                <Link 
-                  to="/products" 
-                  className={`block py-2 px-4 rounded-lg transition-colors ${
-                    isActive('/products') ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Products
-                </Link>
+                
+                {/* Profile with dropdown for logged in users */}
+                {user ? (
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                      className="w-full flex items-center justify-between py-2 px-4 rounded-lg transition-colors text-foreground hover:bg-accent"
+                    >
+                      <span>Profile</span>
+                      {isProfileDropdownOpen ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </button>
+                    {isProfileDropdownOpen && (
+                      <div className="pl-4 space-y-1">
+                        <Link 
+                          to="/orders" 
+                          className="block py-2 px-4 rounded-lg transition-colors text-sm text-foreground hover:bg-accent"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          My Orders
+                        </Link>
+                        <Link 
+                          to="/wishlist" 
+                          className="block py-2 px-4 rounded-lg transition-colors text-sm text-foreground hover:bg-accent"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          My Wishlist
+                        </Link>
+                        <Link 
+                          to="/user-settings" 
+                          className="block py-2 px-4 rounded-lg transition-colors text-sm text-foreground hover:bg-accent"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Settings
+                        </Link>
+                        <UserTypeNavLinkMobile />
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+                
                 <Link 
                   to="/pilots" 
                   className={`block py-2 px-4 rounded-lg transition-colors ${
@@ -284,9 +320,6 @@ export const Navbar = () => {
                 >
                   Pilots
                 </Link>
-                {user && (
-                  <UserTypeNavLinkMobile />
-                )}
                 <Link 
                   to="/about" 
                   className={`block py-2 px-4 rounded-lg transition-colors ${
@@ -320,10 +353,7 @@ export const Navbar = () => {
               </div>
 
               <div className="pt-4 border-t border-border">
-                
-                {user ? (
-                  <UserMenu />
-                ) : (
+                {!user && (
                   <Button 
                     asChild 
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"

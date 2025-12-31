@@ -25,7 +25,8 @@ import {
   RotateCcw,
   ArrowLeft,
   Share2,
-  X
+  X,
+  BadgeCheck
 } from 'lucide-react';
 
 // NOTE: Since the useIsMobile hook was missing, I'm providing a simple placeholder 
@@ -342,7 +343,19 @@ const ProductDetail = () => {
               <Badge variant="secondary" className="mb-3">
                 {product.category}
               </Badge>
-              <h1 className="text-2xl lg:text-3xl font-bold mb-4 leading-tight">{product.name}</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-4 leading-tight flex items-center gap-2">
+                {product.name}
+                {/* Subscription badges */}
+                {(product as any).vendor_subscription_plan === 'first_class' && (
+                  <BadgeCheck className="w-6 h-6 text-yellow-500 flex-shrink-0" />
+                )}
+                {(product as any).vendor_subscription_plan === 'economy' && (
+                  <BadgeCheck className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                )}
+                {(product as any).vendor_is_registered && (product as any).vendor_subscription_plan === 'free' && (
+                  <BadgeCheck className="w-6 h-6 text-green-500 flex-shrink-0" />
+                )}
+              </h1>
               
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-4">
@@ -379,9 +392,13 @@ const ProductDetail = () => {
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    ({product.rating.toFixed(1)}) • {product.reviews && product.reviews > 0 ? `${product.reviews} reviews` : 'No Reviews Yet'}
+                    ({product.rating.toFixed(1)}) - {product.reviews && product.reviews > 0 ? `${product.reviews} reviews` : 'No Reviews Yet'}
                   </span>
                 </div>
+              )}
+              
+              {!product.rating && (
+                <p className="text-sm text-muted-foreground mb-4">No Reviews Yet</p>
               )}
 
               {/* Pricing */}
@@ -393,7 +410,7 @@ const ProductDetail = () => {
 
                   {hasDiscount && (
                     <span className="text-lg text-muted-foreground line-through">
-                      ₦{originalPrice.toLocaleString()} {/* FIX: Changed to NGN and used toLocaleString */}
+                      ₦{originalPrice.toLocaleString()}
                     </span>
                   )}
                 </div>
@@ -401,7 +418,6 @@ const ProductDetail = () => {
                   <p className="text-sm text-green-600 font-medium">
                     You save: ₦{amountSaved.toLocaleString()} ({discountPercentage}%)
                   </p>
-
                 )}
               </div>
             </div>

@@ -54,7 +54,7 @@ export const UserTypeSelection = () => {
               <li>• Process orders</li>
               <li>• Analytics dashboard</li>
             </ul>
-            {hasUserType('vendor') ? (
+            {hasUserType('vendor') && shopApplication?.status === 'approved' ? (
               <Badge variant="default" className="w-full justify-center">
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Active

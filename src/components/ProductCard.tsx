@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Leaf, Star } from 'lucide-react';
+import { ShoppingCart, Leaf, Star, BadgeCheck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { WishlistButton } from './WishlistButton';
@@ -33,6 +33,10 @@ interface Product {
   vendor_id?: string | null;
   shipping_fee?: number | null;
   shipping_type?: 'per_product' | 'one_time' | null;
+  
+  // Subscription and registration info
+  vendor_subscription_plan?: string;
+  vendor_is_registered?: boolean;
 }
 
 interface ProductCardProps {
@@ -184,8 +188,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
           
-          <h3 className="font-medium text-sm mb-2 line-clamp-3 group-hover:text-primary transition-colors leading-tight">
+          <h3 className="font-medium text-sm mb-2 line-clamp-3 group-hover:text-primary transition-colors leading-tight flex items-center gap-1">
             {product.name}
+            {/* Subscription badge - Gold for first class, Blue for economy */}
+            {product.vendor_subscription_plan === 'first_class' && (
+              <BadgeCheck className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+            )}
+            {product.vendor_subscription_plan === 'economy' && (
+              <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
+            )}
+            {/* Only show green registered badge if no subscription badge */}
+            {product.vendor_is_registered && product.vendor_subscription_plan === 'free' && (
+              <BadgeCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
+            )}
           </h3>
           
           {/* Pricing */}

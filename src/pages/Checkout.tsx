@@ -303,12 +303,6 @@ const Checkout: React.FC = () => {
                             </Badge>
                           )}
                         </CardTitle>
-                        {group.vendor_location && (
-                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                            <MapPin className="h-3 w-3" />
-                            {group.vendor_location}
-                          </p>
-                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         {getStatusBadge(group, index)}

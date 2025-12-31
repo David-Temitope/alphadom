@@ -5,6 +5,7 @@ import { Tables } from '@/integrations/supabase/types';
 
 type Product = Tables<'products'> & {
   vendor_subscription_plan?: string;
+  vendor_is_registered?: boolean;
 };
 
 export const useProducts = () => {
@@ -47,17 +48,24 @@ export const useProducts = () => {
 
       if (productsError) throw productsError;
 
-      // Fetch vendor subscription plans
+      // Fetch vendor subscription plans and registration status
       const { data: vendorsData } = await supabase
         .from('approved_vendors')
-        .select('id, subscription_plan');
+        .select('id, subscription_plan, application_id');
 
-      // Map vendor subscription plans to products
+      // Fetch shop applications for registration status
+      const { data: applicationsData } = await supabase
+        .from('shop_applications')
+        .select('id, is_registered');
+
+      // Map vendor subscription plans and registration to products
       const productsWithSubscription = (productsData || []).map(product => {
         const vendor = vendorsData?.find(v => v.id === product.vendor_id);
+        const application = applicationsData?.find(a => a.id === vendor?.application_id);
         return {
           ...product,
-          vendor_subscription_plan: vendor?.subscription_plan || 'free'
+          vendor_subscription_plan: vendor?.subscription_plan || 'free',
+          vendor_is_registered: application?.is_registered || false
         };
       });
 
