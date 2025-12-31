@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Heart, ThumbsUp, Star } from 'lucide-react';
+import { ShoppingCart, Heart, ThumbsUp, Star, BadgeCheck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useProductLikes } from '@/hooks/useProductLikes';
@@ -28,6 +28,10 @@ interface Product {
   shipping_type?: 'per_product' | 'one_time' | null;
   sustainability_score?: number;
   vendor_user_id?: string | null;
+  
+  // Subscription and registration info
+  vendor_subscription_plan?: string;
+  vendor_is_registered?: boolean;
 }
 
 interface ProductCardMobileProps {
@@ -163,8 +167,17 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
         </div>
         
         <CardContent className="p-2 flex-1 flex flex-col">
-          <h3 className="font-medium text-xs leading-tight mb-1 line-clamp-1">
+          <h3 className="font-medium text-xs leading-tight mb-1 line-clamp-1 flex items-center gap-0.5">
             {truncateName(product.name)}
+            {product.vendor_subscription_plan === 'first_class' && (
+              <BadgeCheck className="w-3 h-3 text-yellow-500 flex-shrink-0" />
+            )}
+            {product.vendor_subscription_plan === 'economy' && (
+              <BadgeCheck className="w-3 h-3 text-blue-500 flex-shrink-0" />
+            )}
+            {product.vendor_is_registered && product.vendor_subscription_plan === 'free' && (
+              <BadgeCheck className="w-3 h-3 text-green-500 flex-shrink-0" />
+            )}
           </h3>
           
           <div className="mt-auto">
