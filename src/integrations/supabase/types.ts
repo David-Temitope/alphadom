@@ -338,6 +338,9 @@ export type Database = {
           commission_rate: number | null
           created_at: string
           free_ads_remaining: number | null
+          gift_commission_rate: number | null
+          gift_plan: string | null
+          gift_plan_expires_at: string | null
           has_home_visibility: boolean | null
           id: string
           is_active: boolean
@@ -347,7 +350,9 @@ export type Database = {
           product_limit: number | null
           product_slots: number | null
           store_name: string
+          subscription_days_remaining: number | null
           subscription_end_date: string | null
+          subscription_paused_at: string | null
           subscription_plan: string | null
           subscription_start_date: string | null
           total_orders: number
@@ -362,6 +367,9 @@ export type Database = {
           commission_rate?: number | null
           created_at?: string
           free_ads_remaining?: number | null
+          gift_commission_rate?: number | null
+          gift_plan?: string | null
+          gift_plan_expires_at?: string | null
           has_home_visibility?: boolean | null
           id?: string
           is_active?: boolean
@@ -371,7 +379,9 @@ export type Database = {
           product_limit?: number | null
           product_slots?: number | null
           store_name: string
+          subscription_days_remaining?: number | null
           subscription_end_date?: string | null
+          subscription_paused_at?: string | null
           subscription_plan?: string | null
           subscription_start_date?: string | null
           total_orders?: number
@@ -386,6 +396,9 @@ export type Database = {
           commission_rate?: number | null
           created_at?: string
           free_ads_remaining?: number | null
+          gift_commission_rate?: number | null
+          gift_plan?: string | null
+          gift_plan_expires_at?: string | null
           has_home_visibility?: boolean | null
           id?: string
           is_active?: boolean
@@ -395,7 +408,9 @@ export type Database = {
           product_limit?: number | null
           product_slots?: number | null
           store_name?: string
+          subscription_days_remaining?: number | null
           subscription_end_date?: string | null
+          subscription_paused_at?: string | null
           subscription_plan?: string | null
           subscription_start_date?: string | null
           total_orders?: number

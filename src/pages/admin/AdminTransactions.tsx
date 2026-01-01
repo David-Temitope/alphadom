@@ -285,12 +285,18 @@ const AdminTransactions = () => {
                       {tx.transaction_type === 'order_payment' && (() => {
                         // Calculate commission based on subscription plan
                         const subscriptionPlan = meta.subscription_plan || 'free';
+                        const SERVICE_CHARGE = 2.5;
                         let commissionRate = 15; // default free
                         if (subscriptionPlan === 'economy') commissionRate = 9;
                         if (subscriptionPlan === 'first_class') commissionRate = 5;
                         
-                        const vendorPercentage = 100 - commissionRate;
-                        const platformCommission = Number(tx.amount) * (commissionRate / 100);
+                        // Use custom gift commission if set
+                        const effectiveCommission = meta.gift_commission_rate ?? commissionRate;
+                        const totalPlatformRate = effectiveCommission + SERVICE_CHARGE;
+                        const vendorPercentage = 100 - totalPlatformRate;
+                        const platformCommission = Number(tx.amount) * (effectiveCommission / 100);
+                        const serviceCharge = Number(tx.amount) * (SERVICE_CHARGE / 100);
+                        const totalPlatformRevenue = platformCommission + serviceCharge;
                         const vendorPayout = Number(tx.amount) * (vendorPercentage / 100);
                         
                         return (
@@ -298,17 +304,29 @@ const AdminTransactions = () => {
                             <div className="flex justify-between items-center">
                               <span className="text-muted-foreground">Subscription Plan:</span>
                               <Badge variant="outline" className="capitalize">
-                                {subscriptionPlan}
+                                {meta.gift_plan ? `Gift: ${meta.gift_plan}` : subscriptionPlan}
                               </Badge>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Commission Rate:</span>
-                              <span className="font-medium">{commissionRate}%</span>
+                              <span className="font-medium">{effectiveCommission}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Service Charge:</span>
+                              <span className="font-medium">{SERVICE_CHARGE}%</span>
                             </div>
                             <Separator className="my-2" />
                             <div className="flex justify-between text-green-600">
-                              <span>Platform Revenue ({commissionRate}%):</span>
+                              <span>Platform Commission ({effectiveCommission}%):</span>
                               <span className="font-semibold">₦{platformCommission.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-green-500">
+                              <span>Service Charge ({SERVICE_CHARGE}%):</span>
+                              <span className="font-semibold">₦{serviceCharge.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-green-700 font-bold">
+                              <span>Total Platform Revenue ({totalPlatformRate}%):</span>
+                              <span>₦{totalPlatformRevenue.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-blue-600">
                               <span>Vendor Payout ({vendorPercentage}%):</span>

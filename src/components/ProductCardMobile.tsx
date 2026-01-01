@@ -136,11 +136,11 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
   return (
     <Card className="group h-full flex flex-col transition-all duration-200 hover:shadow-md border bg-card overflow-hidden">
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
-        <div className="relative bg-muted aspect-square">
+        <div className="relative bg-muted aspect-square overflow-hidden">
           <img
             src={displayImage}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             loading="lazy"
             decoding="async"
             onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
