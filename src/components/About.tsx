@@ -5,24 +5,23 @@ export const About = () => {
     {
       icon: ShoppingCart,
       title: "Wide Selection",
-      description:
-        "From electronics to fashion and daily essentials — shop a wide range of products from trusted sellers.",
+      description: "From tech gadgets to fashion essentials — everything you need for campus life"
     },
     {
       icon: Award,
       title: "Verified Vendors",
-      description: "Every seller is verified to ensure quality, reliability, and peace of mind.",
+      description: "All sellers are verified students and businesses you can trust"
     },
     {
       icon: CreditCard,
       title: "Secure Shopping",
-      description: "Protected payments and buyer safeguards for safe, worry-free transactions.",
+      description: "Safe and secure payment processing with buyer protection"
     },
     {
       icon: Truck,
-      title: "Fast Delivery",
-      description: "Quick and reliable delivery options to your preferred location.",
-    },
+      title: "Campus Delivery",
+      description: "Quick delivery right to your hostel or faculty building"
+    }
   ];
 
   return (
@@ -31,12 +30,11 @@ export const About = () => {
         {/* Section Header */}
         <div className="text-center mb-12 px-2 sm:px-0">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Built for Everyone
+            Built for Campus Life
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base max-w-md sm:max-w-2xl mx-auto leading-relaxed">
-            Whether you’re buying essentials, discovering great deals, or growing your online business, Alphadom
-            connects buyers with verified vendors in one secure marketplace. Simple, reliable, and built for modern
-            commerce.
+            Whether you're buying textbooks, selling handmade crafts, or looking for the best deals on campus — 
+            Alphadom connects you with fellow students and verified vendors. Shop smart, save more, and support your campus community! 🎓
           </p>
         </div>
 
