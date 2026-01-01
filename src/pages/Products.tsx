@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { ProductCard } from "@/components/ProductCard";
-import { ProductCardMobile } from "@/components/ProductCardMobile";
 import { ProductFilters } from "@/components/ProductFilters";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -175,19 +174,11 @@ const Products = () => {
         <div className="flex gap-3 pb-2 w-max">
           {items.slice(0, 10).map((product) => (
             <div key={product.id} className="w-36 flex-shrink-0">
-              <ProductCardMobile
-                product={{
-                  id: product.id,
-                  name: product.name,
-                  price: Number(product.price),
-                  image: product.image || '/placeholder.svg',
-                  category: product.category,
-                  rating: Number(product.rating) || 0,
-                  stock_count: product.stock_count || 0,
-                  has_discount: product.has_discount,
-                  discount_percentage: product.discount_percentage,
-                  original_price: product.original_price
-                }}
+              <ProductCard
+                product={product as any}
+                variant="mobile"
+              />
+
               />
             </div>
           ))}
@@ -377,22 +368,10 @@ const Products = () => {
                     ) : (
                       <ProductCard
                         key={product.id}
-                        product={{
-                          id: product.id,
-                          name: product.name,
-                          price: Number(product.price),
-                          image: product.image || '/placeholder.svg',
-                          category: product.category,
-                          rating: Number(product.rating) || 0,
-                          sustainability_score: product.sustainability_score || 0,
-                          eco_features: product.eco_features || [],
-                          description: product.description || '',
-                          stock_count: product.stock_count || 0,
-                          has_discount: product.has_discount,
-                          discount_percentage: product.discount_percentage,
-                          original_price: product.original_price
-                        }}
+                        product={product as any}
+                        variant={isMobile ? "mobile" : "desktop"}
                       />
+
                     )
                   ))}
                 </div>

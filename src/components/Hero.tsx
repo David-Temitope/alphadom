@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useAdminSettings } from '@/hooks/useAdminSettings';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserTypes } from '@/hooks/useUserTypes';
-import { useShopApplications } from '@/hooks/useShopApplications';
-import { ArrowRight, Leaf, Shield, Recycle, ChevronLeft, ChevronRight, Store } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useAdminSettings } from "@/hooks/useAdminSettings";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserTypes } from "@/hooks/useUserTypes";
+import { useShopApplications } from "@/hooks/useShopApplications";
+import { ArrowRight, Leaf, Shield, Recycle, ChevronLeft, ChevronRight, Store } from "lucide-react";
 
 // Default hero images for guests/fallback
-import heroDefault1 from '@/assets/hero-default-1.jpg';
-import heroDefault2 from '@/assets/hero-default-2.jpg';
+import heroDefault1 from "@/assets/hero-default-1.jpg";
+import heroDefault2 from "@/assets/hero-default-2.jpg";
 
 const DEFAULT_HERO_IMAGES = [heroDefault1, heroDefault2];
 
 // Fixed guest hero content - never flashes or waits for settings
-const GUEST_HERO_TITLE = "Your Online";
-const GUEST_HERO_MAIN_TEXT = "Marketplace";
-const GUEST_HERO_SECONDARY_TEXT = "Shop Smart, Save Big";
-const GUEST_HERO_SUBTITLE = "Discover amazing deals from verified vendors. Join thousands of buyers and sellers on Africa's growing e-commerce platform!";
+const GUEST_HERO_TITLE = "A Marketplace Built";
+const GUEST_HERO_MAIN_TEXT = "for Buyers and Sellers";
+const GUEST_HERO_SECONDARY_TEXT = "Buy Smarter. Sell Faster.";
+const GUEST_HERO_SUBTITLE =
+  "Shop quality products or grow your business on a secure marketplace built for modern commerce.";
 
 export const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -29,20 +30,24 @@ export const Hero = () => {
   // For guests: ALWAYS use fixed defaults immediately (no flash)
   // For logged-in users: use admin settings or defaults as fallback
   const isGuest = !user;
-  const heroImages = isGuest 
-    ? DEFAULT_HERO_IMAGES 
-    : (settings.hero_images.length > 0 ? settings.hero_images : DEFAULT_HERO_IMAGES);
+  const heroImages = isGuest
+    ? DEFAULT_HERO_IMAGES
+    : settings.hero_images.length > 0
+      ? settings.hero_images
+      : DEFAULT_HERO_IMAGES;
 
   // Use fixed text for guests, admin settings for logged-in users
-  const heroTitle = isGuest ? GUEST_HERO_TITLE : (settings.hero_title || GUEST_HERO_TITLE);
-  const heroMainText = isGuest ? GUEST_HERO_MAIN_TEXT : (settings.hero_main_text || GUEST_HERO_MAIN_TEXT);
-  const heroSecondaryText = isGuest ? GUEST_HERO_SECONDARY_TEXT : (settings.hero_secondary_text || GUEST_HERO_SECONDARY_TEXT);
-  const heroSubtitle = isGuest ? GUEST_HERO_SUBTITLE : (settings.hero_subtitle || GUEST_HERO_SUBTITLE);
+  const heroTitle = isGuest ? GUEST_HERO_TITLE : settings.hero_title || GUEST_HERO_TITLE;
+  const heroMainText = isGuest ? GUEST_HERO_MAIN_TEXT : settings.hero_main_text || GUEST_HERO_MAIN_TEXT;
+  const heroSecondaryText = isGuest
+    ? GUEST_HERO_SECONDARY_TEXT
+    : settings.hero_secondary_text || GUEST_HERO_SECONDARY_TEXT;
+  const heroSubtitle = isGuest ? GUEST_HERO_SUBTITLE : settings.hero_subtitle || GUEST_HERO_SUBTITLE;
 
   // Slide auto-advance effect
   useEffect(() => {
     if (heroImages.length <= 1) return;
-    
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroImages.length);
     }, 5000);
@@ -58,20 +63,20 @@ export const Hero = () => {
 
   const prevSlide = () => {
     if (heroImages.length <= 1) return;
-    setCurrentSlide(
-      (prev) => (prev - 1 + heroImages.length) % heroImages.length
-    );
+    setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
   };
 
   // Show "Start Selling" button only for logged-in users who aren't vendors/dispatchers/applicants
   // Show "Start Selling" button only for logged-in users who aren't approved vendors/dispatchers
   // Still show if they have a rejected application so they can reapply
-  const showStartSelling = user && !hasUserType('vendor') && !hasUserType('dispatch') && 
-    (!userApplication || userApplication.status === 'rejected');
+  const showStartSelling =
+    user &&
+    !hasUserType("vendor") &&
+    !hasUserType("dispatch") &&
+    (!userApplication || userApplication.status === "rejected");
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-blue-50 to-slate-50 min-h-[90vh] flex items-center pb-16">
-
       {/* Background decorative elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-green-200/30 rounded-full blur-3xl"></div>
@@ -81,15 +86,13 @@ export const Hero = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-
           {/* Left Content */}
           <div className="space-y-8">
             <div className="space-y-4">
-
               {/* Site Description Badge */}
               <div className="inline-flex items-center px-4 py-2 bg-green-100/80 text-green-700 rounded-full text-sm font-medium backdrop-blur-sm border border-green-200/50">
                 <Shield className="w-4 h-4 mr-2" />
-                Buy & Sell Online with Ease
+                Your Online Marketing Genesis
               </div>
 
               {/* Hero Title */}
@@ -102,9 +105,7 @@ export const Hero = () => {
               </h1>
 
               {/* Hero Subtitle */}
-              <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                {heroSubtitle}
-              </p>
+              <p className="text-xl text-slate-600 leading-relaxed max-w-lg">{heroSubtitle}</p>
             </div>
 
             {/* Action Buttons */}
@@ -130,7 +131,7 @@ export const Hero = () => {
                 >
                   <Link to="/user-types" className="flex items-center">
                     <Store className="mr-2 w-5 h-5" />
-                    Start Selling
+                    Become a Seller
                   </Link>
                 </Button>
               ) : (
@@ -158,14 +159,14 @@ export const Hero = () => {
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors duration-200">
                   <Shield className="w-6 h-6 text-blue-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Verified Vendors</p>
+                <p className="text-sm font-medium text-slate-700">Verified Sellers</p>
               </div>
 
               <div className="text-center group">
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors duration-200">
                   <Recycle className="w-6 h-6 text-green-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Fast Delivery</p>
+                <p className="text-sm font-medium text-slate-700">Reliable Delivery</p>
               </div>
             </div>
           </div>
@@ -179,10 +180,10 @@ export const Hero = () => {
                     key={index}
                     className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
                       index === currentSlide
-                        ? 'translate-x-0'
+                        ? "translate-x-0"
                         : index < currentSlide
-                        ? '-translate-x-full'
-                        : 'translate-x-full'
+                          ? "-translate-x-full"
+                          : "translate-x-full"
                     }`}
                   >
                     <img
@@ -219,7 +220,7 @@ export const Hero = () => {
                           key={index}
                           onClick={() => setCurrentSlide(index)}
                           className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                            index === currentSlide ? 'bg-white shadow-lg' : 'bg-white/50'
+                            index === currentSlide ? "bg-white shadow-lg" : "bg-white/50"
                           }`}
                         />
                       ))}

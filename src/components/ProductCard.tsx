@@ -1,249 +1,197 @@
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingCart, Star, Heart, Leaf, BadgeCheck } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Leaf, Star, BadgeCheck } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { WishlistButton } from './WishlistButton';
-import { LikeButton } from './LikeButton';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+type Variant = "desktop" | "mobile" | "compact";
 
 interface Product {
   id: string;
   name: string;
   price: number;
-  image: string;
-  category: string;
-  description?: string;
-  sustainability_score?: number;
-  rating?: number;
-  eco_features?: string[];
+  original_price?: number;
   has_discount?: boolean;
   discount_percentage?: number;
-  original_price?: number;
+  image: string;
+  category: string;
+  rating?: number;
   stock_count?: number;
-  initial_stock_count?: number;
-  vendor_user_id?: string | null;
-
-  // Needed for correct multi-vendor checkout + shipping calculation
-  vendor_id?: string | null;
-  shipping_fee?: number | null;
-  shipping_type?: 'per_product' | 'one_time' | null;
-  
-  // Subscription and registration info
-  vendor_subscription_plan?: string;
+  sustainability_score?: number;
+  vendor_subscription_plan?: "first_class" | "economy" | "free";
   vendor_is_registered?: boolean;
 }
 
-interface ProductCardProps {
+interface Props {
   product: Product;
+  variant?: Variant;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<Props> = ({ product, variant = "desktop" }) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
+  const isMobile = variant !== "desktop";
+  const hasDiscount = product.has_discount && product.discount_percentage && product.original_price;
+
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    // Require login to add to cart
+
     if (!user) {
       toast({
         title: "Login Required",
-        description: "Please login or sign up to add items to your cart.",
+        description: "Please login to add items to your cart.",
       });
-      navigate('/auth');
+      navigate("/auth");
       return;
     }
-    
-    if ((product.stock_count || 0) <= 0) {
+
+    if ((product.stock_count ?? 1) <= 0) {
       toast({
-        title: "Out of Stock",
-        description: "This product is out of stock. The vendor has been notified to restock.",
+        title: "Sold Out",
+        description: "This product is currently unavailable.",
         variant: "destructive",
       });
-      
-      // Notify vendor about out of stock
-      if (product.vendor_user_id) {
-        try {
-          await supabase.from('user_notifications').insert({
-            user_id: product.vendor_user_id,
-            title: 'Product Out of Stock - Restock Required!',
-            message: `Your product "${product.name}" is out of stock and a customer tried to purchase it. Please restock within 7 days or the product will be automatically deleted.`,
-            type: 'stock_alert',
-            related_id: product.id,
-          });
-        } catch (error) {
-          console.error('Failed to notify vendor:', error);
-        }
-      }
       return;
     }
-    
+
     addToCart(product);
     toast({
       title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      description: `${product.name} added successfully.`,
     });
   };
 
-  // Use admin-set discount if available
-  const hasDiscount = product.has_discount && product.discount_percentage && product.original_price;
-  const discountPercentage = hasDiscount ? product.discount_percentage : 0;
-  const originalPrice = hasDiscount ? product.original_price : 0;
-  const formatNaira = (amount: number) => {
-  return amount.toLocaleString("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-  });
-};
-
-  // Extract first image from potential JSON array
-  const getDisplayImage = (imageField: string | undefined | null): string => {
-    if (!imageField) return '/placeholder.svg';
-    try {
-      if (imageField.startsWith('[')) {
-        const images = JSON.parse(imageField);
-        return images[0] || '/placeholder.svg';
-      }
-      return imageField;
-    } catch {
-      return imageField;
-    }
-  };
-
-  const displayImage = getDisplayImage(product.image);
+  const formatNaira = (amount: number) =>
+    amount.toLocaleString("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    });
 
   return (
-    <Card className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg border bg-white dark:bg-card">
+    <Card className="group h-full flex flex-col border bg-white hover:shadow-lg transition-all">
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
-        <div className="relative overflow-hidden bg-muted aspect-square">
+        {/* IMAGE */}
+        <div className="relative aspect-square overflow-hidden bg-muted">
           <img
-            src={displayImage}
+            src={product.image || "/placeholder.svg"}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
-            decoding="async"
-            onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
+            onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
           />
-          
-          {/* Discount badges - only show if admin set discount */}
+
+          {/* Discount */}
           {hasDiscount && (
-            <div className="absolute top-2 left-2 flex flex-col gap-1">
-              <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0 text-xs px-2 py-1">
-                {discountPercentage}% off
-              </Badge>
-              <Badge className="bg-white text-orange-600 border border-orange-200 text-xs px-2 py-1 font-medium">
-                Special offer
-              </Badge>
+            <Badge className="absolute top-2 left-2 bg-orange-500 text-white text-xs">
+              -{product.discount_percentage}%
+            </Badge>
+          )}
+
+          {/* Vendor Trust Badge */}
+          {(product.vendor_subscription_plan || product.vendor_is_registered) && (
+            <div className="absolute top-2 right-2">
+              <BadgeCheck
+                className={`w-5 h-5 ${
+                  product.vendor_subscription_plan === "first_class"
+                    ? "text-yellow-500"
+                    : product.vendor_subscription_plan === "economy"
+                      ? "text-blue-500"
+                      : "text-green-500"
+                }`}
+              />
             </div>
           )}
 
-          <div className="absolute top-2 right-2 flex gap-1">
-            <WishlistButton productId={product.id} size="sm" />
-            <LikeButton productId={product.id} size="sm" />
-          </div>
-          
-          {product.sustainability_score != null && product.sustainability_score > 7 && (
-            <Badge className="absolute bottom-2 left-2 bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100">
+          {/* Eco Badge */}
+          {product.sustainability_score && product.sustainability_score >= 8 && (
+            <Badge className="absolute bottom-2 left-2 bg-green-100 text-green-800 text-xs">
               <Leaf className="w-3 h-3 mr-1" />
-              Eco-Friendly
+              Eco
             </Badge>
           )}
+
+          {/* Wishlist */}
+          <button
+            className="absolute bottom-2 right-2 bg-white/90 p-1.5 rounded-full"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <Heart className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
-        
-        <CardContent className="flex-1 p-4">
-          {/* Rating first (Amazon style) */}
-          <div className="flex items-center gap-1 mb-2">
-            {product.rating && product.rating > 0 ? (
-              <>
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-3 h-3 ${
-                        i < Math.floor(product.rating!)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : i < product.rating!
-                          ? 'fill-yellow-200 text-yellow-200'
-                          : 'fill-gray-200 text-gray-200'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  ({product.rating.toFixed(1)})
-                </span>
-              </>
-            ) : (
-              <span className="text-xs text-muted-foreground">No reviews yet</span>
-            )}
-          </div>
-          
-          <h3 className="font-medium text-sm mb-2 line-clamp-3 group-hover:text-primary transition-colors leading-tight flex items-center gap-1">
-            {product.name}
-            {/* Subscription badge - Gold for first class, Blue for economy */}
-            {product.vendor_subscription_plan === 'first_class' && (
-              <BadgeCheck className="w-4 h-4 text-yellow-500 flex-shrink-0" />
-            )}
-            {product.vendor_subscription_plan === 'economy' && (
-              <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
-            )}
-            {/* Only show green registered badge if no subscription badge */}
-            {product.vendor_is_registered && product.vendor_subscription_plan === 'free' && (
-              <BadgeCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
-            )}
-          </h3>
-          
-          {/* Pricing */}
+
+        <CardContent className={`flex-1 flex flex-col ${isMobile ? "p-2" : "p-4"}`}>
+          {/* Rating */}
+          {product.rating && product.rating > 0 && (
+            <div className="flex items-center gap-1 mb-1">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3 h-3 ${
+                    i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                  }`}
+                />
+              ))}
+              <span className="text-xs text-muted-foreground">({product.rating.toFixed(1)})</span>
+            </div>
+          )}
+
+          {/* Name */}
+          <h3 className={`font-medium leading-tight mb-2 line-clamp-${isMobile ? "2" : "3"}`}>{product.name}</h3>
+
+          {/* Price */}
           <div className="mt-auto">
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className={`text-lg font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
+            <div className="flex items-baseline gap-2">
+              <span
+                className={`font-bold ${isMobile ? "text-sm" : "text-lg"} ${
+                  hasDiscount ? "text-orange-600" : "text-foreground"
+                }`}
+              >
                 {formatNaira(product.price)}
               </span>
 
               {hasDiscount && (
                 <span className="text-sm text-muted-foreground line-through">
-                  {formatNaira(originalPrice)}
+                  {formatNaira(product.original_price!)}
                 </span>
               )}
             </div>
 
-            
-            <div className="flex items-center justify-between">
-              <Badge variant="outline" className="text-xs border-green-200 text-green-700">
+            {/* Meta */}
+            <div className="flex items-center justify-between mt-1">
+              <Badge variant="outline" className="text-xs text-muted-foreground">
                 {product.category}
               </Badge>
-              {product.sustainability_score != null && product.sustainability_score > 0 && (
-                <div className="flex items-center gap-1">
-                  <Leaf className="w-3 h-3 text-green-600" />
-                  <span className="text-xs text-green-600">
-                    {product.sustainability_score}/10
-                  </span>
-                </div>
+
+              {product.sustainability_score && product.sustainability_score > 0 && (
+                <span className="text-xs text-green-600">{product.sustainability_score}/10</span>
               )}
             </div>
           </div>
         </CardContent>
       </Link>
-      
-      <CardFooter className="p-4 pt-0">
-        <Button 
+
+      {/* ACTION */}
+      <CardFooter className={`${isMobile ? "p-2" : "p-4 pt-0"}`}>
+        <Button
           onClick={handleAddToCart}
-          disabled={(product.stock_count || 0) <= 0}
-          className="w-full bg-green-600 hover:bg-green-700 text-white border-0 disabled:opacity-50"
-          size="sm"
+          disabled={(product.stock_count ?? 1) <= 0}
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          size={isMobile ? "sm" : "default"}
         >
           <ShoppingCart className="w-4 h-4 mr-1" />
-          {(product.stock_count || 0) <= 0 ? 'Out of Stock' : 'Add'}
+          {(product.stock_count ?? 1) <= 0 ? "Sold Out" : isMobile ? "Add" : "Add to Cart"}
         </Button>
       </CardFooter>
     </Card>
