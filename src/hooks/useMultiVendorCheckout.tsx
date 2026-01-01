@@ -225,6 +225,9 @@ export const useMultiVendorCheckout = () => {
     );
   }, [vendorGroups]);
 
+  // Service charge constant
+  const SERVICE_CHARGE_RATE = 2.5;
+
   // Get commission rate based on subscription plan
   const getCommissionRate = (subscriptionPlan: string): number => {
     switch (subscriptionPlan) {
@@ -294,10 +297,15 @@ export const useMultiVendorCheckout = () => {
       if (itemsError) throw itemsError;
 
       // Calculate commission for metadata
-      // Vendor payout = subtotal - commission + shipping (shipping goes to vendor, not platform)
+      // Commission + Service Charge = Total Platform Take
+      // Free: 15% + 2.5% = 17.5% (vendor gets 82.5%)
+      // Economy: 9% + 2.5% = 11.5% (vendor gets 88.5%)
+      // First Class: 5% + 2.5% = 7.5% (vendor gets 92.5%)
       const commissionRate = getCommissionRate(group.subscription_plan);
       const commissionAmount = group.subtotal * (commissionRate / 100);
-      const vendorPayout = (group.subtotal - commissionAmount) + group.shipping;
+      const serviceCharge = group.subtotal * (SERVICE_CHARGE_RATE / 100);
+      const totalPlatformTake = commissionAmount + serviceCharge;
+      const vendorPayout = (group.subtotal - totalPlatformTake) + group.shipping;
 
       // Record transaction with commission details
       await supabase.from("platform_transactions").insert({
@@ -319,7 +327,10 @@ export const useMultiVendorCheckout = () => {
           vendor_name: group.vendor_name,
           subscription_plan: group.subscription_plan,
           commission_rate: commissionRate,
+          service_charge_rate: SERVICE_CHARGE_RATE,
           commission_amount: commissionAmount,
+          service_charge: serviceCharge,
+          platform_commission: totalPlatformTake,
           vendor_payout: vendorPayout,
           split_group: group.vendor_id ? getSplitGroupId(group.subscription_plan) : null,
         },

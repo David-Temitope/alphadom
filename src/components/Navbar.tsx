@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, Menu, X, Shield, ChevronDown, ChevronUp } from "lucide-react";
+import { ShoppingCart, User, Menu, X, Shield, ChevronDown, ChevronUp, LogOut } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { UserMenu } from "./UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,18 +10,37 @@ import { useUserTypes } from "@/hooks/useUserTypes";
 import { useShopApplications } from "@/hooks/useShopApplications";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useToast } from "@/hooks/use-toast";
 
 export const Navbar = () => {
   const { items } = useCart();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { admin } = useAdmin();
   const { settings } = useAdminSettings();
   const { hasUserType } = useUserTypes();
+  const { toast } = useToast();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setIsMobileMenuOpen(false);
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
@@ -356,8 +375,17 @@ export const Navbar = () => {
                 )}
               </div>
 
-              <div className="pt-4 border-t border-border">
-                {!user && (
+              <div className="pt-4 border-t border-border space-y-2">
+                {user ? (
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
+                ) : (
                   <Button
                     asChild
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"

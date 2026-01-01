@@ -7,12 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- SEO -->
-    <title>Alphadom - The Student Online Marketplace | Buy & Sell Campus Products</title>
+    <title>Alphadom - Your Online Marketplace | Buy & Sell Products</title>
     <meta
       name="description"
-      content="Alphadom is the #1 online marketplace for university students. Buy affordable fashion, electronics, books, dorm essentials & more."
+      content="Alphadom is the #1 online marketplace. Buy affordable fashion, electronics, books, essentials & more."
     />
-    <meta name="keywords" content="Alphadom, student marketplace, campus shopping, university store, student deals" />
+    <meta name="keywords" content="Alphadom, marketplace, online shopping, deals, products" />
     <meta name="author" content="Alphadom" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://alphadom.online" />
@@ -24,16 +24,16 @@
     <!-- Open Graph -->
     <meta property="og:locale" content="en_NG" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Alphadom - The Student Online Marketplace" />
-    <meta property="og:description" content="Affordable products for students. Trusted vendors. Campus delivery." />
+    <meta property="og:title" content="Alphadom - Your Online Marketplace" />
+    <meta property="og:description" content="Affordable products. Trusted vendors. Nationwide delivery." />
     <meta property="og:url" content="https://alphadom.online" />
     <meta property="og:site_name" content="Alphadom" />
     <meta property="og:image" content="https://alphadom.online/favicon.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Alphadom - The Student Online Marketplace" />
-    <meta name="twitter:description" content="Buy and sell on campus. Student-friendly prices." />
+    <meta name="twitter:title" content="Alphadom - Your Online Marketplace" />
+    <meta name="twitter:description" content="Buy and sell online. Great prices." />
     <meta name="twitter:image" content="https://alphadom.online/favicon.png" />
 
     <!-- Structured Data -->
@@ -51,17 +51,17 @@
       }
     </script>
 
-    <!-- Security Headers (CSP fixed for GTM + Paystack) -->
+    <!-- Security Headers -->
     <meta
       http-equiv="Content-Security-Policy"
       content="
         default-src 'self';
-        script-src 'self' 'unsafe-inline' https://js.paystack.co https://www.googletagmanager.com;
-        connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https: wss://ksdlqjyayvybbiiyfrxf.supabase.co wss://ksdlqjyayvybbiiyfrxf.functions.supabase.co;
+        script-src 'self' 'unsafe-inline' https://js.paystack.co;
+        connect-src 'self' https: wss://ksdlqjyayvybbiiyfrxf.supabase.co wss://ksdlqjyayvybbiiyfrxf.functions.supabase.co;
         img-src 'self' data: https:;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
-        frame-src https://checkout.paystack.com https://www.googletagmanager.com;
+        frame-src https://checkout.paystack.com;
       "
     />
 
@@ -72,23 +72,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- Cookie Consent (must call loadGTM() after accept) -->
-    <script src="/cookie-consent.js" defer></script>
   </head>
 
   <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript>
-      <iframe
-        src="https://www.googletagmanager.com/ns.html?id=G-BCHGE2H6YN"
-        height="0"
-        width="0"
-        style="display:none;visibility:hidden"
-      ></iframe>
-    </noscript>
-    <!-- End Google Tag Manager -->
-
     <div id="root"></div>
 
     <script type="module" src="/src/main.tsx"></script>

@@ -48,10 +48,10 @@ export const useProducts = () => {
 
       if (productsError) throw productsError;
 
-      // Fetch vendor subscription plans and registration status
+      // Fetch vendor subscription plans, gift plans, and registration status
       const { data: vendorsData } = await supabase
         .from('approved_vendors')
-        .select('id, subscription_plan, application_id');
+        .select('id, subscription_plan, application_id, gift_plan, gift_plan_expires_at');
 
       // Fetch shop applications for registration status
       const { data: applicationsData } = await supabase
@@ -62,9 +62,20 @@ export const useProducts = () => {
       const productsWithSubscription = (productsData || []).map(product => {
         const vendor = vendorsData?.find(v => v.id === product.vendor_id);
         const application = applicationsData?.find(a => a.id === vendor?.application_id);
+        
+        // Check if vendor has active gift plan
+        let effectiveSubscription = vendor?.subscription_plan || 'free';
+        if (vendor?.gift_plan && vendor?.gift_plan_expires_at) {
+          const expiresAt = new Date(vendor.gift_plan_expires_at);
+          if (expiresAt > new Date()) {
+            // Gift is still active, use gift plan for display
+            effectiveSubscription = vendor.gift_plan;
+          }
+        }
+        
         return {
           ...product,
-          vendor_subscription_plan: vendor?.subscription_plan || 'free',
+          vendor_subscription_plan: effectiveSubscription,
           vendor_is_registered: application?.is_registered || false
         };
       });

@@ -141,10 +141,35 @@ const Products = () => {
     setSearchTerm('');
   }, [filterOptions.maxPrice]);
 
+  // Skeleton component for loading state
+  const ProductSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="bg-muted aspect-square rounded-lg mb-2"></div>
+      <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+      <div className="h-4 bg-muted rounded w-1/2"></div>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background">
+        <div className="flex">
+          <aside className={`${isMobile ? 'w-16' : 'w-64'} flex-shrink-0 border-r bg-card h-screen sticky top-0`}>
+            <div className="p-4 space-y-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-8 bg-muted rounded animate-pulse"></div>
+              ))}
+            </div>
+          </aside>
+          <main className="flex-1 p-3 md:p-6">
+            <div className="h-8 bg-muted rounded w-1/4 mb-6 animate-pulse"></div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+              {[...Array(8)].map((_, i) => (
+                <ProductSkeleton key={i} />
+              ))}
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -186,7 +211,9 @@ const Products = () => {
                   stock_count: product.stock_count || 0,
                   has_discount: product.has_discount,
                   discount_percentage: product.discount_percentage,
-                  original_price: product.original_price
+                  original_price: product.original_price,
+                  vendor_subscription_plan: product.vendor_subscription_plan,
+                  vendor_is_registered: product.vendor_is_registered
                 }}
               />
             </div>
@@ -371,7 +398,9 @@ const Products = () => {
                           stock_count: product.stock_count || 0,
                           has_discount: product.has_discount,
                           discount_percentage: product.discount_percentage,
-                          original_price: product.original_price
+                          original_price: product.original_price,
+                          vendor_subscription_plan: product.vendor_subscription_plan,
+                          vendor_is_registered: product.vendor_is_registered
                         }}
                       />
                     ) : (
@@ -390,7 +419,9 @@ const Products = () => {
                           stock_count: product.stock_count || 0,
                           has_discount: product.has_discount,
                           discount_percentage: product.discount_percentage,
-                          original_price: product.original_price
+                          original_price: product.original_price,
+                          vendor_subscription_plan: product.vendor_subscription_plan,
+                          vendor_is_registered: product.vendor_is_registered
                         }}
                       />
                     )
