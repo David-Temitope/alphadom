@@ -14,10 +14,10 @@ import heroDefault2 from '@/assets/hero-default-2.jpg';
 const DEFAULT_HERO_IMAGES = [heroDefault1, heroDefault2];
 
 // Fixed guest hero content - never flashes or waits for settings
-const GUEST_HERO_TITLE = "Your Online";
-const GUEST_HERO_MAIN_TEXT = "Marketplace";
-const GUEST_HERO_SECONDARY_TEXT = "Shop Smart, Save Big";
-const GUEST_HERO_SUBTITLE = "Discover amazing deals from verified vendors. Join thousands of buyers and sellers on Africa's growing e-commerce platform!";
+const GUEST_HERO_TITLE = "A Place Built";
+const GUEST_HERO_MAIN_TEXT = "For Buyers & Sellers";
+const GUEST_HERO_SECONDARY_TEXT = "Buy Smarter. Sell Faster";
+const GUEST_HERO_SUBTITLE = "Shop quality products or grow your business on a secure marketplace built for modern commerce.";
 
 export const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -89,7 +89,7 @@ export const Hero = () => {
               {/* Site Description Badge */}
               <div className="inline-flex items-center px-4 py-2 bg-green-100/80 text-green-700 rounded-full text-sm font-medium backdrop-blur-sm border border-green-200/50">
                 <Shield className="w-4 h-4 mr-2" />
-                Buy & Sell Online with Ease
+                Genesis of Trustworthy Commerce
               </div>
 
               {/* Hero Title - Uses guest or admin settings */}
@@ -130,7 +130,7 @@ export const Hero = () => {
                 >
                   <Link to="/user-types" className="flex items-center">
                     <Store className="mr-2 w-5 h-5" />
-                    Start Selling
+                    Become a Seller
                   </Link>
                 </Button>
               ) : (
@@ -158,14 +158,14 @@ export const Hero = () => {
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors duration-200">
                   <Shield className="w-6 h-6 text-blue-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Verified Vendors</p>
+                <p className="text-sm font-medium text-slate-700">Verified Sellers</p>
               </div>
 
               <div className="text-center group">
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors duration-200">
                   <Recycle className="w-6 h-6 text-green-600" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">Fast Delivery</p>
+                <p className="text-sm font-medium text-slate-700">Reliable Delivery</p>
               </div>
             </div>
           </div>
