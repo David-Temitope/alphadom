@@ -53,9 +53,9 @@ export const useProducts = () => {
         .from('approved_vendors')
         .select('id, subscription_plan, application_id, gift_plan, gift_plan_expires_at');
 
-      // Fetch shop applications for registration status
+      // Fetch shop applications for registration status using the safe view (bypasses RLS)
       const { data: applicationsData } = await supabase
-        .from('shop_applications')
+        .from('shop_applications_safe')
         .select('id, is_registered');
 
       // Map vendor subscription plans and registration to products

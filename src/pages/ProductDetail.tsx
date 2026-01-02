@@ -9,13 +9,13 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { WishlistButton } from '@/components/WishlistButton';
-import { LikeButton } from '@/components/LikeButton';
 import { ProductCard } from '@/components/ProductCard'; 
 import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { ProductComments } from '@/components/ProductComments';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ProductDetailSkeleton } from '@/components/skeletons/PageSkeletons';
 import { 
   ShoppingCart, 
   Leaf, 
@@ -177,11 +177,7 @@ const ProductDetail = () => {
 
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {
@@ -360,14 +356,9 @@ const ProductDetail = () => {
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {hasDiscount && (
-                  <>
-                    <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0 text-sm px-3 py-1">
-                      {discountPercentage}% off
-                    </Badge>
-                    <Badge className="bg-white text-orange-600 border border-orange-200 text-sm px-3 py-1 font-medium">
-                      Special offer
-                    </Badge>
-                  </>
+                  <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0 text-sm px-3 py-1">
+                    {discountPercentage}% off
+                  </Badge>
                 )}
                 {product.sustainability_score != null && product.sustainability_score > 7 && (
                   <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -517,7 +508,6 @@ const ProductDetail = () => {
                 </Button>
                 <div className="flex gap-3 justify-center">
                   <WishlistButton productId={product.id} size="lg" className="flex-1 h-11" />
-                  <LikeButton productId={product.id} size="lg" className="flex-1 h-11" />
                   <Button 
                     onClick={handleShare}
                     variant="outline"
