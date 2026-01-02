@@ -8,7 +8,6 @@ import { ShoppingCart, Leaf, Star, BadgeCheck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { WishlistButton } from './WishlistButton';
-import { LikeButton } from './LikeButton';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -135,21 +134,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
           />
           
-          {/* Discount badges - only show if admin set discount */}
+          {/* Discount badge - only the percentage */}
           {hasDiscount && (
-            <div className="absolute top-2 left-2 flex flex-col gap-1">
-              <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0 text-xs px-2 py-1">
-                {discountPercentage}% off
-              </Badge>
-              <Badge className="bg-white text-orange-600 border border-orange-200 text-xs px-2 py-1 font-medium">
-                Special offer
-              </Badge>
-            </div>
+            <Badge className="absolute top-2 left-2 bg-orange-500 hover:bg-orange-600 text-white border-0 text-xs px-2 py-1">
+              {discountPercentage}% off
+            </Badge>
           )}
 
-          <div className="absolute top-2 right-2 flex gap-1">
+          <div className="absolute top-2 right-2">
             <WishlistButton productId={product.id} size="sm" />
-            <LikeButton productId={product.id} size="sm" />
           </div>
           
           {product.sustainability_score != null && product.sustainability_score > 7 && (
@@ -184,7 +177,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </span>
               </>
             ) : (
-              <span className="text-xs text-muted-foreground">No reviews yet</span>
+              <span className="text-xs text-muted-foreground">New</span>
             )}
           </div>
           
@@ -206,7 +199,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Pricing */}
           <div className="mt-auto">
             <div className="flex items-baseline gap-2 mb-1">
-              <span className={`text-lg font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
+              <span className="text-lg font-bold text-foreground">
                 {formatNaira(product.price)}
               </span>
 
@@ -219,9 +212,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
             
             <div className="flex items-center justify-between">
-              <Badge variant="outline" className="text-xs border-green-200 text-green-700">
-                {product.category}
-              </Badge>
               {product.sustainability_score != null && product.sustainability_score > 0 && (
                 <div className="flex items-center gap-1">
                   <Leaf className="w-3 h-3 text-green-600" />

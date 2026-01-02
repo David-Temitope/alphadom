@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Camera, User, Save } from 'lucide-react';
+import { UserSettingsSkeleton } from '@/components/skeletons/PageSkeletons';
 
 const UserSettings = () => {
   const { user } = useAuth();
@@ -153,11 +154,7 @@ const UserSettings = () => {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    return <UserSettingsSkeleton />;
   }
 
   return (
