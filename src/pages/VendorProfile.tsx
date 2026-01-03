@@ -12,6 +12,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
+import { VendorProfileSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface VendorProfile {
   id: string;
@@ -163,11 +164,7 @@ export const VendorProfile = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <VendorProfileSkeleton />;
   }
 
   if (!vendor) {

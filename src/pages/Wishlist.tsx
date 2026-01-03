@@ -7,6 +7,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
 import { PlatformAd } from '@/components/PlatformAd';
+import { WishlistSkeleton } from '@/components/skeletons/PageSkeletons';
 
 const Wishlist = () => {
   const { wishlistItems, removeFromWishlist, loading } = useWishlist();
@@ -38,11 +39,7 @@ const Wishlist = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <WishlistSkeleton />;
   }
 
   return (

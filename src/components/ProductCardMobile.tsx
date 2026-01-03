@@ -2,10 +2,9 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Heart, ThumbsUp, Star, BadgeCheck } from 'lucide-react';
+import { ShoppingCart, Heart, Star, BadgeCheck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/hooks/useWishlist';
-import { useProductLikes } from '@/hooks/useProductLikes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,10 +43,8 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const { toggleLike, isLiked } = useProductLikes();
 
   const productInWishlist = isInWishlist(product.id);
-  const productIsLiked = isLiked(product.id);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -98,12 +95,6 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
     e.preventDefault();
     e.stopPropagation();
     toggleWishlist(product.id);
-  };
-
-  const handleLikeToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleLike(product.id);
   };
 
   const truncateName = (name: string, maxLength: number = 30) => {
@@ -196,7 +187,7 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
       </Link>
       
       {/* Action buttons row */}
-      <div className="p-2 pt-0 flex items-center justify-between gap-1">
+      <div className="p-2 pt-0 flex items-center gap-1">
         <Button
           variant="ghost"
           size="sm"
@@ -204,15 +195,6 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
           onClick={handleWishlistToggle}
         >
           <Heart className={`h-3.5 w-3.5 ${productInWishlist ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0"
-          onClick={handleLikeToggle}
-        >
-          <ThumbsUp className={`h-3.5 w-3.5 ${productIsLiked ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
         </Button>
         
         <Button

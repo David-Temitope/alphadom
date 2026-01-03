@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OrderSuccessModal } from "@/components/OrderSuccessModal";
+import { CheckoutSkeleton } from "@/components/skeletons/PageSkeletons";
 import {
   ShoppingCart,
   CreditCard,
@@ -235,11 +236,7 @@ const Checkout: React.FC = () => {
   };
 
   if (!user || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <CheckoutSkeleton />;
   }
 
   if (vendorGroups.length === 0) {
