@@ -201,13 +201,12 @@ export const VendorProfile = () => {
                     </span>
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
-                  <CheckCircle className="w-3 h-3 text-white" />
-                </div>
+                {vendor.is_registered && (
+                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
+                    <CheckCircle className="w-3 h-3 text-white" />
+                  </div>
+                )}
               </div>
-              <Badge variant="default" className="bg-green-100 text-green-800 text-[8px] mt-1 px-1.5 py-0">
-                Verified
-              </Badge>
               {vendor.is_registered && (
                 <Badge variant="default" className="bg-blue-100 text-blue-800 text-[8px] mt-0.5 px-1.5 py-0">
                   Registered
@@ -303,17 +302,16 @@ export const VendorProfile = () => {
                     </span>
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                  <CheckCircle className="w-5 h-5 text-white" />
-                </div>
+                {vendor.is_registered && (
+                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                )}
               </div>
               
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <CardTitle className="text-3xl">{vendor.store_name}</CardTitle>
-                  <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
-                    Verified
-                  </Badge>
                   {vendor.is_registered && (
                     <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs">
                       Registered Business
