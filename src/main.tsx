@@ -1,7 +1,7 @@
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { supabase } from './lib/supabaseClient.ts'
+import { supabase } from './integrations/supabase/client.ts'
 import App from './App.tsx'
 import './index.css'
 
