@@ -59,6 +59,7 @@ import DispatchProfile from "./pages/DispatchProfile";
 import CategoryProducts from "./pages/CategoryProducts";
 import Sitemap from "./pages/Sitemap";
 import ResetPassword from "./pages/ResetPassword";
+import PaystackTestCheckout from "./pages/PaystackTestCheckout";
 
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
@@ -122,6 +123,7 @@ const App = () => {
                       <Route path="/dispatch-selection/:orderId" element={<Layout><DispatchSelection /></Layout>} />
                       <Route path="/settings" element={<Layout><UserSettings /></Layout>} />
                       <Route path="/sitemap" element={<Sitemap />} />
+                      <Route path="/test-checkout" element={<Layout><PaystackTestCheckout /></Layout>} />
                       <Route path="/about" element={<Layout><About /></Layout>} />
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
