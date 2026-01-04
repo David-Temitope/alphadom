@@ -9,8 +9,11 @@ import {
   CartItemWithVendor,
   PaymentStatus,
   VAT_RATE,
+  SERVICE_CHARGE_RATE,
   calculateGroupShipping,
-  getSplitGroupId,
+  getCommissionRate,
+  getEffectiveCommissionRate,
+  calculatePlatformCharge,
   generateSessionId,
   generatePaystackReference,
 } from "@/types/checkout";
@@ -21,6 +24,9 @@ type VendorInfo = {
   subscription_plan: string;
   paystack_subaccount_code: string | null;
   business_address: string | null;
+  gift_plan: string | null;
+  gift_commission_rate: number | null;
+  gift_plan_expires_at: string | null;
 };
 
 export const useMultiVendorCheckout = () => {
@@ -40,10 +46,10 @@ export const useMultiVendorCheckout = () => {
 
     if (vendorIds.length === 0) return vendorMap;
 
-    // Fetch vendor info with business address from shop_applications
+    // Fetch vendor info with gift plan details
     const { data, error } = await supabase
       .from("approved_vendors")
-      .select("id, store_name, subscription_plan, paystack_subaccount_code, application_id")
+      .select("id, store_name, subscription_plan, paystack_subaccount_code, application_id, gift_plan, gift_commission_rate, gift_plan_expires_at")
       .in("id", vendorIds);
 
     if (error) {
@@ -75,6 +81,9 @@ export const useMultiVendorCheckout = () => {
         subscription_plan: vendor.subscription_plan || "free",
         paystack_subaccount_code: vendor.paystack_subaccount_code,
         business_address: vendor.application_id ? addressMap.get(vendor.application_id) || null : null,
+        gift_plan: vendor.gift_plan || null,
+        gift_commission_rate: vendor.gift_commission_rate ?? null,
+        gift_plan_expires_at: vendor.gift_plan_expires_at || null,
       });
     });
 
@@ -188,6 +197,9 @@ export const useMultiVendorCheckout = () => {
         vendor_location: vendorInfo?.business_address || null,
         subscription_plan: vendorInfo?.subscription_plan || "free",
         paystack_subaccount_code: vendorInfo?.paystack_subaccount_code || null,
+        gift_plan: vendorInfo?.gift_plan || null,
+        gift_commission_rate: vendorInfo?.gift_commission_rate ?? null,
+        gift_plan_expires_at: vendorInfo?.gift_plan_expires_at || null,
         items: groupItems,
         subtotal,
         shipping,
@@ -225,20 +237,14 @@ export const useMultiVendorCheckout = () => {
     );
   }, [vendorGroups]);
 
-  // Service charge constant
-  const SERVICE_CHARGE_RATE = 2.5;
-
-  // Get commission rate based on subscription plan
-  const getCommissionRate = (subscriptionPlan: string): number => {
-    switch (subscriptionPlan) {
-      case "first_class":
-        return 5;
-      case "economy":
-        return 9;
-      case "free":
-      default:
-        return 15;
-    }
+  // Get effective commission rate for a vendor group (considers gift plans)
+  const getGroupCommissionRate = (group: VendorGroup): number => {
+    return getEffectiveCommissionRate(
+      group.subscription_plan,
+      group.gift_plan,
+      group.gift_commission_rate,
+      group.gift_plan_expires_at
+    );
   };
 
   // Create order for a specific vendor group
@@ -301,7 +307,8 @@ export const useMultiVendorCheckout = () => {
       // Free: 15% + 2.5% = 17.5% (vendor gets 82.5%)
       // Economy: 9% + 2.5% = 11.5% (vendor gets 88.5%)
       // First Class: 5% + 2.5% = 7.5% (vendor gets 92.5%)
-      const commissionRate = getCommissionRate(group.subscription_plan);
+      // Gift plans may have custom rates
+      const commissionRate = getGroupCommissionRate(group);
       const commissionAmount = group.subtotal * (commissionRate / 100);
       const serviceCharge = group.subtotal * (SERVICE_CHARGE_RATE / 100);
       const totalPlatformTake = commissionAmount + serviceCharge;
@@ -326,23 +333,27 @@ export const useMultiVendorCheckout = () => {
           vat: group.vat,
           vendor_name: group.vendor_name,
           subscription_plan: group.subscription_plan,
+          gift_plan: group.gift_plan,
+          gift_commission_rate: group.gift_commission_rate,
           commission_rate: commissionRate,
           service_charge_rate: SERVICE_CHARGE_RATE,
           commission_amount: commissionAmount,
           service_charge: serviceCharge,
           platform_commission: totalPlatformTake,
           vendor_payout: vendorPayout,
-          split_group: group.vendor_id ? getSplitGroupId(group.subscription_plan) : null,
+          subaccount_code: group.paystack_subaccount_code,
         },
       });
 
       // Create notification for vendor about new order
       if (vendorOwnerId) {
         const itemsList = group.items.map((i) => i.name).join(", ");
+        const effectiveCommissionRate = getGroupCommissionRate(group);
+        const effectiveCommissionAmount = group.subtotal * (effectiveCommissionRate / 100);
         await supabase.from("user_notifications").insert({
           user_id: vendorOwnerId,
           title: "New Order Received!",
-          message: `New order received: Products ₦${group.subtotal.toLocaleString()} (Shipping ₦${group.shipping.toLocaleString()}, Service Charge ₦${group.vat.toLocaleString()}). Commission: ${commissionRate}% (₦${commissionAmount.toLocaleString()}). Items: ${itemsList.substring(0, 100)}${itemsList.length > 100 ? "..." : ""}`,
+          message: `New order received: Products ₦${group.subtotal.toLocaleString()} (Shipping ₦${group.shipping.toLocaleString()}, Service Charge ₦${group.vat.toLocaleString()}). Commission: ${effectiveCommissionRate}% (₦${effectiveCommissionAmount.toLocaleString()}). Items: ${itemsList.substring(0, 100)}${itemsList.length > 100 ? "..." : ""}`,
           type: "order",
           related_id: order.id,
         });
@@ -435,10 +446,21 @@ export const useMultiVendorCheckout = () => {
       },
     };
 
-    // Add split group for vendor products (NOT for platform products)
-    if (group.vendor_id) {
-      const splitGroupId = getSplitGroupId(group.subscription_plan);
-      paystackConfig.split_code = splitGroupId;
+    // Use direct subaccount payment for vendor products (NOT for platform products)
+    if (group.vendor_id && group.paystack_subaccount_code) {
+      // Calculate platform charge (commission + service charge) in kobo
+      const platformChargeKobo = calculatePlatformCharge(
+        group.subtotal,
+        group.subscription_plan,
+        group.gift_plan,
+        group.gift_commission_rate,
+        group.gift_plan_expires_at
+      );
+      
+      // Use direct subaccount instead of split groups
+      paystackConfig.subaccount = group.paystack_subaccount_code;
+      paystackConfig.transaction_charge = platformChargeKobo; // Platform gets this amount
+      paystackConfig.bearer = "account"; // Main account (platform) pays Paystack fees
     }
 
     try {
