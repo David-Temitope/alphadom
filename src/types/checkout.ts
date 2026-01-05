@@ -1,12 +1,13 @@
 // Multi-vendor checkout types and constants
 
 export const VAT_RATE = 0.025; // 2.5% VAT
+export const SERVICE_CHARGE_RATE = 2.5; // 2.5% service charge
 
-// Split Group IDs - Paystack handles commission automatically
-export const SPLIT_GROUPS: Record<string, string> = {
-  first_class: "SPL_vNGYPJAeYT",
-  economy: "SPL_iIuyLk9ghh",
-  free: "SPL_VMVciFxPCP",
+// Commission rates by subscription plan (percentage)
+export const COMMISSION_RATES: Record<string, number> = {
+  first_class: 5,    // 5% commission + 2.5% service = 7.5% platform takes
+  economy: 9,        // 9% commission + 2.5% service = 11.5% platform takes  
+  free: 15,          // 15% commission + 2.5% service = 17.5% platform takes
 };
 
 export type ShippingInfo = {
@@ -29,6 +30,9 @@ export type VendorGroup = {
   vendor_location: string | null; // Business address/location
   subscription_plan: string;
   paystack_subaccount_code: string | null;
+  gift_plan?: string | null;
+  gift_commission_rate?: number | null;
+  gift_plan_expires_at?: string | null;
   items: CartItemWithVendor[];
   subtotal: number;
   shipping: number;
@@ -100,9 +104,60 @@ export const calculateGroupShipping = (
   return totalShipping;
 };
 
-// Get split group ID based on subscription plan
-export const getSplitGroupId = (subscriptionPlan: string): string => {
-  return SPLIT_GROUPS[subscriptionPlan] || SPLIT_GROUPS["free"];
+// Get commission rate based on subscription plan
+export const getCommissionRate = (subscriptionPlan: string): number => {
+  return COMMISSION_RATES[subscriptionPlan] || COMMISSION_RATES["free"];
+};
+
+// Calculate effective commission rate considering gift plans
+export const getEffectiveCommissionRate = (
+  subscriptionPlan: string,
+  giftPlan?: string | null,
+  giftCommissionRate?: number | null,
+  giftPlanExpiresAt?: string | null
+): number => {
+  // Check if gift plan is active
+  if (giftPlanExpiresAt) {
+    const expiresAt = new Date(giftPlanExpiresAt);
+    const now = new Date();
+    
+    if (expiresAt > now) {
+      // Gift is still active
+      // If custom commission rate is set, use it
+      if (giftCommissionRate !== null && giftCommissionRate !== undefined) {
+        return giftCommissionRate;
+      }
+      // Otherwise use the gift plan's standard rate
+      if (giftPlan) {
+        return getCommissionRate(giftPlan);
+      }
+    }
+  }
+  
+  // Default to subscription plan rate
+  return getCommissionRate(subscriptionPlan);
+};
+
+// Calculate platform charge in kobo for Paystack transaction_charge
+export const calculatePlatformCharge = (
+  subtotal: number,
+  subscriptionPlan: string,
+  giftPlan?: string | null,
+  giftCommissionRate?: number | null,
+  giftPlanExpiresAt?: string | null
+): number => {
+  const commissionRate = getEffectiveCommissionRate(
+    subscriptionPlan,
+    giftPlan,
+    giftCommissionRate,
+    giftPlanExpiresAt
+  );
+  
+  // Total platform take = commission + service charge
+  const totalPlatformRate = commissionRate + SERVICE_CHARGE_RATE;
+  
+  // Convert to kobo (multiply by 100) and round
+  return Math.round(subtotal * (totalPlatformRate / 100) * 100);
 };
 
 // Generate unique checkout session ID
