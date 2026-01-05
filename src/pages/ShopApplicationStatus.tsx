@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-const PAYSTACK_PUBLIC_KEY = "pk_live_b65b60f97ee0b66e9631df6b1301ef83d383913a";
+const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
 const subscriptionPlans = [
   {
