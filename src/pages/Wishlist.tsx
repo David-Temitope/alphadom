@@ -17,7 +17,7 @@ const Wishlist = () => {
   const handleAddToCart = (product: any) => {
     addToCart(product);
     toast({
-      title: "Added to cart",
+      title: 'Added to cart',
       description: `${product.name} added to your cart.`,
     });
   };
@@ -26,115 +26,133 @@ const Wishlist = () => {
     try {
       await removeFromWishlist(productId);
       toast({
-        title: "Removed from wishlist",
-        description: "Item removed from your wishlist.",
+        title: 'Removed from wishlist',
+        description: 'Item removed from your wishlist.',
       });
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to remove item from wishlist.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to remove item from wishlist.',
+        variant: 'destructive',
       });
     }
   };
 
-  if (loading) {
-    return <WishlistSkeleton />;
-  }
+  if (loading) return <WishlistSkeleton />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-4 mb-8">
+    <div className="min-h-screen bg-muted/30">
+      <div className="container mx-auto px-4 py-10">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-10">
           <Link to="/products">
             <Button variant="outline" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Products
+              Back
             </Button>
           </Link>
+
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Heart className="w-8 h-8 text-red-500" />
-              My Wishlist
+              <Heart className="w-7 h-7 text-red-500" />
+              Wishlist
             </h1>
-            <p className="text-muted-foreground">
-              {wishlistItems.length} item{wishlistItems.length !== 1 ? 's' : ''} in your wishlist
+            <p className="text-sm text-muted-foreground">
+              {wishlistItems.length} item{wishlistItems.length !== 1 ? 's' : ''}
             </p>
           </div>
         </div>
 
+        {/* Empty State */}
         {wishlistItems.length === 0 ? (
-          <Card className="text-center py-16">
-            <CardContent>
-              <Heart className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold mb-2">Your wishlist is empty</h2>
+          <Card className="max-w-lg mx-auto text-center">
+            <CardContent className="py-20">
+              <Heart className="w-14 h-14 mx-auto mb-4 text-muted-foreground" />
+              <h2 className="text-xl font-semibold mb-2">
+                Your wishlist is empty
+              </h2>
               <p className="text-muted-foreground mb-6">
-                Save items you love by clicking the heart icon on products
+                Add products you care about and come back later.
               </p>
               <Link to="/products">
-                <Button>
-                  Browse Products
-                </Button>
+                <Button>Browse Products</Button>
               </Link>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
-            {wishlistItems.map((item) => (
-              <Card key={item.id} className="group hover:shadow-lg transition-shadow">
-                <CardContent className="p-4">
-                  <div className="relative mb-4">
-                    <Link to={`/products/${item.products?.id}`}>
+            {wishlistItems.map((item) => {
+              const product = item.products;
+              if (!product) return null;
+
+              return (
+                <Card
+                  key={item.id}
+                  className="h-full overflow-hidden transition hover:shadow-lg"
+                >
+                  <CardContent className="p-3 flex flex-col h-full">
+                    {/* Image */}
+                    <Link
+                      to={`/products/${product.id}`}
+                      className="relative mb-3 block overflow-hidden rounded-lg aspect-[3/4]"
+                    >
                       <img
-                        src={item.products?.image || '/placeholder.svg'}
-                        alt={item.products?.name}
-                        className="w-full h-48 object-cover rounded-lg"
+                        src={product.image || '/placeholder.svg'}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     </Link>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Link to={`/products/${item.products?.id}`}>
-                      <h3 className="font-semibold line-clamp-2 hover:text-primary transition-colors">
-                        {item.products?.name}
-                      </h3>
-                    </Link>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-primary">
-                        ${item.products?.price.toFixed(2)}
-                      </span>
-                      {item.products?.sustainability_score && item.products.sustainability_score > 7 && (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                          Eco-Friendly
-                        </span>
-                      )}
-                    </div>
 
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleAddToCart(item.products)}
-                        className="flex-1"
-                        size="sm"
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Add to Cart
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRemoveFromWishlist(item.product_id!)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    {/* Content */}
+                    <div className="flex flex-col flex-1 min-h-0">
+                      <Link to={`/products/${product.id}`}>
+                        <h3 className="font-semibold text-sm leading-snug line-clamp-2 hover:text-primary">
+                          {product.name}
+                        </h3>
+                      </Link>
+
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="font-bold text-primary text-sm whitespace-nowrap">
+                          ₦{product.price.toFixed(2)}
+                        </span>
+
+                        {product.sustainability_score > 7 && (
+                          <span className="text-[10px] font-medium bg-green-100 text-green-800 px-2 py-0.5 rounded-full whitespace-nowrap">
+                            Eco
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Actions pinned to bottom */}
+                      <div className="mt-auto pt-3 flex gap-2">
+                        <Button
+                          size="sm"
+                          className="flex-1 truncate"
+                          onClick={() => handleAddToCart(product)}
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-1 shrink-0" />
+                          Add
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleRemoveFromWishlist(item.product_id!)
+                          }
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
+
       <PlatformAd targetPage="wishlist" />
     </div>
   );
