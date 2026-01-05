@@ -35,8 +35,9 @@ const Auth = () => {
     const { error } = await signIn(email, password);
     
     if (error) {
-      setError(error.message);
-      toast.error('Sign in failed: ' + error.message);
+      console.error('Sign in error:', error.message);
+      setError('Unable to sign in. Please check your credentials and try again.');
+      toast.error('Sign in failed. Please try again.');
     } else {
       toast.success('Welcome back!');
     }
@@ -70,8 +71,9 @@ const Auth = () => {
     const { error } = await signUp(email, password, fullName);
     
     if (error) {
-      setError(error.message);
-      toast.error('Sign up failed: ' + error.message);
+      console.error('Sign up error:', error.message);
+      setError('Unable to create account. Please try again later.');
+      toast.error('Sign up failed. Please try again.');
     } else {
       toast.success('Account created! Please check your email to verify your account.');
       setConfirmPassword('');
@@ -88,8 +90,9 @@ const Auth = () => {
     const { error } = await resetPassword(resetEmail);
     
     if (error) {
-      setError(error.message);
-      toast.error('Password reset failed: ' + error.message);
+      console.error('Password reset error:', error.message);
+      setError('Unable to send reset email. Please try again later.');
+      toast.error('Password reset failed. Please try again.');
     } else {
       toast.success('Password reset email sent! Please check your inbox.');
       setShowResetPassword(false);
