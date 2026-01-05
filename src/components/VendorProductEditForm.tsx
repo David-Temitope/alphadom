@@ -202,41 +202,52 @@ export const VendorProductEditForm: React.FC<VendorProductEditFormProps> = ({
                 Current stock: {product.stock_count || 0}. Update to restock.
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="shipping_fee">On-Campus / Free Pickup (₦)</Label>
-              <Input 
-                id="shipping_fee" 
-                type="number" 
-                step="0.01"
-                value={formData.shipping_fee}
-                onChange={(e) => setFormData({...formData, shipping_fee: e.target.value})}
-                placeholder="0 for free pickup"
-              />
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="shipping_fee_2km_5km">2km - 5km from Campus (₦)</Label>
-              <Input 
-                id="shipping_fee_2km_5km" 
-                type="number" 
-                step="0.01"
-                value={formData.shipping_fee_2km_5km}
-                onChange={(e) => setFormData({...formData, shipping_fee_2km_5km: e.target.value})}
-                placeholder="e.g. 500"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="shipping_fee_over_5km">Over 5km from Campus (₦)</Label>
-              <Input 
-                id="shipping_fee_over_5km" 
-                type="number" 
-                step="0.01"
-                value={formData.shipping_fee_over_5km}
-                onChange={(e) => setFormData({...formData, shipping_fee_over_5km: e.target.value})}
-                placeholder="e.g. 1000"
-              />
+          {/* Zone-Based Shipping Fees */}
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
+            <h4 className="font-semibold text-sm">Shipping & Delivery Fees (Zone-Based)</h4>
+            <p className="text-xs text-muted-foreground">
+              Set different shipping fees based on delivery zones. Buyers will see your business location to determine their zone.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="shipping_fee">Zone 1 - Local (Same City/State) (₦)</Label>
+                <Input 
+                  id="shipping_fee" 
+                  type="number" 
+                  step="0.01"
+                  placeholder="500"
+                  value={formData.shipping_fee}
+                  onChange={(e) => setFormData({...formData, shipping_fee: e.target.value})}
+                />
+                <p className="text-xs text-muted-foreground">Buyer is in same city as you</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="shipping_fee_2km_5km">Zone 2 - Regional (Neighboring States) (₦)</Label>
+                <Input 
+                  id="shipping_fee_2km_5km" 
+                  type="number" 
+                  step="0.01"
+                  placeholder="1000"
+                  value={formData.shipping_fee_2km_5km}
+                  onChange={(e) => setFormData({...formData, shipping_fee_2km_5km: e.target.value})}
+                />
+                <p className="text-xs text-muted-foreground">Buyer is in a nearby state</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="shipping_fee_over_5km">Zone 3 - National (Far-Away States) (₦)</Label>
+                <Input 
+                  id="shipping_fee_over_5km" 
+                  type="number" 
+                  step="0.01"
+                  placeholder="2000"
+                  value={formData.shipping_fee_over_5km}
+                  onChange={(e) => setFormData({...formData, shipping_fee_over_5km: e.target.value})}
+                />
+                <p className="text-xs text-muted-foreground">Buyer is far from your location</p>
+              </div>
             </div>
           </div>
 
