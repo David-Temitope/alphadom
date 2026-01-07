@@ -97,8 +97,9 @@ const App = () => {
                   <Toaster />
                   <Sonner />
                   <Routes>
-                      {/* Auth Route */}
+                      {/* Auth Routes */}
                       <Route path="/auth" element={<Auth />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
 
                       {/* Public Routes */}
                       <Route path="/" element={<Layout><Index /></Layout>} />
