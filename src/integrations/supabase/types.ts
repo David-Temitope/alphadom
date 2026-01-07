@@ -1558,6 +1558,63 @@ export type Database = {
           },
         ]
       }
+      vendor_sensitive_data: {
+        Row: {
+          application_id: string
+          bank_details: Json | null
+          created_at: string
+          id: string
+          id_image_url: string | null
+          id_number: string | null
+          id_type: string | null
+          tin_number: string | null
+          updated_at: string
+          user_id: string
+          vendor_bank_details: Json | null
+        }
+        Insert: {
+          application_id: string
+          bank_details?: Json | null
+          created_at?: string
+          id?: string
+          id_image_url?: string | null
+          id_number?: string | null
+          id_type?: string | null
+          tin_number?: string | null
+          updated_at?: string
+          user_id: string
+          vendor_bank_details?: Json | null
+        }
+        Update: {
+          application_id?: string
+          bank_details?: Json | null
+          created_at?: string
+          id?: string
+          id_image_url?: string | null
+          id_number?: string | null
+          id_type?: string | null
+          tin_number?: string | null
+          updated_at?: string
+          user_id?: string
+          vendor_bank_details?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_sensitive_data_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "shop_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_sensitive_data_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "shop_applications_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wishlist: {
         Row: {
           created_at: string | null

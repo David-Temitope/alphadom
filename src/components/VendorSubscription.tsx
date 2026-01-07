@@ -8,12 +8,7 @@ import { useVendors } from "@/hooks/useVendors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-declare global {
-  interface Window {
-    PaystackPop?: any;
-  }
-}
+import { loadPaystackScript } from "@/utils/loadPaystack";
 
 const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
@@ -69,33 +64,19 @@ export const VendorSubscription: React.FC<VendorSubscriptionProps> = ({ onPlanCh
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [paystackLoaded, setPaystackLoaded] = useState(false);
 
-  // Load Paystack script
+  // Load Paystack script with SRI
   useEffect(() => {
-    const loadPaystack = () => {
-      if (window.PaystackPop) {
-        setPaystackLoaded(true);
-        return;
-      }
-
-      const existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
-      if (existingScript) {
-        existingScript.addEventListener("load", () => setPaystackLoaded(true));
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://js.paystack.co/v1/inline.js";
-      script.async = true;
-      script.onload = () => setPaystackLoaded(true);
-      script.onerror = () => {
-        console.error("Failed to load Paystack");
-        setTimeout(loadPaystack, 2000);
-      };
-      document.body.appendChild(script);
-    };
-
-    loadPaystack();
-  }, []);
+    loadPaystackScript()
+      .then(() => setPaystackLoaded(true))
+      .catch((error) => {
+        console.error("Failed to load Paystack:", error);
+        toast({
+          title: "Payment Error",
+          description: "Failed to load payment system. Please refresh.",
+          variant: "destructive",
+        });
+      });
+  }, [toast]);
 
   useEffect(() => {
     if (currentVendor?.subscription_end_date) {
