@@ -9,12 +9,7 @@ import { Clock, CheckCircle, XCircle, Timer, CreditCard, Crown, Star, Zap, Alert
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-declare global {
-  interface Window {
-    PaystackPop?: any;
-  }
-}
+import { loadPaystackScript } from "@/utils/loadPaystack";
 
 const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
@@ -64,12 +59,11 @@ const ShopApplicationStatus = () => {
     refreshVendors();
   }, []);
 
-  // Load Paystack script
+  // Load Paystack script with SRI
   useEffect(() => {
-    if (window.PaystackPop) return;
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    document.body.appendChild(script);
+    loadPaystackScript().catch((error) => {
+      console.error("Failed to load Paystack:", error);
+    });
   }, []);
 
   // Calculate subscription days left

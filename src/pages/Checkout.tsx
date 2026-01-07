@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OrderSuccessModal } from "@/components/OrderSuccessModal";
 import { CheckoutSkeleton } from "@/components/skeletons/PageSkeletons";
+import { loadPaystackScript } from "@/utils/loadPaystack";
 import {
   ShoppingCart,
   CreditCard,
@@ -30,12 +31,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShippingInfo, VAT_RATE, VendorGroup } from "@/types/checkout";
-
-declare global {
-  interface Window {
-    PaystackPop?: any;
-  }
-}
 
 const Checkout: React.FC = () => {
   const { user } = useAuth();
@@ -108,32 +103,18 @@ const Checkout: React.FC = () => {
     }
   }, [user, items, navigate, isBanned]);
 
-  // Load Paystack script
+  // Load Paystack script with SRI
   useEffect(() => {
-    if (window.PaystackPop) {
-      setPaystackLoaded(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.async = true;
-    script.onload = () => setPaystackLoaded(true);
-    script.onerror = () => {
-      console.error("Failed to load Paystack script");
-      toast({
-        title: "Payment Error",
-        description: "Failed to load payment system. Please refresh.",
-        variant: "destructive",
+    loadPaystackScript()
+      .then(() => setPaystackLoaded(true))
+      .catch(() => {
+        console.error("Failed to load Paystack script");
+        toast({
+          title: "Payment Error",
+          description: "Failed to load payment system. Please refresh.",
+          variant: "destructive",
+        });
       });
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        document.body.removeChild(script);
-      }
-    };
   }, [toast]);
 
   // Navigate to orders when all payments complete
