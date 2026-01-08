@@ -49,50 +49,6 @@ export type Database = {
           },
         ]
       }
-      admin_invitations: {
-        Row: {
-          accepted_at: string | null
-          created_at: string | null
-          created_by: string | null
-          email: string
-          expires_at: string
-          id: string
-          invitation_token: string
-          name: string
-          role: Database["public"]["Enums"]["admin_role"]
-        }
-        Insert: {
-          accepted_at?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          email: string
-          expires_at: string
-          id?: string
-          invitation_token: string
-          name: string
-          role: Database["public"]["Enums"]["admin_role"]
-        }
-        Update: {
-          accepted_at?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          email?: string
-          expires_at?: string
-          id?: string
-          invitation_token?: string
-          name?: string
-          role?: Database["public"]["Enums"]["admin_role"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_invitations_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "admin_roles"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       admin_login_attempts: {
         Row: {
           attempted_at: string | null
@@ -1792,7 +1748,6 @@ export type Database = {
         Args: { app_user_id: string }
         Returns: boolean
       }
-      cleanup_expired_admin_invitations: { Args: never; Returns: undefined }
       generate_sitemap_data: {
         Args: never
         Returns: {
