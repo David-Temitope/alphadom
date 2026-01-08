@@ -437,6 +437,48 @@ export type Database = {
           },
         ]
       }
+      blog_posts: {
+        Row: {
+          additional_images: string[] | null
+          author_name: string
+          content: string
+          created_at: string
+          featured_image_url: string | null
+          id: string
+          published: boolean
+          published_at: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          additional_images?: string[] | null
+          author_name: string
+          content: string
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          additional_images?: string[] | null
+          author_name?: string
+          content?: string
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comment_likes: {
         Row: {
           comment_id: string

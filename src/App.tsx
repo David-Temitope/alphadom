@@ -59,6 +59,9 @@ import DispatchProfile from "./pages/DispatchProfile";
 import CategoryProducts from "./pages/CategoryProducts";
 import Sitemap from "./pages/Sitemap";
 import ResetPassword from "./pages/ResetPassword";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import AdminBlog from "./pages/admin/AdminBlog";
 
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
@@ -123,6 +126,8 @@ const App = () => {
                       <Route path="/dispatch-selection/:orderId" element={<Layout><DispatchSelection /></Layout>} />
                       <Route path="/settings" element={<Layout><UserSettings /></Layout>} />
                       <Route path="/sitemap" element={<Sitemap />} />
+                      <Route path="/blog" element={<Layout><Blog /></Layout>} />
+                      <Route path="/blog/:id" element={<Layout><BlogPost /></Layout>} />
                       <Route path="/about" element={<Layout><About /></Layout>} />
                       <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
@@ -201,6 +206,11 @@ const App = () => {
                       <Route path="/appleisgood/adverts" element={
                         <AdminProtectedRoute allowedRoles={['super_admin', 'vendor_admin', 'orders_admin']}>
                           <AdminAdverts />
+                        </AdminProtectedRoute>
+                      } />
+                      <Route path="/appleisgood/blog" element={
+                        <AdminProtectedRoute allowedRoles={['super_admin', 'customer_service']}>
+                          <AdminBlog />
                         </AdminProtectedRoute>
                       } />
 

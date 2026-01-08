@@ -179,7 +179,15 @@ export const Navbar = () => {
                   isActive("/pilots") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
                 }`}
               >
-                Pilots
+              Pilots
+              </Link>
+              <Link
+                to="/blog"
+                className={`text-sm font-medium transition-colors duration-200 hover:text-primary ${
+                  isActive("/blog") ? "text-primary border-b-2 border-primary pb-1" : "text-foreground"
+                }`}
+              >
+                Blog
               </Link>
               {user && <UserTypeNavLink />}
               <Link
@@ -340,6 +348,15 @@ export const Navbar = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Pilots
+                </Link>
+                <Link
+                  to="/blog"
+                  className={`block py-2 px-4 rounded-lg transition-colors ${
+                    isActive("/blog") ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Blog
                 </Link>
                 <Link
                   to="/about"
