@@ -1748,6 +1748,7 @@ export type Database = {
         Args: { app_user_id: string }
         Returns: boolean
       }
+      can_view_shop_applications_safe: { Args: never; Returns: boolean }
       generate_sitemap_data: {
         Args: never
         Returns: {
