@@ -50,6 +50,7 @@ import DispatchApplicationStatus from "./pages/DispatchApplicationStatus";
 import VendorDashboard from "./pages/VendorDashboard";
 import UserTypeSelection from "./pages/UserTypeSelection";
 import UserSettings from "./pages/UserSettings";
+import UserDashboard from "./pages/UserDashboard";
 import Pilots from "./pages/Pilots";
 import { VendorProfile } from "./pages/VendorProfile";
 import DispatchDashboard from "./pages/DispatchDashboard";
@@ -125,6 +126,7 @@ const App = () => {
                       <Route path="/dispatch-dashboard" element={<Layout><DispatchDashboard /></Layout>} />
                       <Route path="/dispatch-selection/:orderId" element={<Layout><DispatchSelection /></Layout>} />
                       <Route path="/settings" element={<Layout><UserSettings /></Layout>} />
+                      <Route path="/dashboard" element={<Layout><UserDashboard /></Layout>} />
                       <Route path="/sitemap" element={<Sitemap />} />
                       <Route path="/blog" element={<Layout><Blog /></Layout>} />
                       <Route path="/blog/:id" element={<Layout><BlogPost /></Layout>} />

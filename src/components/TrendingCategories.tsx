@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Laptop, 
@@ -9,27 +9,48 @@ import {
   Baby,
   ChevronRight
 } from 'lucide-react';
+import { useProducts } from '@/hooks/useProducts';
 
-const categories = [
-  { name: 'Electronics', icon: Laptop, href: '/products?category=electronics' },
-  { name: 'Fashion', icon: Shirt, href: '/products?category=fashion' },
-  { name: 'Home', icon: Home, href: '/products?category=home' },
-  { name: 'Sports', icon: Dumbbell, href: '/products?category=sports' },
-  { name: 'Beauty', icon: Sparkles, href: '/products?category=beauty' },
-  { name: 'Toys', icon: Baby, href: '/products?category=toys' },
-];
+const categoryIcons: Record<string, React.ComponentType<any>> = {
+  electronics: Laptop,
+  fashion: Shirt,
+  home: Home,
+  sports: Dumbbell,
+  beauty: Sparkles,
+  toys: Baby,
+};
 
 export const TrendingCategories = () => {
+  const { products } = useProducts();
+
+  // Get unique categories from actual products in database
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(products.map(p => p.category))];
+    return uniqueCategories.slice(0, 6).map(cat => {
+      const normalizedCat = cat.toLowerCase();
+      const IconComponent = categoryIcons[normalizedCat] || Laptop;
+      return {
+        name: cat,
+        icon: IconComponent,
+        href: `/products?category=${encodeURIComponent(cat)}`
+      };
+    });
+  }, [products]);
+
+  if (categories.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="py-16 bg-background">
+    <section className="py-12 lg:py-16 bg-background">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl lg:text-3xl font-bold text-foreground">
+            <h2 className="text-xl lg:text-2xl font-bold text-foreground">
               Trending Categories
             </h2>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               Discover what's hot right now in our market
             </p>
           </div>
@@ -43,17 +64,17 @@ export const TrendingCategories = () => {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 lg:gap-6">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 lg:gap-4">
           {categories.map((category) => (
             <Link
               key={category.name}
               to={category.href}
-              className="group flex flex-col items-center gap-3 p-4 lg:p-6 rounded-2xl bg-secondary hover:bg-accent transition-colors"
+              className="group flex flex-col items-center gap-3 p-4 lg:p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md transition-all duration-200"
             >
-              <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-background flex items-center justify-center group-hover:scale-110 transition-transform">
-                <category.icon className="w-6 h-6 lg:w-7 lg:h-7 text-foreground" />
+              <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                <category.icon className="w-6 h-6 lg:w-7 lg:h-7 text-foreground group-hover:text-primary transition-colors" />
               </div>
-              <span className="text-sm font-medium text-foreground text-center">
+              <span className="text-xs lg:text-sm font-medium text-foreground text-center">
                 {category.name}
               </span>
             </Link>
