@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, Clock, MessageSquare, Send, Loader2, ExternalLink, Package } from "lucide-react";
-import { Mail, Phone, MapPin, Clock, MessageSquare, Send, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
