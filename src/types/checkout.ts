@@ -11,6 +11,8 @@ export const COMMISSION_RATES: Record<string, number> = {
 };
 
 export type ShippingInfo = {
+  firstName?: string;
+  lastName?: string;
   street: string;
   city: string;
   state: string;
