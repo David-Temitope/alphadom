@@ -100,6 +100,18 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
+  const trackLoginAttempt = async (email: string, success: boolean) => {
+    try {
+      await supabase.rpc('track_admin_login_attempt', {
+        _email: email,
+        _success: success,
+        _ip_address: null // IP tracking handled server-side if needed
+      });
+    } catch (error) {
+      // Silently fail - don't block login flow for tracking errors
+    }
+  };
+
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // Authenticate with Supabase
@@ -109,7 +121,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       });
 
       if (authError) {
-        console.error('Auth error:', authError);
+        // Track failed login attempt via secure function
+        await trackLoginAttempt(email, false);
         return false;
       }
 
@@ -122,16 +135,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .maybeSingle();
 
       if (roleError) {
-        console.error('Role error:', roleError);
+        await trackLoginAttempt(email, false);
         await supabase.auth.signOut();
         return false;
       }
 
       if (!roleData) {
-        console.error('No admin role found for user');
+        await trackLoginAttempt(email, false);
         await supabase.auth.signOut();
         return false;
       }
+
+      // Track successful login
+      await trackLoginAttempt(email, true);
 
       // Get profile name
       const { data: profileData } = await supabase
@@ -150,7 +166,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setAdmin(adminUser);
       return true;
     } catch (error) {
-      console.error('Login error:', error);
+      await trackLoginAttempt(email, false);
       return false;
     }
   };
