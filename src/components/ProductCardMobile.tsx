@@ -134,7 +134,7 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
           <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm text-foreground text-[10px] px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
             {product.rating && product.rating > 0 ? (
               <>
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                 {product.rating.toFixed(1)}
               </>
             ) : (
@@ -144,7 +144,7 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
 
           {/* Discount badge */}
           {hasDiscount && (
-            <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] px-2 py-1 rounded-lg font-medium shadow-sm">
+            <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] px-2 py-1 rounded-lg font-medium shadow-sm">
               -{product.discount_percentage}%
             </div>
           )}
@@ -155,10 +155,10 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
             <span className="flex-1">{truncateName(product.name)}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0">
               {product.vendor_subscription_plan === 'first_class' && (
-                <BadgeCheck className="w-3.5 h-3.5 text-yellow-500" />
+                <BadgeCheck className="w-3.5 h-3.5 text-amber-500" />
               )}
               {product.vendor_subscription_plan === 'economy' && (
-                <BadgeCheck className="w-3.5 h-3.5 text-blue-500" />
+                <BadgeCheck className="w-3.5 h-3.5 text-sky-500" />
               )}
               {product.vendor_is_registered && product.vendor_subscription_plan === 'free' && (
                 <BadgeCheck className="w-3.5 h-3.5 text-primary" />
@@ -168,7 +168,7 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
           
           <div className="mt-auto">
             <div className="flex items-baseline gap-1.5">
-              <span className={`text-sm font-bold ${hasDiscount ? 'text-orange-600' : 'text-foreground'}`}>
+              <span className={`text-sm font-bold ${hasDiscount ? 'text-destructive' : 'text-foreground'}`}>
                 {formatNaira(product.price)}
               </span>
               {hasDiscount && (
@@ -189,7 +189,7 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
           className="h-8 w-8 p-0 rounded-xl border-border/50"
           onClick={handleWishlistToggle}
         >
-          <Heart className={`h-4 w-4 ${productInWishlist ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
+          <Heart className={`h-4 w-4 ${productInWishlist ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
         </Button>
         
         <Button

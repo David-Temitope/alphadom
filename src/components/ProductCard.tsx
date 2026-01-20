@@ -128,7 +128,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           
           {/* Discount badge */}
           {hasDiscount && (
-            <Badge className="absolute top-3 left-3 bg-orange-500 hover:bg-orange-600 text-white border-0 text-xs px-2.5 py-1 rounded-lg">
+            <Badge className="absolute top-3 left-3 bg-destructive hover:bg-destructive text-destructive-foreground border-0 text-xs px-2.5 py-1 rounded-lg">
               {discountPercentage}% off
             </Badge>
           )}
@@ -156,9 +156,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       key={i}
                       className={`w-3.5 h-3.5 ${
                         i < Math.floor(product.rating!)
-                          ? 'fill-yellow-400 text-yellow-400'
+                          ? 'fill-amber-400 text-amber-400'
                           : i < product.rating!
-                          ? 'fill-yellow-200 text-yellow-200'
+                          ? 'fill-amber-200 text-amber-200'
                           : 'fill-muted text-muted'
                       }`}
                     />
@@ -178,10 +178,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="flex-1">{product.name}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0 mt-0.5">
               {product.vendor_subscription_plan === 'first_class' && (
-                <BadgeCheck className="w-4 h-4 text-yellow-500" />
+                <BadgeCheck className="w-4 h-4 text-amber-500" />
               )}
               {product.vendor_subscription_plan === 'economy' && (
-                <BadgeCheck className="w-4 h-4 text-blue-500" />
+                <BadgeCheck className="w-4 h-4 text-sky-500" />
               )}
               {product.vendor_is_registered && product.vendor_subscription_plan === 'free' && (
                 <BadgeCheck className="w-4 h-4 text-primary" />

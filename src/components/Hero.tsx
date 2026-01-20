@@ -130,9 +130,8 @@ export const Hero = () => {
             <div className="relative z-10 rounded-2xl overflow-hidden shadow-card bg-secondary aspect-square lg:aspect-[4/3]">
               {/* Rating Badge */}
               <div className="absolute top-4 right-4 z-20 bg-background/95 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-soft">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-semibold">4.9</span>
-                <span className="text-xs text-muted-foreground">Top Rated</span>
+                <Star className="w-4 h-4 fill-primary text-primary" />
+                <span className="text-sm font-semibold">Top Rated</span>
               </div>
 
               {/* Images */}

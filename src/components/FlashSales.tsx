@@ -138,7 +138,7 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
             return (
               <Link
                 key={product.id}
-                to={`/product/${product.id}`}
+                to={`/products/${product.id}`}
                 className="group flex-shrink-0 w-56 lg:w-64 bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300"
               >
                 {/* Image Container */}
@@ -178,9 +178,9 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
                 <div className="p-4 space-y-2">
                   {/* Rating */}
                   <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span className="text-sm text-muted-foreground">
-                      {product.rating || '4.5'}
+                      <Star className="w-4 h-4 fill-primary text-primary" />
+                      <span className="text-sm text-muted-foreground">
+                        {product.rating || 0}
                     </span>
                   </div>
 
