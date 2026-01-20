@@ -1,6 +1,6 @@
-
 import { useState } from "react";
-import { Mail, Phone, MapPin, Clock, MessageSquare, Send, Loader2 } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, MessageSquare, Send, Loader2, ExternalLink, Package } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, MessageSquare, Send, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 const Contact = () => {
   const { user } = useAuth();
@@ -106,53 +107,59 @@ const Contact = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 to-green-800 text-white py-16">
+      <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-background py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <MessageSquare className="h-16 w-16 mx-auto mb-6" />
-          <h1 className="text-4xl font-bold mb-4">Get in Touch</h1>
-          <p className="text-xl text-green-100 max-w-2xl mx-auto">
+          <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <MessageSquare className="h-10 w-10 text-primary" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Get in Touch</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid lg:grid-cols-3 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-gray-900">Send us a Message</CardTitle>
-                <p className="text-gray-600">
-                  Have a question about our products or sustainability practices? We're here to help!
+            <Card className="shadow-lg border-border/50 rounded-2xl overflow-hidden">
+              <CardHeader className="bg-card border-b border-border/50">
+                <CardTitle className="text-2xl font-bold">Send us a Message</CardTitle>
+                <p className="text-muted-foreground">
+                  Have a question about our products or services? We're here to help!
                 </p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6 md:p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
                       <Input 
                         id="firstName" 
                         required 
                         value={formData.firstName}
                         onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                        className="rounded-xl border-border/50"
+                        placeholder="John"
                       />
                     </div>
-                    <div>
+                    <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
                       <Input 
                         id="lastName" 
                         required 
                         value={formData.lastName}
                         onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                        className="rounded-xl border-border/50"
+                        placeholder="Doe"
                       />
                     </div>
                   </div>
 
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
                     <Input 
                       id="email" 
@@ -160,10 +167,12 @@ const Contact = () => {
                       required 
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      className="rounded-xl border-border/50"
+                      placeholder="john@example.com"
                     />
                   </div>
 
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="subject">Subject</Label>
                     <Input 
                       id="subject" 
@@ -171,10 +180,11 @@ const Contact = () => {
                       placeholder="How can we help you?" 
                       value={formData.subject}
                       onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                      className="rounded-xl border-border/50"
                     />
                   </div>
 
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="message">Message</Label>
                     <Textarea
                       id="message"
@@ -183,10 +193,11 @@ const Contact = () => {
                       placeholder="Tell us more about your inquiry..."
                       value={formData.message}
                       onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                      className="rounded-xl border-border/50 resize-none"
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+                  <Button type="submit" size="lg" className="w-full rounded-xl" disabled={loading}>
                     {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     <Send className="h-4 w-4 mr-2" />
                     Send Message
@@ -197,18 +208,18 @@ const Contact = () => {
           </div>
 
           {/* Contact Information */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {contactInfo.map((info, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-green-100 p-3 rounded-lg">
-                      <info.icon className="h-6 w-6 text-green-600" />
+              <Card key={index} className="hover:shadow-md transition-shadow border-border/50 rounded-2xl overflow-hidden">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <info.icon className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-1">{info.title}</h3>
-                      <p className="text-gray-700 mb-1">{info.details}</p>
-                      <p className="text-sm text-gray-500">{info.subtext}</p>
+                      <h3 className="font-semibold text-foreground mb-1">{info.title}</h3>
+                      <p className="text-foreground mb-1">{info.details}</p>
+                      <p className="text-sm text-muted-foreground">{info.subtext}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -216,49 +227,55 @@ const Contact = () => {
             ))}
 
             {/* Quick Links */}
-            <Card>
-              <CardHeader>
+            <Card className="border-border/50 rounded-2xl overflow-hidden">
+              <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Quick Support</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  📚 View FAQ
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  📋 Track Your Order
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  🔄 Return Policy
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  🌱 Sustainability Guide
-                </Button>
+              <CardContent className="space-y-2 pb-5">
+                <Link to="/orders">
+                  <Button variant="outline" className="w-full justify-start rounded-xl border-border/50 hover:bg-primary/5">
+                    <Package className="w-4 h-4 mr-2" />
+                    Track Your Order
+                  </Button>
+                </Link>
+                <Link to="/return-policy">
+                  <Button variant="outline" className="w-full justify-start rounded-xl border-border/50 hover:bg-primary/5">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Return Policy
+                  </Button>
+                </Link>
+                <Link to="/delivery-policy">
+                  <Button variant="outline" className="w-full justify-start rounded-xl border-border/50 hover:bg-primary/5">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Delivery Policy
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
         </div>
 
         {/* FAQ Section */}
-        <section className="mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-lg text-gray-600">
+        <section className="mt-16 md:mt-20">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-foreground mb-4">Frequently Asked Questions</h2>
+            <p className="text-lg text-muted-foreground">
               Find quick answers to common questions about our products and services.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             {faqs.map((faq, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card key={index} className="hover:shadow-md transition-shadow border-border/50 rounded-2xl overflow-hidden">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">{faq.question}</h3>
-                  <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                  <h3 className="font-semibold text-foreground mb-3">{faq.question}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
                   {faq.link && (
                     <a 
                       href={faq.link} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 mt-3 text-red-600 hover:text-red-700 font-medium"
+                      className="inline-flex items-center gap-2 mt-4 text-destructive hover:text-destructive/80 font-medium transition-colors"
                     >
                       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -271,7 +288,6 @@ const Contact = () => {
             ))}
           </div>
         </section>
-
       </div>
     </div>
   );
