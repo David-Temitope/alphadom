@@ -1777,6 +1777,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      verify_admin_access: {
+        Args: { _required_role?: Database["public"]["Enums"]["admin_role"] }
+        Returns: boolean
+      }
     }
     Enums: {
       admin_role:

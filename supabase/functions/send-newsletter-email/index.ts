@@ -5,6 +5,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// HTML escape function to prevent XSS
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
+}
+
+// Email validation regex
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -12,17 +27,37 @@ serve(async (req) => {
 
   try {
     const { email } = await req.json();
+    
+    // Validate email format to prevent injection attacks
+    if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format' }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    // Additional validation: max length to prevent overflow attacks
+    if (email.length > 254) {
+      return new Response(
+        JSON.stringify({ error: 'Email address too long' }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     
     if (!RESEND_API_KEY) {
-      console.log("RESEND_API_KEY not configured, skipping email send");
-      return new Response(JSON.stringify({ success: true, message: "Email service not configured" }), {
+      // Don't expose configuration details in production
+      return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Send notification to admin
+    // Sanitize email for HTML display
+    const safeEmail = escapeHtml(email);
+
+    // Send notification to admin with sanitized content
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -36,13 +71,13 @@ serve(async (req) => {
         html: `
           <h2>New Newsletter Subscription</h2>
           <p>A new user has subscribed to your newsletter:</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+          <p><strong>Email:</strong> ${safeEmail}</p>
+          <p><strong>Date:</strong> ${new Date().toISOString()}</p>
         `,
       }),
     });
 
-    // Send welcome email to subscriber
+    // Send welcome email to subscriber (email already validated)
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -66,11 +101,13 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Error sending newsletter email:", error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    // Generic error message - don't expose internal details
+    return new Response(
+      JSON.stringify({ error: 'An error occurred. Please try again.' }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
+    );
   }
 });
