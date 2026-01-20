@@ -287,7 +287,7 @@ const Products = () => {
               >
                 <div className="flex items-center">
                   {[...Array(4)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-amber-400 fill-amber-400" />
+                    <Star key={i} className="h-4 w-4 text-primary fill-primary" />
                   ))}
                   <Star className="h-4 w-4 text-muted-foreground/30" />
                 </div>
@@ -434,7 +434,7 @@ const Products = () => {
                               key={i}
                               className={`h-3 w-3 ${
                                 i < Math.floor(Number(product.rating) || 0) 
-                                  ? 'text-amber-400 fill-amber-400' 
+                                  ? 'text-primary fill-primary' 
                                   : 'text-muted-foreground/30'
                               }`}
                             />

@@ -139,8 +139,8 @@ export const FeaturedProducts = () => {
         <div className="mb-12">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
-                <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
+                <Crown className="h-5 w-5 text-primary" />
               </div>
               <h3 className="text-lg md:text-xl font-semibold text-foreground">Best Selling Products</h3>
             </div>
@@ -163,8 +163,8 @@ export const FeaturedProducts = () => {
         <div>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <Flame className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              <div className="w-10 h-10 bg-destructive/10 rounded-xl flex items-center justify-center">
+                <Flame className="h-5 w-5 text-destructive" />
               </div>
               <h3 className="text-lg md:text-xl font-semibold text-foreground">Hot Sales</h3>
             </div>
