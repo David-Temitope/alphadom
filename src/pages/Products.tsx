@@ -287,7 +287,7 @@ const Products = () => {
               >
                 <div className="flex items-center">
                   {[...Array(4)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                    <Star key={i} className="h-4 w-4 text-amber-400 fill-amber-400" />
                   ))}
                   <Star className="h-4 w-4 text-muted-foreground/30" />
                 </div>
@@ -380,7 +380,7 @@ const Products = () => {
                       {/* Badges */}
                       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
                         {hasDiscount && (
-                          <Badge className="bg-red-500 text-white text-xs">
+                          <Badge className="bg-destructive text-destructive-foreground text-xs">
                             SALE
                           </Badge>
                         )}
@@ -396,14 +396,14 @@ const Products = () => {
                         onClick={() => toggleWishlist(product.id)}
                         className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
                           isInWishlist 
-                            ? 'bg-red-100 text-red-500' 
-                            : 'bg-white/80 text-muted-foreground hover:text-red-500'
+                            ? 'bg-destructive/10 text-destructive' 
+                            : 'bg-background/80 text-muted-foreground hover:text-destructive'
                         }`}
                       >
                         <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-current' : ''}`} />
                       </button>
 
-                      <Link to={`/product/${product.id}`}>
+                      <Link to={`/products/${product.id}`}>
                         <img
                           src={getDisplayImage(product.image)}
                           alt={product.name}
@@ -420,7 +420,7 @@ const Products = () => {
                       </p>
 
                       {/* Name */}
-                      <Link to={`/product/${product.id}`}>
+                      <Link to={`/products/${product.id}`}>
                         <h3 className="font-medium text-foreground line-clamp-2 mb-2 hover:text-primary transition-colors">
                           {product.name}
                         </h3>
@@ -434,7 +434,7 @@ const Products = () => {
                               key={i}
                               className={`h-3 w-3 ${
                                 i < Math.floor(Number(product.rating) || 0) 
-                                  ? 'text-yellow-400 fill-yellow-400' 
+                                  ? 'text-amber-400 fill-amber-400' 
                                   : 'text-muted-foreground/30'
                               }`}
                             />
@@ -459,9 +459,9 @@ const Products = () => {
                         </div>
                         <button
                           onClick={() => toggleWishlist(product.id)}
-                          className="text-muted-foreground hover:text-red-500 transition-colors"
+                          className="text-muted-foreground hover:text-destructive transition-colors"
                         >
-                          <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />
+                          <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-destructive text-destructive' : ''}`} />
                         </button>
                       </div>
                     </div>

@@ -41,11 +41,17 @@ export const TopVendors = () => {
               .select('*', { count: 'exact', head: true })
               .eq('vendor_id', vendor.user_id);
 
+            // Count followers from user_follows table
+            const { count: followersCount } = await supabase
+              .from('user_follows')
+              .select('*', { count: 'exact', head: true })
+              .eq('following_id', vendor.user_id);
+
             return {
               ...vendor,
               products_count: count || 0,
-              followers_count: Math.floor(Math.random() * 20000) + 1000, // Placeholder
-              rating: (4 + Math.random()).toFixed(1), // Placeholder
+              followers_count: followersCount || 0,
+              rating: null, // Will show N/A if no real rating
             };
           })
         );
@@ -167,8 +173,8 @@ export const TopVendors = () => {
                   </div>
                   <div className="text-center">
                     <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                      {vendor.rating}
-                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                      {vendor.rating || 'N/A'}
+                      {vendor.rating && <Star className="w-3.5 h-3.5 fill-primary text-primary" />}
                     </p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Rating
