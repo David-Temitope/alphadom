@@ -1777,6 +1777,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      track_admin_login_attempt: {
+        Args: { _email: string; _ip_address?: string; _success: boolean }
+        Returns: undefined
+      }
       verify_admin_access: {
         Args: { _required_role?: Database["public"]["Enums"]["admin_role"] }
         Returns: boolean
