@@ -154,16 +154,16 @@ const UserDashboard = () => {
     switch (status.toLowerCase()) {
       case 'delivered':
       case 'completed':
-        return 'bg-green-100 text-green-700';
+        return 'bg-primary/10 text-primary';
       case 'shipped':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-accent text-accent-foreground';
       case 'processing':
       case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-secondary text-secondary-foreground';
       case 'cancelled':
-        return 'bg-red-100 text-red-700';
+        return 'bg-destructive/10 text-destructive';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -245,7 +245,7 @@ const UserDashboard = () => {
                     <button
                       key={item.id}
                       onClick={item.action}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                     >
                       <item.icon className="h-5 w-5" />
                       {item.label}
@@ -311,8 +311,8 @@ const UserDashboard = () => {
                       {stats.couponsAvailable} Available
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center">
-                    <Ticket className="h-6 w-6 text-yellow-600" />
+                  <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
+                    <Ticket className="h-6 w-6 text-accent-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -330,8 +330,8 @@ const UserDashboard = () => {
                       {stats.totalOrders}
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                    <Package className="h-6 w-6 text-blue-600" />
+                  <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+                    <Package className="h-6 w-6 text-secondary-foreground" />
                   </div>
                 </div>
               </CardContent>
