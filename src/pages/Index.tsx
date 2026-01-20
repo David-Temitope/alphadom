@@ -1,5 +1,8 @@
 import { Hero } from "@/components/Hero";
+import { TrendingCategories } from "@/components/TrendingCategories";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
+import { FlashSales } from "@/components/FlashSales";
+import { TopVendors } from "@/components/TopVendors";
 import { About } from "@/components/About";
 import { NewsletterSubscription } from "@/components/NewsletterSubscription";
 import { PlatformAd } from "@/components/PlatformAd";
@@ -9,11 +12,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Hero />
+      <TrendingCategories />
       <FeaturedProducts />
+      <FlashSales />
+      <TopVendors />
       <About />
       
       {/* Newsletter Section */}
-      <section className="py-16 px-4">
+      <section className="py-16 px-4 bg-background">
         <div className="container mx-auto max-w-2xl">
           <NewsletterSubscription />
         </div>

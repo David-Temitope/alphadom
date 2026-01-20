@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, Package, Users, MapPin, CheckCircle, UserPlus, UserMinus, Share2 } from 'lucide-react';
+import { Star, Package, Users, MapPin, CheckCircle, UserPlus, UserMinus, Share2, ShoppingBag, Calendar, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserFollows } from '@/hooks/useUserFollows';
@@ -169,8 +169,13 @@ export const VendorProfile = () => {
 
   if (!vendor) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Vendor not found</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center p-8">
+          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShoppingBag className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <p className="text-muted-foreground text-lg">Vendor not found</p>
+        </div>
       </div>
     );
   }
@@ -179,269 +184,251 @@ export const VendorProfile = () => {
   const isUserFollowing = isFollowing(vendor.user_id);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Vendor Header */}
-      <Card className="mb-8">
-        <CardHeader className="p-4 md:p-6">
+    <div className="min-h-screen bg-background">
+      {/* Hero Header */}
+      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background">
+        <div className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
           {/* Mobile Layout */}
-          <div className="flex md:hidden gap-3">
-            {/* Left: Avatar + Verified */}
-            <div className="flex-shrink-0 flex flex-col items-center">
+          <div className="flex md:hidden gap-4">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
               <div className="relative">
-                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary/20">
                   {vendor.profile?.avatar_url ? (
                     <img 
                       src={vendor.profile.avatar_url} 
                       alt={vendor.store_name}
-                      className="w-16 h-16 rounded-full object-cover"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-xl font-semibold text-gray-600">
+                    <span className="text-2xl font-bold text-primary">
                       {vendor.store_name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
                 {vendor.is_registered && (
-                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
-                    <CheckCircle className="w-3 h-3 text-white" />
+                  <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1 shadow-lg">
+                    <CheckCircle className="w-4 h-4 text-white" />
                   </div>
                 )}
               </div>
-              {vendor.is_registered && (
-                <Badge variant="default" className="bg-blue-100 text-blue-800 text-[8px] mt-0.5 px-1.5 py-0">
-                  Registered
-                </Badge>
-              )}
             </div>
 
-            {/* Center: Info */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <h2 className="font-bold text-base truncate" title={vendor.store_name}>
-                {vendor.store_name}
-              </h2>
-              <p className="text-xs text-gray-600 truncate">
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="font-bold text-xl truncate">{vendor.store_name}</h1>
+                {vendor.is_registered && (
+                  <Badge className="bg-primary/10 text-primary border-0 text-[10px]">Verified</Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">
                 by {vendor.profile?.full_name || 'Vendor'}
               </p>
               {vendor.business_address && (
-                <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
-                  <MapPin className="w-3 h-3 flex-shrink-0" />
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="w-3 h-3" />
                   <span className="truncate">{vendor.business_address}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 mt-1">
-                <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                <span className="text-xs font-medium">4.8</span>
-                <span className="text-xs text-gray-500">({vendor.total_orders})</span>
+              <div className="flex items-center gap-1 mt-2">
+                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                <span className="text-sm font-medium">4.8</span>
+                <span className="text-xs text-muted-foreground">({vendor.total_orders} orders)</span>
               </div>
             </div>
+          </div>
 
-            {/* Right: Action Buttons (vertical) */}
+          {/* Mobile Action Buttons */}
+          <div className="flex md:hidden gap-2 mt-4">
             {user && user.id !== vendor.user_id && (
-              <div className="flex flex-col gap-1.5 flex-shrink-0">
+              <>
                 <Button
                   onClick={handleFollow}
                   variant={isUserFollowing ? "outline" : "default"}
-                  size="icon"
-                  className="h-8 w-8"
-                  title={isUserFollowing ? "Unfollow" : "Follow"}
+                  className="flex-1 rounded-xl"
+                  size="sm"
                 >
                   {isUserFollowing ? (
-                    <UserMinus className="w-3.5 h-3.5" />
+                    <><UserMinus className="w-4 h-4 mr-2" /> Unfollow</>
                   ) : (
-                    <UserPlus className="w-3.5 h-3.5" />
+                    <><UserPlus className="w-4 h-4 mr-2" /> Follow</>
                   )}
                 </Button>
                 {vendor.contact_phone && (
                   <WhatsAppButton
                     phoneNumber={vendor.contact_phone}
                     variant="vendor"
-                    iconOnly
-                    className="h-8 w-8"
+                    className="rounded-xl"
                   />
                 )}
-                <Button
-                  onClick={handleShare}
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  title="Share"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                </Button>
-              </div>
+              </>
             )}
-            {(!user || user.id === vendor.user_id) && (
-              <div className="flex flex-col gap-1.5 flex-shrink-0">
-                <Button
-                  onClick={handleShare}
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  title="Share"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            )}
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
           </div>
 
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center justify-between">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center gap-6">
               <div className="relative">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                <div className="w-28 h-28 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary/20">
                   {vendor.profile?.avatar_url ? (
                     <img 
                       src={vendor.profile.avatar_url} 
                       alt={vendor.store_name}
-                      className="w-24 h-24 rounded-full object-cover"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-2xl font-semibold text-gray-600">
+                    <span className="text-3xl font-bold text-primary">
                       {vendor.store_name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
                 {vendor.is_registered && (
-                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                  <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-1.5 shadow-lg">
                     <CheckCircle className="w-5 h-5 text-white" />
                   </div>
                 )}
               </div>
               
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-3xl">{vendor.store_name}</CardTitle>
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl font-bold">{vendor.store_name}</h1>
                   {vendor.is_registered && (
-                    <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs">
-                      Registered Business
-                    </Badge>
+                    <Badge className="bg-primary/10 text-primary border-0">Verified Business</Badge>
                   )}
                 </div>
-                <p className="text-base text-gray-600">{vendor.profile?.full_name}</p>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span>{vendor.product_category}</span>
+                <p className="text-muted-foreground mb-2">{vendor.profile?.full_name}</p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <Badge variant="outline" className="rounded-full">{vendor.product_category}</Badge>
                   {vendor.business_address && (
-                    <>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{vendor.business_address}</span>
-                      </div>
-                    </>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      <span>{vendor.business_address}</span>
+                    </div>
                   )}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span className="text-sm font-medium">4.8</span>
-                  <span className="text-sm text-gray-500">({vendor.total_orders} reviews)</span>
+                <div className="flex items-center gap-1 mt-2">
+                  <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                  <span className="font-medium">4.8</span>
+                  <span className="text-muted-foreground">({vendor.total_orders} reviews)</span>
                 </div>
               </div>
             </div>
 
-            {user && user.id !== vendor.user_id && (
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleFollow}
-                  variant={isUserFollowing ? "outline" : "default"}
-                  className="flex items-center gap-2"
-                >
-                  {isUserFollowing ? (
-                    <>
-                      <UserMinus className="w-4 h-4" />
-                      Unfollow
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4" />
-                      Follow
-                    </>
+            {/* Desktop Actions */}
+            <div className="flex gap-3">
+              {user && user.id !== vendor.user_id && (
+                <>
+                  <Button
+                    onClick={handleFollow}
+                    variant={isUserFollowing ? "outline" : "default"}
+                    className="rounded-xl"
+                  >
+                    {isUserFollowing ? (
+                      <><UserMinus className="w-4 h-4 mr-2" /> Unfollow</>
+                    ) : (
+                      <><UserPlus className="w-4 h-4 mr-2" /> Follow</>
+                    )}
+                  </Button>
+                  {vendor.contact_phone && (
+                    <WhatsAppButton
+                      phoneNumber={vendor.contact_phone}
+                      variant="vendor"
+                      className="rounded-xl"
+                    />
                   )}
-                </Button>
-                {vendor.contact_phone && (
-                  <WhatsAppButton
-                    phoneNumber={vendor.contact_phone}
-                    variant="vendor"
-                  />
-                )}
-                <Button
-                  onClick={handleShare}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </Button>
-              </div>
-            )}
-            {(!user || user.id === vendor.user_id) && (
+                </>
+              )}
               <Button
                 onClick={handleShare}
                 variant="outline"
-                className="flex items-center gap-2"
+                className="rounded-xl"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-4 h-4 mr-2" />
                 Share
               </Button>
-            )}
-          </div>
-        </CardHeader>
-      </Card>
-
-      {/* Stats Cards - 3 on mobile, 3 on desktop (removed total sales) */}
-      <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8">
-        <Card>
-          <CardContent className="p-3 md:p-6 text-center">
-            <div className="text-lg md:text-2xl font-bold text-primary">{customerCount}</div>
-            <div className="text-[10px] md:text-sm text-gray-600">Customers</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-3 md:p-6 text-center">
-            <div className="text-lg md:text-2xl font-bold text-primary">{products.length}</div>
-            <div className="text-[10px] md:text-sm text-gray-600">Products</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-3 md:p-6 text-center">
-            <div className="text-lg md:text-2xl font-bold text-primary">
-              {new Date(vendor.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
             </div>
-            <div className="text-[10px] md:text-sm text-gray-600">Vendor Since</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8">
+          <Card className="bg-card border-border/50 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4 md:p-6 text-center">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-2 md:mb-3">
+                <Users className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+              </div>
+              <div className="text-xl md:text-2xl font-bold text-foreground">{customerCount}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Customers</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-card border-border/50 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4 md:p-6 text-center">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-2 md:mb-3">
+                <Package className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+              </div>
+              <div className="text-xl md:text-2xl font-bold text-foreground">{products.length}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Products</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-card border-border/50 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4 md:p-6 text-center">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-2 md:mb-3">
+                <Calendar className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+              </div>
+              <div className="text-xl md:text-2xl font-bold text-foreground">
+                {new Date(vendor.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              </div>
+              <div className="text-xs md:text-sm text-muted-foreground">Vendor Since</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Products Section */}
+        <Card className="bg-card border-border/50 rounded-2xl shadow-sm">
+          <CardHeader className="border-b border-border/50">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Package className="w-5 h-5 text-primary" />
+                Products ({products.length})
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 md:p-6">
+            {products.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {products.map(product => (
+                  isMobile ? (
+                    <ProductCardMobile key={product.id} product={product as any} />
+                  ) : (
+                    <ProductCard key={product.id} product={product as any} />
+                  )
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-lg">No products yet</p>
+                <p className="text-muted-foreground text-sm">Check back later for new arrivals</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Products Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              Products ({products.length})
-            </CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-              {products.map(product => (
-                isMobile ? (
-                  <ProductCardMobile key={product.id} product={product as any} />
-                ) : (
-                  <ProductCard key={product.id} product={product as any} />
-                )
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No products found</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 };

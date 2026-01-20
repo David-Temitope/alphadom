@@ -53,7 +53,17 @@ export const FeaturedProducts = () => {
   };
 
   if (loading) {
-    return <section className="py-12 px-4"><div className="container mx-auto"><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[...Array(8)].map((_, i) => <div key={i} className="h-64 bg-muted rounded animate-pulse" />)}</div></div></section>;
+    return (
+      <section className="py-12 md:py-16 px-4 bg-background">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-72 bg-muted rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
   }
 
   const ProductScrollRow = ({ 
@@ -70,7 +80,7 @@ export const FeaturedProducts = () => {
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -ml-4"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -ml-4 rounded-full border-border/50"
             onClick={() => scrollLeft(scrollRef)}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -78,7 +88,7 @@ export const FeaturedProducts = () => {
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -mr-4"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -mr-4 rounded-full border-border/50"
             onClick={() => scrollRight(scrollRef)}
           >
             <ChevronRight className="h-4 w-4" />
@@ -90,9 +100,9 @@ export const FeaturedProducts = () => {
         ref={scrollRef}
         className="overflow-x-auto overflow-y-hidden scrollbar-hide"
       >
-        <div className="flex gap-3 md:gap-4 pb-2 w-max pl-1">
+        <div className="flex gap-4 pb-2 w-max pl-1">
           {items.map(product => (
-            <div key={product.id} className={isMobile ? "w-36 flex-shrink-0" : "w-56 flex-shrink-0"}>
+            <div key={product.id} className={isMobile ? "w-40 flex-shrink-0" : "w-60 flex-shrink-0"}>
               {isMobile ? (
                 <ProductCardMobile product={product as any} />
               ) : (
@@ -106,30 +116,71 @@ export const FeaturedProducts = () => {
   );
 
   return (
-    <section className="py-8 md:py-16 px-1 md:px-4 bg-background">
-      <div className="container mx-auto px-1 md:px-0">
-        <div className="flex items-center justify-between mb-6 px-2 md:px-0">
-          <h2 className="text-xl md:text-2xl font-bold">Featured Products</h2>
+    <section className="py-12 md:py-16 px-4 bg-background">
+      <div className="container mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground">Featured Products</h2>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[140px] md:w-[180px]"><SelectValue placeholder="Category" /></SelectTrigger>
-            <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{c === "all" ? "All Categories" : c}</SelectItem>)}</SelectContent>
+            <SelectTrigger className="w-[150px] md:w-[180px] rounded-xl border-border/50">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map(c => (
+                <SelectItem key={c} value={c}>
+                  {c === "all" ? "All Categories" : c}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
 
+        {/* Best Selling */}
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-4 px-2 md:px-0">
-            <div className="flex items-center gap-2"><Crown className="h-5 w-5 text-yellow-500" /><h3 className="text-lg md:text-xl font-semibold">Best Selling Products</h3></div>
-            <Link to="/products"><Button variant="ghost" size="sm">See All <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
+                <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <h3 className="text-lg md:text-xl font-semibold text-foreground">Best Selling Products</h3>
+            </div>
+            <Link to="/products">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                See All <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
-          {bestSellingFinal.length > 0 ? <ProductScrollRow items={bestSellingFinal} scrollRef={bestSellingRef} /> : <p className="text-center text-muted-foreground py-8">No products</p>}
+          {bestSellingFinal.length > 0 ? (
+            <ProductScrollRow items={bestSellingFinal} scrollRef={bestSellingRef} />
+          ) : (
+            <div className="text-center py-12 bg-muted/30 rounded-2xl">
+              <p className="text-muted-foreground">No products available</p>
+            </div>
+          )}
         </div>
 
+        {/* Hot Sales */}
         <div>
-          <div className="flex items-center justify-between mb-4 px-2 md:px-0">
-            <div className="flex items-center gap-2"><Flame className="h-5 w-5 text-orange-500" /><h3 className="text-lg md:text-xl font-semibold">Hot Sales</h3></div>
-            <Link to="/products"><Button variant="ghost" size="sm">See All <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                <Flame className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <h3 className="text-lg md:text-xl font-semibold text-foreground">Hot Sales</h3>
+            </div>
+            <Link to="/products">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                See All <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
-          {hotSalesFinal.length > 0 ? <ProductScrollRow items={hotSalesFinal} scrollRef={hotSalesRef} /> : <p className="text-center text-muted-foreground py-8">No products</p>}
+          {hotSalesFinal.length > 0 ? (
+            <ProductScrollRow items={hotSalesFinal} scrollRef={hotSalesRef} />
+          ) : (
+            <div className="text-center py-12 bg-muted/30 rounded-2xl">
+              <p className="text-muted-foreground">No products available</p>
+            </div>
+          )}
         </div>
       </div>
     </section>

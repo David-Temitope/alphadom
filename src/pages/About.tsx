@@ -1,5 +1,4 @@
-
-import { Leaf, Users, Award, Target, GraduationCap } from "lucide-react";
+import { Leaf, Users, Award, Target, Rocket, ShoppingBag, Truck, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
@@ -10,9 +9,9 @@ const About = () => {
   const { stats: liveStats, loading: statsLoading } = useAboutStats();
   
   const stats = [
-    { label: "Products Sold", value: statsLoading ? "..." : liveStats.productsSold.toLocaleString() },
-    { label: "Users", value: statsLoading ? "..." : liveStats.users.toLocaleString() },
-    { label: "Happy Customers", value: statsLoading ? "..." : liveStats.happyCustomers.toLocaleString() },
+    { label: "Products Sold", value: statsLoading ? "..." : liveStats.productsSold.toLocaleString(), icon: ShoppingBag },
+    { label: "Users", value: statsLoading ? "..." : liveStats.users.toLocaleString(), icon: Users },
+    { label: "Happy Customers", value: statsLoading ? "..." : liveStats.happyCustomers.toLocaleString(), icon: Award },
   ];
 
   const values = [
@@ -33,31 +32,38 @@ const About = () => {
     }
   ];
 
+  const timeline = [
+    { year: "2025", title: "Founded", description: "Alphadom was born in Abuja, Nigeria with a vision to transform African e-commerce." },
+    { year: "2025", title: "First 100 Vendors", description: "Reached our first milestone of 100 verified vendors on the platform." },
+    { year: "2026", title: "Expansion", description: "Expanding operations across Nigeria and West Africa." },
+    { year: "2030", title: "Vision", description: "Reaching 500,000+ sellers across Africa with 4M+ products sold." },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 to-green-800 text-white py-20">
+      <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-background py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge className="bg-white/20 text-white mb-4">About {settings.site_name}</Badge>
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
+            <Badge className="bg-primary/10 text-primary border-0 mb-4">About {settings.site_name}</Badge>
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
               {settings.about_hero_title || "Curating Quality Products"}
             </h1>
-            <p className="text-xl lg:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {settings.about_hero_subtitle || "We're on a mission to make quality products accessible, affordable, and beautiful for everyone."}
             </p>
           </div>
         </div>
       </section>
 
-      {/* Story Section - NOW BEFORE STATS */}
-      <section className="py-16 bg-white">
+      {/* Story Section */}
+      <section className="py-16 bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
-              <div className="space-y-4 text-gray-700 leading-relaxed">
+              <Badge className="bg-primary/10 text-primary border-0 mb-4">Our Journey</Badge>
+              <h2 className="text-3xl font-bold text-foreground mb-6">Our Story</h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
                 {settings.about_story ? (
                   <div className="whitespace-pre-line">{settings.about_story}</div>
                 ) : (
@@ -81,56 +87,94 @@ const About = () => {
               </div>
             </div>
             <div className="relative order-1 lg:order-2">
-              <img
-                src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop"
-                alt="Sustainable workspace"
-                className="rounded-lg shadow-xl"
-              />
-              <div className="absolute -bottom-6 -right-6 bg-green-600 text-white p-4 rounded-lg shadow-lg">
-                <GraduationCap className="h-8 w-8 mb-2" />
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop"
+                  alt="Sustainable workspace"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-6 -left-6 bg-primary text-primary-foreground p-5 rounded-2xl shadow-xl">
+                <Rocket className="h-8 w-8 mb-2" />
                 <div className="text-lg font-bold">Global Impact</div>
-                <div className="text-sm">Business Journey</div>
+                <div className="text-sm opacity-90">Business Journey</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section - NOW AFTER STORY */}
-      <section className="py-16 bg-gray-50">
+      {/* Stats Section */}
+      <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 gap-4 md:gap-8 text-center">
+          <div className="grid grid-cols-3 gap-4 md:gap-8">
             {stats.map((stat, index) => (
-              <Card key={index} className="border-primary/20">
-                <CardContent className="p-4 md:p-6">
-                  <div className="text-xl md:text-3xl font-bold text-primary mb-1 md:mb-2">{stat.value}</div>
-                  <div className="text-xs md:text-base text-muted-foreground">{stat.label}</div>
+              <Card key={index} className="border-border/50 rounded-2xl hover:shadow-lg transition-shadow">
+                <CardContent className="p-4 md:p-8 text-center">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <stat.icon className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                  </div>
+                  <div className="text-2xl md:text-4xl font-bold text-foreground mb-1">{stat.value}</div>
+                  <div className="text-sm md:text-base text-muted-foreground">{stat.label}</div>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline Section */}
+      <section className="py-16 bg-card">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <Badge className="bg-primary/10 text-primary border-0 mb-4">Our Timeline</Badge>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Our Journey So Far</h2>
+            <p className="text-muted-foreground">From a vision to a growing platform serving entrepreneurs across Africa.</p>
+          </div>
+
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-primary/20 transform md:-translate-x-1/2"></div>
+            
+            {timeline.map((item, index) => (
+              <div key={index} className={`relative flex items-center mb-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                <div className={`w-full md:w-1/2 ${index % 2 === 0 ? 'md:pr-12' : 'md:pl-12'} pl-12 md:pl-0`}>
+                  <Card className="border-border/50 rounded-2xl hover:shadow-md transition-shadow">
+                    <CardContent className="p-5">
+                      <Badge className="bg-primary/10 text-primary border-0 mb-2">{item.year}</Badge>
+                      <h3 className="font-semibold text-foreground text-lg mb-2">{item.title}</h3>
+                      <p className="text-muted-foreground text-sm">{item.description}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+                {/* Timeline dot */}
+                <div className="absolute left-4 md:left-1/2 w-4 h-4 bg-primary rounded-full transform -translate-x-1/2 border-4 border-background shadow-lg"></div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Values</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <Badge className="bg-primary/10 text-primary border-0 mb-4">Our Values</Badge>
+            <h2 className="text-3xl font-bold text-foreground mb-4">What We Stand For</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               These core principles guide everything we do and help us stay true to our mission.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {values.map((value, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow border-green-100">
-                <CardContent className="p-6">
-                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <value.icon className="h-8 w-8 text-green-600" />
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow border-border/50 rounded-2xl">
+                <CardContent className="p-6 md:p-8">
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <value.icon className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">{value.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-3">{value.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -138,27 +182,26 @@ const About = () => {
         </div>
       </section>
 
-
       {/* Mission Section */}
-      <section className="py-16 bg-green-600 text-white">
+      <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Target className="h-12 w-12 mx-auto mb-6" />
+          <Target className="h-12 w-12 mx-auto mb-6 opacity-90" />
           <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-          <p className="text-xl leading-relaxed text-green-100 mb-8">
+          <p className="text-xl leading-relaxed opacity-90 mb-10">
             To make online marketing as easy as possible for everyone across Africa. We're building a platform that empowers sellers, connects buyers, and simplifies e-commerce.
           </p>
           <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-2xl font-bold mb-2">500K+</div>
-              <div className="text-green-200">Sellers Across Africa by 2030</div>
+            <div className="bg-white/10 rounded-2xl p-6">
+              <div className="text-3xl font-bold mb-2">500K+</div>
+              <div className="text-sm opacity-80">Sellers Across Africa by 2030</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold mb-2">4M+</div>
-              <div className="text-green-200">Products Sold by 2030</div>
+            <div className="bg-white/10 rounded-2xl p-6">
+              <div className="text-3xl font-bold mb-2">4M+</div>
+              <div className="text-sm opacity-80">Products Sold by 2030</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold mb-2">Fast</div>
-              <div className="text-green-200">Delivery Across All Regions</div>
+            <div className="bg-white/10 rounded-2xl p-6">
+              <div className="text-3xl font-bold mb-2">Fast</div>
+              <div className="text-sm opacity-80">Delivery Across All Regions</div>
             </div>
           </div>
         </div>
