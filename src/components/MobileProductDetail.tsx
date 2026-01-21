@@ -5,10 +5,7 @@ import {
   Star, 
   Heart,
   ShoppingCart,
-  Truck,
-  BadgeCheck,
-  Share2,
-  ChevronRight
+  Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,9 +13,12 @@ import { Progress } from '@/components/ui/progress';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useProductRatings } from '@/hooks/useProductRatings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
+import { StarRating } from '@/components/StarRating';
+import { ProductComments } from '@/components/ProductComments';
 
 interface Product {
   id: string;
@@ -59,6 +59,8 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [vendorName, setVendorName] = useState<string>('');
   const [vendorPhone, setVendorPhone] = useState<string>('');
+  
+  const { stats: ratingStats, rateProduct } = useProductRatings(product.id);
 
   const inWishlist = isInWishlist(product.id);
 
@@ -164,20 +166,9 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
     navigate('/checkout');
   };
 
-  // Rating distribution (simulated)
-  const getRatingDistribution = () => {
-    const baseRating = product?.rating || 3;
-    const reviews = product?.reviews || 0;
-    if (reviews === 0) return [0, 0, 0, 0, 0];
-    
-    const distribution = [0, 0, 0, 0, 0];
-    distribution[Math.floor(baseRating) - 1] = 82;
-    distribution[Math.min(4, Math.floor(baseRating))] = 12;
-    distribution[Math.max(0, Math.floor(baseRating) - 2)] = 4;
-    return distribution;
+  const handleRateProduct = async (stars: number) => {
+    await rateProduct(stars);
   };
-
-  const ratingDistribution = getRatingDistribution();
 
   const getDisplayImage = (imageField: string | null | undefined): string => {
     if (!imageField) return '/placeholder.svg';
@@ -301,34 +292,54 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
           </p>
         </div>
 
+        {/* User Rating Section */}
+        <div className="space-y-4 pt-2 border-t border-border/30">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-base">Rate this product</h3>
+            {ratingStats.userRating && (
+              <span className="text-xs text-primary">You rated: {ratingStats.userRating} stars</span>
+            )}
+          </div>
+          <StarRating
+            rating={ratingStats.averageRating}
+            interactive={true}
+            onRate={handleRateProduct}
+            userRating={ratingStats.userRating}
+            size="lg"
+          />
+        </div>
+
         {/* Reviews Section */}
         <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-base">Reviews</h3>
             <span className="text-xs text-muted-foreground">
-              Based on {product.reviews || 0} verified buyers
+              {ratingStats.totalRatings} ratings
             </span>
           </div>
           
           {/* Rating Bars */}
           <div className="space-y-2">
-            {[5, 4, 3].map((star) => (
+            {[5, 4, 3, 2, 1].map((star) => (
               <div key={star} className="flex items-center gap-3">
                 <div className="flex items-center gap-1 w-8">
                   <span className="text-sm font-medium">{star}</span>
                   <Star className="w-3 h-3 fill-primary text-primary" />
                 </div>
                 <Progress 
-                  value={ratingDistribution[star - 1]} 
+                  value={ratingStats.distribution[star - 1]} 
                   className="h-2 flex-1" 
                 />
                 <span className="text-xs text-muted-foreground w-10 text-right">
-                  {ratingDistribution[star - 1]}%
+                  {ratingStats.distribution[star - 1]}%
                 </span>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Comments Section */}
+        <ProductComments productId={product.id} />
 
         {/* You Might Also Like */}
         {similarProducts.length > 0 && (

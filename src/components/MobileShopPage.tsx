@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Search, 
@@ -7,20 +7,21 @@ import {
   ShoppingCart,
   SlidersHorizontal,
   X,
-  ChevronDown
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { useProducts } from '@/hooks/useProducts';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminSettings } from '@/hooks/useAdminSettings';
 import { supabase } from '@/integrations/supabase/client';
 
 type SortOption = 'all' | 'price' | 'rating' | 'category';
@@ -31,12 +32,25 @@ export const MobileShopPage: React.FC = () => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { settings } = useAdminSettings();
   const navigate = useNavigate();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSort, setActiveSort] = useState<SortOption>('all');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  // Auto-slide banner
+  useEffect(() => {
+    if (settings.hero_images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentBannerIndex(prev => 
+        prev === settings.hero_images.length - 1 ? 0 : prev + 1
+      );
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [settings.hero_images.length]);
 
   // Get unique categories
   const categories = useMemo(() => {
@@ -309,19 +323,77 @@ export const MobileShopPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Promo Banner */}
+      {/* Promo Banner with Admin Images */}
       <div className="px-4 py-4">
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-4 border border-primary/20">
-          <Badge className="bg-primary/20 text-primary border-0 text-xs font-semibold mb-2">
-            SUMMER SALE
-          </Badge>
-          <h3 className="text-lg font-bold text-foreground mb-1">
-            Eco-Friendly Essentials
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Save up to 40% on all green products this week.
-          </p>
-        </div>
+        {settings.hero_images.length > 0 ? (
+          <div className="relative rounded-2xl overflow-hidden">
+            <Link to="/products">
+              <img 
+                src={settings.hero_images[currentBannerIndex]} 
+                alt="Promo Banner"
+                className="w-full h-40 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-center px-4">
+                <Badge className="bg-primary/90 text-primary-foreground border-0 text-xs font-semibold mb-2 w-fit">
+                  {settings.hero_secondary_text || 'SPECIAL OFFER'}
+                </Badge>
+                <h3 className="text-lg font-bold text-white mb-1">
+                  {settings.hero_title}
+                </h3>
+                <p className="text-sm text-white/80">
+                  {settings.hero_main_text}
+                </p>
+              </div>
+            </Link>
+            
+            {/* Banner Navigation */}
+            {settings.hero_images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentBannerIndex(prev => 
+                    prev === 0 ? settings.hero_images.length - 1 : prev - 1
+                  )}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setCurrentBannerIndex(prev => 
+                    prev === settings.hero_images.length - 1 ? 0 : prev + 1
+                  )}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                
+                {/* Dots */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {settings.hero_images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentBannerIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        idx === currentBannerIndex ? 'bg-white w-4' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-4 border border-primary/20">
+            <Badge className="bg-primary/20 text-primary border-0 text-xs font-semibold mb-2">
+              SUMMER SALE
+            </Badge>
+            <h3 className="text-lg font-bold text-foreground mb-1">
+              Eco-Friendly Essentials
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Save up to 40% on all green products this week.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Active Filter Chips */}
