@@ -12,6 +12,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { GideonChat } from "@/components/GideonChat";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -80,8 +81,11 @@ const queryClient = new QueryClient({
 const Layout = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen flex flex-col">
     <Navbar />
-    <main className="flex-1">{children}</main>
-    <Footer />
+    <main className="flex-1 pb-16 md:pb-0">{children}</main>
+    <div className="hidden md:block">
+      <Footer />
+    </div>
+    <MobileBottomNav />
   </div>
 );
 
