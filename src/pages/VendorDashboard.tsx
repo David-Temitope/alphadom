@@ -351,21 +351,6 @@ const VendorDashboard = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={profileImage || ""} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                  {currentVendor.store_name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {!isMobile && (
-                <div className="text-right">
-                  <p className="text-sm font-medium">{currentVendor.store_name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {currentVendor.subscription_plan?.replace("_", " ") || "Free"} Vendor
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </header>
