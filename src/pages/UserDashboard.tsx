@@ -15,6 +15,8 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileAccountPage from '@/components/MobileAccountPage';
 
 type SidebarItem = {
   id: string;
@@ -31,6 +33,7 @@ const UserDashboard = () => {
   const { products } = useProducts();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const [activeTab, setActiveTab] = useState('dashboard');
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string } | null>(null);
@@ -203,6 +206,11 @@ const UserDashboard = () => {
   }
 
   const firstName = profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'User';
+
+  // Render mobile version
+  if (isMobile) {
+    return <MobileAccountPage />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
