@@ -332,16 +332,24 @@ const VendorDashboard = () => {
               </div>
             )}
 
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
-            </Button>
 
-            <Button variant="ghost" size="icon">
-              <MessageSquare className="h-5 w-5" />
-            </Button>
+            {/* Avatar only on mobile header */}
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profileImage || ""} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {currentVendor.store_name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {!isMobile && (
+                <div className="text-right">
+                  <p className="text-sm font-medium">{currentVendor.store_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {currentVendor.subscription_plan?.replace("_", " ") || "Free"} Vendor
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">

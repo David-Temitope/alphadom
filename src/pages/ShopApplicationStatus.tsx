@@ -10,8 +10,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { loadPaystackScript } from "@/utils/loadPaystack";
-
-const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+import { PAYSTACK_PUBLIC_KEY } from "@/config/paystack";
 
 const subscriptionPlans = [
   {

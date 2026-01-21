@@ -243,13 +243,12 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
 
       {/* Product Info */}
       <div className="px-4 py-5 space-y-5">
-        {/* Verified Merchant Badge */}
-        <div className="flex items-center gap-2">
-          <BadgeCheck className="w-4 h-4 text-primary" />
-          <span className="text-xs text-muted-foreground font-medium">
-            VERIFIED MERCHANT ID: ALPHA-{product.id.slice(0, 4).toUpperCase()}
-          </span>
-        </div>
+        {/* Verified Vendor */}
+        {vendorName && (
+          <p className="text-xs text-muted-foreground">
+            Sold by <span className="text-primary font-medium">{vendorName}</span>
+          </p>
+        )}
 
         {/* Product Name */}
         <h1 className="text-xl font-bold text-foreground leading-tight">
@@ -273,26 +272,13 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
           )}
         </div>
 
-        {/* Info Row */}
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          <div className="flex items-center gap-1.5">
-            <Star className="w-4 h-4 fill-primary text-primary" />
-            <span className="font-medium">{(product.rating || 0).toFixed(1)}/5</span>
-            <span className="text-muted-foreground">
-              based on {product.reviews || 0} Reviews
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm border-t border-b border-border/50 py-4">
-          <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4 text-primary" />
-            <span>Delivery: <strong>Free</strong></span>
-          </div>
-          <div className="flex items-center gap-2">
-            <BadgeCheck className="w-4 h-4 text-primary" />
-            <span>Quality: <strong>Original</strong></span>
-          </div>
+        {/* Rating Info */}
+        <div className="flex items-center gap-2 text-sm">
+          <Star className="w-4 h-4 fill-primary text-primary" />
+          <span className="font-medium">{(product.rating || 0).toFixed(1)}/5</span>
+          <span className="text-muted-foreground">
+            ({product.reviews || 0} reviews)
+          </span>
         </div>
 
         {/* WhatsApp Button */}

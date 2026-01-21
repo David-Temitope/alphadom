@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Laptop, 
@@ -7,12 +7,14 @@ import {
   Sparkles,
   ChevronRight,
   Star,
-  BadgeCheck
+  BadgeCheck,
+  ChevronLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProducts } from '@/hooks/useProducts';
+import { useAdminSettings } from '@/hooks/useAdminSettings';
 
 const categoryIcons: Record<string, React.ComponentType<any>> = {
   electronics: Laptop,
@@ -23,6 +25,20 @@ const categoryIcons: Record<string, React.ComponentType<any>> = {
 
 export const MobileHomepage: React.FC = () => {
   const { products, loading } = useProducts();
+  const { settings } = useAdminSettings();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Hero images from admin settings
+  const heroImages = settings.hero_images || [];
+
+  // Auto-slide hero images
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   // Get categories from products
   const categories = useMemo(() => {
@@ -101,41 +117,101 @@ export const MobileHomepage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Banner */}
+      {/* Hero Banner with Admin Images */}
       <section className="px-4 pt-4 pb-2">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-6">
-          {/* Background pattern overlay */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-2xl" />
-          </div>
-          
-          <div className="relative z-10">
-            <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs font-medium mb-3">
-              LIMITED OFFER
-            </Badge>
-            
-            <h2 className="text-2xl font-bold text-white leading-tight mb-1">
-              Summer Tech
-            </h2>
-            <h2 className="text-2xl font-bold text-white leading-tight mb-2">
-              Mega Sale
-            </h2>
-            
-            <p className="text-white/90 text-sm mb-4">
-              Upto 40% off electronics
-            </p>
-            
-            <Button 
-              asChild 
-              size="sm"
-              className="bg-white text-primary hover:bg-white/90 font-semibold rounded-full px-6"
-            >
-              <Link to="/products?category=electronics">
-                Shop Now
-              </Link>
-            </Button>
-          </div>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/70">
+          {/* Hero Images Carousel */}
+          {heroImages.length > 0 ? (
+            <div className="relative aspect-[16/9]">
+              <img
+                src={heroImages[currentSlide]}
+                alt={`Hero ${currentSlide + 1}`}
+                className="w-full h-full object-cover"
+              />
+              {/* Overlay with text */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs font-medium mb-2">
+                  {settings.hero_title || 'LIMITED OFFER'}
+                </Badge>
+                <h2 className="text-xl font-bold leading-tight mb-1">
+                  {settings.hero_main_text || 'Shop Now'}
+                </h2>
+                <p className="text-white/90 text-sm mb-3">
+                  {settings.hero_secondary_text || 'Discover great deals'}
+                </p>
+                <Button 
+                  asChild 
+                  size="sm"
+                  className="bg-white text-primary hover:bg-white/90 font-semibold rounded-full px-6"
+                >
+                  <Link to="/products">
+                    Shop Now
+                  </Link>
+                </Button>
+              </div>
+              {/* Dots indicator */}
+              {heroImages.length > 1 && (
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {heroImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        index === currentSlide ? 'bg-white w-5' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+              {/* Arrow navigation */}
+              {heroImages.length > 1 && (
+                <>
+                  <button 
+                    onClick={() => setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={() => setCurrentSlide((prev) => (prev + 1) % heroImages.length)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
+          ) : (
+            // Fallback when no hero images
+            <div className="p-6 relative z-10">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-2xl" />
+              </div>
+              <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs font-medium mb-3">
+                LIMITED OFFER
+              </Badge>
+              <h2 className="text-2xl font-bold text-white leading-tight mb-1">
+                Summer Tech
+              </h2>
+              <h2 className="text-2xl font-bold text-white leading-tight mb-2">
+                Mega Sale
+              </h2>
+              <p className="text-white/90 text-sm mb-4">
+                Upto 40% off electronics
+              </p>
+              <Button 
+                asChild 
+                size="sm"
+                className="bg-white text-primary hover:bg-white/90 font-semibold rounded-full px-6"
+              >
+                <Link to="/products?category=electronics">
+                  Shop Now
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

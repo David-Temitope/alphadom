@@ -11,6 +11,8 @@ import { useShopApplications } from "@/hooks/useShopApplications";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminSettings } from "@/hooks/useAdminSettings";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Navbar = () => {
   const { items } = useCart();
@@ -18,6 +20,8 @@ export const Navbar = () => {
   const { admin } = useAdmin();
   const { hasUserType } = useUserTypes();
   const { toast } = useToast();
+  const { settings } = useAdminSettings();
+  const isMobile = useIsMobile();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -149,14 +153,26 @@ export const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
+            {/* Logo - Use admin uploaded logo on mobile */}
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-                <ShoppingCart className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold text-foreground">
-                Alphadom
-              </span>
+              {settings.navbar_logo && settings.navbar_logo !== "/favicon.png" ? (
+                <img 
+                  src={settings.navbar_logo} 
+                  alt="Logo" 
+                  className="h-9 w-auto object-contain"
+                />
+              ) : (
+                <>
+                  <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
+                    <ShoppingCart className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  {!isMobile && (
+                    <span className="text-xl font-bold text-foreground">
+                      Alphadom
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
 
             {/* Desktop Navigation */}
@@ -206,17 +222,19 @@ export const Navbar = () => {
                 </div>
               </form>
 
-              {/* Cart */}
-              <Button variant="ghost" size="icon" asChild className="relative">
-                <Link to="/cart">
-                  <ShoppingCart className="h-5 w-5" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                      {totalItems > 9 ? "9+" : totalItems}
-                    </span>
-                  )}
-                </Link>
-              </Button>
+              {/* Cart - Desktop only (mobile has it in bottom nav) */}
+              {!isMobile && (
+                <Button variant="ghost" size="icon" asChild className="relative">
+                  <Link to="/cart">
+                    <ShoppingCart className="h-5 w-5" />
+                    {totalItems > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                        {totalItems > 9 ? "9+" : totalItems}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+              )}
 
               {/* Notifications */}
               {user && <NotificationCenter />}
