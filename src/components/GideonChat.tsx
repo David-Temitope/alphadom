@@ -252,7 +252,7 @@ export const GideonChat = () => {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 border-2 border-white z-50 animate-[pulse_6s_ease-in-out_infinite]"
+          className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 border-2 border-white z-50 animate-[pulse_6s_ease-in-out_infinite] md:bottom-6"
           size="icon"
         >
           <MessageCircle className="h-6 w-6 text-white drop-shadow-lg" />
@@ -260,7 +260,7 @@ export const GideonChat = () => {
       )}
 
       {isOpen && (
-        <Card className="fixed bottom-6 right-4 left-4 md:left-auto md:right-6 md:w-96 h-[500px] shadow-2xl z-50 flex flex-col max-w-[calc(100vw-2rem)]">
+        <Card className="fixed bottom-24 right-4 left-4 md:bottom-6 md:left-auto md:right-6 md:w-96 h-[500px] shadow-2xl z-50 flex flex-col max-w-[calc(100vw-2rem)]">
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />

@@ -333,12 +333,50 @@ const Checkout: React.FC = () => {
                     />
                   </div>
 
+                  {/* Delivery Zone Selection */}
+                  <div className="mt-6">
+                    <Label className="text-base font-semibold">Delivery Zone</Label>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Select your delivery zone based on your distance from the vendor(s)
+                    </p>
+                    <div className="grid gap-3">
+                      {[
+                        { value: 'on_campus', label: 'On-Campus Pickup', description: 'Free - Pick up at vendor location', price: 'FREE' },
+                        { value: '2km_5km', label: 'Zone 1 - Local (0-5km)', description: 'Same city or nearby area', price: 'Varies' },
+                        { value: 'over_5km', label: 'Zone 2 - Regional (5km+)', description: 'Different city or distant location', price: 'Varies' },
+                      ].map((zone) => (
+                        <button
+                          key={zone.value}
+                          type="button"
+                          onClick={() => setShippingInfo(prev => ({ 
+                            ...prev, 
+                            deliveryMethod: zone.value as 'on_campus' | '2km_5km' | 'over_5km' 
+                          }))}
+                          disabled={processing}
+                          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                            shippingInfo.deliveryMethod === zone.value
+                              ? 'border-primary bg-primary/5'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="text-left">
+                            <p className="font-medium">{zone.label}</p>
+                            <p className="text-sm text-muted-foreground">{zone.description}</p>
+                          </div>
+                          <Badge variant={zone.value === 'on_campus' ? 'default' : 'secondary'}>
+                            {zone.price}
+                          </Badge>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <Button
                     onClick={handleDeliverToAddress}
                     className="w-full mt-6 bg-primary hover:bg-primary/90"
                     disabled={!isShippingValid || processing}
                   >
-                    Deliver to this address
+                    Continue to Payment
                   </Button>
                 </AccordionContent>
               </AccordionItem>

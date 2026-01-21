@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { PAYSTACK_PUBLIC_KEY } from "@/config/paystack";
 import {
   VendorGroup,
   ShippingInfo,
@@ -404,7 +405,7 @@ export const useMultiVendorCheckout = () => {
     const reference = generatePaystackReference(sessionId, index);
 
     const paystackConfig: any = {
-      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      key: PAYSTACK_PUBLIC_KEY,
       email: user.email,
       amount: Math.round(group.total * 100), // Amount in kobo
       currency: "NGN",

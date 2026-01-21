@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -241,7 +241,7 @@ export const VendorProfile = () => {
 
           {/* Mobile Action Buttons */}
           <div className="flex md:hidden gap-2 mt-4">
-            {user && user.id !== vendor.user_id && (
+            {user && user.id !== vendor.user_id ? (
               <>
                 <Button
                   onClick={handleFollow}
@@ -263,7 +263,18 @@ export const VendorProfile = () => {
                   />
                 )}
               </>
-            )}
+            ) : !user ? (
+              <Button
+                asChild
+                variant="default"
+                className="flex-1 rounded-xl"
+                size="sm"
+              >
+                <Link to="/auth">
+                  <UserPlus className="w-4 h-4 mr-2" /> Follow
+                </Link>
+              </Button>
+            ) : null}
             <Button
               onClick={handleShare}
               variant="outline"

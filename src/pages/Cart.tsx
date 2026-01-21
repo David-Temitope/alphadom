@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
 import { useProducts } from "@/hooks/useProducts";
+import { useVendors } from "@/hooks/useVendors";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductCardMobile } from "@/components/ProductCardMobile";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 // Helper function to extract first image from JSON array or single image
 const getDisplayImage = (image: string | null | undefined): string => {
@@ -36,8 +37,22 @@ const useIsMobile = () => {
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
   const { products } = useProducts();
+  const { vendors } = useVendors();
   const [promoCode, setPromoCode] = useState('');
   const isMobile = useIsMobile();
+
+  // Create vendor lookup map
+  const vendorLookup = useMemo(() => {
+    const map = new Map<string, string>();
+    vendors.forEach(v => map.set(v.id, v.store_name));
+    return map;
+  }, [vendors]);
+
+  // Find vendor name for an item
+  const getVendorName = (vendorId: string | null | undefined) => {
+    if (!vendorId) return 'Alphadom';
+    return vendorLookup.get(vendorId) || 'Vendor';
+  };
 
   // Get frequently bought together products (random products from different categories)
   const frequentlyBoughtTogether = products
@@ -147,7 +162,7 @@ const Cart = () => {
                             </h3>
                           </Link>
                           <p className="text-sm text-muted-foreground">
-                            Sold by: <span className="text-primary">Vendor</span>
+                            Sold by: <span className="text-primary">{getVendorName(item.vendor_id)}</span>
                           </p>
                           <p className="text-lg font-bold text-foreground mt-1">
                             ₦{item.price.toLocaleString()}
