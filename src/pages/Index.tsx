@@ -7,8 +7,24 @@ import { About } from "@/components/About";
 import { NewsletterSubscription } from "@/components/NewsletterSubscription";
 import { PlatformAd } from "@/components/PlatformAd";
 import { WelcomeCard } from "@/components/WelcomeCard";
+import { MobileHomepage } from "@/components/MobileHomepage";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
+  const isMobile = useIsMobile();
+
+  // Render mobile-specific layout
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MobileHomepage />
+        <PlatformAd targetPage="home" />
+        <WelcomeCard />
+      </div>
+    );
+  }
+
+  // Desktop layout
   return (
     <div className="min-h-screen bg-background">
       <Hero />
