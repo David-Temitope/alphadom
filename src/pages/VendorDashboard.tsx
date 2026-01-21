@@ -350,8 +350,6 @@ const VendorDashboard = () => {
                 </div>
               )}
             </div>
-
-            </div>
           </div>
         </header>
 
