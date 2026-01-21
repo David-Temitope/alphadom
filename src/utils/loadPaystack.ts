@@ -37,13 +37,8 @@ export const loadPaystackScript = (): Promise<void> => {
     script.src = "https://js.paystack.co/v1/inline.js";
     script.async = true;
     
-    // Add integrity attribute for SRI
-    // Note: Paystack's CDN may not support SRI consistently, so we add crossorigin but may need to remove integrity
-    // if the hash changes frequently. For now, we prioritize loading over strict SRI enforcement.
-    script.crossOrigin = "anonymous";
-    
-    // Uncomment below if Paystack provides stable SRI hashes
-    // script.integrity = PAYSTACK_SRI_HASH;
+    // Note: Paystack's CDN does not support CORS headers, so we cannot use crossOrigin or SRI
+    // The script is loaded securely over HTTPS from Paystack's official domain
 
     script.onload = () => resolve();
     script.onerror = () => {
