@@ -14,9 +14,11 @@ import { ProductCard } from '@/components/ProductCard';
 import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { ProductComments } from '@/components/ProductComments';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
+import { MobileProductDetail } from '@/components/MobileProductDetail';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductDetailSkeleton } from '@/components/skeletons/PageSkeletons';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   ShoppingCart,
   Star,
@@ -30,16 +32,6 @@ import {
   Store,
   MessageCircle,
 } from 'lucide-react';
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  return isMobile;
-};
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -177,6 +169,11 @@ const ProductDetail = () => {
         </div>
       </div>
     );
+  }
+
+  // Render mobile version
+  if (isMobile) {
+    return <MobileProductDetail product={product as any} similarProducts={similarProducts as any} />;
   }
 
   return (
