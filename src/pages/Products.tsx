@@ -18,6 +18,7 @@ import {
   Star, Heart, Home 
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileShopPage } from "@/components/MobileShopPage";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
@@ -156,6 +157,11 @@ const Products = () => {
       description: `${product.name} has been added to your cart`
     });
   };
+
+  // Render mobile version
+  if (isMobile) {
+    return <MobileShopPage />;
+  }
 
   if (loading) {
     return (
