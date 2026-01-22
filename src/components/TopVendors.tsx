@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Star, ChevronRight, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +13,7 @@ interface Vendor {
   created_at: string;
   user_id: string;
   followers_count?: number;
-  rating?: number | string;
+  rating?: number;
   products_count?: number;
 }
 
@@ -28,18 +27,21 @@ export const TopVendors = () => {
         const { data, error } = await supabase
           .from('approved_vendors')
           .select('*')
+          .eq('is_active', true)
+          .eq('is_suspended', false)
           .order('created_at', { ascending: false })
           .limit(6);
 
         if (error) throw error;
 
-        // Get product counts for each vendor
+        // Get product counts and calculate ratings for each vendor
         const vendorsWithStats = await Promise.all(
           (data || []).map(async (vendor) => {
-            const { count } = await supabase
+            // Count products for this vendor
+            const { count: productsCount } = await supabase
               .from('products')
               .select('*', { count: 'exact', head: true })
-              .eq('vendor_id', vendor.user_id);
+              .eq('vendor_id', vendor.id);
 
             // Count followers from user_follows table
             const { count: followersCount } = await supabase
@@ -47,11 +49,30 @@ export const TopVendors = () => {
               .select('*', { count: 'exact', head: true })
               .eq('following_id', vendor.user_id);
 
+            // Calculate average rating from product_ratings for vendor's products
+            const { data: vendorProducts } = await supabase
+              .from('products')
+              .select('id')
+              .eq('vendor_id', vendor.id);
+
+            let avgRating = 0;
+            if (vendorProducts && vendorProducts.length > 0) {
+              const productIds = vendorProducts.map(p => p.id);
+              const { data: ratings } = await supabase
+                .from('product_ratings')
+                .select('stars')
+                .in('product_id', productIds);
+
+              if (ratings && ratings.length > 0) {
+                avgRating = ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length;
+              }
+            }
+
             return {
               ...vendor,
-              products_count: count || 0,
+              products_count: productsCount || 0,
               followers_count: followersCount || 0,
-              rating: null, // Will show N/A if no real rating
+              rating: avgRating,
             };
           })
         );
@@ -77,11 +98,11 @@ export const TopVendors = () => {
   const getPlanBadge = (plan?: string) => {
     switch (plan) {
       case 'first_class':
-        return { label: 'Premium Vendor', variant: 'default' as const, color: 'bg-primary' };
+        return { label: 'Premium Vendor', variant: 'default' as const };
       case 'economy':
-        return { label: 'Verified Vendor', variant: 'secondary' as const, color: 'bg-blue-500' };
+        return { label: 'Verified Vendor', variant: 'secondary' as const };
       default:
-        return { label: 'Eco Friendly', variant: 'outline' as const, color: '' };
+        return { label: 'Verified Seller', variant: 'outline' as const };
     }
   };
 
@@ -173,8 +194,8 @@ export const TopVendors = () => {
                   </div>
                   <div className="text-center">
                     <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                      {vendor.rating || 'N/A'}
-                      {vendor.rating && <Star className="w-3.5 h-3.5 fill-primary text-primary" />}
+                      {vendor.rating && vendor.rating > 0 ? vendor.rating.toFixed(1) : 'N/A'}
+                      {vendor.rating && vendor.rating > 0 && <Star className="w-3.5 h-3.5 fill-primary text-primary" />}
                     </p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Rating

@@ -64,7 +64,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlog from "./pages/admin/AdminBlog";
-
+import BecomeAVendor from "./pages/BecomeAVendor";
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -124,6 +124,7 @@ const App = () => {
                       <Route path="/user-types" element={<Layout><UserTypeSelection /></Layout>} />
                       <Route path="/category/:category" element={<Layout><CategoryProducts /></Layout>} />
                       <Route path="/pilots" element={<Layout><Pilots /></Layout>} />
+                      <Route path="/become-a-vendor" element={<Layout><BecomeAVendor /></Layout>} />
                       <Route path="/pilot/:vendorId" element={<Layout><VendorProfile /></Layout>} />
                       <Route path="/vendor/:vendorId" element={<Layout><VendorProfile /></Layout>} />
                       <Route path="/dispatcher/:dispatchId" element={<Layout><DispatchProfile /></Layout>} />

@@ -199,7 +199,24 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
             >
               <Heart className={`w-5 h-5 ${inWishlist ? 'fill-destructive text-destructive' : ''}`} />
             </button>
-            <button className="p-2">
+            <button 
+              className="p-2"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: product.name,
+                    text: `Check out ${product.name} on Alphadom!`,
+                    url: window.location.href,
+                  }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast({
+                    title: "Link Copied",
+                    description: "Product link copied to clipboard!",
+                  });
+                }
+              }}
+            >
               <Share2 className="w-5 h-5" />
             </button>
           </div>
@@ -378,8 +395,8 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
         )}
       </div>
 
-      {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/50 px-4 py-3 safe-area-pb">
+      {/* Sticky Bottom Bar - positioned above bottom nav */}
+      <div className="fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border/50 px-4 py-3">
         <div className="flex gap-3">
           <Button
             onClick={handleAddToCart}

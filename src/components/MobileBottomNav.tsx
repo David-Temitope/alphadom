@@ -49,7 +49,7 @@ export const MobileBottomNav: React.FC = () => {
             >
               <div className="relative">
                 <item.icon className={cn("h-5 w-5", active && "stroke-[2.5px]")} />
-                {item.badge && item.badge > 0 && (
+                {typeof item.badge === 'number' && item.badge > 0 && (
                   <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                     {item.badge > 99 ? '99+' : item.badge}
                   </span>

@@ -363,17 +363,8 @@ const ProductDetail = () => {
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart
                 </Button>
-                <WishlistButton productId={product.id} size="lg" className="h-12 w-12" />
+                <WishlistButton productId={product.id} size="lg" className="h-12 px-6" />
               </div>
-
-              <Button
-                variant="outline"
-                className="w-full h-12"
-                onClick={handleAddToCart}
-                disabled={(product.stock_count || 0) <= 0}
-              >
-                Buy it Now
-              </Button>
             </div>
 
             {/* WhatsApp Chat Button */}

@@ -126,53 +126,56 @@ const AdminVendorMonitoring = () => {
       const vendor = vendors.find(v => v.id === vendorId);
       
       if (action === 'close' && vendor) {
-        // For closing shop: delete all products, remove vendor record, remove user_type, delete shop_application
+        // For closing shop: delete all related data completely
         
         // 1. Delete all products from this vendor
-        const { error: deleteProductsError } = await supabase
+        await supabase.from('products').delete().eq('vendor_id', vendorId);
+
+        // 2. Delete product ratings for vendor's products (already deleted, but clean up)
+        const { data: vendorProducts } = await supabase
           .from('products')
-          .delete()
+          .select('id')
           .eq('vendor_id', vendorId);
         
-        if (deleteProductsError) throw deleteProductsError;
+        if (vendorProducts && vendorProducts.length > 0) {
+          const productIds = vendorProducts.map(p => p.id);
+          await supabase.from('product_ratings').delete().in('product_id', productIds);
+          await supabase.from('product_comments').delete().in('product_id', productIds);
+          await supabase.from('product_likes').delete().in('product_id', productIds);
+        }
 
-        // 2. Remove the user's vendor user_type
+        // 3. Delete followers of this vendor
+        await supabase.from('user_follows').delete().eq('following_id', vendor.user_id);
+
+        // 4. Delete user likes for this vendor
+        await supabase.from('user_likes').delete().eq('liked_user_id', vendor.user_id);
+
+        // 5. Delete orders associated with this vendor
+        await supabase.from('orders').delete().eq('vendor_id', vendorId);
+
+        // 6. Delete delivery requests for this vendor
+        await supabase.from('delivery_requests').delete().eq('vendor_id', vendorId);
+
+        // 7. Remove the user's vendor user_type
         await supabase
           .from('user_types')
           .delete()
           .eq('user_id', vendor.user_id)
           .eq('user_type', 'vendor');
 
-        // 3. Log the action before deleting vendor
-        await supabase
-          .from('vendor_activity_logs')
-          .insert({
-            vendor_id: vendorId,
-            activity_type: 'shop_closed',
-            activity_details: { admin_notes: notes, action }
-          });
-
-        // 4. Get the application_id before deleting vendor
+        // 8. Get the application_id before deleting vendor
         const { data: vendorData } = await supabase
           .from('approved_vendors')
           .select('application_id')
           .eq('id', vendorId)
           .single();
 
-        // 5. Delete the approved_vendors record entirely
-        const { error: deleteVendorError } = await supabase
-          .from('approved_vendors')
-          .delete()
-          .eq('id', vendorId);
+        // 9. Delete the approved_vendors record entirely
+        await supabase.from('approved_vendors').delete().eq('id', vendorId);
 
-        if (deleteVendorError) throw deleteVendorError;
-
-        // 6. Delete the shop_application so user can reapply
+        // 10. Delete the shop_application so user can reapply
         if (vendorData?.application_id) {
-          await supabase
-            .from('shop_applications')
-            .delete()
-            .eq('id', vendorData.application_id);
+          await supabase.from('shop_applications').delete().eq('id', vendorData.application_id);
         }
 
       } else {
