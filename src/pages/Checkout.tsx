@@ -520,7 +520,7 @@ const Checkout: React.FC = () => {
 
                 <Button
                   onClick={handlePayNow}
-                  disabled={processing || grandTotals.total <= 0 || !paystackLoaded || !isShippingValid}
+                  disabled={processing || grandTotals.total <= 0 || !paystackLoaded || !isShippingValid || openAccordion !== "review"}
                   className="w-full mt-4 bg-primary hover:bg-primary/90"
                   size="lg"
                 >

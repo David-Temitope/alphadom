@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserTypes } from '@/hooks/useUserTypes';
 import { useShopApplications } from '@/hooks/useShopApplications';
+import { useAdminSettings } from '@/hooks/useAdminSettings';
 import { ArrowRight, CheckCircle, Shield, Truck, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
-// Default hero images for guests/fallback
+// Default hero images for fallback
 import heroDefault1 from '@/assets/hero-default-1.jpg';
 import heroDefault2 from '@/assets/hero-default-2.jpg';
 
@@ -17,8 +18,12 @@ export const Hero = () => {
   const { user } = useAuth();
   const { hasUserType } = useUserTypes();
   const { userApplication } = useShopApplications();
+  const { settings, loading: settingsLoading } = useAdminSettings();
 
-  const heroImages = DEFAULT_HERO_IMAGES;
+  // Use admin settings images if available, otherwise use defaults
+  const heroImages = settings.hero_images && settings.hero_images.length > 0 
+    ? settings.hero_images 
+    : DEFAULT_HERO_IMAGES;
 
   // Slide auto-advance effect
   useEffect(() => {
@@ -53,25 +58,25 @@ export const Hero = () => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm font-medium">
               <CheckCircle className="w-4 h-4" />
-              Genesis of Trustworthy Commerce
+              {settings.hero_secondary_text || "Genesis of Trustworthy Commerce"}
             </div>
 
-            {/* Hero Title */}
+            {/* Hero Title - Admin controlled */}
             <div className="space-y-2">
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                A Place Built
+                {settings.hero_title || "A Place Built"}
               </h1>
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                <span className="text-gradient">For Buyers &</span>
+                <span className="text-gradient">{settings.hero_main_text || "For Buyers &"}</span>
               </h1>
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
                 <span className="text-gradient">Sellers</span>
               </h1>
             </div>
 
-            {/* Subtitle */}
+            {/* Subtitle - Admin controlled */}
             <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-              Shop quality products or grow your business on a secure marketplace built for modern commerce. Simple, reliable, and powerful.
+              {settings.hero_subtitle || "Shop quality products or grow your business on a secure marketplace built for modern commerce. Simple, reliable, and powerful."}
             </p>
 
             {/* CTA Buttons */}
@@ -94,7 +99,7 @@ export const Hero = () => {
                   size="lg"
                   className="border-border hover:bg-secondary px-8 rounded-xl font-semibold"
                 >
-                  <Link to="/user-types">Become a Seller</Link>
+                  <Link to="/become-a-vendor">Become a Seller</Link>
                 </Button>
               ) : (
                 <Button
