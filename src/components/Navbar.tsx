@@ -8,6 +8,7 @@ import { UserMenu } from "./UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserTypes } from "@/hooks/useUserTypes";
 import { useShopApplications } from "@/hooks/useShopApplications";
+import { useVendors } from "@/hooks/useVendors";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useToast } from "@/hooks/use-toast";
@@ -57,9 +58,10 @@ export const Navbar = () => {
 
   const UserTypeNavLink = () => {
     const { userApplication } = useShopApplications();
+    const { currentVendor } = useVendors();
 
-    // If user is an approved vendor, show "My Shop" - takes priority over application status
-    if (hasUserType("vendor")) {
+    // If user is an approved vendor with subscription, show "My Shop" - takes highest priority
+    if (hasUserType("vendor") || currentVendor) {
       return (
         <Link
           to="/vendor-dashboard"
@@ -81,8 +83,8 @@ export const Navbar = () => {
           My Dashboard
         </Link>
       );
-    } else if (userApplication && userApplication.status !== 'approved') {
-      // Only show application status if not yet approved
+    } else if (userApplication && userApplication.status !== 'approved' && userApplication.status !== 'payment') {
+      // Only show application status if not yet approved and not in payment stage
       return (
         <Link
           to="/shop-application-status"
@@ -99,9 +101,10 @@ export const Navbar = () => {
 
   const UserTypeNavLinkMobile = () => {
     const { userApplication } = useShopApplications();
+    const { currentVendor } = useVendors();
 
-    // If user is an approved vendor, show "My Shop" - takes priority over application status
-    if (hasUserType("vendor")) {
+    // If user is an approved vendor with subscription, show "My Shop" - takes highest priority
+    if (hasUserType("vendor") || currentVendor) {
       return (
         <Link
           to="/vendor-dashboard"
@@ -125,8 +128,8 @@ export const Navbar = () => {
           My Dashboard
         </Link>
       );
-    } else if (userApplication && userApplication.status !== 'approved') {
-      // Only show application status if not yet approved
+    } else if (userApplication && userApplication.status !== 'approved' && userApplication.status !== 'payment') {
+      // Only show application status if not yet approved and not in payment stage
       return (
         <Link
           to="/shop-application-status"

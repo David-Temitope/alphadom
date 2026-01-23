@@ -34,10 +34,10 @@ export const Pilots = () => {
 
   const fetchVendors = async () => {
     try {
-      // Fetch approved vendors
+      // Fetch approved vendors with cover_image
       const { data: vendorsData, error: vendorsError } = await supabase
         .from('approved_vendors')
-        .select('id, user_id, store_name, product_category, subscription_plan, is_active, application_id')
+        .select('id, user_id, store_name, product_category, subscription_plan, is_active, application_id, cover_image')
         .eq('is_active', true)
         .eq('is_suspended', false)
         .order('created_at', { ascending: false });
@@ -103,6 +103,7 @@ export const Pilots = () => {
             rating: avgRating,
             business_address: businessAddress,
             avatar_url: profileData?.avatar_url || null,
+            cover_image: vendor.cover_image || null,
           };
         })
       );
@@ -231,16 +232,25 @@ export const Pilots = () => {
                   key={vendor.id}
                   className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
                 >
-                  <CardContent className="p-0">
-                    {/* Header with gradient */}
-                    <div className="h-24 bg-gradient-to-br from-primary/20 to-primary/5 relative">
-                      <Badge 
-                        className={`absolute top-3 right-3 ${planBadge.className}`}
-                        variant={planBadge.variant}
-                      >
-                        {planBadge.label}
-                      </Badge>
-                    </div>
+                    <CardContent className="p-0">
+                      {/* Header with gradient or cover image */}
+                      <div className="h-24 relative overflow-hidden">
+                        {vendor.cover_image ? (
+                          <img 
+                            src={vendor.cover_image} 
+                            alt={`${vendor.store_name} cover`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-full bg-gradient-to-br from-primary/20 to-primary/5" />
+                        )}
+                        <Badge 
+                          className={`absolute top-3 right-3 ${planBadge.className}`}
+                          variant={planBadge.variant}
+                        >
+                          {planBadge.label}
+                        </Badge>
+                      </div>
                     
                     {/* Store Logo */}
                     <div className="px-6 -mt-10 relative z-10">

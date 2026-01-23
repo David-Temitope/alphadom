@@ -29,6 +29,10 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
   }, [currentImages]);
 
   const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Prevent any form interactions during upload
+    event.preventDefault();
+    event.stopPropagation();
+    
     try {
       setUploading(true);
       
@@ -44,8 +48,6 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
       }
       
       // Check current total size + new file
-      // Note: We can't get exact size of already uploaded images, so we validate per-file
-      const maxSingleFileMB = maxTotalSizeMB / maxImages; // Distribute limit
       if (file.size > maxTotalSizeMB * 1024 * 1024) {
         throw new Error(`Image size must be less than ${maxTotalSizeMB}MB`);
       }
@@ -82,9 +84,6 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         title: "Success",
         description: `Image ${newImages.length} of ${maxImages} uploaded!`,
       });
-
-      // Reset file input
-      event.target.value = '';
     } catch (error) {
       console.error('Image upload error:', error);
       toast({
@@ -94,6 +93,10 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
       });
     } finally {
       setUploading(false);
+      // Reset file input after everything is done
+      if (event.target) {
+        event.target.value = '';
+      }
     }
   };
 
@@ -143,7 +146,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         
         {/* Upload Button */}
         {images.length < maxImages && (
-          <div className="relative aspect-square">
+          <div className="relative aspect-square" onClick={(e) => e.stopPropagation()}>
             <div className="border-2 border-dashed border-border hover:border-primary rounded-xl h-full flex flex-col items-center justify-center bg-muted/50 hover:bg-muted transition-all duration-200 cursor-pointer group">
               <div className="flex flex-col items-center space-y-2 p-2">
                 <div className="p-2 rounded-full bg-muted group-hover:bg-primary/10 transition-colors duration-200">
@@ -158,6 +161,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
               type="file"
               accept="image/*"
               onChange={uploadImage}
+              onClick={(e) => e.stopPropagation()}
               disabled={uploading}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
