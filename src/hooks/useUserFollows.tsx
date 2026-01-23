@@ -85,8 +85,8 @@ export const useUserFollows = () => {
     } catch (error: any) {
       console.error('Error toggling follow:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to update follow status",
+        title: "Couldn't Follow",
+        description: "Unable to follow this vendor. Please try again later.",
         variant: "destructive",
       });
     }

@@ -15,12 +15,14 @@ interface Vendor {
   store_name: string;
   product_category: string;
   store_logo?: string;
+  cover_image?: string;
   subscription_plan?: string;
   is_active: boolean;
   products_count: number;
   followers_count: number;
   rating: number;
   business_address?: string;
+  avatar_url?: string;
 }
 
 export const Pilots = () => {
@@ -68,6 +70,13 @@ export const Pilots = () => {
             businessAddress = appData?.business_address || '';
           }
 
+          // Get avatar from profiles table
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('avatar_url')
+            .eq('id', vendor.user_id)
+            .single();
+
           // Calculate average rating from product_ratings
           const { data: vendorProducts } = await supabase
             .from('products')
@@ -93,6 +102,7 @@ export const Pilots = () => {
             followers_count: followersCount || 0,
             rating: avgRating,
             business_address: businessAddress,
+            avatar_url: profileData?.avatar_url || null,
           };
         })
       );
@@ -235,7 +245,13 @@ export const Pilots = () => {
                     {/* Store Logo */}
                     <div className="px-6 -mt-10 relative z-10">
                       <div className="w-20 h-20 rounded-2xl bg-card border-4 border-background flex items-center justify-center overflow-hidden shadow-md">
-                        {vendor.store_logo ? (
+                        {vendor.avatar_url ? (
+                          <img
+                            src={vendor.avatar_url}
+                            alt={vendor.store_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : vendor.store_logo ? (
                           <img
                             src={vendor.store_logo}
                             alt={vendor.store_name}
@@ -278,7 +294,7 @@ export const Pilots = () => {
                       <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-border/50">
                         <div className="text-center">
                           <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                            {vendor.rating > 0 ? vendor.rating.toFixed(1) : 'N/A'}
+                            {vendor.rating > 0 ? vendor.rating.toFixed(1) : 'New'}
                             {vendor.rating > 0 && <Star className="w-3 h-3 fill-primary text-primary" />}
                           </p>
                           <p className="text-[10px] text-muted-foreground uppercase">Rating</p>
