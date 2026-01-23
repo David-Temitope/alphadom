@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,31 +43,61 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
   const { currentVendor } = useVendors();
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    price: '',
-    category: '',
-    product_type: '',
-    gender: '',
-    colors: [] as string[],
-    sizes: [] as string[],
-    material: '',
-    thickness: '',
-    tags: '',
-    stock_count: '',
-    sustainability_score: '',
-    eco_features: [] as string[],
-    discount_percentage: 0,
-    original_price: 0,
-    image: '',
-    images: [] as string[],
-    description: '',
-    full_description: '',
-    shipping_fee: '',
-    shipping_fee_2km_5km: '',
-    shipping_fee_over_5km: '',
-    shipping_type: 'one_time' as 'one_time' | 'per_product',
-  });
+  
+  const FORM_STORAGE_KEY = `vendor_product_form_${user?.id || 'guest'}`;
+
+  // Initialize state from localStorage or defaults
+  const getInitialFormState = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(FORM_STORAGE_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          localStorage.removeItem(FORM_STORAGE_KEY);
+        }
+      }
+    }
+    return {
+      name: '',
+      price: '',
+      category: '',
+      product_type: '',
+      gender: '',
+      colors: [] as string[],
+      sizes: [] as string[],
+      material: '',
+      thickness: '',
+      tags: '',
+      stock_count: '',
+      sustainability_score: '',
+      eco_features: [] as string[],
+      discount_percentage: 0,
+      original_price: 0,
+      image: '',
+      images: [] as string[],
+      description: '',
+      full_description: '',
+      shipping_fee: '',
+      shipping_fee_2km_5km: '',
+      shipping_fee_over_5km: '',
+      shipping_type: 'one_time' as 'one_time' | 'per_product',
+    };
+  };
+
+  const [newProduct, setNewProduct] = useState(getInitialFormState);
+
+  // Save to localStorage whenever form changes
+  useEffect(() => {
+    if (user?.id) {
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(newProduct));
+    }
+  }, [newProduct, user?.id, FORM_STORAGE_KEY]);
+
+  // Clear form from localStorage after successful submission
+  const clearFormStorage = () => {
+    localStorage.removeItem(FORM_STORAGE_KEY);
+  };
 
   const productTypes = newProduct.category ? PRODUCT_TYPES[newProduct.category as keyof typeof PRODUCT_TYPES] || [] : [];
 
@@ -155,6 +185,8 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
         description: "Product added successfully!",
       });
 
+      // Clear localStorage and reset form
+      clearFormStorage();
       setNewProduct({
         name: '',
         price: '',

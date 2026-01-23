@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,8 @@ import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { ProductComments } from '@/components/ProductComments';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { MobileProductDetail } from '@/components/MobileProductDetail';
+import { StarRating } from '@/components/StarRating';
+import { useProductRatings } from '@/hooks/useProductRatings';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductDetailSkeleton } from '@/components/skeletons/PageSkeletons';
@@ -46,7 +48,9 @@ const ProductDetail = () => {
   const [vendorUserId, setVendorUserId] = useState<string>('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState('description');
   const isMobile = useIsMobile();
+  const { stats: ratingStats, rateProduct } = useProductRatings(id || '');
 
   const product = products?.find(p => p.id === id);
   const similarProducts = product
@@ -354,16 +358,33 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3">
                 <Button
                   onClick={handleAddToCart}
                   disabled={(product.stock_count || 0) <= 0}
-                  className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart
                 </Button>
-                <WishlistButton productId={product.id} size="lg" className="h-12 px-6" />
+                <WishlistButton productId={product.id} size="lg" className="w-full h-12" />
+              </div>
+
+              {/* Star Rating for Users */}
+              <div className="p-4 bg-muted/50 rounded-xl border">
+                <p className="text-sm font-medium mb-3">Rate this product</p>
+                <StarRating
+                  rating={product.rating || 0}
+                  userRating={ratingStats.userRating}
+                  interactive={!!user}
+                  onRate={(stars) => rateProduct(stars)}
+                  size="lg"
+                />
+                {!user && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    <Link to="/auth" className="text-primary hover:underline">Sign in</Link> to rate this product
+                  </p>
+                )}
               </div>
             </div>
 
@@ -393,7 +414,7 @@ const ProductDetail = () => {
         </div>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="description" className="mb-12">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-12">
           <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0 gap-8">
             <TabsTrigger
               value="description"
@@ -471,7 +492,11 @@ const ProductDetail = () => {
                   ))}
                 </div>
 
-                <Button variant="outline" className="w-full mt-4 border-primary text-primary hover:bg-primary/5">
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4 border-primary text-primary hover:bg-primary/5"
+                  onClick={() => setActiveTab('reviews')}
+                >
                   Write a Review
                 </Button>
               </Card>

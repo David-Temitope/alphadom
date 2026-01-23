@@ -15,6 +15,7 @@ interface Vendor {
   followers_count?: number;
   rating?: number;
   products_count?: number;
+  avatar_url?: string;
 }
 
 export const TopVendors = () => {
@@ -49,6 +50,13 @@ export const TopVendors = () => {
               .select('*', { count: 'exact', head: true })
               .eq('following_id', vendor.user_id);
 
+            // Get avatar from profiles table
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('avatar_url')
+              .eq('id', vendor.user_id)
+              .single();
+
             // Calculate average rating from product_ratings for vendor's products
             const { data: vendorProducts } = await supabase
               .from('products')
@@ -73,6 +81,7 @@ export const TopVendors = () => {
               products_count: productsCount || 0,
               followers_count: followersCount || 0,
               rating: avgRating,
+              avatar_url: profileData?.avatar_url || null,
             };
           })
         );
@@ -153,7 +162,13 @@ export const TopVendors = () => {
                 <div className="flex items-start gap-4">
                   {/* Logo */}
                   <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {vendor.store_logo ? (
+                    {vendor.avatar_url ? (
+                      <img
+                        src={vendor.avatar_url}
+                        alt={vendor.store_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : vendor.store_logo ? (
                       <img
                         src={vendor.store_logo}
                         alt={vendor.store_name}
@@ -194,7 +209,7 @@ export const TopVendors = () => {
                   </div>
                   <div className="text-center">
                     <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                      {vendor.rating && vendor.rating > 0 ? vendor.rating.toFixed(1) : 'N/A'}
+                      {vendor.rating && vendor.rating > 0 ? vendor.rating.toFixed(1) : 'New'}
                       {vendor.rating && vendor.rating > 0 && <Star className="w-3.5 h-3.5 fill-primary text-primary" />}
                     </p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">

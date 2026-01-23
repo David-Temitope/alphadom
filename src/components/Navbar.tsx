@@ -58,6 +58,7 @@ export const Navbar = () => {
   const UserTypeNavLink = () => {
     const { userApplication } = useShopApplications();
 
+    // If user is an approved vendor, show "My Shop" - takes priority over application status
     if (hasUserType("vendor")) {
       return (
         <Link
@@ -80,7 +81,8 @@ export const Navbar = () => {
           My Dashboard
         </Link>
       );
-    } else if (userApplication) {
+    } else if (userApplication && userApplication.status !== 'approved') {
+      // Only show application status if not yet approved
       return (
         <Link
           to="/shop-application-status"
@@ -98,6 +100,7 @@ export const Navbar = () => {
   const UserTypeNavLinkMobile = () => {
     const { userApplication } = useShopApplications();
 
+    // If user is an approved vendor, show "My Shop" - takes priority over application status
     if (hasUserType("vendor")) {
       return (
         <Link
@@ -122,7 +125,8 @@ export const Navbar = () => {
           My Dashboard
         </Link>
       );
-    } else if (userApplication) {
+    } else if (userApplication && userApplication.status !== 'approved') {
+      // Only show application status if not yet approved
       return (
         <Link
           to="/shop-application-status"
