@@ -128,8 +128,10 @@ export const MobileHomepage: React.FC = () => {
                 alt={`Hero ${currentSlide + 1}`}
                 className="w-full h-full object-cover"
               />
-              {/* Overlay with text */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              {/* Dark overlay for better text readability */}
+              <div className="absolute inset-0 bg-black/40" />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs font-medium mb-2">
                   {settings.hero_title || 'LIMITED OFFER'}

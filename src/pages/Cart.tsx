@@ -41,17 +41,34 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState('');
   const isMobile = useIsMobile();
 
-  // Create vendor lookup map
+  // Create vendor lookup map using both id and user_id for matching
   const vendorLookup = useMemo(() => {
     const map = new Map<string, string>();
-    vendors.forEach(v => map.set(v.id, v.store_name));
+    vendors.forEach(v => {
+      map.set(v.id, v.store_name);
+      map.set(v.user_id, v.store_name);
+    });
     return map;
   }, [vendors]);
 
-  // Find vendor name for an item
-  const getVendorName = (vendorId: string | null | undefined) => {
-    if (!vendorId) return 'Alphadom';
-    return vendorLookup.get(vendorId) || 'Vendor';
+  // Find vendor name for an item - check vendor_id first, then look up in products
+  const getVendorName = (vendorId: string | null | undefined, productId?: string) => {
+    if (vendorId && vendorLookup.has(vendorId)) {
+      return vendorLookup.get(vendorId) || 'Vendor';
+    }
+    
+    // Try to find from product's vendor_id in products array
+    if (productId) {
+      const product = products.find(p => p.id === productId);
+      if (product?.vendor_id && vendorLookup.has(product.vendor_id)) {
+        return vendorLookup.get(product.vendor_id) || 'Vendor';
+      }
+    }
+    
+    // No vendor found means it's a platform product
+    if (!vendorId) return 'Alphadom Store';
+    
+    return 'Vendor';
   };
 
   // Get frequently bought together products (random products from different categories)
@@ -162,7 +179,7 @@ const Cart = () => {
                             </h3>
                           </Link>
                           <p className="text-sm text-muted-foreground">
-                            Sold by: <span className="text-primary">{getVendorName(item.vendor_id)}</span>
+                            Sold by: <span className="text-primary">{getVendorName(item.vendor_id, item.id)}</span>
                           </p>
                           <p className="text-lg font-bold text-foreground mt-1">
                             ₦{item.price.toLocaleString()}

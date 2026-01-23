@@ -342,8 +342,8 @@ const Checkout: React.FC = () => {
                     <div className="grid gap-3">
                       {[
                         { value: 'on_campus', label: 'On-Campus Pickup', description: 'Free - Pick up at vendor location', price: 'FREE' },
-                        { value: '2km_5km', label: 'Zone 1 - Local (0-5km)', description: 'Same city or nearby area', price: 'Varies' },
-                        { value: 'over_5km', label: 'Zone 2 - Regional (5km+)', description: 'Different city or distant location', price: 'Varies' },
+                        { value: '2km_5km', label: 'Zone 1 - Local (Same City/State)', description: 'Buyer is in the same city or state as vendor', price: 'Varies' },
+                        { value: 'over_5km', label: 'Zone 2 - Regional (Neighboring States)', description: 'Buyer is in a neighboring state', price: 'Varies' },
                       ].map((zone) => (
                         <button
                           key={zone.value}

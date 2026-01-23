@@ -292,6 +292,7 @@ export type Database = {
         Row: {
           application_id: string
           commission_rate: number | null
+          cover_image: string | null
           created_at: string
           free_ads_remaining: number | null
           gift_commission_rate: number | null
@@ -321,6 +322,7 @@ export type Database = {
         Insert: {
           application_id: string
           commission_rate?: number | null
+          cover_image?: string | null
           created_at?: string
           free_ads_remaining?: number | null
           gift_commission_rate?: number | null
@@ -350,6 +352,7 @@ export type Database = {
         Update: {
           application_id?: string
           commission_rate?: number | null
+          cover_image?: string | null
           created_at?: string
           free_ads_remaining?: number | null
           gift_commission_rate?: number | null

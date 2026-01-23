@@ -62,7 +62,9 @@ const VendorDashboard = () => {
   const isMobile = useIsMobile();
   const vendorProducts = products.filter((p) => p.vendor_user_id === user?.id);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [coverImage, setCoverImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -123,18 +125,59 @@ const VendorDashboard = () => {
     }
   };
 
-  // Fetch current profile image on mount
-  React.useEffect(() => {
-    const fetchProfileImage = async () => {
-      if (!user) return;
-      const { data } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).single();
+  const handleCoverImageUpload = async (imageUrl: string) => {
+    if (!currentVendor) return;
 
-      if (data?.avatar_url) {
-        setProfileImage(data.avatar_url);
+    setUploadingCover(true);
+    try {
+      const { error } = await supabase
+        .from("approved_vendors")
+        .update({ cover_image: imageUrl })
+        .eq("id", currentVendor.id);
+
+      if (error) throw error;
+
+      setCoverImage(imageUrl);
+      toast({
+        title: "Success",
+        description: "Cover image updated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update cover image",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  // Fetch current profile image and cover image on mount
+  React.useEffect(() => {
+    const fetchImages = async () => {
+      if (!user) return;
+      
+      // Fetch profile image
+      const { data: profileData } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).single();
+      if (profileData?.avatar_url) {
+        setProfileImage(profileData.avatar_url);
+      }
+      
+      // Fetch cover image from vendor
+      if (currentVendor?.id) {
+        const { data: vendorData } = await supabase
+          .from("approved_vendors")
+          .select("cover_image")
+          .eq("id", currentVendor.id)
+          .single();
+        if (vendorData?.cover_image) {
+          setCoverImage(vendorData.cover_image);
+        }
       }
     };
-    fetchProfileImage();
-  }, [user]);
+    fetchImages();
+  }, [user, currentVendor?.id]);
 
   if (!user) {
     return (
@@ -814,6 +857,34 @@ const VendorDashboard = () => {
           {/* Store Settings Tab */}
           {activeTab === "settings" && (
             <div className="space-y-6">
+              {/* Cover Image Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Store Cover Image</CardTitle>
+                  <CardDescription>This banner image appears on your store page in the vendor directory</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="relative w-full h-48 rounded-xl bg-muted overflow-hidden border-2 border-dashed border-border">
+                    {coverImage ? (
+                      <img src={coverImage} alt="Store cover" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="text-center">
+                          <Camera className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">No cover image uploaded</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="max-w-sm">
+                    <Label className="mb-2 block">Upload Cover Image (Recommended: 1200x300)</Label>
+                    <ImageUpload onImageUploaded={handleCoverImageUpload} />
+                    {uploadingCover && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Profile Section */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
