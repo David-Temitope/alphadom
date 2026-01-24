@@ -19,7 +19,7 @@ export type ShippingInfo = {
   zipCode: string;
   country: string;
   phone: string;
-  deliveryMethod?: 'on_campus' | '2km_5km' | 'over_5km';
+  deliveryMethod?: 'zone1' | 'zone2' | 'zone3';
 };
 
 export type PaymentMethod = "bank_transfer" | "paystack";
@@ -52,9 +52,9 @@ export type CartItemWithVendor = {
   quantity: number;
   image: string;
   vendor_id: string | null;
-  shipping_fee: number;
-  shipping_fee_2km_5km?: number;
-  shipping_fee_over_5km?: number;
+  shipping_fee: number; // Zone 1 - Local (Same City/State)
+  shipping_fee_2km_5km?: number; // Zone 2 - Regional (Neighboring States)
+  shipping_fee_over_5km?: number; // Zone 3 - National (Far Away)
   shipping_type: "one_time" | "per_product";
 };
 
@@ -66,25 +66,28 @@ export type CheckoutSession = {
   created_at: Date;
 };
 
-// Calculate shipping for a group of items based on delivery method
+// Calculate shipping for a group of items based on delivery zone
+// Zone 1 - Local (Same City/State as vendor) - uses shipping_fee
+// Zone 2 - Regional (Neighboring States) - uses shipping_fee_2km_5km
+// Zone 3 - National (Far Away) - uses shipping_fee_over_5km
 export const calculateGroupShipping = (
   items: CartItemWithVendor[], 
-  deliveryMethod: 'on_campus' | '2km_5km' | 'over_5km' = 'on_campus'
+  deliveryMethod: 'zone1' | 'zone2' | 'zone3' = 'zone1'
 ): number => {
-  // On-campus pickup is FREE
-  if (deliveryMethod === 'on_campus') {
-    return 0;
-  }
-
   let totalShipping = 0;
   const oneTimeShippingApplied = new Set<string>();
 
   for (const item of items) {
-    // Get the appropriate shipping fee based on delivery method
+    // Get the appropriate shipping fee based on delivery zone
     let shippingFee = 0;
-    if (deliveryMethod === '2km_5km') {
+    if (deliveryMethod === 'zone1') {
+      // Zone 1 - Local (Same City/State)
+      shippingFee = Number(item.shipping_fee) || 0;
+    } else if (deliveryMethod === 'zone2') {
+      // Zone 2 - Regional (Neighboring States)
       shippingFee = Number(item.shipping_fee_2km_5km) || Number(item.shipping_fee) || 0;
-    } else if (deliveryMethod === 'over_5km') {
+    } else if (deliveryMethod === 'zone3') {
+      // Zone 3 - National (Far Away)
       shippingFee = Number(item.shipping_fee_over_5km) || Number(item.shipping_fee) || 0;
     }
     

@@ -64,7 +64,7 @@ const Checkout: React.FC = () => {
     zipCode: "",
     country: "NG",
     phone: "",
-    deliveryMethod: "on_campus",
+    deliveryMethod: "zone1",
     firstName: "",
     lastName: "",
   });
@@ -417,20 +417,20 @@ const Checkout: React.FC = () => {
                   <div className="mt-6">
                     <Label className="text-base font-semibold">Delivery Zone</Label>
                     <p className="text-sm text-muted-foreground mb-3">
-                      Select your delivery zone based on your distance from the vendor(s)
+                      Select the zone that best describes your location relative to the vendor
                     </p>
                     <div className="grid gap-3">
                       {[
-                        { value: 'on_campus', label: 'On-Campus Pickup', description: 'Free - Pick up at vendor location', price: 'FREE' },
-                        { value: '2km_5km', label: 'Zone 1 - Local (Same City/State)', description: 'Buyer is in the same city or state as vendor', price: 'Varies' },
-                        { value: 'over_5km', label: 'Zone 2 - Regional (Neighboring States)', description: 'Buyer is in a neighboring state', price: 'Varies' },
+                        { value: 'zone1', label: 'Zone 1 - Local (Same City/State)', description: 'You are in the same city or state as the vendor' },
+                        { value: 'zone2', label: 'Zone 2 - Regional (Neighboring States)', description: 'You are in a neighboring state close to the vendor' },
+                        { value: 'zone3', label: 'Zone 3 - National (Far Away)', description: 'You are far away from the vendor (different region)' },
                       ].map((zone) => (
                         <button
                           key={zone.value}
                           type="button"
                           onClick={() => setShippingInfo(prev => ({ 
                             ...prev, 
-                            deliveryMethod: zone.value as 'on_campus' | '2km_5km' | 'over_5km' 
+                            deliveryMethod: zone.value as 'zone1' | 'zone2' | 'zone3' 
                           }))}
                           disabled={processing}
                           className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
@@ -443,8 +443,9 @@ const Checkout: React.FC = () => {
                             <p className="font-medium">{zone.label}</p>
                             <p className="text-sm text-muted-foreground">{zone.description}</p>
                           </div>
-                          <Badge variant={zone.value === 'on_campus' ? 'default' : 'secondary'}>
-                            {zone.price}
+                          <Badge variant="secondary">
+                            <Truck className="h-3 w-3 mr-1" />
+                            Shipping applies
                           </Badge>
                         </button>
                       ))}
