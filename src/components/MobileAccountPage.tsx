@@ -186,9 +186,9 @@ export const MobileAccountPage: React.FC = () => {
     },
     { 
       icon: Truck, 
-      label: 'Shipping Addresses', 
+      label: 'Address Book', 
       description: 'Manage delivery locations',
-      href: '/settings' 
+      href: '/address-book' 
     },
   ];
 

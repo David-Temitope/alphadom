@@ -109,7 +109,7 @@ const UserDashboard = () => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
     { id: 'orders', label: 'My Orders', icon: ShoppingBag, href: '/orders' },
     { id: 'wishlist', label: 'Wishlist', icon: Heart, href: '/wishlist' },
-    { id: 'address', label: 'Address Book', icon: MapPin, href: '/dashboard' },
+    { id: 'address', label: 'Address Book', icon: MapPin, href: '/address-book' },
     { id: 'payment', label: 'Payment Methods', icon: CreditCard, href: '/dashboard' },
   ];
 

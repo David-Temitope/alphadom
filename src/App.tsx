@@ -65,6 +65,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlog from "./pages/admin/AdminBlog";
 import BecomeAVendor from "./pages/BecomeAVendor";
+import AddressBook from "./pages/AddressBook";
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -132,6 +133,7 @@ const App = () => {
                       <Route path="/dispatch-selection/:orderId" element={<Layout><DispatchSelection /></Layout>} />
                       <Route path="/settings" element={<Layout><UserSettings /></Layout>} />
                       <Route path="/dashboard" element={<Layout><UserDashboard /></Layout>} />
+                      <Route path="/address-book" element={<Layout><AddressBook /></Layout>} />
                       <Route path="/sitemap" element={<Sitemap />} />
                       <Route path="/blog" element={<Layout><Blog /></Layout>} />
                       <Route path="/blog/:id" element={<Layout><BlogPost /></Layout>} />

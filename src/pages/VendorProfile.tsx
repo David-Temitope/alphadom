@@ -239,7 +239,7 @@ export const VendorProfile = () => {
             </div>
           </div>
 
-          {/* Mobile Action Buttons */}
+          {/* Mobile Action Buttons - Compact */}
           <div className="flex md:hidden gap-2 mt-4">
             {user && user.id !== vendor.user_id ? (
               <>
@@ -250,9 +250,9 @@ export const VendorProfile = () => {
                   size="sm"
                 >
                   {isUserFollowing ? (
-                    <><UserMinus className="w-4 h-4 mr-2" /> Unfollow</>
+                    <><UserMinus className="w-4 h-4 mr-1" /> Unfollow</>
                   ) : (
-                    <><UserPlus className="w-4 h-4 mr-2" /> Follow</>
+                    <><UserPlus className="w-4 h-4 mr-1" /> Follow</>
                   )}
                 </Button>
                 {vendor.contact_phone && (
@@ -260,6 +260,7 @@ export const VendorProfile = () => {
                     phoneNumber={vendor.contact_phone}
                     variant="vendor"
                     className="rounded-xl"
+                    iconOnly
                   />
                 )}
               </>
@@ -271,15 +272,15 @@ export const VendorProfile = () => {
                 size="sm"
               >
                 <Link to="/auth">
-                  <UserPlus className="w-4 h-4 mr-2" /> Follow
+                  <UserPlus className="w-4 h-4 mr-1" /> Follow
                 </Link>
               </Button>
             ) : null}
             <Button
               onClick={handleShare}
               variant="outline"
-              size="sm"
-              className="rounded-xl"
+              size="icon"
+              className="rounded-xl h-9 w-9"
             >
               <Share2 className="w-4 h-4" />
             </Button>

@@ -1356,6 +1356,57 @@ export type Database = {
         }
         Relationships: []
       }
+      user_addresses: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          first_name: string
+          id: string
+          is_default: boolean
+          label: string
+          last_name: string
+          phone: string
+          postal_code: string | null
+          state: string | null
+          street: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string
+          first_name: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          last_name: string
+          phone: string
+          postal_code?: string | null
+          state?: string | null
+          street: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          first_name?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          last_name?: string
+          phone?: string
+          postal_code?: string | null
+          state?: string | null
+          street?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_follows: {
         Row: {
           created_at: string

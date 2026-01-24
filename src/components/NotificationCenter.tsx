@@ -1,5 +1,6 @@
 import React from 'react';
-import { Bell, Check, CheckCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,8 +12,45 @@ import {
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 
+// Map notification types to their redirect paths
+const getNotificationPath = (type: string, relatedId?: string): string | null => {
+  if (!relatedId) return null;
+  
+  switch (type) {
+    case 'blog_post':
+      return `/blog/${relatedId}`;
+    case 'new_product':
+    case 'product':
+      return `/products/${relatedId}`;
+    case 'order':
+    case 'order_update':
+      return '/orders';
+    case 'follow':
+    case 'vendor_follow':
+      return `/vendor/${relatedId}`;
+    case 'stock_alert':
+      return `/products/${relatedId}`;
+    default:
+      return null;
+  }
+};
+
 export const NotificationCenter = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const navigate = useNavigate();
+
+  const handleNotificationClick = (notification: any) => {
+    // Mark as read first
+    if (!notification.is_read) {
+      markAsRead(notification.id);
+    }
+    
+    // Navigate to the relevant page
+    const path = getNotificationPath(notification.type, notification.related_id);
+    if (path) {
+      navigate(path);
+    }
+  };
 
   return (
     <Popover>
@@ -58,9 +96,9 @@ export const NotificationCenter = () => {
                 <div
                   key={notification.id}
                   className={`p-3 hover:bg-accent cursor-pointer border-b last:border-b-0 ${
-                    !notification.is_read ? 'bg-blue-50' : ''
+                    !notification.is_read ? 'bg-primary/5' : ''
                   }`}
-                  onClick={() => !notification.is_read && markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
@@ -73,7 +111,7 @@ export const NotificationCenter = () => {
                       </p>
                     </div>
                     {!notification.is_read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1" />
+                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1" />
                     )}
                   </div>
                 </div>
