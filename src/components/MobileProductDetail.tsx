@@ -191,7 +191,6 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
           <button onClick={() => navigate(-1)} className="p-2 -ml-2">
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="font-semibold text-sm">ALPHADOM</span>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => toggleWishlist(product.id)}
@@ -251,8 +250,13 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
 
       {/* Product Info */}
       <div className="px-4 py-5 space-y-5">
-        {/* Verified Vendor */}
-        {vendorName && (
+        {/* Verified Vendor - Clickable */}
+        {vendorName && product.vendor_user_id && (
+          <Link to={`/vendor/${product.vendor_user_id}`} className="text-xs text-muted-foreground inline-block">
+            Sold by <span className="text-primary font-medium hover:underline">{vendorName}</span>
+          </Link>
+        )}
+        {vendorName && !product.vendor_user_id && (
           <p className="text-xs text-muted-foreground">
             Sold by <span className="text-primary font-medium">{vendorName}</span>
           </p>

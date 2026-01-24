@@ -173,19 +173,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
           
-          {/* Product name with badges */}
+          {/* Product name with badges
+              Badge Logic:
+              - Gold (amber-500): First Class subscription vendors
+              - Blue (sky-500): Economy subscription vendors  
+              - Green (primary): Registered business (has TIN) on Free plan
+          */}
           <h3 className="font-medium text-sm mb-3 line-clamp-2 group-hover:text-primary transition-colors leading-snug flex items-start gap-1">
             <span className="flex-1">{product.name}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0 mt-0.5">
-              {product.vendor_subscription_plan === 'first_class' && (
+              {product.vendor_subscription_plan === 'first_class' ? (
                 <BadgeCheck className="w-4 h-4 text-amber-500" />
-              )}
-              {product.vendor_subscription_plan === 'economy' && (
+              ) : product.vendor_subscription_plan === 'economy' ? (
                 <BadgeCheck className="w-4 h-4 text-sky-500" />
-              )}
-              {product.vendor_is_registered && product.vendor_subscription_plan === 'free' && (
+              ) : product.vendor_is_registered ? (
                 <BadgeCheck className="w-4 h-4 text-primary" />
-              )}
+              ) : null}
             </span>
           </h3>
           

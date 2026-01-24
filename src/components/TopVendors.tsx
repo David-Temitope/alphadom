@@ -209,8 +209,14 @@ export const TopVendors = () => {
                   </div>
                   <div className="text-center">
                     <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                      {vendor.rating && vendor.rating > 0 ? vendor.rating.toFixed(1) : 'New'}
-                      {vendor.rating && vendor.rating > 0 && <Star className="w-3.5 h-3.5 fill-primary text-primary" />}
+                      {vendor.rating && vendor.rating > 0 ? (
+                        <>
+                          {vendor.rating.toFixed(1)}
+                          <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                        </>
+                      ) : (
+                        'New'
+                      )}
                     </p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Rating
