@@ -563,8 +563,8 @@ export const useMultiVendorCheckout = () => {
     return vendorGroups.filter((g) => g.payment_status === "pending");
   }, [vendorGroups]);
 
-  // Recalculate shipping based on delivery method
-  const recalculateWithDeliveryMethod = useCallback((deliveryMethod: "on_campus" | "2km_5km" | "over_5km") => {
+  // Recalculate shipping based on delivery zone
+  const recalculateWithDeliveryMethod = useCallback((deliveryMethod: "zone1" | "zone2" | "zone3") => {
     setVendorGroups((prev) =>
       prev.map((group) => {
         const shipping = calculateGroupShipping(group.items, deliveryMethod);
