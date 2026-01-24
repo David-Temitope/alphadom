@@ -58,7 +58,7 @@ export const Hero = () => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm font-medium">
               <CheckCircle className="w-4 h-4" />
-              {settings.hero_secondary_text || "Genesis of Trustworthy Commerce"}
+              {settings.hero_subtitle || "Genesis of Trustworthy Commerce"}
             </div>
 
             {/* Hero Title - Admin controlled */}
@@ -71,9 +71,9 @@ export const Hero = () => {
               </h1>
             </div>
 
-            {/* Subtitle - Admin controlled */}
+            {/* Secondary Text - Admin controlled */}
             <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-              {settings.hero_subtitle}
+              {settings.hero_secondary_text}
             </p>
 
             {/* CTA Buttons */}
