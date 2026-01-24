@@ -134,10 +134,10 @@ export const MobileHomepage: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs font-medium mb-2">
-                  {settings.hero_title || 'LIMITED OFFER'}
+                  {settings.hero_subtitle || 'LIMITED OFFER'}
                 </Badge>
                 <h2 className="text-xl font-bold leading-tight mb-1">
-                  {settings.hero_main_text || 'Shop Now'}
+                  {settings.hero_title} {settings.hero_main_text}
                 </h2>
                 <p className="text-white/90 text-sm mb-3">
                   {settings.hero_secondary_text || 'Discover great deals'}
