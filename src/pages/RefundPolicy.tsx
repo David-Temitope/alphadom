@@ -1,7 +1,14 @@
+import Head from 'next/head'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const RefundPolicy = () => {
   return (
+    <>
+    <Head>
+        <title>Refund Policy</title>
+        <meta name="robots" content="noindex, follow" />
+    </Head>
+
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Card>
         <CardHeader>
@@ -73,6 +80,7 @@ const RefundPolicy = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 

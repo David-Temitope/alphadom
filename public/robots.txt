@@ -1,33 +1,19 @@
 # Alphadom Robots.txt
 # https://alphadom.online
 
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
 
-# Disallow private/admin pages
+# Private / transactional pages
 Disallow: /cart
 Disallow: /checkout
 Disallow: /auth
-Disallow: /appleisgood
-Disallow: /appleisgood/*
 Disallow: /admin-login
 Disallow: /user-settings
 Disallow: /orders
 Disallow: /wishlist
+
+# Vendor & dispatcher dashboards
 Disallow: /vendor-dashboard
 Disallow: /vendor-orders
 Disallow: /vendor-profile
@@ -37,10 +23,10 @@ Disallow: /dispatch-selection
 Disallow: /shop-application-status
 Disallow: /dispatch-application-status
 
-# Disallow filter URLs to prevent duplicate content
+# Filter & sort parameters (crawl control only)
 Disallow: /*?*sort=
 Disallow: /*?*filter=
 Disallow: /*?*page=
 
-# Sitemap location
+# Sitemap
 Sitemap: https://alphadom.online/sitemap.xml
