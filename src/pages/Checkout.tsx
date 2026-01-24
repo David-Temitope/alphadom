@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useMultiVendorCheckout } from "@/hooks/useMultiVendorCheckout";
 import { useBanStatus } from "@/hooks/useBanStatus";
+import { useAddresses } from "@/hooks/useAddresses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import {
   CreditCard,
   MapPin,
   Package,
+  Home,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShippingInfo, VAT_RATE, VendorGroup } from "@/types/checkout";
@@ -52,6 +54,9 @@ const Checkout: React.FC = () => {
     recalculateWithDeliveryMethod,
   } = useMultiVendorCheckout();
 
+  const { addresses, getDefaultAddress, loading: addressesLoading } = useAddresses();
+  const [useDefaultAddress, setUseDefaultAddress] = useState(true);
+
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     street: "",
     city: "",
@@ -67,6 +72,38 @@ const Checkout: React.FC = () => {
   const [paystackLoaded, setPaystackLoaded] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [openAccordion, setOpenAccordion] = useState("shipping");
+
+  // Load default address on mount
+  useEffect(() => {
+    const defaultAddr = getDefaultAddress();
+    if (defaultAddr && useDefaultAddress) {
+      setShippingInfo(prev => ({
+        ...prev,
+        firstName: defaultAddr.first_name,
+        lastName: defaultAddr.last_name,
+        street: defaultAddr.street,
+        city: defaultAddr.city,
+        state: defaultAddr.state || '',
+        zipCode: defaultAddr.postal_code || '',
+        phone: defaultAddr.phone,
+        country: defaultAddr.country,
+      }));
+    }
+  }, [addresses, useDefaultAddress]);
+
+  const handleUseDefaultAddress = (addr: any) => {
+    setShippingInfo(prev => ({
+      ...prev,
+      firstName: addr.first_name,
+      lastName: addr.last_name,
+      street: addr.street,
+      city: addr.city,
+      state: addr.state || '',
+      zipCode: addr.postal_code || '',
+      phone: addr.phone,
+      country: addr.country,
+    }));
+  };
 
   const isShippingValid = useMemo(() => {
     return (
@@ -259,6 +296,49 @@ const Checkout: React.FC = () => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-6">
+                  {/* Saved Addresses */}
+                  {addresses.length > 0 && (
+                    <div className="mb-6">
+                      <Label className="text-base font-semibold">Saved Addresses</Label>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Select from your saved addresses or enter a new one
+                      </p>
+                      <div className="grid gap-2">
+                        {addresses.map((addr) => (
+                          <button
+                            key={addr.id}
+                            type="button"
+                            onClick={() => handleUseDefaultAddress(addr)}
+                            disabled={processing}
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                              shippingInfo.street === addr.street && shippingInfo.phone === addr.phone
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Home className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm flex items-center gap-2">
+                                {addr.label}
+                                {addr.is_default && (
+                                  <Badge variant="secondary" className="text-xs">Default</Badge>
+                                )}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {addr.first_name} {addr.last_name} • {addr.street}, {addr.city}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <Separator className="my-4" />
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Or edit/enter address details below:
+                      </p>
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
