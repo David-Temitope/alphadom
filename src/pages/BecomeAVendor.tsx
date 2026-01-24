@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShopApplicationForm } from '@/components/ShopApplicationForm';
+import { useVendorStats } from '@/hooks/useVendorStats';
+import becomeVendorHero from '@/assets/become-vendor-hero.jpg';
 import {
   Store,
   TrendingUp,
@@ -24,6 +26,7 @@ const BecomeAVendor = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const { stats, loading: statsLoading } = useVendorStats();
 
   const handleStartSelling = () => {
     if (!user) {
@@ -132,46 +135,79 @@ const BecomeAVendor = () => {
     },
   ];
 
+  const formatNumber = (num: number) => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(0) + '+';
+    }
+    return num.toString();
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/10 via-background to-background py-16 lg:py-24">
-        <div className="container mx-auto px-4">
+      {/* Hero Section with Background Image */}
+      <section 
+        className="relative py-16 lg:py-24 bg-cover bg-center"
+        style={{ backgroundImage: `url(${becomeVendorHero})` }}
+      >
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/60" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <Badge className="mb-4" variant="secondary">
+            <Badge className="mb-4 bg-white/20 text-white border-white/30 hover:bg-white/30">
               <Store className="w-3 h-3 mr-1" />
               Become a Vendor
             </Badge>
-            <h1 className="text-3xl lg:text-5xl font-bold text-foreground mb-6">
-              Start Selling on <span className="text-primary">Alphadom</span> Today
+            <h1 className="text-3xl lg:text-5xl font-bold text-white mb-6">
+              Start Selling on <span className="text-white">Alphadom</span> Today
             </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
               Join thousands of successful vendors and reach customers across Nigeria. 
               No setup fees, no hidden charges - just a simple commission on sales.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button size="lg" onClick={handleStartSelling} className="gap-2">
+              <Button 
+                size="lg" 
+                onClick={handleStartSelling} 
+                className="gap-2 bg-white text-foreground hover:bg-white/90"
+              >
                 Start Selling
                 <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                asChild 
+                className="border-white text-white hover:bg-white/20"
+              >
                 <Link to="/pilots">View Top Vendors</Link>
               </Button>
             </div>
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-muted-foreground">
+            {/* Trust indicators with real data */}
+            <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-white/90">
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary" />
-                <span>1,000+ Active Vendors</span>
+                <Users className="w-4 h-4 text-white" />
+                <span>
+                  {statsLoading ? '...' : `${formatNumber(stats.activeVendors)} Active Vendors`}
+                </span>
               </div>
               <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-primary" />
-                <span>50,000+ Products</span>
+                <Package className="w-4 h-4 text-white" />
+                <span>
+                  {statsLoading ? '...' : `${formatNumber(stats.totalProducts)} Products`}
+                </span>
               </div>
               <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-primary" />
-                <span>4.8/5 Vendor Rating</span>
+                <Star className="w-4 h-4 text-white" />
+                <span>
+                  {statsLoading 
+                    ? '...' 
+                    : stats.avgVendorRating > 0 
+                      ? `${stats.avgVendorRating.toFixed(1)}/5 Avg Rating`
+                      : 'New Platform'
+                  }
+                </span>
               </div>
             </div>
           </div>

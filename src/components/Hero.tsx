@@ -64,19 +64,16 @@ export const Hero = () => {
             {/* Hero Title - Admin controlled */}
             <div className="space-y-2">
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                {settings.hero_title || "A Place Built"}
+                {settings.hero_title}
               </h1>
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                <span className="text-gradient">{settings.hero_main_text || "For Buyers &"}</span>
-              </h1>
-              <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                <span className="text-gradient">Sellers</span>
+                <span className="text-gradient">{settings.hero_main_text}</span>
               </h1>
             </div>
 
             {/* Subtitle - Admin controlled */}
             <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-              {settings.hero_subtitle || "Shop quality products or grow your business on a secure marketplace built for modern commerce. Simple, reliable, and powerful."}
+              {settings.hero_subtitle}
             </p>
 
             {/* CTA Buttons */}

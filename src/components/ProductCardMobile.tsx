@@ -151,18 +151,21 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
         </div>
         
         <CardContent className="p-3 flex-1 flex flex-col">
+          {/* Badge Logic:
+              - Gold (amber-500): First Class subscription vendors
+              - Blue (sky-500): Economy subscription vendors  
+              - Green (primary): Registered business (has TIN) on Free plan
+          */}
           <h3 className="font-medium text-xs leading-tight mb-1.5 line-clamp-2 flex items-start gap-1">
             <span className="flex-1">{truncateName(product.name)}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0">
-              {product.vendor_subscription_plan === 'first_class' && (
+              {product.vendor_subscription_plan === 'first_class' ? (
                 <BadgeCheck className="w-3.5 h-3.5 text-amber-500" />
-              )}
-              {product.vendor_subscription_plan === 'economy' && (
+              ) : product.vendor_subscription_plan === 'economy' ? (
                 <BadgeCheck className="w-3.5 h-3.5 text-sky-500" />
-              )}
-              {product.vendor_is_registered && product.vendor_subscription_plan === 'free' && (
+              ) : product.vendor_is_registered ? (
                 <BadgeCheck className="w-3.5 h-3.5 text-primary" />
-              )}
+              ) : null}
             </span>
           </h3>
           
