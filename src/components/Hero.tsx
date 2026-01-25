@@ -55,25 +55,25 @@ export const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8 animate-fade-up">
-            {/* Badge */}
+            {/* Subtitle Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm font-medium">
               <CheckCircle className="w-4 h-4" />
-              {settings.hero_subtitle || "Genesis of Trustworthy Commerce"}
+              {settings.hero_subtitle || "Hot sales"}
             </div>
 
             {/* Hero Title - Admin controlled */}
             <div className="space-y-2">
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                {settings.hero_title}
+                {settings.hero_title || "Welcome To"}
               </h1>
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                <span className="text-gradient">{settings.hero_main_text}</span>
+                <span className="text-gradient">{settings.hero_main_text || "Alphadom,"}</span>
               </h1>
             </div>
 
             {/* Secondary Text - Admin controlled */}
             <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-              {settings.hero_secondary_text}
+              {settings.hero_secondary_text || "The Genesis of Your Online Business."}
             </p>
 
             {/* CTA Buttons */}

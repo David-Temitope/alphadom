@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,42 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, Lock, User, ShoppingCart, Shield, Sparkles } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Mail, Lock, User, ShoppingCart, Shield, Sparkles, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Password strength checker
+const checkPasswordStrength = (password: string) => {
+  const checks = {
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    digit: /[0-9]/.test(password),
+    symbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    length: password.length >= 8,
+  };
+  
+  const passedChecks = Object.values(checks).filter(Boolean).length;
+  const strength = (passedChecks / 5) * 100;
+  
+  let label = 'Very Weak';
+  let color = 'bg-destructive';
+  
+  if (strength >= 100) {
+    label = 'Strong';
+    color = 'bg-primary';
+  } else if (strength >= 80) {
+    label = 'Good';
+    color = 'bg-emerald-500';
+  } else if (strength >= 60) {
+    label = 'Fair';
+    color = 'bg-yellow-500';
+  } else if (strength >= 40) {
+    label = 'Weak';
+    color = 'bg-orange-500';
+  }
+  
+  return { checks, strength, label, color };
+};
 
 const Auth = () => {
   const { user, signIn, signUp, resetPassword } = useAuth();
@@ -17,6 +51,9 @@ const Auth = () => {
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+
+  const passwordStrength = useMemo(() => checkPasswordStrength(signupPassword), [signupPassword]);
 
   // Redirect if already authenticated
   if (user) {
@@ -35,9 +72,8 @@ const Auth = () => {
     const { error } = await signIn(email, password);
     
     if (error) {
-      console.error('Sign in error:', error.message);
-      setError('Unable to sign in. Please check your credentials and try again.');
-      toast.error('Sign in failed. Please try again.');
+      setError("Account doesn't exist");
+      toast.error("Account doesn't exist");
     } else {
       toast.success('Welcome back!');
     }
@@ -52,7 +88,7 @@ const Auth = () => {
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const password = signupPassword;
     const fullName = formData.get('fullName') as string;
 
     // Password match validation
@@ -62,8 +98,10 @@ const Auth = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Strong password validation
+    const { checks } = passwordStrength;
+    if (!checks.lowercase || !checks.uppercase || !checks.digit || !checks.symbol || !checks.length) {
+      setError('Weak Password - Include uppercase, lowercase, digit and symbol (min 8 chars)');
       setLoading(false);
       return;
     }
@@ -71,12 +109,18 @@ const Auth = () => {
     const { error } = await signUp(email, password, fullName);
     
     if (error) {
-      console.error('Sign up error:', error.message);
-      setError('Unable to create account. Please try again later.');
-      toast.error('Sign up failed. Please try again.');
+      // Check for weak password error from Supabase
+      if (error.message?.toLowerCase().includes('password')) {
+        setError('Weak Password');
+        toast.error('Weak Password');
+      } else {
+        setError("Account doesn't exist");
+        toast.error('Sign up failed. Please try again.');
+      }
     } else {
       toast.success('Account created! Please check your email to verify your account.');
       setConfirmPassword('');
+      setSignupPassword('');
     }
     
     setLoading(false);
@@ -90,8 +134,7 @@ const Auth = () => {
     const { error } = await resetPassword(resetEmail);
     
     if (error) {
-      console.error('Password reset error:', error.message);
-      setError('Unable to send reset email. Please try again later.');
+      setError("Account doesn't exist");
       toast.error('Password reset failed. Please try again.');
     } else {
       toast.success('Password reset email sent! Please check your inbox.');
@@ -187,6 +230,15 @@ const Auth = () => {
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-6 sm:p-8">
+            {/* Error Alert - Fixed position to prevent layout shift */}
+            <div className="min-h-[48px] mb-4">
+              {error && (
+                <Alert variant="destructive" className="animate-in fade-in duration-200">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Welcome! 👋</h2>
               <p className="text-gray-600 text-sm mt-1">
@@ -194,7 +246,7 @@ const Auth = () => {
               </p>
             </div>
 
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs defaultValue="signin" className="w-full" onValueChange={() => setError('')}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin" className="rounded-lg">Sign In</TabsTrigger>
                 <TabsTrigger value="signup" className="rounded-lg">Sign Up</TabsTrigger>
@@ -233,12 +285,6 @@ const Auth = () => {
                       </div>
                     </div>
 
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
-
                     <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
                       {loading ? 'Signing in...' : 'Sign In'}
                     </Button>
@@ -271,12 +317,6 @@ const Auth = () => {
                         We'll send you a link to reset your password
                       </p>
                     </div>
-
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
 
                     <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
                       {loading ? 'Sending...' : 'Send Reset Link'}
@@ -336,12 +376,50 @@ const Auth = () => {
                         id="signup-password"
                         name="password"
                         type="password"
-                        placeholder="Create a password (min 6 characters)"
+                        placeholder="Create a strong password"
                         className="pl-10"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
                         required
-                        minLength={6}
                       />
                     </div>
+                    
+                    {/* Password Strength Indicator */}
+                    {signupPassword && (
+                      <div className="space-y-2 mt-2">
+                        <div className="flex items-center gap-2">
+                          <Progress value={passwordStrength.strength} className={`h-2 ${passwordStrength.color}`} />
+                          <span className={`text-xs font-medium ${
+                            passwordStrength.strength >= 100 ? 'text-primary' :
+                            passwordStrength.strength >= 60 ? 'text-yellow-600' : 'text-destructive'
+                          }`}>
+                            {passwordStrength.label}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 text-xs">
+                          <div className={`flex items-center gap-1 ${passwordStrength.checks.lowercase ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {passwordStrength.checks.lowercase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                            Lowercase
+                          </div>
+                          <div className={`flex items-center gap-1 ${passwordStrength.checks.uppercase ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {passwordStrength.checks.uppercase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                            Uppercase
+                          </div>
+                          <div className={`flex items-center gap-1 ${passwordStrength.checks.digit ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {passwordStrength.checks.digit ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                            Number
+                          </div>
+                          <div className={`flex items-center gap-1 ${passwordStrength.checks.symbol ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {passwordStrength.checks.symbol ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                            Symbol
+                          </div>
+                          <div className={`flex items-center gap-1 ${passwordStrength.checks.length ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {passwordStrength.checks.length ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                            8+ characters
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -356,7 +434,6 @@ const Auth = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
-                        minLength={6}
                       />
                     </div>
                   </div>
@@ -371,12 +448,6 @@ const Auth = () => {
                       Privacy Policy
                     </Link>
                   </div>
-
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
 
                   <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
                     {loading ? 'Creating account...' : 'Create Account'}

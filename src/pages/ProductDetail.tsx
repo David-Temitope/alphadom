@@ -244,12 +244,11 @@ const ProductDetail = () => {
 
           {/* Product Info */}
           <div className="space-y-6">
-            {/* Badge & SKU */}
+            {/* Badge */}
             <div className="flex items-center gap-3 flex-wrap">
               {hasDiscount && (
                 <Badge className="bg-primary text-primary-foreground">NEW ARRIVAL</Badge>
               )}
-              <span className="text-xs text-muted-foreground">SKU: {product.id.slice(0, 8).toUpperCase()}</span>
             </div>
 
             {/* Title */}
