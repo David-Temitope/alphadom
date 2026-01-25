@@ -169,7 +169,12 @@ const BecomeAVendor = () => {
                 Start Selling
                 <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-white text-green hover:bg-white/20">
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="border-white bg-primary text-primary-foreground hover:bg-white/20"
+              >
                 <Link to="/pilots">View Top Vendors</Link>
               </Button>
             </div>
