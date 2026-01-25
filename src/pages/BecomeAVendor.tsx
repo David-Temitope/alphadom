@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/AuthContext';
-import { ShopApplicationForm } from '@/components/ShopApplicationForm';
-import { useVendorStats } from '@/hooks/useVendorStats';
-import becomeVendorHero from '@/assets/become-vendor-hero.jpg';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { ShopApplicationForm } from "@/components/ShopApplicationForm";
+import { useVendorStats } from "@/hooks/useVendorStats";
+import becomeVendorHero from "@/assets/become-vendor-hero.jpg";
 import {
   Store,
   TrendingUp,
@@ -20,7 +20,7 @@ import {
   Truck,
   HeadphonesIcon,
   BarChart3,
-} from 'lucide-react';
+} from "lucide-react";
 
 const BecomeAVendor = () => {
   const { user } = useAuth();
@@ -30,7 +30,7 @@ const BecomeAVendor = () => {
 
   const handleStartSelling = () => {
     if (!user) {
-      navigate('/auth?redirect=/become-a-vendor');
+      navigate("/auth?redirect=/become-a-vendor");
       return;
     }
     setShowApplicationForm(true);
@@ -39,97 +39,92 @@ const BecomeAVendor = () => {
   const benefits = [
     {
       icon: Store,
-      title: 'Your Own Storefront',
-      description: 'Create a personalized store page with your brand, logo, and product catalog.',
+      title: "Your Own Storefront",
+      description: "Create a personalized store page with your brand, logo, and product catalog.",
     },
     {
       icon: TrendingUp,
-      title: 'Grow Your Business',
-      description: 'Reach thousands of customers actively looking to buy quality products.',
+      title: "Grow Your Business",
+      description: "Reach thousands of customers actively looking to buy quality products.",
     },
     {
       icon: CreditCard,
-      title: 'Secure Payments',
-      description: 'Get paid directly to your bank account with our secure payment system.',
+      title: "Secure Payments",
+      description: "Get paid directly to your bank account with our secure payment system.",
     },
     {
       icon: BarChart3,
-      title: 'Analytics Dashboard',
-      description: 'Track your sales, orders, and customer insights in real-time.',
+      title: "Analytics Dashboard",
+      description: "Track your sales, orders, and customer insights in real-time.",
     },
     {
       icon: Truck,
-      title: 'Flexible Delivery',
-      description: 'Choose to handle deliveries yourself or use our dispatch network.',
+      title: "Flexible Delivery",
+      description: "Choose to handle deliveries yourself or use our dispatch network.",
     },
     {
       icon: HeadphonesIcon,
-      title: 'Dedicated Support',
-      description: '24/7 vendor support to help you succeed on our platform.',
+      title: "Dedicated Support",
+      description: "24/7 vendor support to help you succeed on our platform.",
     },
   ];
 
   const steps = [
     {
       step: 1,
-      title: 'Complete Application',
-      description: 'Fill out a simple form with your business details and verification documents.',
+      title: "Complete Application",
+      description: "Fill out a simple form with your business details and verification documents.",
     },
     {
       step: 2,
-      title: 'Get Approved',
-      description: 'Our team reviews your application within 24-48 hours.',
+      title: "Get Approved",
+      description: "Our team reviews your application within 24-48 hours.",
     },
     {
       step: 3,
-      title: 'Set Up Store',
-      description: 'Customize your storefront and add your products.',
+      title: "Set Up Store",
+      description: "Customize your storefront and add your products.",
     },
     {
       step: 4,
-      title: 'Start Selling',
-      description: 'Go live and start receiving orders from customers!',
+      title: "Start Selling",
+      description: "Go live and start receiving orders from customers!",
     },
   ];
 
   const plans = [
     {
-      name: 'Free',
-      price: '₦0',
-      period: '/month',
-      features: [
-        'Up to 20 products',
-        'Basic analytics',
-        'Standard support',
-        '15% commission per sale',
-      ],
+      name: "Free",
+      price: "₦0",
+      period: "/month",
+      features: ["Up to 20 products", "Basic analytics", "Standard support", "15% commission per sale"],
       popular: false,
     },
     {
-      name: 'Economy',
-      price: '₦5,000',
-      period: '/month',
+      name: "Economy",
+      price: "₦5,000",
+      period: "/month",
       features: [
-        'Up to 100 products',
-        'Advanced analytics',
-        'Priority support',
-        '10% commission per sale',
-        'Verified badge',
+        "Up to 100 products",
+        "Advanced analytics",
+        "Priority support",
+        "10% commission per sale",
+        "Verified badge",
       ],
       popular: true,
     },
     {
-      name: 'First Class',
-      price: '₦15,000',
-      period: '/month',
+      name: "First Class",
+      price: "₦15,000",
+      period: "/month",
       features: [
-        'Unlimited products',
-        'Premium analytics',
-        '24/7 dedicated support',
-        '5% commission per sale',
-        'Premium badge',
-        'Homepage visibility',
-        'Free promotional ads',
+        "Unlimited products",
+        "Premium analytics",
+        "24/7 dedicated support",
+        "5% commission per sale",
+        "Premium badge",
+        "Homepage visibility",
+        "Free promotional ads",
       ],
       popular: false,
     },
@@ -137,7 +132,7 @@ const BecomeAVendor = () => {
 
   const formatNumber = (num: number) => {
     if (num >= 1000) {
-      return (num / 1000).toFixed(0) + '+';
+      return (num / 1000).toFixed(0) + "+";
     }
     return num.toString();
   };
@@ -145,13 +140,13 @@ const BecomeAVendor = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section with Background Image */}
-      <section 
+      <section
         className="relative py-16 lg:py-24 bg-cover bg-center"
         style={{ backgroundImage: `url(${becomeVendorHero})` }}
       >
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/60" />
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <Badge className="mb-4 bg-white/20 text-white border-white/30 hover:bg-white/30">
@@ -162,24 +157,19 @@ const BecomeAVendor = () => {
               Start Selling on <span className="text-white">Alphadom</span> Today
             </h1>
             <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of successful vendors and reach customers across Nigeria. 
-              No setup fees, no hidden charges - just a simple commission on sales.
+              Join thousands of successful vendors and reach customers across Nigeria. No setup fees, no hidden charges
+              - just a simple commission on sales.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button 
-                size="lg" 
-                onClick={handleStartSelling} 
+              <Button
+                size="lg"
+                onClick={handleStartSelling}
                 className="gap-2 bg-white text-foreground hover:bg-white/90"
               >
                 Start Selling
                 <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                asChild 
-                className="border-white text-white hover:bg-white/20"
-              >
+              <Button size="lg" variant="outline" asChild className="border-white text-green hover:bg-white/20">
                 <Link to="/pilots">View Top Vendors</Link>
               </Button>
             </div>
@@ -188,25 +178,20 @@ const BecomeAVendor = () => {
             <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-white/90">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-white" />
-                <span>
-                  {statsLoading ? '...' : `${formatNumber(stats.activeVendors)} Active Vendors`}
-                </span>
+                <span>{statsLoading ? "..." : `${formatNumber(stats.activeVendors)} Active Vendors`}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Package className="w-4 h-4 text-white" />
-                <span>
-                  {statsLoading ? '...' : `${formatNumber(stats.totalProducts)} Products`}
-                </span>
+                <span>{statsLoading ? "..." : `${formatNumber(stats.totalProducts)} Products`}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="w-4 h-4 text-white" />
                 <span>
-                  {statsLoading 
-                    ? '...' 
-                    : stats.avgVendorRating > 0 
+                  {statsLoading
+                    ? "..."
+                    : stats.avgVendorRating > 0
                       ? `${stats.avgVendorRating.toFixed(1)}/5 Avg Rating`
-                      : 'New Platform'
-                  }
+                      : "New Platform"}
                 </span>
               </div>
             </div>
@@ -218,9 +203,7 @@ const BecomeAVendor = () => {
       <section className="py-16 lg:py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">
-              Why Sell on Alphadom?
-            </h2>
+            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">Why Sell on Alphadom?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Everything you need to launch and grow your online business
             </p>
@@ -233,12 +216,8 @@ const BecomeAVendor = () => {
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                     <benefit.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {benefit.description}
-                  </p>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{benefit.title}</h3>
+                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -250,12 +229,8 @@ const BecomeAVendor = () => {
       <section className="py-16 lg:py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">
-              How It Works
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Get started in just 4 simple steps
-            </p>
+            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">How It Works</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Get started in just 4 simple steps</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -265,12 +240,8 @@ const BecomeAVendor = () => {
                   <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                     {item.step}
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {item.description}
-                  </p>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
                 {index < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-border" />
@@ -285,37 +256,18 @@ const BecomeAVendor = () => {
       <section className="py-16 lg:py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">
-              Choose Your Plan
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Start free and upgrade as your business grows
-            </p>
+            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">Choose Your Plan</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Start free and upgrade as your business grows</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {plans.map((plan, index) => (
-              <Card
-                key={index}
-                className={`relative ${
-                  plan.popular
-                    ? 'border-primary shadow-lg scale-105'
-                    : ''
-                }`}
-              >
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    Most Popular
-                  </Badge>
-                )}
+              <Card key={index} className={`relative ${plan.popular ? "border-primary shadow-lg scale-105" : ""}`}>
+                {plan.popular && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Most Popular</Badge>}
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-foreground mb-2">
-                    {plan.name}
-                  </h3>
+                  <h3 className="text-xl font-bold text-foreground mb-2">{plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-6">
-                    <span className="text-3xl font-bold text-foreground">
-                      {plan.price}
-                    </span>
+                    <span className="text-3xl font-bold text-foreground">{plan.price}</span>
                     <span className="text-muted-foreground">{plan.period}</span>
                   </div>
                   <ul className="space-y-3 mb-6">
@@ -328,7 +280,7 @@ const BecomeAVendor = () => {
                   </ul>
                   <Button
                     className="w-full"
-                    variant={plan.popular ? 'default' : 'outline'}
+                    variant={plan.popular ? "default" : "outline"}
                     onClick={handleStartSelling}
                   >
                     Get Started
@@ -349,17 +301,14 @@ const BecomeAVendor = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                'Valid Nigerian phone number',
-                'Bank account for payments',
-                'Government-issued ID',
-                'Business description',
-                'Product category information',
-                'Store name and logo (optional)',
+                "Valid Nigerian phone number",
+                "Bank account for payments",
+                "Government-issued ID",
+                "Business description",
+                "Product category information",
+                "Store name and logo (optional)",
               ].map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-3 p-4 bg-card rounded-xl border"
-                >
+                <div key={index} className="flex items-center gap-3 p-4 bg-card rounded-xl border">
                   <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
                   <span className="text-sm">{item}</span>
                 </div>
@@ -374,12 +323,9 @@ const BecomeAVendor = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <Shield className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">
-              Ready to Start Your Business?
-            </h2>
+            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">Ready to Start Your Business?</h2>
             <p className="text-muted-foreground mb-8">
-              Join Alphadom today and start reaching thousands of customers. 
-              No upfront costs, no long-term contracts.
+              Join Alphadom today and start reaching thousands of customers. No upfront costs, no long-term contracts.
             </p>
             <Button size="lg" onClick={handleStartSelling} className="gap-2">
               Register as a Vendor
@@ -390,10 +336,7 @@ const BecomeAVendor = () => {
       </section>
 
       {/* Application Form Modal */}
-      <ShopApplicationForm 
-        open={showApplicationForm} 
-        onOpenChange={setShowApplicationForm} 
-      />
+      <ShopApplicationForm open={showApplicationForm} onOpenChange={setShowApplicationForm} />
     </div>
   );
 };
