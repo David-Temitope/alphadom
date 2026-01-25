@@ -173,7 +173,7 @@ const BecomeAVendor = () => {
                 size="lg"
                 variant="outline"
                 asChild
-                className="border-white bg-primary text-primary-foreground hover:bg-white/20"
+                className="border-white bg-foreground text-background hover:bg-foreground/90"
               >
                 <Link to="/pilots">View Top Vendors</Link>
               </Button>
