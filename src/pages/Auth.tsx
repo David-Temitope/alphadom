@@ -173,7 +173,7 @@ const Auth = () => {
               />
             </div>
             <h1 className="text-5xl font-bold tracking-tight">Alphadom</h1>
-            <p className="text-green-100 text-lg mt-2">Your Online Marketplace 🛍️</p>
+            <p className="text-green-100 text-lg mt-2">Your Online Marketplace</p>
           </div>
 
           {/* Features for everyone */}
@@ -204,7 +204,7 @@ const Auth = () => {
               </div>
               <div>
                 <h3 className="font-semibold">Start Selling Today</h3>
-                <p className="text-sm text-green-100">Turn your hustle into income 💰</p>
+                <p className="text-sm text-green-100">Turn your hustle into income</p>
               </div>
             </div>
           </div>
@@ -225,7 +225,7 @@ const Auth = () => {
                 />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">Alphadom</h1>
-              <p className="text-gray-600 text-sm">Your Online Marketplace 🛍️</p>
+              <p className="text-gray-600 text-sm">Your Online Marketplace</p>
             </div>
           </div>
 
@@ -240,7 +240,7 @@ const Auth = () => {
             </div>
 
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome! 👋</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Welcome!</h2>
               <p className="text-gray-600 text-sm mt-1">
                 Sign in to start shopping or selling
               </p>
