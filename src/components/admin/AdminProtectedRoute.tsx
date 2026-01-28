@@ -28,7 +28,7 @@ export const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   }
 
   if (!admin) {
-    return <Navigate to="/appleisgood/login" state={{ from: location }} replace />;
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
   // If allowedRoles is specified, check if user has access

@@ -1,14 +1,9 @@
-import Head from 'next/head'
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Terms = () => {
   return (
     <>
-    <Head>
-        <title>Terms of Service</title>
-        <meta name="robots" content="noindex, follow" />
-    </Head>
 
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -63,7 +58,7 @@ const Terms = () => {
                 <li>False advertising or misleading product information</li>
                 <li>Activities that violate local laws and regulations</li>
                 <li>Discrimination based on race, gender, religion, or nationality</li>
-                <li><strong>False accusations are highly punishable</strong> - Filing false claims against vendors, customers, or the platform may result in immediate account termination and potential legal action</li>
+                <li><strong>False accusations are strictly prohibited</strong> - Filing false claims against vendors, customers, or the platform may result in immediate account termination and potential legal action</li>
               </ul>
             </section>
 

@@ -202,9 +202,9 @@ export const Navbar = () => {
               {user && <UserTypeNavLink />}
               {admin && (
                 <Link
-                  to="/appleisgood"
+                  to="/admin"
                   className={`text-sm font-medium transition-colors duration-200 hover:text-primary flex items-center gap-1.5 ${
-                    isActive("/appleisgood") ? "text-primary" : "text-foreground"
+                    isActive("/admin") ? "text-primary" : "text-foreground"
                   }`}
                 >
                   <Shield className="h-4 w-4" />
@@ -371,9 +371,9 @@ export const Navbar = () => {
 
                 {admin && (
                   <Link
-                    to="/appleisgood"
+                    to="/admin"
                     className={`block py-2.5 px-4 rounded-lg transition-colors flex items-center gap-2 font-medium ${
-                      isActive("/appleisgood")
+                      isActive("/admin")
                         ? "bg-primary text-primary-foreground"
                         : "text-foreground hover:bg-secondary"
                     }`}

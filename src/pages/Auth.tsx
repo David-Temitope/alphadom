@@ -72,8 +72,8 @@ const Auth = () => {
     const { error } = await signIn(email, password);
     
     if (error) {
-      setError("Account doesn't exist");
-      toast.error("Account doesn't exist");
+      setError("Invalid email or password");
+      toast.error("Invalid email or password");
     } else {
       toast.success('Welcome back!');
     }
@@ -114,7 +114,7 @@ const Auth = () => {
         setError('Weak Password');
         toast.error('Weak Password');
       } else {
-        setError("Account doesn't exist");
+        setError("Could not create account");
         toast.error('Sign up failed. Please try again.');
       }
     } else {
@@ -134,7 +134,7 @@ const Auth = () => {
     const { error } = await resetPassword(resetEmail);
     
     if (error) {
-      setError("Account doesn't exist");
+      setError("Invalid email");
       toast.error('Password reset failed. Please try again.');
     } else {
       toast.success('Password reset email sent! Please check your inbox.');

@@ -34,22 +34,22 @@ interface SidebarItem {
 }
 
 const sidebarItems: SidebarItem[] = [
-  { name: 'Dashboard', href: '/appleisgood', icon: LayoutDashboard, allowedRoles: ['super_admin', 'vendor_admin', 'dispatch_admin', 'user_admin', 'orders_admin', 'customer_service'] },
-  { name: 'Products', href: '/appleisgood/products', icon: Package, allowedRoles: ['super_admin', 'orders_admin'] },
-  { name: 'Orders', href: '/appleisgood/orders', icon: ShoppingCart, allowedRoles: ['super_admin', 'orders_admin'] },
-  { name: 'Shop Applications', href: '/appleisgood/applications', icon: Store, allowedRoles: ['super_admin', 'vendor_admin'] },
-  { name: 'Dispatch Applications', href: '/appleisgood/dispatch-applications', icon: Truck, allowedRoles: ['super_admin', 'dispatch_admin'] },
-  { name: 'Vendor Monitoring', href: '/appleisgood/vendor-monitoring', icon: BarChart3, allowedRoles: ['super_admin', 'vendor_admin'] },
-  { name: 'Dispatch Monitoring', href: '/appleisgood/dispatch-monitoring', icon: Truck, allowedRoles: ['super_admin', 'dispatch_admin'] },
-  { name: 'Users', href: '/appleisgood/users', icon: Users, allowedRoles: ['super_admin', 'user_admin'] },
-  { name: 'Transactions', href: '/appleisgood/transactions', icon: ShoppingCart, allowedRoles: ['super_admin'] },
-  { name: 'Newsletter', href: '/appleisgood/newsletter', icon: Users, allowedRoles: ['super_admin', 'customer_service'] },
-  { name: 'Reports', href: '/appleisgood/reports', icon: BarChart3, allowedRoles: ['super_admin', 'user_admin', 'customer_service'] },
-  { name: 'Adverts', href: '/appleisgood/adverts', icon: Megaphone, allowedRoles: ['super_admin', 'vendor_admin', 'orders_admin'] },
-  { name: 'Blog', href: '/appleisgood/blog', icon: FileText, allowedRoles: ['super_admin', 'customer_service'] },
-  { name: 'Admin Management', href: '/appleisgood/admin-management', icon: UserCog, allowedRoles: ['super_admin'] },
-  { name: 'Analytics', href: '/appleisgood/analytics', icon: BarChart3, allowedRoles: ['super_admin'] },
-  { name: 'Settings', href: '/appleisgood/settings', icon: Settings, allowedRoles: ['super_admin'] },
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, allowedRoles: ['super_admin', 'vendor_admin', 'dispatch_admin', 'user_admin', 'orders_admin', 'customer_service'] },
+  { name: 'Products', href: '/admin/products', icon: Package, allowedRoles: ['super_admin', 'orders_admin'] },
+  { name: 'Orders', href: '/admin/orders', icon: ShoppingCart, allowedRoles: ['super_admin', 'orders_admin'] },
+  { name: 'Shop Applications', href: '/admin/applications', icon: Store, allowedRoles: ['super_admin', 'vendor_admin'] },
+  { name: 'Dispatch Applications', href: '/admin/dispatch-applications', icon: Truck, allowedRoles: ['super_admin', 'dispatch_admin'] },
+  { name: 'Vendor Monitoring', href: '/admin/vendor-monitoring', icon: BarChart3, allowedRoles: ['super_admin', 'vendor_admin'] },
+  { name: 'Dispatch Monitoring', href: '/admin/dispatch-monitoring', icon: Truck, allowedRoles: ['super_admin', 'dispatch_admin'] },
+  { name: 'Users', href: '/admin/users', icon: Users, allowedRoles: ['super_admin', 'user_admin'] },
+  { name: 'Transactions', href: '/admin/transactions', icon: ShoppingCart, allowedRoles: ['super_admin'] },
+  { name: 'Newsletter', href: '/admin/newsletter', icon: Users, allowedRoles: ['super_admin', 'customer_service'] },
+  { name: 'Reports', href: '/admin/reports', icon: BarChart3, allowedRoles: ['super_admin', 'user_admin', 'customer_service'] },
+  { name: 'Adverts', href: '/admin/adverts', icon: Megaphone, allowedRoles: ['super_admin', 'vendor_admin', 'orders_admin'] },
+  { name: 'Blog', href: '/admin/blog', icon: FileText, allowedRoles: ['super_admin', 'customer_service'] },
+  { name: 'Admin Management', href: '/admin/admin-management', icon: UserCog, allowedRoles: ['super_admin'] },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, allowedRoles: ['super_admin'] },
+  { name: 'Settings', href: '/admin/settings', icon: Settings, allowedRoles: ['super_admin'] },
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavigate }) => {
