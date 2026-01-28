@@ -8,7 +8,7 @@ Allow: /
 Disallow: /cart
 Disallow: /checkout
 Disallow: /auth
-Disallow: /admin-login
+Disallow: /admin
 Disallow: /user-settings
 Disallow: /orders
 Disallow: /wishlist
