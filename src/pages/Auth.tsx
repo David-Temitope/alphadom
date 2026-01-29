@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Mail, Lock, User, ShoppingCart, Shield, Sparkles, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 // Password strength checker
 const checkPasswordStrength = (password: string) => {
@@ -72,6 +73,7 @@ const Auth = () => {
     const { error } = await signIn(email, password);
     
     if (error) {
+      logger.error('Sign in error:', error);
       setError("Invalid email or password");
       toast.error("Invalid email or password");
     } else {
@@ -109,6 +111,7 @@ const Auth = () => {
     const { error } = await signUp(email, password, fullName);
     
     if (error) {
+      logger.error('Sign up error:', error);
       // Check for weak password error from Supabase
       if (error.message?.toLowerCase().includes('password')) {
         setError('Weak Password');
@@ -131,18 +134,24 @@ const Auth = () => {
     setLoading(true);
     setError('');
 
-    const { error } = await resetPassword(resetEmail);
-    
-    if (error) {
-      setError("Invalid email");
-      toast.error('Password reset failed. Please try again.');
-    } else {
-      toast.success('Password reset email sent! Please check your inbox.');
+    try {
+      const { error } = await resetPassword(resetEmail);
+
+      if (error) {
+        // Log the actual error for debugging, but keep the UI message generic
+        logger.error('Password reset attempt error:', error);
+      }
+
+      // Always show generic success message to prevent account enumeration
+      toast.success('If an account exists with this email, a reset link has been sent.');
       setShowResetPassword(false);
       setResetEmail('');
+    } catch (err) {
+      logger.error('Password reset unexpected error:', err);
+      toast.error('An unexpected error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
