@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Mail, Lock, User, ShoppingCart, Shield, Sparkles, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 // Password strength checker
 const checkPasswordStrength = (password: string) => {
@@ -134,14 +135,14 @@ const Auth = () => {
     const { error } = await resetPassword(resetEmail);
     
     if (error) {
-      setError("Invalid email");
-      toast.error('Password reset failed. Please try again.');
-    } else {
-      toast.success('Password reset email sent! Please check your inbox.');
-      setShowResetPassword(false);
-      setResetEmail('');
+      logger.error('Password reset error:', error);
     }
     
+    // Always show generic message to prevent account enumeration
+    toast.success('If an account exists for this email, you will receive a password reset link.');
+    setShowResetPassword(false);
+    setResetEmail('');
+
     setLoading(false);
   };
 

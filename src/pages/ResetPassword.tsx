@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, CheckCircle, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -87,7 +88,8 @@ const ResetPassword = () => {
         navigate('/auth');
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to reset password');
+      logger.error('Reset password error:', err);
+      setError('An error occurred while resetting your password. Please try again.');
       toast.error('Password reset failed');
     } finally {
       setLoading(false);
