@@ -20,10 +20,12 @@ export const Hero = () => {
   const { userApplication } = useShopApplications();
   const { settings, loading: settingsLoading } = useAdminSettings();
 
-  // Use admin settings images if available, otherwise use defaults
-  const heroImages = settings.hero_images && settings.hero_images.length > 0 
-    ? settings.hero_images 
-    : DEFAULT_HERO_IMAGES;
+  // Use hero_slides images if available, otherwise use hero_images, then defaults
+  const heroImages = settings.hero_slides && settings.hero_slides.length > 0 
+    ? settings.hero_slides.map(s => s.image).filter(Boolean)
+    : settings.hero_images && settings.hero_images.length > 0 
+      ? settings.hero_images 
+      : DEFAULT_HERO_IMAGES;
 
   // Slide auto-advance effect
   useEffect(() => {

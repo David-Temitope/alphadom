@@ -9,9 +9,19 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
 import { ImageUpload } from '@/components/admin/ImageUpload';
-import { Save, CreditCard, Building2, Image, Download } from 'lucide-react';
+import { Save, CreditCard, Building2, Image, Download, Monitor, Smartphone, Trash2, Plus, Link as LinkIcon } from 'lucide-react';
 import { exportOrdersToPDF } from '@/utils/pdfExport';
 import { useOrders } from '@/hooks/useOrders';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+interface HeroSlide {
+  image: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  buttonLink: string;
+}
 
 const AdminSettings = () => {
   const { toast } = useToast();
@@ -22,19 +32,20 @@ const AdminSettings = () => {
     account_number: '',
     account_name: '',
     routing_number: '',
-    hero_images: [] as string[],
-    site_name: 'Pilot',
+    hero_slides: [] as HeroSlide[], // New per-slide configuration for mobile
+    site_name: 'Alphadom',
     site_description: '',
     navbar_logo: '',
-    hero_title: '',
-    hero_subtitle: '',
-    hero_main_text: 'Store',
-    hero_secondary_text: 'for Modern Living',
+    // Desktop hero text (shown on left side)
+    hero_title: 'Welcome To',
+    hero_subtitle: 'Hot sales',
+    hero_main_text: 'Alphadom,',
+    hero_secondary_text: 'The Genesis of Your Online Business.',
     about_hero_title: '',
     about_hero_subtitle: '',
     about_story: '',
     about_mission: '',
-    primary_color: '#059669', // Default green color
+    primary_color: '#059669',
   });
 
   useEffect(() => {
@@ -54,19 +65,65 @@ const AdminSettings = () => {
         return acc;
       }, {} as Record<string, any>);
 
+      // Parse hero_slides
+      const rawHeroSlides = settingsMap.hero_slides;
+      const parsedHeroSlides: HeroSlide[] = (() => {
+        if (Array.isArray(rawHeroSlides)) return rawHeroSlides;
+        if (typeof rawHeroSlides === 'string') {
+          try {
+            const parsed = JSON.parse(rawHeroSlides);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return [];
+      })();
+
+      // Also try to migrate old hero_images if hero_slides is empty
+      if (parsedHeroSlides.length === 0) {
+        const rawHeroImages = settingsMap.hero_images;
+        const parsedHeroImages: string[] = (() => {
+          if (Array.isArray(rawHeroImages)) return rawHeroImages;
+          if (typeof rawHeroImages === 'string') {
+            try {
+              const parsed = JSON.parse(rawHeroImages);
+              return Array.isArray(parsed) ? parsed : [];
+            } catch {
+              return [];
+            }
+          }
+          return [];
+        })();
+        
+        // Convert old images to new slide format
+        parsedHeroImages.forEach((img) => {
+          if (img) {
+            parsedHeroSlides.push({
+              image: img,
+              tag: 'LIMITED OFFER',
+              title: 'Summer Sale',
+              subtitle: 'Up to 40% off',
+              buttonText: 'Shop Now',
+              buttonLink: '/products',
+            });
+          }
+        });
+      }
+
       setSettings({
         bank_name: settingsMap.bank_details?.bank_name || '',
         account_number: settingsMap.bank_details?.account_number || '',
         account_name: settingsMap.bank_details?.account_name || '',
         routing_number: settingsMap.bank_details?.routing_number || '',
-        hero_images: settingsMap.hero_images || [],
-        site_name: settingsMap.site_config?.name || 'Pilot',
+        hero_slides: parsedHeroSlides,
+        site_name: settingsMap.site_config?.name || 'Alphadom',
         site_description: settingsMap.site_config?.description || '',
         navbar_logo: settingsMap.navbar_config?.logo || '',
-        hero_title: settingsMap.hero_config?.title || '',
-        hero_subtitle: settingsMap.hero_config?.subtitle || '',
-        hero_main_text: settingsMap.hero_config?.main_text || 'Store',
-        hero_secondary_text: settingsMap.hero_config?.secondary_text || 'for Modern Living',
+        hero_title: settingsMap.hero_config?.title || 'Welcome To',
+        hero_subtitle: settingsMap.hero_config?.subtitle || 'Hot sales',
+        hero_main_text: settingsMap.hero_config?.main_text || 'Alphadom,',
+        hero_secondary_text: settingsMap.hero_config?.secondary_text || 'The Genesis of Your Online Business.',
         about_hero_title: settingsMap.about_config?.hero_title || '',
         about_hero_subtitle: settingsMap.about_config?.hero_subtitle || '',
         about_story: settingsMap.about_config?.story || '',
@@ -99,12 +156,20 @@ const AdminSettings = () => {
           }
         }, { onConflict: 'setting_key' });
 
-      // Update hero images
+      // Update hero_slides (new format for mobile)
+      await supabase
+        .from('admin_settings')
+        .upsert({
+          setting_key: 'hero_slides',
+          setting_value: settings.hero_slides as any
+        }, { onConflict: 'setting_key' });
+
+      // Also update hero_images for backwards compatibility (just the image URLs)
       await supabase
         .from('admin_settings')
         .upsert({
           setting_key: 'hero_images',
-          setting_value: settings.hero_images
+          setting_value: settings.hero_slides.map(s => s.image).filter(Boolean) as any
         }, { onConflict: 'setting_key' });
 
       // Update site config
@@ -128,7 +193,7 @@ const AdminSettings = () => {
           }
         }, { onConflict: 'setting_key' });
 
-      // Update hero config
+      // Update hero config (desktop static text)
       await supabase
         .from('admin_settings')
         .upsert({
@@ -183,17 +248,44 @@ const AdminSettings = () => {
     }
   };
 
-  const handleImageUpload = (imageUrl: string) => {
+  // Add new hero slide
+  const addHeroSlide = () => {
     setSettings(prev => ({
       ...prev,
-      hero_images: [...prev.hero_images, imageUrl]
+      hero_slides: [
+        ...prev.hero_slides,
+        {
+          image: '',
+          tag: 'NEW ARRIVAL',
+          title: 'New Collection',
+          subtitle: 'Check out our latest products',
+          buttonText: 'Shop Now',
+          buttonLink: '/products',
+        }
+      ]
     }));
   };
 
-  const removeImage = (index: number) => {
+  // Update a specific hero slide
+  const updateHeroSlide = (index: number, field: keyof HeroSlide, value: string) => {
     setSettings(prev => ({
       ...prev,
-      hero_images: prev.hero_images.filter((_, i) => i !== index)
+      hero_slides: prev.hero_slides.map((slide, i) => 
+        i === index ? { ...slide, [field]: value } : slide
+      )
+    }));
+  };
+
+  // Handle image upload for a specific slide
+  const handleSlideImageUpload = (index: number, imageUrl: string) => {
+    updateHeroSlide(index, 'image', imageUrl);
+  };
+
+  // Remove a hero slide
+  const removeHeroSlide = (index: number) => {
+    setSettings(prev => ({
+      ...prev,
+      hero_slides: prev.hero_slides.filter((_, i) => i !== index)
     }));
   };
 
@@ -378,55 +470,221 @@ const AdminSettings = () => {
           </Card>
         </div>
 
-        {/* Hero Content */}
+        {/* Hero Section - Tabbed for Desktop/Mobile */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Image className="h-5 w-5" />
-              Hero Section Content
+              Hero Section Configuration
             </CardTitle>
             <CardDescription>
-              Customize the main hero section text
+              Configure the hero banner for desktop and mobile views separately
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="hero_title">Hero Title</Label>
-              <Input
-                id="hero_title"
-                value={settings.hero_title}
-                onChange={(e) => setSettings(prev => ({ ...prev, hero_title: e.target.value }))}
-                placeholder="e.g., The People's Store"
-              />
-            </div>
-            <div>
-              <Label htmlFor="hero_subtitle">Hero Subtitle</Label>
-              <Textarea
-                id="hero_subtitle"
-                value={settings.hero_subtitle}
-                onChange={(e) => setSettings(prev => ({ ...prev, hero_subtitle: e.target.value }))}
-                placeholder="e.g., Discover high-quality products that combine style, functionality..."
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="hero_main_text">Hero Main Text</Label>
-              <Input
-                id="hero_main_text"
-                value={settings.hero_main_text}
-                onChange={(e) => setSettings(prev => ({ ...prev, hero_main_text: e.target.value }))}
-                placeholder="e.g., Store"
-              />
-            </div>
-            <div>
-              <Label htmlFor="hero_secondary_text">Hero Secondary Text</Label>
-              <Input
-                id="hero_secondary_text"
-                value={settings.hero_secondary_text}
-                onChange={(e) => setSettings(prev => ({ ...prev, hero_secondary_text: e.target.value }))}
-                placeholder="e.g., for Modern Living"
-              />
-            </div>
+          <CardContent>
+            <Tabs defaultValue="desktop" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="desktop" className="flex items-center gap-2">
+                  <Monitor className="h-4 w-4" />
+                  Desktop
+                </TabsTrigger>
+                <TabsTrigger value="mobile" className="flex items-center gap-2">
+                  <Smartphone className="h-4 w-4" />
+                  Mobile Slides
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Desktop Hero Configuration */}
+              <TabsContent value="desktop" className="space-y-6">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Desktop shows static text on the left with image carousel on the right
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="hero_title">Hero Title</Label>
+                    <Input
+                      id="hero_title"
+                      value={settings.hero_title}
+                      onChange={(e) => setSettings(prev => ({ ...prev, hero_title: e.target.value }))}
+                      placeholder="e.g., Welcome To"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">First line of heading</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="hero_main_text">Hero Main Text (Highlighted)</Label>
+                    <Input
+                      id="hero_main_text"
+                      value={settings.hero_main_text}
+                      onChange={(e) => setSettings(prev => ({ ...prev, hero_main_text: e.target.value }))}
+                      placeholder="e.g., Alphadom,"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">This appears with gradient styling</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="hero_secondary_text">Hero Secondary Text (Description)</Label>
+                  <Textarea
+                    id="hero_secondary_text"
+                    value={settings.hero_secondary_text}
+                    onChange={(e) => setSettings(prev => ({ ...prev, hero_secondary_text: e.target.value }))}
+                    placeholder="e.g., The Genesis of Your Online Business."
+                    rows={2}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Description text below the heading</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="hero_subtitle">Badge/Tag Text</Label>
+                  <Input
+                    id="hero_subtitle"
+                    value={settings.hero_subtitle}
+                    onChange={(e) => setSettings(prev => ({ ...prev, hero_subtitle: e.target.value }))}
+                    placeholder="e.g., Hot sales"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Shown as a small badge above the title</p>
+                </div>
+
+                {/* Preview */}
+                <div className="border rounded-lg p-4 bg-muted/30">
+                  <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                  <div className="bg-accent text-accent-foreground rounded-full px-3 py-1 text-xs inline-block mb-2">
+                    {settings.hero_subtitle || 'Badge Text'}
+                  </div>
+                  <h3 className="text-xl font-bold">{settings.hero_title || 'Hero Title'}</h3>
+                  <h3 className="text-xl font-bold text-primary">{settings.hero_main_text || 'Main Text'}</h3>
+                  <p className="text-muted-foreground text-sm mt-1">{settings.hero_secondary_text || 'Description...'}</p>
+                </div>
+              </TabsContent>
+
+              {/* Mobile Hero Slides Configuration */}
+              <TabsContent value="mobile" className="space-y-6">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Mobile shows full-screen image slides with overlay text. Each slide has its own content.
+                </p>
+                
+                <Button onClick={addHeroSlide} variant="outline" className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Slide
+                </Button>
+
+                {settings.hero_slides.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
+                    No slides yet. Click "Add New Slide" to create your first hero banner.
+                  </div>
+                )}
+
+                {settings.hero_slides.map((slide, index) => (
+                  <Card key={index} className="border-2">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">Slide {index + 1}</CardTitle>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => removeHeroSlide(index)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Image Upload */}
+                      <div>
+                        <Label>Slide Image</Label>
+                        <div className="mt-2">
+                          {slide.image ? (
+                            <div className="relative">
+                              <img 
+                                src={slide.image} 
+                                alt={`Slide ${index + 1}`} 
+                                className="w-full h-32 object-cover rounded-lg"
+                              />
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => updateHeroSlide(index, 'image', '')}
+                              >
+                                ×
+                              </Button>
+                            </div>
+                          ) : (
+                            <ImageUpload 
+                              onImageUploaded={(url) => handleSlideImageUpload(index, url)}
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Tag/Badge</Label>
+                          <Input
+                            value={slide.tag}
+                            onChange={(e) => updateHeroSlide(index, 'tag', e.target.value)}
+                            placeholder="e.g., LIMITED OFFER"
+                          />
+                        </div>
+                        <div>
+                          <Label>Title</Label>
+                          <Input
+                            value={slide.title}
+                            onChange={(e) => updateHeroSlide(index, 'title', e.target.value)}
+                            placeholder="e.g., Summer Tech Mega Sale"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label>Subtitle</Label>
+                        <Input
+                          value={slide.subtitle}
+                          onChange={(e) => updateHeroSlide(index, 'subtitle', e.target.value)}
+                          placeholder="e.g., Up to 40% off electronics"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Button Text</Label>
+                          <Input
+                            value={slide.buttonText}
+                            onChange={(e) => updateHeroSlide(index, 'buttonText', e.target.value)}
+                            placeholder="e.g., Shop Now"
+                          />
+                        </div>
+                        <div>
+                          <Label className="flex items-center gap-1">
+                            <LinkIcon className="h-3 w-3" />
+                            Button Link
+                          </Label>
+                          <Input
+                            value={slide.buttonLink}
+                            onChange={(e) => updateHeroSlide(index, 'buttonLink', e.target.value)}
+                            placeholder="e.g., /products"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Mini Preview */}
+                      {slide.image && (
+                        <div className="relative rounded-lg overflow-hidden h-24">
+                          <img src={slide.image} alt="" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40" />
+                          <div className="absolute bottom-2 left-2 text-white text-xs">
+                            <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">{slide.tag}</span>
+                            <p className="font-bold mt-1">{slide.title}</p>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
@@ -523,47 +781,6 @@ const AdminSettings = () => {
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Hero Images Management */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Image className="h-5 w-5" />
-              Hero Images
-            </CardTitle>
-            <CardDescription>
-              Manage images displayed in the hero carousel
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ImageUpload onImageUploaded={handleImageUpload} />
-            
-            {settings.hero_images.length > 0 && (
-              <>
-                <Separator />
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {settings.hero_images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={image}
-                        alt={`Hero ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(index)}
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
           </CardContent>
         </Card>
       </div>
