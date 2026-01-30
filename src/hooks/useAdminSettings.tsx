@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Individual hero slide configuration (for mobile)
+export interface HeroSlide {
+  image: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  buttonLink: string;
+}
+
 interface AdminSettings {
   site_name: string;
   site_description: string;
   hero_images: string[];
+  hero_slides: HeroSlide[]; // New: per-slide configuration for mobile
   navbar_logo: string;
+  // Desktop hero config (static text shown on left side)
   hero_title: string;
   hero_subtitle: string;
   hero_main_text: string;
@@ -28,11 +40,12 @@ export const useAdminSettings = () => {
     site_name: 'Alphadom',
     site_description: 'The Student Marketplace',
     hero_images: [],
+    hero_slides: [],
     navbar_logo: "/favicon.png",
-    hero_title: "Your Campus",
-    hero_subtitle: "Find budget-friendly products from verified vendors. Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰",
-    hero_main_text: "Marketplace",
-    hero_secondary_text: "Shop Smart, Save Big",
+    hero_title: "Welcome To",
+    hero_subtitle: "Hot sales",
+    hero_main_text: "Alphadom,",
+    hero_secondary_text: "The Genesis of Your Online Business.",
     about_hero_title: "Curating Quality Products",
     about_hero_subtitle: "We're on a mission to make quality products accessible, affordable, and beautiful for everyone.",
     about_story: "",
@@ -75,15 +88,31 @@ export const useAdminSettings = () => {
         return [];
       })();
 
+      // Parse hero_slides for mobile (per-image configuration)
+      const rawHeroSlides = settingsMap.hero_slides;
+      const parsedHeroSlides: HeroSlide[] = (() => {
+        if (Array.isArray(rawHeroSlides)) return rawHeroSlides;
+        if (typeof rawHeroSlides === 'string') {
+          try {
+            const parsed = JSON.parse(rawHeroSlides);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return [];
+      })();
+
       setSettings({
         site_name: settingsMap.site_config?.name || 'Alphadom',
         site_description: settingsMap.site_config?.description || 'The Student Marketplace',
         hero_images: parsedHeroImages.filter((u) => typeof u === 'string' && u.length > 0),
+        hero_slides: parsedHeroSlides,
         navbar_logo: settingsMap.navbar_config?.logo || "/favicon.png",
-        hero_title: settingsMap.hero_config?.title || "Your Campus",
-        hero_subtitle: settingsMap.hero_config?.subtitle || "Find budget-friendly products from verified vendors. Whether you're looking for textbooks, gadgets, or dorm essentials — we've got you covered! 💰",
-        hero_main_text: settingsMap.hero_config?.main_text || "Marketplace",
-        hero_secondary_text: settingsMap.hero_config?.secondary_text || "Shop Smart, Save Big",
+        hero_title: settingsMap.hero_config?.title || "Welcome To",
+        hero_subtitle: settingsMap.hero_config?.subtitle || "Hot sales",
+        hero_main_text: settingsMap.hero_config?.main_text || "Alphadom,",
+        hero_secondary_text: settingsMap.hero_config?.secondary_text || "The Genesis of Your Online Business.",
         about_hero_title: settingsMap.about_config?.hero_title || "Curating Quality Products",
         about_hero_subtitle: settingsMap.about_config?.hero_subtitle || "We're on a mission to make quality products accessible, affordable, and beautiful for everyone.",
         about_story: settingsMap.about_config?.story || "",
