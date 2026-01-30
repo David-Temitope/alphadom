@@ -131,16 +131,11 @@ const Auth = () => {
     setLoading(true);
     setError('');
 
-    const { error } = await resetPassword(resetEmail);
-    
-    if (error) {
-      setError("Invalid email");
-      toast.error('Password reset failed. Please try again.');
-    } else {
-      toast.success('Password reset email sent! Please check your inbox.');
-      setShowResetPassword(false);
-      setResetEmail('');
-    }
+    // Use a generic message to avoid leaking user existence
+    await resetPassword(resetEmail);
+    toast.success('If an account exists with this email, you will receive a reset link.');
+    setShowResetPassword(false);
+    setResetEmail('');
     
     setLoading(false);
   };
