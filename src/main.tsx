@@ -15,21 +15,3 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>
 );
-
-
-async function testSupabase() {
-  try {
-    // Replace 'test' with a real table name
-    const { data, error } = await supabase.from('profiles').select('*')
-
-    if (error) {
-      console.error('Supabase error:', error)
-    } else {
-      console.log('Supabase data:', data)
-    }
-  } catch (err) {
-    console.error('Unexpected error:', err)
-  }
-}
-
-testSupabase()

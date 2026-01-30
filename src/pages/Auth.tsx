@@ -18,7 +18,7 @@ const checkPasswordStrength = (password: string) => {
     lowercase: /[a-z]/.test(password),
     uppercase: /[A-Z]/.test(password),
     digit: /[0-9]/.test(password),
-    symbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    symbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
     length: password.length >= 8,
   };
   
@@ -132,16 +132,12 @@ const Auth = () => {
     setLoading(true);
     setError('');
 
-    const { error } = await resetPassword(resetEmail);
+    await resetPassword(resetEmail);
     
-    if (error) {
-      setError("Invalid email");
-      toast.error('Password reset failed. Please try again.');
-    } else {
-      toast.success('Password reset email sent! Please check your inbox.');
-      setShowResetPassword(false);
-      setResetEmail('');
-    }
+    // Generic message to prevent user enumeration
+    toast.success('If an account exists, you will receive a password reset link.');
+    setShowResetPassword(false);
+    setResetEmail('');
     
     setLoading(false);
   };
