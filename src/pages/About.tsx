@@ -33,10 +33,10 @@ const About = () => {
   ];
 
   const timeline = [
-    { year: "2025", title: "Founded", description: "Alphadom was born in Abuja, Nigeria with a vision to transform African e-commerce." },
-    { year: "2025", title: "First 100 Vendors", description: "Reached our first milestone of 100 verified vendors on the platform." },
-    { year: "2026", title: "Expansion", description: "Expanding operations across Nigeria and West Africa." },
-    { year: "2030", title: "Vision", description: "Reaching 500,000+ sellers across Africa with 4M+ products sold." },
+    { year: "2025", title: "Launch Year", description: "Alphadom launches in Abuja, Nigeria — building the foundation for a new era of African e-commerce." },
+    { year: "2026", title: "Growing Strong", description: "Our goal: onboard 1,000+ verified vendors and establish Alphadom as a trusted marketplace." },
+    { year: "2027", title: "National Expansion", description: "Expanding operations to all major cities across Nigeria with fast, reliable delivery." },
+    { year: "2030", title: "Continental Vision", description: "Reaching 500,000+ sellers across Africa with 4M+ products sold — empowering entrepreneurs everywhere." },
   ];
 
   return (
@@ -127,9 +127,9 @@ const About = () => {
       <section className="py-16 bg-card">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <Badge className="bg-primary/10 text-primary border-0 mb-4">Our Timeline</Badge>
-            <h2 className="text-3xl font-bold text-foreground mb-4">Our Journey So Far</h2>
-            <p className="text-muted-foreground">From a vision to a growing platform serving entrepreneurs across Africa.</p>
+            <Badge className="bg-primary/10 text-primary border-0 mb-4">Our Roadmap</Badge>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Our Journey Ahead</h2>
+            <p className="text-muted-foreground">From vision to reality — here's how we plan to transform African e-commerce by 2030.</p>
           </div>
 
           <div className="relative">

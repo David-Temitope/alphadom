@@ -222,8 +222,27 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
         </div>
       </div>
 
-      {/* Main Image */}
-      <div className="relative aspect-square bg-muted">
+      {/* Main Image with Swipe Support */}
+      <div 
+        className="relative aspect-square bg-muted touch-pan-y"
+        onTouchStart={(e) => {
+          const touch = e.touches[0];
+          (e.currentTarget as any).touchStartX = touch.clientX;
+        }}
+        onTouchEnd={(e) => {
+          const touch = e.changedTouches[0];
+          const startX = (e.currentTarget as any).touchStartX;
+          const diff = touch.clientX - startX;
+          
+          if (Math.abs(diff) > 50) {
+            if (diff > 0 && selectedImageIndex > 0) {
+              setSelectedImageIndex(selectedImageIndex - 1);
+            } else if (diff < 0 && selectedImageIndex < images.length - 1) {
+              setSelectedImageIndex(selectedImageIndex + 1);
+            }
+          }
+        }}
+      >
         <img
           src={currentImage}
           alt={product.name}

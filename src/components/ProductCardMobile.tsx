@@ -130,17 +130,13 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
             onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
           />
           
-          {/* Rating badge */}
-          <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm text-foreground text-[10px] px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-            {product.rating && product.rating > 0 ? (
-              <>
-                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                {product.rating.toFixed(1)}
-              </>
-            ) : (
-              <span className="text-muted-foreground">New</span>
-            )}
-          </div>
+          {/* Rating badge - only show if there's a meaningful rating */}
+          {product.rating != null && product.rating > 0 && (
+            <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm text-foreground text-[10px] px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              {product.rating.toFixed(1)}
+            </div>
+          )}
 
           {/* Discount badge */}
           {hasDiscount && (

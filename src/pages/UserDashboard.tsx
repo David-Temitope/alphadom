@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, ShoppingBag, Heart, MapPin, CreditCard, 
   Settings, LogOut, Gift, Ticket, Package, ChevronRight,
-  ShoppingCart, Star, Loader2
+  ShoppingCart, Star, Loader2, Store
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ import { useOrders } from '@/hooks/useOrders';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
+import { useVendors } from '@/hooks/useVendors';
+import { useShopApplications } from '@/hooks/useShopApplications';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileAccountPage from '@/components/MobileAccountPage';
@@ -32,6 +34,8 @@ const UserDashboard = () => {
   const { wishlistItems } = useWishlist();
   const { products } = useProducts();
   const { addToCart } = useCart();
+  const { isVendor } = useVendors();
+  const { userApplication } = useShopApplications();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
@@ -39,6 +43,9 @@ const UserDashboard = () => {
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string } | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
+  
+  // Check if user can become a seller
+  const canBecomeVendor = !isVendor && !userApplication;
 
   // Fetch user profile
   useEffect(() => {
@@ -499,23 +506,45 @@ const UserDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Refer & Earn */}
-            <Card className="border-border/50 bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden relative">
-              <CardContent className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-2">Refer & Earn!</h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Invite your friends and get ₦500 for every successful purchase.
-                </p>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Get Referral Link
-                </Button>
-                
-                {/* Decorative elements */}
-                <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20">
-                  <Gift className="w-full h-full text-primary" />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Become a Seller / Refer & Earn */}
+            {canBecomeVendor ? (
+              <Card className="border-border/50 bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden relative">
+                <CardContent className="p-6">
+                  <h2 className="text-lg font-semibold text-foreground mb-2">Start Selling on Alphadom!</h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Turn your products into profit. Apply to become a vendor and reach thousands of buyers.
+                  </p>
+                  <Link to="/become-a-vendor">
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                      <Store className="h-4 w-4 mr-2" />
+                      Become a Seller
+                    </Button>
+                  </Link>
+                  
+                  {/* Decorative elements */}
+                  <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20">
+                    <Store className="w-full h-full text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-border/50 bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden relative">
+                <CardContent className="p-6">
+                  <h2 className="text-lg font-semibold text-foreground mb-2">Refer & Earn!</h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Invite your friends and get ₦500 for every successful purchase.
+                  </p>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    Get Referral Link
+                  </Button>
+                  
+                  {/* Decorative elements */}
+                  <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20">
+                    <Gift className="w-full h-full text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </main>
       </div>

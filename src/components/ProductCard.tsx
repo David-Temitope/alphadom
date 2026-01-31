@@ -146,32 +146,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
         
         <CardContent className="flex-1 p-4">
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-2">
-            {product.rating && product.rating > 0 ? (
-              <>
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-3.5 h-3.5 ${
-                        i < Math.floor(product.rating!)
-                          ? 'fill-amber-400 text-amber-400'
-                          : i < product.rating!
-                          ? 'fill-amber-200 text-amber-200'
-                          : 'fill-muted text-muted'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground ml-1">
-                  ({product.rating.toFixed(1)})
-                </span>
-              </>
-            ) : (
-              <span className="text-xs text-muted-foreground">New</span>
-            )}
-          </div>
+          {/* Rating - only show if rating exists and is greater than 0 */}
+          {product.rating != null && product.rating > 0 && (
+            <div className="flex items-center gap-1 mb-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-3.5 h-3.5 ${
+                      i < Math.floor(product.rating!)
+                        ? 'fill-amber-400 text-amber-400'
+                        : i < product.rating!
+                        ? 'fill-amber-200 text-amber-200'
+                        : 'fill-muted text-muted'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground ml-1">
+                ({product.rating.toFixed(1)})
+              </span>
+            </div>
+          )}
           
           {/* Product name with badges
               Badge Logic:
