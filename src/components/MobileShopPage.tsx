@@ -41,16 +41,18 @@ export const MobileShopPage: React.FC = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
-  // Auto-slide banner
+  // Auto-slide banner - use hero_slides if available, fallback to hero_images
+  const slideCount = settings.hero_slides.length > 0 ? settings.hero_slides.length : settings.hero_images.length;
+  
   useEffect(() => {
-    if (settings.hero_images.length <= 1) return;
+    if (slideCount <= 1) return;
     const interval = setInterval(() => {
       setCurrentBannerIndex(prev => 
-        prev === settings.hero_images.length - 1 ? 0 : prev + 1
+        prev === slideCount - 1 ? 0 : prev + 1
       );
     }, 5000);
     return () => clearInterval(interval);
-  }, [settings.hero_images.length]);
+  }, [slideCount]);
 
   // Get unique categories
   const categories = useMemo(() => {
@@ -323,35 +325,35 @@ export const MobileShopPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Promo Banner with Admin Images */}
+      {/* Promo Banner with Admin Slide Configuration - synced with MobileHomepage */}
       <div className="px-4 py-4">
-        {settings.hero_images.length > 0 ? (
+        {settings.hero_slides.length > 0 ? (
           <div className="relative rounded-2xl overflow-hidden">
-            <Link to="/products">
+            <Link to={settings.hero_slides[currentBannerIndex]?.buttonLink || '/products'}>
               <img 
-                src={settings.hero_images[currentBannerIndex]} 
+                src={settings.hero_slides[currentBannerIndex]?.image} 
                 alt="Promo Banner"
                 className="w-full h-40 object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-center px-4">
                 <Badge className="bg-primary/90 text-primary-foreground border-0 text-xs font-semibold mb-2 w-fit">
-                  {settings.hero_secondary_text || 'SPECIAL OFFER'}
+                  {settings.hero_slides[currentBannerIndex]?.tag || 'SPECIAL OFFER'}
                 </Badge>
                 <h3 className="text-lg font-bold text-white mb-1">
-                  {settings.hero_title}
+                  {settings.hero_slides[currentBannerIndex]?.title || settings.hero_title}
                 </h3>
                 <p className="text-sm text-white/80">
-                  {settings.hero_main_text}
+                  {settings.hero_slides[currentBannerIndex]?.subtitle || settings.hero_main_text}
                 </p>
               </div>
             </Link>
             
             {/* Banner Navigation */}
-            {settings.hero_images.length > 1 && (
+            {settings.hero_slides.length > 1 && (
               <>
                 <button
                   onClick={() => setCurrentBannerIndex(prev => 
-                    prev === 0 ? settings.hero_images.length - 1 : prev - 1
+                    prev === 0 ? settings.hero_slides.length - 1 : prev - 1
                   )}
                   className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white"
                 >
@@ -359,7 +361,7 @@ export const MobileShopPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setCurrentBannerIndex(prev => 
-                    prev === settings.hero_images.length - 1 ? 0 : prev + 1
+                    prev === settings.hero_slides.length - 1 ? 0 : prev + 1
                   )}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white"
                 >
@@ -368,7 +370,7 @@ export const MobileShopPage: React.FC = () => {
                 
                 {/* Dots */}
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {settings.hero_images.map((_, idx) => (
+                  {settings.hero_slides.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentBannerIndex(idx)}
@@ -380,6 +382,27 @@ export const MobileShopPage: React.FC = () => {
                 </div>
               </>
             )}
+          </div>
+        ) : settings.hero_images.length > 0 ? (
+          <div className="relative rounded-2xl overflow-hidden">
+            <Link to="/products">
+              <img 
+                src={settings.hero_images[currentBannerIndex]} 
+                alt="Promo Banner"
+                className="w-full h-40 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-center px-4">
+                <Badge className="bg-primary/90 text-primary-foreground border-0 text-xs font-semibold mb-2 w-fit">
+                  {settings.hero_subtitle || 'SPECIAL OFFER'}
+                </Badge>
+                <h3 className="text-lg font-bold text-white mb-1">
+                  {settings.hero_title}
+                </h3>
+                <p className="text-sm text-white/80">
+                  {settings.hero_main_text}
+                </p>
+              </div>
+            </Link>
           </div>
         ) : (
           <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-4 border border-primary/20">

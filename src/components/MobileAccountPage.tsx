@@ -3,13 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, Settings, Camera, ShoppingBag, Heart, 
   Truck, User, HelpCircle, LogOut, ChevronRight, Loader2,
-  Award
+  Award, Store
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrders } from '@/hooks/useOrders';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useVendors } from '@/hooks/useVendors';
+import { useShopApplications } from '@/hooks/useShopApplications';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,6 +28,8 @@ export const MobileAccountPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const { orders, loading: ordersLoading } = useOrders();
   const { wishlistItems } = useWishlist();
+  const { isVendor } = useVendors();
+  const { userApplication } = useShopApplications();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -33,6 +37,9 @@ export const MobileAccountPage: React.FC = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [userReviewsCount, setUserReviewsCount] = useState(0);
+  
+  // Check if user can become a seller (not a vendor and no pending/approved application)
+  const canBecomeVendor = !isVendor && !userApplication;
 
   // Fetch user profile
   useEffect(() => {
@@ -358,8 +365,22 @@ export const MobileAccountPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Become a Seller Button */}
+      {canBecomeVendor && (
+        <div className="px-4 mt-6">
+          <Link to="/become-a-vendor">
+            <Button
+              className="w-full h-12 bg-primary text-primary-foreground"
+            >
+              <Store className="h-5 w-5 mr-2" />
+              Become a Seller
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Sign Out Button */}
-      <div className="px-4 mt-8">
+      <div className="px-4 mt-6">
         <Button
           variant="outline"
           className="w-full h-12 text-destructive border-destructive/30 hover:bg-destructive/10"
