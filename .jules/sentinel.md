@@ -7,3 +7,8 @@
 **Vulnerability:** Password reset flow returned specific "Invalid email" messages.
 **Learning:** Specific error messages in authentication flows allow attackers to verify whether specific emails have accounts on the platform.
 **Prevention:** Always use generic messages like "If an account exists, you will receive a reset link" to ensure the response is identical regardless of user existence.
+
+## 2026-01-31 - [Defense-in-Depth Content Security Policy]
+**Vulnerability:** The application lacked a Content Security Policy (CSP), leaving it more vulnerable to Cross-Site Scripting (XSS) and other injection attacks if other defenses failed.
+**Learning:** While server-side headers are preferred, adding a CSP via a meta tag in `index.html` provides a necessary client-side fallback and defense-in-depth for single-page applications.
+**Prevention:** Always include a baseline CSP meta tag in the main `index.html` tailored to the application's external dependencies (Supabase, Paystack, Google Fonts).
