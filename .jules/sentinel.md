@@ -12,3 +12,8 @@
 **Vulnerability:** The application lacked a Content Security Policy (CSP), leaving it more vulnerable to Cross-Site Scripting (XSS) and other injection attacks if other defenses failed.
 **Learning:** While server-side headers are preferred, adding a CSP via a meta tag in `index.html` provides a necessary client-side fallback and defense-in-depth for single-page applications.
 **Prevention:** Always include a baseline CSP meta tag in the main `index.html` tailored to the application's external dependencies (Supabase, Paystack, Google Fonts).
+
+## 2026-02-01 - [Inconsistent Password Strength Requirements]
+**Vulnerability:** The password reset flow had significantly weaker validation (6-character minimum) compared to the main registration flow (8+ characters with mixed types), creating a weak link in account security.
+**Learning:** Security policies must be enforced consistently across all entry points where sensitive data (like passwords) is handled. UI feedback should mirror these requirements to guide users.
+**Prevention:** Centralize sensitive validation logic into shared utilities and reuse them across all relevant pages (Auth, Reset Password, Settings) to ensure a uniform security posture.

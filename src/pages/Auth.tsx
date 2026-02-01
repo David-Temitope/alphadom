@@ -11,39 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Mail, Lock, User, ShoppingCart, Shield, Sparkles, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-// Password strength checker
-const checkPasswordStrength = (password: string) => {
-  const checks = {
-    lowercase: /[a-z]/.test(password),
-    uppercase: /[A-Z]/.test(password),
-    digit: /[0-9]/.test(password),
-    symbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
-    length: password.length >= 8,
-  };
-  
-  const passedChecks = Object.values(checks).filter(Boolean).length;
-  const strength = (passedChecks / 5) * 100;
-  
-  let label = 'Very Weak';
-  let color = 'bg-destructive';
-  
-  if (strength >= 100) {
-    label = 'Strong';
-    color = 'bg-primary';
-  } else if (strength >= 80) {
-    label = 'Good';
-    color = 'bg-emerald-500';
-  } else if (strength >= 60) {
-    label = 'Fair';
-    color = 'bg-yellow-500';
-  } else if (strength >= 40) {
-    label = 'Weak';
-    color = 'bg-orange-500';
-  }
-  
-  return { checks, strength, label, color };
-};
+import { checkPasswordStrength } from '@/utils/passwordValidation';
 
 const Auth = () => {
   const { user, signIn, signUp, resetPassword } = useAuth();
