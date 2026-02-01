@@ -10,10 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useBlogPosts, BlogPost } from '@/hooks/useBlogPosts';
-import { Plus, Edit, Trash2, Eye, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Upload, X, Image as ImageIcon, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ContentResearch } from '@/components/admin/ContentResearch';
 
 const AdminBlog = () => {
   const { posts, loading, fetchPosts, createPost, updatePost, deletePost, uploadImage } = useBlogPosts();
@@ -141,15 +143,27 @@ const AdminBlog = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Blog Management</h1>
-            <p className="text-muted-foreground">Create and manage blog posts</p>
+        <Tabs defaultValue="posts" className="w-full">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Blog Management</h1>
+              <p className="text-muted-foreground">Create and manage blog posts</p>
+            </div>
+            <TabsList>
+              <TabsTrigger value="posts">Posts</TabsTrigger>
+              <TabsTrigger value="research" className="gap-2">
+                <Search className="h-4 w-4" />
+                Research
+              </TabsTrigger>
+            </TabsList>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
-          }}>
+          
+          <TabsContent value="posts" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) resetForm();
+              }}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -319,106 +333,112 @@ Regular paragraph text goes here.
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+            </div>
 
-        {/* Posts Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Blog Posts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No blog posts yet. Create your first post!
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Author</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {posts.map((post) => (
-                      <TableRow key={post.id}>
-                        <TableCell className="font-medium max-w-[300px]">
-                          <div className="truncate">{post.title}</div>
-                          {post.subtitle && (
-                            <div className="text-sm text-muted-foreground truncate">{post.subtitle}</div>
-                          )}
-                        </TableCell>
-                        <TableCell>{post.author_name}</TableCell>
-                        <TableCell>
-                          <Badge variant={post.published ? 'default' : 'secondary'}>
-                            {post.published ? 'Published' : 'Draft'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(post.created_at), 'MMM d, yyyy')}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {post.published && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                asChild
-                              >
-                                <a href={`/blog/${post.id}`} target="_blank" rel="noopener noreferrer">
-                                  <Eye className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEditDialog(post)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete "{post.title}"? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDelete(post.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            {/* Posts Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>All Blog Posts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+                  </div>
+                ) : posts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No blog posts yet. Create your first post!
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Author</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {posts.map((post) => (
+                          <TableRow key={post.id}>
+                            <TableCell className="font-medium max-w-[300px]">
+                              <div className="truncate">{post.title}</div>
+                              {post.subtitle && (
+                                <div className="text-sm text-muted-foreground truncate">{post.subtitle}</div>
+                              )}
+                            </TableCell>
+                            <TableCell>{post.author_name}</TableCell>
+                            <TableCell>
+                              <Badge variant={post.published ? 'default' : 'secondary'}>
+                                {post.published ? 'Published' : 'Draft'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {format(new Date(post.created_at), 'MMM d, yyyy')}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                {post.published && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    asChild
                                   >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                                    <a href={`/blog/${post.id}`} target="_blank" rel="noopener noreferrer">
+                                      <Eye className="h-4 w-4" />
+                                    </a>
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openEditDialog(post)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete "{post.title}"? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDelete(post.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+      
+      <TabsContent value="research" className="mt-6">
+        <ContentResearch />
+      </TabsContent>
+    </Tabs>
       </div>
     </AdminLayout>
   );

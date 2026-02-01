@@ -49,8 +49,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { MarketResearch } from "@/components/vendor/MarketResearch";
 
-type ActiveTab = "dashboard" | "products" | "orders" | "settings" | "subscription";
+type ActiveTab = "dashboard" | "products" | "orders" | "settings" | "subscription" | "market-research";
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
@@ -215,6 +216,7 @@ const VendorDashboard = () => {
     { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
     { id: "products" as const, label: "Products", icon: Package },
     { id: "orders" as const, label: "Orders", icon: ShoppingCart },
+    { id: "market-research" as const, label: "Market Insights", icon: TrendingUp },
     { id: "settings" as const, label: "Store Settings", icon: Settings },
     { id: "subscription" as const, label: "Subscription", icon: CreditCard },
   ];
@@ -356,6 +358,7 @@ const VendorDashboard = () => {
               {activeTab === "dashboard" && "Dashboard Overview"}
               {activeTab === "products" && "My Products"}
               {activeTab === "orders" && "Orders"}
+              {activeTab === "market-research" && "Market Insights"}
               {activeTab === "settings" && "Store Settings"}
               {activeTab === "subscription" && "Subscription"}
             </h1>
@@ -953,6 +956,11 @@ const VendorDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          )}
+
+          {/* Market Research Tab */}
+          {activeTab === "market-research" && (
+            <MarketResearch />
           )}
 
           {/* Subscription Tab */}

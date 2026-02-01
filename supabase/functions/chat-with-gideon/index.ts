@@ -6,6 +6,62 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Keywords that trigger web search for external information
+const WEB_SEARCH_TRIGGERS = [
+  'what is', 'how to', 'latest', 'trending', 'news', 'price of',
+  'compare', 'vs', 'versus', 'best', 'top', 'review', 'recommend',
+  'market', 'trend', 'fashion', 'technology', 'update', 'new release'
+];
+
+// Check if user message needs web search
+function needsWebSearch(message: string): boolean {
+  const lowerMessage = message.toLowerCase();
+  return WEB_SEARCH_TRIGGERS.some(trigger => lowerMessage.includes(trigger));
+}
+
+// Perform Firecrawl web search
+async function performWebSearch(query: string): Promise<string> {
+  const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
+  if (!FIRECRAWL_API_KEY) {
+    console.log('Firecrawl not configured, skipping web search');
+    return '';
+  }
+
+  try {
+    const response = await fetch('https://api.firecrawl.dev/v1/search', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `${query} Nigeria`,
+        limit: 5,
+        country: 'NG',
+        lang: 'en',
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Firecrawl search failed:', response.status);
+      return '';
+    }
+
+    const data = await response.json();
+    if (data.success && data.data && Array.isArray(data.data)) {
+      const webResults = data.data.slice(0, 3).map((item: any) => 
+        `- ${item.title}: ${item.description || item.markdown?.slice(0, 150) || ''} (Source: ${new URL(item.url).hostname})`
+      ).join('\n');
+      
+      return webResults ? `\nWEB SEARCH RESULTS for "${query}":\n${webResults}\n` : '';
+    }
+    return '';
+  } catch (error) {
+    console.error('Web search error:', error);
+    return '';
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
@@ -95,8 +151,16 @@ serve(async (req) => {
       user_id: v.user_id
     })) || [];
 
+    // Check if the latest user message needs web search
+    const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop();
+    let webSearchContext = '';
+    if (lastUserMessage && needsWebSearch(lastUserMessage.content)) {
+      console.log('Triggering web search for:', lastUserMessage.content);
+      webSearchContext = await performWebSearch(lastUserMessage.content);
+    }
+
     const platformContext = `
-PLATFORM DATA (Use ONLY this information):
+PLATFORM DATA (Use ONLY this information for platform-specific questions):
 
 PRODUCTS (${productList.length} available):
 ${productList.map(p => `[PRODUCT_ID:${p.id}] ${p.name}: ₦${p.price} (Category: ${p.category}, Stock: ${p.stock}, Rating: ${p.rating}, Image: ${p.image || 'none'})`).join('\n')}
@@ -105,6 +169,7 @@ VENDORS (${vendorList.length} active):
 ${vendorList.map(v => `[VENDOR_ID:${v.id}] ${v.name} (Category: ${v.category}, Products: ${v.products}, Image: ${v.image || 'none'}, UserID: ${v.user_id})`).join('\n')}
 
 CURRENCY: All prices are in Nigerian Naira (₦).
+${webSearchContext}
 `;
 
     const systemPrompt = `You are Gideon, a helpful AI assistant for Alphadom, an e-commerce platform in Nigeria.
@@ -120,17 +185,23 @@ RESPONSE FORMAT RULES:
    [[VENDOR:vendor_id:vendor_name:vendor_image_url:user_id]]
    Example: [[VENDOR:xyz789:Fashion Hub:/images/avatar.jpg:user123]]
 
-3. ONLY use products and vendors from the platform data above
+3. ONLY use products and vendors from the platform data above for platform-specific questions
 4. Always use Nigerian Naira (₦) for prices
 5. Keep answers concise and helpful
 6. If asked about products in a category, show the product cards
-7. If information isn't in the data, say so clearly
+7. If information isn't in platform data, say so clearly
+
+WEB SEARCH CAPABILITY:
+- When web search results are provided above, use them to answer questions about trends, news, comparisons, and general knowledge
+- Combine web search results with platform data when relevant (e.g., "Here are the latest fashion trends... and here are some products on Alphadom that match these trends")
+- Always cite the source when using web search information
 
 You help users with:
 - Finding actual products on the platform (show product cards!)
 - Information about real vendors
 - Platform features and usage
 - Product categories and availability
+- General questions about trends, fashion, technology (using web search when available)
 
 You DO NOT:
 - Make up products or prices

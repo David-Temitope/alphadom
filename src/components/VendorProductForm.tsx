@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useVendors } from '@/hooks/useVendors';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { DescriptionEnhancer } from '@/components/vendor/DescriptionEnhancer';
 
 interface VendorProductFormProps {
   onProductAdded: () => void;
@@ -533,7 +534,15 @@ export const VendorProductForm: React.FC<VendorProductFormProps> = ({ onProductA
       />
 
       <div className="space-y-2">
-        <Label htmlFor="description">Short Description</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description">Short Description</Label>
+          <DescriptionEnhancer 
+            productName={newProduct.name}
+            category={newProduct.category}
+            onApplyDescription={(desc) => setNewProduct({...newProduct, description: desc})}
+            onApplyTags={(tags) => setNewProduct({...newProduct, tags: [...newProduct.tags.split(',').map(t => t.trim()).filter(t => t), ...tags].join(', ')})}
+          />
+        </div>
         <Textarea 
           id="description" 
           placeholder="Brief product description"
