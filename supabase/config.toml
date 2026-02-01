@@ -1,4 +1,13 @@
 project_id = "ksdlqjyayvybbiiyfrxf"
 
 [functions.chat-with-gideon]
-verify_jwt = true
+verify_jwt = false
+
+[functions.firecrawl-scrape]
+verify_jwt = false
+
+[functions.firecrawl-search]
+verify_jwt = false
+
+[functions.firecrawl-map]
+verify_jwt = false
