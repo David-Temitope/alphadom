@@ -273,11 +273,11 @@ export const DispatchApplicationForm = ({ open, onOpenChange }: DispatchApplicat
               />
               <Label htmlFor="terms" className="text-sm">
                 I agree to the{' '}
-                <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   terms and conditions
                 </a>{' '}
                 and{' '}
-                <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   privacy policy
                 </a>
               </Label>
