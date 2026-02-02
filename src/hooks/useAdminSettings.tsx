@@ -62,13 +62,18 @@ export const useAdminSettings = () => {
 
   const fetchSettings = async () => {
     try {
+      // Fetch hero_slides specifically to ensure RLS allows public access
       const { data, error } = await supabase
         .from('admin_settings')
-        .select('*');
+        .select('*')
+        .in('setting_key', ['site_config', 'navbar_config', 'hero_config', 'hero_images', 'hero_slides', 'about_config', 'bank_details', 'theme_config']);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching admin settings:', error);
+        throw error;
+      }
 
-      const settingsMap = data.reduce((acc, setting) => {
+      const settingsMap = (data || []).reduce((acc, setting) => {
         acc[setting.setting_key] = setting.setting_value;
         return acc;
       }, {} as Record<string, any>);

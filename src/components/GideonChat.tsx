@@ -44,8 +44,15 @@ const VendorCard = memo(({ id, name, image, userId }: { id: string; name: string
     }
   };
   
-  // Use placeholder if image is empty, 'none', or undefined
-  const displayImage = image && image !== 'none' && image.trim() !== '' ? image : '/placeholder.svg';
+  // Use placeholder if image is empty, 'none', undefined, null, or just whitespace
+  const getValidImage = (img?: string): string => {
+    if (!img || img === 'none' || img === 'null' || img === 'undefined' || img.trim() === '') {
+      return '/placeholder.svg';
+    }
+    return img;
+  };
+  
+  const displayImage = getValidImage(image);
   
   return (
     <div 
@@ -55,10 +62,13 @@ const VendorCard = memo(({ id, name, image, userId }: { id: string; name: string
       <img 
         src={displayImage} 
         alt={name}
-        className="w-12 h-12 object-cover rounded-full"
+        className="w-12 h-12 object-cover rounded-full bg-muted"
         loading="lazy"
         onError={(e) => {
-          (e.target as HTMLImageElement).src = '/placeholder.svg';
+          const target = e.target as HTMLImageElement;
+          if (target.src !== '/placeholder.svg') {
+            target.src = '/placeholder.svg';
+          }
         }}
       />
       <div className="flex flex-col">
