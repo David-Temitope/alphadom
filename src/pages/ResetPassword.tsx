@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, CheckCircle, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Lock, CheckCircle, Eye, EyeOff, AlertCircle, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { checkPasswordStrength, isPasswordStrong } from '@/utils/passwordValidation';
+import { Progress } from '@/components/ui/progress';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -53,6 +55,8 @@ const ResetPassword = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const passwordStrength = React.useMemo(() => checkPasswordStrength(password), [password]);
+
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -62,8 +66,8 @@ const ResetPassword = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!isPasswordStrong(password)) {
+      setError('Weak Password - Include uppercase, lowercase, digit and symbol (min 8 chars)');
       return;
     }
 
@@ -86,8 +90,8 @@ const ResetPassword = () => {
       setTimeout(() => {
         navigate('/auth');
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to reset password');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset password');
       toast.error('Password reset failed');
     } finally {
       setLoading(false);
@@ -182,7 +186,6 @@ const ResetPassword = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
               />
               <button
                 type="button"
@@ -192,6 +195,43 @@ const ResetPassword = () => {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+
+            {/* Password Strength Indicator */}
+            {password && (
+              <div className="space-y-2 mt-2">
+                <div className="flex items-center gap-2">
+                  <Progress value={passwordStrength.strength} className={`h-2 ${passwordStrength.color}`} />
+                  <span className={`text-xs font-medium ${
+                    passwordStrength.strength >= 100 ? 'text-primary' :
+                    passwordStrength.strength >= 60 ? 'text-yellow-600' : 'text-destructive'
+                  }`}>
+                    {passwordStrength.label}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1 text-xs">
+                  <div className={`flex items-center gap-1 ${passwordStrength.checks.lowercase ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {passwordStrength.checks.lowercase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    Lowercase
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordStrength.checks.uppercase ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {passwordStrength.checks.uppercase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    Uppercase
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordStrength.checks.digit ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {passwordStrength.checks.digit ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    Number
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordStrength.checks.symbol ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {passwordStrength.checks.symbol ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    Symbol
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordStrength.checks.length ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {passwordStrength.checks.length ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    8+ characters
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -206,7 +246,6 @@ const ResetPassword = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                minLength={6}
               />
               <button
                 type="button"

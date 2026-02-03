@@ -541,7 +541,7 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                     })}
                   />
                   <Label htmlFor="return_policy" className="text-sm">
-                    I agree to the <a href="/return-policy" className="text-primary underline" target="_blank">Return Policy</a>
+                    I agree to the <a href="/return-policy" className="text-primary underline" target="_blank" rel="noopener noreferrer">Return Policy</a>
                   </Label>
                 </div>
 
@@ -555,7 +555,7 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                     })}
                   />
                   <Label htmlFor="refund_policy" className="text-sm">
-                    I agree to the <a href="/refund-policy" className="text-primary underline" target="_blank">Refund Policy</a>
+                    I agree to the <a href="/refund-policy" className="text-primary underline" target="_blank" rel="noopener noreferrer">Refund Policy</a>
                   </Label>
                 </div>
 
@@ -569,7 +569,7 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                     })}
                   />
                   <Label htmlFor="delivery_policy" className="text-sm">
-                    I agree to the <a href="/delivery-policy" className="text-primary underline" target="_blank">Delivery Policy</a>
+                    I agree to the <a href="/delivery-policy" className="text-primary underline" target="_blank" rel="noopener noreferrer">Delivery Policy</a>
                   </Label>
                 </div>
 
@@ -583,7 +583,7 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                     })}
                   />
                   <Label htmlFor="dispute_policy" className="text-sm">
-                    I agree to the <a href="/dispute-policy" className="text-primary underline" target="_blank">Dispute Resolution Policy</a>
+                    I agree to the <a href="/dispute-policy" className="text-primary underline" target="_blank" rel="noopener noreferrer">Dispute Resolution Policy</a>
                   </Label>
                 </div>
               </div>
