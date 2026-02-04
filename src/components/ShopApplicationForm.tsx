@@ -78,6 +78,9 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
       const filePath = `id-documents/${fileName}`;
 
+      // SECURITY: ID images contain sensitive personal information.
+      // TODO: Move these uploads to a private bucket (e.g., 'receipts-private' or a dedicated 'vendor-ids-private' bucket)
+      // and use signed URLs for access. Currently, they are stored in the public 'product-images' bucket.
       const { error: uploadError } = await supabase.storage
         .from('product-images')
         .upload(filePath, file);

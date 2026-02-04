@@ -166,7 +166,7 @@ const Orders = () => {
     const phone = vendorPhones[vendorId].replace(/\D/g, '');
     const formattedPhone = phone.startsWith('0') ? `234${phone.slice(1)}` : phone;
     const message = encodeURIComponent(`Hi, I have a question about my order #${orderId.slice(0, 8)}`);
-    window.open(`https://wa.me/${formattedPhone}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${formattedPhone}?text=${message}`, '_blank', 'noopener,noreferrer');
   };
 
   const getStatusColor = (status: string) => {

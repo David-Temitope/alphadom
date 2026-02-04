@@ -85,7 +85,7 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
 
   const handleClick = () => {
     if (ad?.target_url) {
-      window.open(ad.target_url, '_blank');
+      window.open(ad.target_url, '_blank', 'noopener,noreferrer');
     } else if (ad?.target_product_id) {
       navigate(`/product/${ad.target_product_id}`);
     } else if (ad?.target_vendor_id) {
