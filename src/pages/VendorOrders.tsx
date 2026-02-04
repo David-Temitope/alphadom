@@ -258,7 +258,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
               src={order.receipt_image}
               alt="Payment receipt"
               className="w-40 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => window.open(order.receipt_image, "_blank")}
+              onClick={() => window.open(order.receipt_image, "_blank", "noopener,noreferrer")}
             />
           </div>
         )}

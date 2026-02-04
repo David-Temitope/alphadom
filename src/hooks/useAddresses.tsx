@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface UserAddress {
   id: string;
@@ -45,7 +46,7 @@ export const useAddresses = () => {
       if (error) throw error;
       setAddresses(data || []);
     } catch (error) {
-      console.error('Error fetching addresses:', error);
+      logger.error('Error fetching addresses:', error);
       toast({
         title: "Error",
         description: "Failed to load addresses",
@@ -78,7 +79,7 @@ export const useAddresses = () => {
       });
       return data;
     } catch (error) {
-      console.error('Error adding address:', error);
+      logger.error('Error adding address:', error);
       toast({
         title: "Error",
         description: "Failed to add address",
@@ -103,7 +104,7 @@ export const useAddresses = () => {
         description: "Address updated successfully",
       });
     } catch (error) {
-      console.error('Error updating address:', error);
+      logger.error('Error updating address:', error);
       toast({
         title: "Error",
         description: "Failed to update address",
@@ -127,7 +128,7 @@ export const useAddresses = () => {
         description: "Address deleted successfully",
       });
     } catch (error) {
-      console.error('Error deleting address:', error);
+      logger.error('Error deleting address:', error);
       toast({
         title: "Error",
         description: "Failed to delete address",
@@ -151,7 +152,7 @@ export const useAddresses = () => {
         description: "Default address updated",
       });
     } catch (error) {
-      console.error('Error setting default address:', error);
+      logger.error('Error setting default address:', error);
       toast({
         title: "Error",
         description: "Failed to set default address",
