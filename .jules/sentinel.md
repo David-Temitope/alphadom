@@ -12,3 +12,8 @@
 **Vulnerability:** The application lacked a Content Security Policy (CSP), leaving it more vulnerable to Cross-Site Scripting (XSS) and other injection attacks if other defenses failed.
 **Learning:** While server-side headers are preferred, adding a CSP via a meta tag in `index.html` provides a necessary client-side fallback and defense-in-depth for single-page applications.
 **Prevention:** Always include a baseline CSP meta tag in the main `index.html` tailored to the application's external dependencies (Supabase, Paystack, Google Fonts).
+
+## 2026-02-03 - [Public Storage of Sensitive PII]
+**Vulnerability:** Identity verification documents (NIN, Driver's License) were uploaded to the public 'product-images' bucket, making them accessible via static URLs without authentication.
+**Learning:** Defaulting to public storage for ease of implementation can lead to High-severity data leaks of sensitive Personally Identifiable Information (PII).
+**Prevention:** Always use private storage buckets for PII. Implement a secure access layer using signed URLs (e.g., via a 'SecureImage' component) and strictly enforce Row Level Security (RLS) policies for both owners and authorized admins.
