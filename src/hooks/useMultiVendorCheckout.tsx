@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+// Using production-safe logger to prevent information disclosure in production logs
+import { logger } from "@/utils/logger";
 import { PAYSTACK_PUBLIC_KEY } from "@/config/paystack";
 import {
   VendorGroup,
@@ -54,7 +56,7 @@ export const useMultiVendorCheckout = () => {
       .in("id", vendorIds);
 
     if (error) {
-      console.error("Error fetching vendor info:", error);
+      logger.error("Error fetching vendor info:", error);
       return vendorMap;
     }
 
@@ -362,7 +364,7 @@ export const useMultiVendorCheckout = () => {
 
       return order.id;
     } catch (error) {
-      console.error("Error creating vendor order:", error);
+      logger.error("Error creating vendor order:", error);
       return null;
     }
   };
@@ -436,7 +438,7 @@ export const useMultiVendorCheckout = () => {
             }
           })
           .catch((err) => {
-            console.error("Payment callback error:", err);
+            logger.error("Payment callback error:", err);
             updateGroupPaymentStatus(group.vendor_id, "failed");
             onError(`Payment processing error for ${group.vendor_name}`);
           });
@@ -468,7 +470,7 @@ export const useMultiVendorCheckout = () => {
       const handler = window.PaystackPop.setup(paystackConfig);
       handler.openIframe();
     } catch (err) {
-      console.error("Paystack setup error:", err);
+      logger.error("Paystack setup error:", err);
       onError("Failed to initialize payment");
     }
   };

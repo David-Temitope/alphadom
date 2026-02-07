@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+// Using production-safe logger to prevent information disclosure in production logs
+import { logger } from '@/utils/logger';
 
 interface AdminUser {
   id: string;
@@ -43,7 +45,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .maybeSingle();
 
         if (error) {
-          console.error('Error checking admin role:', error);
+          logger.error('Error checking admin role:', error);
           setAdmin(null);
           return;
         }
@@ -69,7 +71,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setAdmin(null);
       }
     } catch (error) {
-      console.error('Error in checkAdminStatus:', error);
+      logger.error('Error in checkAdminStatus:', error);
       setAdmin(null);
     }
   };
