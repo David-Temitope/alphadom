@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { logger } from '@/utils/logger';
 
-type Order = Tables<'orders'> & {
+export type Order = Tables<'orders'> & {
   profiles?: {
     id: string;
     full_name: string | null;
@@ -88,7 +88,7 @@ export const useAdminOrders = () => {
       
       logger.info('Orders fetched successfully:', { count: ordersData?.length || 0 });
       
-      setOrders(ordersData as any || []);
+      setOrders(ordersData as Order[] || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load orders';
       setError(errorMessage);
