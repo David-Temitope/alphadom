@@ -57,6 +57,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
         size="icon"
         className={`bg-[#25D366] hover:bg-[#128C7E] text-white ${className}`}
         title="Message on WhatsApp"
+        aria-label="Chat on WhatsApp"
       >
         <MessageCircle className="w-4 h-4" />
       </Button>

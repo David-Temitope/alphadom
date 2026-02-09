@@ -222,6 +222,7 @@ export const Navbar = () => {
                   <Input
                     type="text"
                     placeholder="Search products..."
+                    aria-label="Search products"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-48 pl-9 h-9 bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-primary"
@@ -270,6 +271,7 @@ export const Navbar = () => {
                 size="icon"
                 className="md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
@@ -304,6 +306,7 @@ export const Navbar = () => {
                   <Input
                     type="text"
                     placeholder="Search products..."
+                    aria-label="Search products"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-9 bg-secondary border-0"
