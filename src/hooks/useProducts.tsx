@@ -58,10 +58,14 @@ export const useProducts = () => {
         .from('shop_applications_safe')
         .select('id, is_registered');
 
+      // Create Maps for O(1) lookups instead of O(N) .find() calls
+      const vendorMap = new Map(vendorsData?.map(v => [v.id, v]));
+      const applicationMap = new Map(applicationsData?.map(a => [a.id, a]));
+
       // Map vendor subscription plans and registration to products
       const productsWithSubscription = (productsData || []).map(product => {
-        const vendor = vendorsData?.find(v => v.id === product.vendor_id);
-        const application = applicationsData?.find(a => a.id === vendor?.application_id);
+        const vendor = product.vendor_id ? vendorMap.get(product.vendor_id) : null;
+        const application = vendor?.application_id ? applicationMap.get(vendor.application_id) : null;
         
         // Check if vendor has active gift plan
         let effectiveSubscription = vendor?.subscription_plan || 'free';
