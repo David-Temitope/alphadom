@@ -33,8 +33,6 @@ const AdminOrders = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  console.log('AdminOrders render - orders:', orders, 'loading:', loading, 'error:', error);
-
   const filteredOrders = orders.filter(order => {
     const profile = order.profiles;
     const matchesSearch = profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

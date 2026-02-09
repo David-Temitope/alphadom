@@ -17,3 +17,8 @@
 **Vulnerability:** Identity verification documents (NIN, Driver's License) were uploaded to the public 'product-images' bucket, making them accessible via static URLs without authentication.
 **Learning:** Defaulting to public storage for ease of implementation can lead to High-severity data leaks of sensitive Personally Identifiable Information (PII).
 **Prevention:** Always use private storage buckets for PII. Implement a secure access layer using signed URLs (e.g., via a 'SecureImage' component) and strictly enforce Row Level Security (RLS) policies for both owners and authorized admins.
+
+## 2025-05-23 - [Information Disclosure via Sensitive Data Logging]
+**Vulnerability:** Admin pages and hooks were logging sensitive data structures (entire order arrays, user profiles) to the browser console using direct `console.log` calls.
+**Learning:** Even if administrative access is restricted, logging full data objects to the client console creates a significant information disclosure risk. Rendering-time logs are particularly leaky as they execute on every state update.
+**Prevention:** Standardize on a production-safe logger utility (like `src/utils/logger.ts`) that conditionally suppresses logs based on the environment (e.g., `import.meta.env.DEV`). Avoid logging full data structures even in development if they contain PII.
