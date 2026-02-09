@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
+import { logger } from '@/utils/logger';
 
 type Product = Tables<'products'> & {
   vendor_subscription_plan?: string;
@@ -27,7 +28,7 @@ export const useProducts = () => {
           table: 'products'
         },
         (payload) => {
-          console.log('Product change received!', payload);
+          logger.info('Product change received!', payload);
           fetchProducts(); // Refetch all products when any change occurs
         }
       )
@@ -95,7 +96,7 @@ export const useProducts = () => {
       setProducts(sortedProducts);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
-      console.error('Error fetching products:', err);
+      logger.error('Error fetching products:', err);
     } finally {
       setLoading(false);
     }

@@ -27,6 +27,7 @@ import { Search, UserPlus, Mail, Ban, Shield, Loader2, MessageSquare } from 'luc
 import { useUsers } from '@/hooks/useUsers';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 const AdminUsers = () => {
   const { users, loading, banUser, unbanUser, updateUserProfile } = useUsers();
@@ -79,7 +80,7 @@ const AdminUsers = () => {
       });
       setMessageDialogOpen(false);
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       toast({
         title: "Error",
         description: "Failed to send message",

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, X, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface ImageUploadProps {
   onImageUploaded: (url: string) => void;
@@ -40,7 +41,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-      console.log('Uploading file:', fileName, 'Size:', file.size, 'Type:', file.type);
+      logger.info('Uploading file', { fileName, size: file.size, type: file.type });
 
       const { error: uploadError } = await supabase.storage
         .from('product-images')
@@ -50,7 +51,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        logger.error('Upload error:', uploadError);
         throw uploadError;
       }
 
@@ -58,7 +59,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         .from('product-images')
         .getPublicUrl(fileName);
 
-      console.log('Upload successful, public URL:', publicUrl);
+      logger.info('Upload successful', { publicUrl });
 
       setPreview(publicUrl);
       onImageUploaded(publicUrl);
@@ -68,7 +69,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         description: "Image uploaded successfully!",
       });
     } catch (error) {
-      console.error('Image upload error:', error);
+      logger.error('Image upload error:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : 'Error uploading image',
