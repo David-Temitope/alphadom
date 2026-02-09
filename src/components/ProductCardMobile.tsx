@@ -33,7 +33,7 @@ interface ProductCardMobileProps {
   product: Product;
 }
 
-export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product }) => {
+export const ProductCardMobile = React.memo(({ product }: ProductCardMobileProps) => {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -203,4 +203,6 @@ export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product })
       </div>
     </Card>
   );
-};
+});
+
+ProductCardMobile.displayName = 'ProductCardMobile';

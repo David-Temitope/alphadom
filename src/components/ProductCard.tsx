@@ -37,7 +37,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard = React.memo(({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -217,4 +217,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </CardFooter>
     </Card>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
