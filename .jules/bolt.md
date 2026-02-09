@@ -1,7 +1,3 @@
-## 2025-05-15 - [O(N^2) data mapping in useProducts hook]
-**Learning:** The `useProducts` hook was performing nested `.find()` calls on large arrays (products, vendors, applications) on every fetch. This resulted in $O(Products \times Vendors)$ complexity, which degrades as the marketplace grows.
-**Action:** Replace nested `.find()` calls with `Map` lookups to achieve $O(Products + Vendors)$ complexity. Always consider using Maps for relational lookups in data-fetching hooks.
-
-## 2025-05-15 - [Unnecessary re-renders in product lists]
-**Learning:** `ProductCard` and `ProductCardMobile` components were re-rendering even when their props didn't change, especially when the parent category filters were toggled.
-**Action:** Wrap frequently used list item components in `React.memo()` to prevent unnecessary re-renders in large lists.
+## 2025-05-15 - [Rendering & Loading Optimization]
+**Learning:** Combining algorithmic efficiency ($O(N)$ lookups), component memoization, and route-based code splitting provides a holistic performance boost. While each is "small", their cumulative effect on First Contentful Paint (FCP) and interaction latency is significant.
+**Action:** Always check for nested `.find()` or `.filter()` calls in data mapping hooks, especially those used in large lists. Use `Map` for constant-time lookups. Pair this with `React.memo` for list items and `React.lazy` for routes to ensure the app stays fast as it grows.
