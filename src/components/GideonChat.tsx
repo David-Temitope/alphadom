@@ -264,6 +264,7 @@ export const GideonChat = () => {
           onClick={() => setIsOpen(true)}
           className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 border-2 border-white z-50 animate-[pulse_6s_ease-in-out_infinite] md:bottom-6"
           size="icon"
+          aria-label="Open Gideon AI assistant"
         >
           <MessageCircle className="h-6 w-6 text-white drop-shadow-lg" />
         </Button>
@@ -276,7 +277,7 @@ export const GideonChat = () => {
               <MessageCircle className="h-5 w-5" />
               <h3 className="font-semibold">Gideon AI Assistant</h3>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close Gideon AI assistant">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -325,8 +326,9 @@ export const GideonChat = () => {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about products, vendors..."
                 disabled={isLoading}
+                aria-label="Chat input"
               />
-              <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+              <Button type="submit" size="icon" disabled={isLoading || !input.trim()} aria-label="Send message">
                 <Send className="h-4 w-4" />
               </Button>
             </form>
