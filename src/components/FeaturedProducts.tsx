@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,48 +7,106 @@ import { ProductCardMobile } from "./ProductCardMobile";
 import { useProducts } from "@/hooks/useProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Flame, Crown, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
+
+type Product = Tables<'products'> & {
+  vendor_subscription_plan?: string;
+  vendor_is_registered?: boolean;
+};
+
+interface ProductScrollRowProps {
+  items: Product[];
+  scrollRef: React.RefObject<HTMLDivElement>;
+  isMobile: boolean;
+  onScroll: (direction: 'left' | 'right') => void;
+}
+
+// Moved outside to prevent re-creation on every render
+const ProductScrollRow = ({
+  items,
+  scrollRef,
+  isMobile,
+  onScroll
+}: ProductScrollRowProps) => (
+  <div className="relative group">
+    {/* Scroll buttons - desktop only */}
+    {!isMobile && items.length > 4 && (
+      <>
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -ml-4 rounded-full border-border/50"
+          onClick={() => onScroll('left')}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -mr-4 rounded-full border-border/50"
+          onClick={() => onScroll('right')}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </>
+    )}
+
+    <div
+      ref={scrollRef}
+      className="overflow-x-auto overflow-y-hidden scrollbar-hide"
+    >
+      <div className="flex gap-4 pb-2 w-max pl-1">
+        {items.map(product => (
+          <div key={product.id} className={isMobile ? "w-40 flex-shrink-0" : "w-60 flex-shrink-0"}>
+            {isMobile ? (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              <ProductCardMobile product={product as any} />
+            ) : (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              <ProductCard product={product as any} />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 export const FeaturedProducts = () => {
   const { products, loading } = useProducts();
   const isMobile = useIsMobile();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [vendorPlans, setVendorPlans] = useState<Record<string, string>>({});
   const bestSellingRef = useRef<HTMLDivElement>(null);
   const hotSalesRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchVendorPlans = async () => {
-      const { data } = await supabase.from('approved_vendors').select('id, subscription_plan');
-      if (data) {
-        const plans: Record<string, string> = {};
-        data.forEach((v: any) => { plans[v.id] = v.subscription_plan || 'free'; });
-        setVendorPlans(plans);
-      }
-    };
-    fetchVendorPlans();
-  }, []);
+  const categories = useMemo(() => ["all", ...new Set(products.map(p => p.category))], [products]);
 
-  const categories = ["all", ...new Set(products.map(p => p.category))];
-  const filteredProducts = selectedCategory === "all" ? products : products.filter(p => p.category === selectedCategory);
+  const filteredProducts = useMemo(() =>
+    selectedCategory === "all" ? products : products.filter(p => p.category === selectedCategory),
+    [products, selectedCategory]
+  );
 
   // Best Selling (First Class vendors, fallback to oldest) - limit to 10
-  const bestSelling = filteredProducts.filter(p => p.vendor_id && vendorPlans[p.vendor_id] === 'first_class').slice(0, 10);
-  const bestSellingFinal = bestSelling.length > 0 ? bestSelling : [...filteredProducts].sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()).slice(0, 10);
+  // Optimized: useMemo and direct vendor_subscription_plan access (removed redundant fetch)
+  const bestSellingFinal = useMemo(() => {
+    const bestSelling = filteredProducts.filter(p => p.vendor_subscription_plan === 'first_class').slice(0, 10);
+    return bestSelling.length > 0
+      ? bestSelling
+      : [...filteredProducts].sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()).slice(0, 10);
+  }, [filteredProducts]);
 
   // Hot Sales (Economy vendors, fallback to newest) - limit to 10
-  const hotSales = filteredProducts.filter(p => p.vendor_id && vendorPlans[p.vendor_id] === 'economy').slice(0, 10);
-  const hotSalesFinal = hotSales.length > 0 ? hotSales : [...filteredProducts].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0, 10);
+  // Optimized: useMemo and direct vendor_subscription_plan access (removed redundant fetch)
+  const hotSalesFinal = useMemo(() => {
+    const hotSales = filteredProducts.filter(p => p.vendor_subscription_plan === 'economy').slice(0, 10);
+    return hotSales.length > 0
+      ? hotSales
+      : [...filteredProducts].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0, 10);
+  }, [filteredProducts]);
 
-  const scrollLeft = (ref: React.RefObject<HTMLDivElement>) => {
+  const handleScroll = (ref: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
     if (ref.current) {
-      ref.current.scrollBy({ left: -300, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = (ref: React.RefObject<HTMLDivElement>) => {
-    if (ref.current) {
-      ref.current.scrollBy({ left: 300, behavior: 'smooth' });
+      ref.current.scrollBy({ left: direction === 'left' ? -300 : 300, behavior: 'smooth' });
     }
   };
 
@@ -65,55 +123,6 @@ export const FeaturedProducts = () => {
       </section>
     );
   }
-
-  const ProductScrollRow = ({ 
-    items, 
-    scrollRef 
-  }: { 
-    items: typeof products; 
-    scrollRef: React.RefObject<HTMLDivElement>;
-  }) => (
-    <div className="relative group">
-      {/* Scroll buttons - desktop only */}
-      {!isMobile && items.length > 4 && (
-        <>
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -ml-4 rounded-full border-border/50"
-            onClick={() => scrollLeft(scrollRef)}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-lg -mr-4 rounded-full border-border/50"
-            onClick={() => scrollRight(scrollRef)}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </>
-      )}
-      
-      <div 
-        ref={scrollRef}
-        className="overflow-x-auto overflow-y-hidden scrollbar-hide"
-      >
-        <div className="flex gap-4 pb-2 w-max pl-1">
-          {items.map(product => (
-            <div key={product.id} className={isMobile ? "w-40 flex-shrink-0" : "w-60 flex-shrink-0"}>
-              {isMobile ? (
-                <ProductCardMobile product={product as any} />
-              ) : (
-                <ProductCard product={product as any} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <section className="py-12 md:py-16 px-4 bg-background">
@@ -151,7 +160,12 @@ export const FeaturedProducts = () => {
             </Link>
           </div>
           {bestSellingFinal.length > 0 ? (
-            <ProductScrollRow items={bestSellingFinal} scrollRef={bestSellingRef} />
+            <ProductScrollRow
+              items={bestSellingFinal}
+              scrollRef={bestSellingRef}
+              isMobile={isMobile}
+              onScroll={(dir) => handleScroll(bestSellingRef, dir)}
+            />
           ) : (
             <div className="text-center py-12 bg-muted/30 rounded-2xl">
               <p className="text-muted-foreground">No products available</p>
@@ -175,7 +189,12 @@ export const FeaturedProducts = () => {
             </Link>
           </div>
           {hotSalesFinal.length > 0 ? (
-            <ProductScrollRow items={hotSalesFinal} scrollRef={hotSalesRef} />
+            <ProductScrollRow
+              items={hotSalesFinal}
+              scrollRef={hotSalesRef}
+              isMobile={isMobile}
+              onScroll={(dir) => handleScroll(hotSalesRef, dir)}
+            />
           ) : (
             <div className="text-center py-12 bg-muted/30 rounded-2xl">
               <p className="text-muted-foreground">No products available</p>
