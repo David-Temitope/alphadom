@@ -43,6 +43,7 @@ export const UserMenu = () => {
           variant="ghost"
           className="relative h-8 w-8 rounded-full transition-all duration-200 hover:scale-105"
           onClick={() => window.location.href = '/dashboard'}
+          aria-label="User profile dashboard"
         >
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.user_metadata?.avatar_url} alt="Profile" />
