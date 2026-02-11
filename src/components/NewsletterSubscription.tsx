@@ -64,6 +64,7 @@ export const NewsletterSubscription = () => {
         <Button 
           type="submit" 
           disabled={loading}
+          aria-label="Subscribe to newsletter"
           className="bg-green-600 hover:bg-green-700 text-white px-6 shadow-sm hover:shadow-md transition-all duration-200"
         >
           {loading ? (

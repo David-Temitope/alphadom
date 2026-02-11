@@ -189,7 +189,7 @@ export const TopVendors = () => {
                       </h3>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                      <CheckCircle className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                       <span className="text-xs text-primary font-medium">
                         {planBadge.label}
                       </span>

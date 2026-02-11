@@ -179,11 +179,11 @@ export const ProductCard = React.memo(({ product }: ProductCardProps) => {
             <span className="flex-1">{product.name}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0 mt-0.5">
               {product.vendor_subscription_plan === 'first_class' ? (
-                <BadgeCheck className="w-4 h-4 text-amber-500" title="Verified First Class Vendor" />
+                <BadgeCheck className="w-4 h-4 text-amber-500" title="Verified First Class Vendor" aria-label="Verified First Class Vendor" />
               ) : product.vendor_subscription_plan === 'economy' ? (
-                <BadgeCheck className="w-4 h-4 text-sky-500" title="Verified Economy Vendor" />
+                <BadgeCheck className="w-4 h-4 text-sky-500" title="Verified Economy Vendor" aria-label="Verified Economy Vendor" />
               ) : product.vendor_is_registered ? (
-                <BadgeCheck className="w-4 h-4 text-primary" title="Registered Business" />
+                <BadgeCheck className="w-4 h-4 text-primary" title="Registered Business" aria-label="Registered Business" />
               ) : null}
             </span>
           </h3>

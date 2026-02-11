@@ -163,6 +163,7 @@ export const Footer = () => {
                 <Button
                   type="submit"
                   disabled={loading}
+                  aria-label="Join newsletter"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-5"
                 >
                   {loading ? "..." : "Join"}
