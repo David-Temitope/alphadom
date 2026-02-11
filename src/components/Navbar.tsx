@@ -233,7 +233,7 @@ export const Navbar = () => {
               {/* Cart - Desktop only (mobile has it in bottom nav) */}
               {!isMobile && (
                 <Button variant="ghost" size="icon" asChild className="relative">
-                  <Link to="/cart">
+                  <Link to="/cart" aria-label="Shopping Cart">
                     <ShoppingCart className="h-5 w-5" />
                     {totalItems > 0 && (
                       <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
@@ -294,7 +294,12 @@ export const Navbar = () => {
                   </div>
                   <span className="text-lg font-bold">Alphadom</span>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  aria-label="Close menu"
+                >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
