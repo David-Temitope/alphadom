@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Heart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,14 @@ interface FlashSalesProps {
   subtitle?: string;
 }
 
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+  }).format(price);
+};
+
 export const FlashSales: React.FC<FlashSalesProps> = ({ 
   title = "Flash Sales",
   subtitle = "Don't miss out on these amazing deals"
@@ -24,9 +32,13 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Filter products with discounts
-  const flashProducts = products
-    .filter(p => p.discount_percentage && p.discount_percentage > 0)
-    .slice(0, 10);
+  // Optimized: useMemo for filtering products
+  const flashProducts = useMemo(() =>
+    products
+      .filter(p => p.discount_percentage && p.discount_percentage > 0)
+      .slice(0, 10),
+    [products]
+  );
 
   const checkScrollButtons = () => {
     if (scrollRef.current) {
@@ -51,14 +63,6 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
       });
       setTimeout(checkScrollButtons, 300);
     }
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-    }).format(price);
   };
 
   if (loading) {
