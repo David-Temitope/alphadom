@@ -289,7 +289,7 @@ export const MobileHomepage: React.FC = () => {
                   {/* Vendor Pick Badge */}
                   {isVendorPick && (
                     <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-[9px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                      <BadgeCheck className="w-3 h-3" />
+                      <BadgeCheck className="w-3 h-3" aria-hidden="true" />
                       Vendor Pick
                     </div>
                   )}
