@@ -7,10 +7,20 @@ import { useNewsletter } from '@/hooks/useNewsletter';
 
 export const NewsletterSubscription = () => {
   const [email, setEmail] = useState('');
+  const [hpValue, setHpValue] = useState('');
   const { subscribe, loading } = useNewsletter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Honeypot check: if the hidden field is filled, it's likely a bot
+    if (hpValue) {
+      // Silently "succeed" without actually subscribing
+      setEmail('');
+      setHpValue('');
+      return;
+    }
+
     if (!email) return;
     
     const result = await subscribe(email);
@@ -32,6 +42,17 @@ export const NewsletterSubscription = () => {
       </div>
       
       <form onSubmit={handleSubmit} className="flex space-x-3">
+        {/* Honeypot field - hidden from users but seen by bots */}
+        <div className="hidden" aria-hidden="true">
+          <input
+            type="text"
+            name="hp_newsletter"
+            tabIndex={-1}
+            autoComplete="off"
+            value={hpValue}
+            onChange={(e) => setHpValue(e.target.value)}
+          />
+        </div>
         <Input
           type="email"
           placeholder="Enter your email"
