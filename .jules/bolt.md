@@ -9,3 +9,7 @@
 ## 2025-05-15 - [N+1 query problem in TopVendors component]
 **Learning:** The `TopVendors` component was making sequential queries for each vendor to fetch profiles, products, and ratings. This resulted in up to 31 network requests for 6 vendors.
 **Action:** Use batch queries with Supabase's `.in()` filter to fetch all related data in bulk and associate them in memory using Maps. Align query limits with UI requirements (e.g., reducing from 6 to 3) to further optimize performance.
+
+## 2025-05-15 - Redundant Network Requests & Over-fetching in useProducts
+**Learning:** Multiple homepage components calling `useProducts()` simultaneously caused redundant network requests for identical data. Additionally, fetching entire related tables for client-side joins scales poorly and wastes bandwidth.
+**Action:** Use TanStack Query (`useQuery`) to deduplicate requests and implement `.in()` filters to fetch only relevant foreign key data, combined with Map-based lookups for O(N) associations.
