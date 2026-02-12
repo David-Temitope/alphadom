@@ -22,3 +22,8 @@
 **Vulnerability:** Admin pages and hooks were logging sensitive data structures (entire order arrays, user profiles) to the browser console using direct `console.log` calls.
 **Learning:** Even if administrative access is restricted, logging full data objects to the client console creates a significant information disclosure risk. Rendering-time logs are particularly leaky as they execute on every state update.
 **Prevention:** Standardize on a production-safe logger utility (like `src/utils/logger.ts`) that conditionally suppresses logs based on the environment (e.g., `import.meta.env.DEV`). Avoid logging full data structures even in development if they contain PII.
+
+## 2026-02-05 - [Secure Handling of Private Storage Assets]
+**Vulnerability:** User identification documents were being uploaded to a public storage bucket and accessed via static public URLs, bypassing access controls for sensitive PII.
+**Learning:** Storing PII in public buckets, even with randomized filenames, is insufficient for security. Private buckets with RLS are required, but they also necessitate a frontend mechanism to handle signed URL generation.
+**Prevention:** Always store PII in private buckets. Use a reusable `useSecureUrl` hook and `SecureImage` component to manage time-limited signed URLs, ensuring that only authorized users (owners and admins) can view the assets. Store relative storage paths (e.g., 'folder/file.ext') in the database to facilitate secure URL generation.

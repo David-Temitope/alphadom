@@ -12,6 +12,7 @@ import { Store, CreditCard, Loader2, ChevronRight, ChevronLeft, Upload, CheckCir
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { SecureImage } from '@/components/SecureImage';
 
 interface ShopApplicationFormProps {
   open: boolean;
@@ -79,19 +80,15 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
       const filePath = `id-documents/${fileName}`;
 
       // SECURITY: ID images contain sensitive personal information.
-      // TODO: Move these uploads to a private bucket (e.g., 'receipts-private' or a dedicated 'vendor-ids-private' bucket)
-      // and use signed URLs for access. Currently, they are stored in the public 'product-images' bucket.
+      // Using private bucket 'receipts-private' to ensure documents are not publicly accessible.
       const { error: uploadError } = await supabase.storage
-        .from('product-images')
+        .from('receipts-private')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-
-      setFormData({ ...formData, id_image_url: data.publicUrl });
+      // Store the path instead of public URL for private storage
+      setFormData({ ...formData, id_image_url: filePath });
       toast({ title: "Success", description: "ID image uploaded successfully" });
     } catch (error) {
       console.error('Upload error:', error);
@@ -417,8 +414,8 @@ export const ShopApplicationForm = ({ open, onOpenChange }: ShopApplicationFormP
                 <div className="mt-2">
                   {formData.id_image_url ? (
                     <div className="relative">
-                      <img 
-                        src={formData.id_image_url} 
+                      <SecureImage
+                        path={formData.id_image_url}
                         alt="ID Document" 
                         className="w-full h-32 object-cover rounded-lg border"
                       />
