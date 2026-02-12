@@ -11,3 +11,7 @@
 ## 2025-05-16 - [A11y] Redundant screen reader announcements
 **Learning:** Icons that are purely decorative or redundant (e.g., placed next to descriptive text like 'Vendor Pick' or 'VERIFIED MERCHANT') should include `aria-hidden="true"` to avoid redundant or confusing screen reader announcements.
 **Action:** Use `aria-hidden="true"` for icons that do not provide additional information beyond the adjacent text.
+
+## 2025-05-17 - [A11y] Semantic rating components
+**Learning:** Rating components (like stars) are often inaccessible if implemented as just a list of buttons or icons. They should be treated as a single informative "img" when read-only, and as a labeled group of buttons when interactive.
+**Action:** Use `role="img"` with a descriptive `aria-label` for read-only ratings, and `role="group"` with labeled buttons for interactive ones. Always hide decorative SVG stars from the accessibility tree.

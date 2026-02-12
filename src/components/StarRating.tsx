@@ -50,6 +50,9 @@ export const StarRating: React.FC<StarRatingProps> = ({
         key={index}
         type="button"
         disabled={!interactive}
+        aria-label={interactive ? `Rate ${starNumber} out of ${maxStars} stars` : undefined}
+        aria-hidden={!interactive ? "true" : undefined}
+        tabIndex={!interactive ? -1 : undefined}
         onClick={() => handleClick(starNumber)}
         onMouseEnter={() => interactive && setHoverRating(starNumber)}
         onMouseLeave={() => interactive && setHoverRating(null)}
@@ -65,6 +68,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
             sizeClasses[size],
             'text-muted-foreground/30'
           )}
+          aria-hidden="true"
         />
         
         {/* Filled star overlay */}
@@ -77,6 +81,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
               isHalf && 'clip-path-half'
             )}
             style={isHalf ? { clipPath: 'inset(0 50% 0 0)' } : undefined}
+            aria-hidden="true"
           />
         )}
       </button>
@@ -84,10 +89,17 @@ export const StarRating: React.FC<StarRatingProps> = ({
   };
 
   return (
-    <div className={cn('flex items-center gap-0.5', className)}>
+    <div
+      className={cn('flex items-center gap-0.5', className)}
+      role={interactive ? "group" : "img"}
+      aria-label={interactive ? "Rate this product" : `Rating: ${displayRating.toFixed(1)} out of ${maxStars} stars`}
+    >
       {Array.from({ length: maxStars }, (_, i) => renderStar(i))}
       {showValue && (
-        <span className="ml-1.5 text-sm font-medium text-foreground">
+        <span
+          className="ml-1.5 text-sm font-medium text-foreground"
+          aria-hidden={!interactive ? "true" : undefined}
+        >
           {displayRating.toFixed(1)}
         </span>
       )}
