@@ -22,14 +22,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, Eye, Download, Loader2 } from 'lucide-react';
-import { useAdminOrders } from '@/hooks/useAdminOrders';
+import { useAdminOrders, type Order } from '@/hooks/useAdminOrders';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminOrders = () => {
   const { orders, loading, error, updateOrderStatus } = useAdminOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
