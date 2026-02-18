@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { WishlistButton } from './WishlistButton';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeUrl } from '@/utils/security';
 
 interface Product {
   id: string;
@@ -118,7 +119,7 @@ export const ProductCard = React.memo(({ product }: ProductCardProps) => {
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
         <div className="relative overflow-hidden bg-muted aspect-square">
           <img
-            src={displayImage}
+            src={sanitizeUrl(displayImage)}
             alt={product.name}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"

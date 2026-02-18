@@ -7,6 +7,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/hooks/useWishlist';
 import { Skeleton } from '@/components/ui/skeleton';
+import { sanitizeUrl } from '@/utils/security';
 
 interface FlashSalesProps {
   title?: string;
@@ -148,7 +149,7 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
                 {/* Image Container */}
                 <div className="relative aspect-square bg-secondary overflow-hidden">
                   <img
-                    src={displayImage || '/placeholder.svg'}
+                    src={sanitizeUrl(displayImage || '/placeholder.svg')}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { sanitizeUrl } from '@/utils/security';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -20,7 +21,7 @@ const ProductCard = memo(({ id, name, price, image }: { id: string; name: string
       onClick={() => navigate(`/products/${id}`)}
     >
       <img 
-        src={image || '/placeholder.svg'} 
+        src={sanitizeUrl(image || '/placeholder.svg')}
         alt={name}
         className="w-12 h-12 object-cover rounded"
         loading="lazy"
@@ -60,7 +61,7 @@ const VendorCard = memo(({ id, name, image, userId }: { id: string; name: string
       onClick={handleClick}
     >
       <img 
-        src={displayImage} 
+        src={sanitizeUrl(displayImage)}
         alt={name}
         className="w-12 h-12 object-cover rounded-full bg-muted"
         loading="lazy"

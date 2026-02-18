@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Upload, X, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
+import { sanitizeUrl } from '@/utils/security';
 
 interface ImageUploadProps {
   onImageUploaded: (url: string) => void;
@@ -93,7 +94,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         <div className="relative group">
           <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm">
             <img 
-              src={preview} 
+              src={sanitizeUrl(preview)}
               alt="Preview" 
               className="w-32 h-32 object-cover"
             />

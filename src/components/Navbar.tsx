@@ -14,6 +14,7 @@ import { useAdmin } from "@/contexts/AdminContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { sanitizeUrl } from "@/utils/security";
 
 export const Navbar = () => {
   const { items } = useCart();
@@ -164,7 +165,7 @@ export const Navbar = () => {
             <Link to="/" className="flex items-center gap-2 group">
               {settings.navbar_logo && settings.navbar_logo !== "/favicon.png" ? (
                 <img 
-                  src={settings.navbar_logo} 
+                  src={sanitizeUrl(settings.navbar_logo)}
                   alt="Logo" 
                   className="h-9 w-auto object-contain"
                 />

@@ -2,6 +2,7 @@ import React from 'react';
 import { useSecureUrl } from '@/hooks/useSecureUrl';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { sanitizeUrl } from '@/utils/security';
 
 interface SecureImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   path: string | null | undefined;
@@ -30,7 +31,7 @@ export const SecureImage: React.FC<SecureImageProps> = ({
 
   return (
     <img
-      src={url}
+      src={sanitizeUrl(url)}
       className={className}
       {...props}
     />
