@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Star, ChevronRight, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { sanitizeUrl } from '@/utils/security';
 
 interface Vendor {
   id: string;
@@ -181,13 +182,13 @@ export const TopVendors = () => {
                   <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
                     {vendor.avatar_url ? (
                       <img
-                        src={vendor.avatar_url}
+                        src={sanitizeUrl(vendor.avatar_url)}
                         alt={vendor.store_name}
                         className="w-full h-full object-cover"
                       />
                     ) : vendor.store_logo ? (
                       <img
-                        src={vendor.store_logo}
+                        src={sanitizeUrl(vendor.store_logo)}
                         alt={vendor.store_name}
                         className="w-full h-full object-cover"
                       />

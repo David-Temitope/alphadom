@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProducts } from '@/hooks/useProducts';
 import { useAdminSettings, HeroSlide } from '@/hooks/useAdminSettings';
+import { sanitizeUrl } from '@/utils/security';
 
 const categoryIcons: Record<string, React.ComponentType<any>> = {
   electronics: Laptop,
@@ -127,7 +128,7 @@ export const MobileHomepage: React.FC = () => {
           {heroSlides.length > 0 && currentSlideData ? (
             <div className="relative aspect-[16/9]">
               <img
-                src={currentSlideData.image}
+                src={sanitizeUrl(currentSlideData.image)}
                 alt={currentSlideData.title}
                 className="w-full h-full object-cover"
               />
@@ -279,7 +280,7 @@ export const MobileHomepage: React.FC = () => {
                 {/* Product Image */}
                 <div className="relative aspect-square bg-muted overflow-hidden">
                   <img
-                    src={displayImage}
+                    src={sanitizeUrl(displayImage)}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"

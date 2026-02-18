@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserTypes } from '@/hooks/useUserTypes';
 import { useShopApplications } from '@/hooks/useShopApplications';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
+import { sanitizeUrl } from '@/utils/security';
 import { ArrowRight, CheckCircle, Shield, Truck, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 // Default hero images for fallback
@@ -148,7 +149,7 @@ export const Hero = () => {
                     }`}
                   >
                     <img
-                      src={image}
+                      src={sanitizeUrl(image)}
                       alt={`Hero slide ${index + 1}`}
                       className="w-full h-full object-cover"
                       loading={index === 0 ? "eager" : "lazy"}
