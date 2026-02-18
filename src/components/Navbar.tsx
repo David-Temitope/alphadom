@@ -14,7 +14,6 @@ import { useAdmin } from "@/contexts/AdminContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { sanitizeUrl } from "@/utils/security";
 
 export const Navbar = () => {
   const { items } = useCart();
@@ -165,7 +164,7 @@ export const Navbar = () => {
             <Link to="/" className="flex items-center gap-2 group">
               {settings.navbar_logo && settings.navbar_logo !== "/favicon.png" ? (
                 <img 
-                  src={sanitizeUrl(settings.navbar_logo)}
+                  src={settings.navbar_logo}
                   alt="Logo" 
                   className="h-9 w-auto object-contain"
                 />
@@ -223,7 +222,6 @@ export const Navbar = () => {
                   <Input
                     type="text"
                     placeholder="Search products..."
-                    aria-label="Search products"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-48 pl-9 h-9 bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-primary"
@@ -234,7 +232,7 @@ export const Navbar = () => {
               {/* Cart - Desktop only (mobile has it in bottom nav) */}
               {!isMobile && (
                 <Button variant="ghost" size="icon" asChild className="relative">
-                  <Link to="/cart" aria-label="Shopping Cart">
+                  <Link to="/cart">
                     <ShoppingCart className="h-5 w-5" />
                     {totalItems > 0 && (
                       <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
@@ -272,7 +270,6 @@ export const Navbar = () => {
                 size="icon"
                 className="md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
@@ -295,12 +292,7 @@ export const Navbar = () => {
                   </div>
                   <span className="text-lg font-bold">Alphadom</span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  aria-label="Close menu"
-                >
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
                   <X className="h-5 w-5" />
                 </Button>
               </div>
@@ -312,7 +304,6 @@ export const Navbar = () => {
                   <Input
                     type="text"
                     placeholder="Search products..."
-                    aria-label="Search products"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-9 bg-secondary border-0"

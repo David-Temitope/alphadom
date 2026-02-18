@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-// Using production-safe logger to prevent information disclosure in production logs
-import { logger } from '@/utils/logger';
 import { Loader2, Mail, Search, Download, Trash2, Users } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -35,7 +33,7 @@ const AdminNewsletter: React.FC = () => {
       if (error) throw error;
       setSubscribers(data || []);
     } catch (error) {
-      logger.error('Error fetching subscribers:', error);
+      console.error('Error fetching subscribers:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch newsletter subscribers',
@@ -68,7 +66,7 @@ const AdminNewsletter: React.FC = () => {
         description: `Subscriber ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
       });
     } catch (error) {
-      logger.error('Error updating subscriber:', error);
+      console.error('Error updating subscriber:', error);
       toast({
         title: 'Error',
         description: 'Failed to update subscriber status',
@@ -92,7 +90,7 @@ const AdminNewsletter: React.FC = () => {
         description: 'Subscriber removed successfully',
       });
     } catch (error) {
-      logger.error('Error deleting subscriber:', error);
+      console.error('Error deleting subscriber:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete subscriber',

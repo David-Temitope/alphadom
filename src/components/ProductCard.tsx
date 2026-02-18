@@ -9,7 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { WishlistButton } from './WishlistButton';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { sanitizeUrl } from '@/utils/security';
 
 interface Product {
   id: string;
@@ -38,7 +37,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-export const ProductCard = React.memo(({ product }: ProductCardProps) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -119,7 +118,7 @@ export const ProductCard = React.memo(({ product }: ProductCardProps) => {
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
         <div className="relative overflow-hidden bg-muted aspect-square">
           <img
-            src={sanitizeUrl(displayImage)}
+            src={displayImage}
             alt={product.name}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
@@ -180,11 +179,11 @@ export const ProductCard = React.memo(({ product }: ProductCardProps) => {
             <span className="flex-1">{product.name}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0 mt-0.5">
               {product.vendor_subscription_plan === 'first_class' ? (
-                <BadgeCheck className="w-4 h-4 text-amber-500" title="Verified First Class Vendor" aria-label="Verified First Class Vendor" />
+                <BadgeCheck className="w-4 h-4 text-amber-500" />
               ) : product.vendor_subscription_plan === 'economy' ? (
-                <BadgeCheck className="w-4 h-4 text-sky-500" title="Verified Economy Vendor" aria-label="Verified Economy Vendor" />
+                <BadgeCheck className="w-4 h-4 text-sky-500" />
               ) : product.vendor_is_registered ? (
-                <BadgeCheck className="w-4 h-4 text-primary" title="Registered Business" aria-label="Registered Business" />
+                <BadgeCheck className="w-4 h-4 text-primary" />
               ) : null}
             </span>
           </h3>
@@ -218,6 +217,4 @@ export const ProductCard = React.memo(({ product }: ProductCardProps) => {
       </CardFooter>
     </Card>
   );
-});
-
-ProductCard.displayName = 'ProductCard';
+};

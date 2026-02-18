@@ -23,7 +23,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
 import { supabase } from '@/integrations/supabase/client';
-import { sanitizeUrl } from '@/utils/security';
 
 type SortOption = 'all' | 'price' | 'rating' | 'category';
 
@@ -332,7 +331,7 @@ export const MobileShopPage: React.FC = () => {
           <div className="relative rounded-2xl overflow-hidden">
             <Link to={settings.hero_slides[currentBannerIndex]?.buttonLink || '/products'}>
               <img 
-                src={sanitizeUrl(settings.hero_slides[currentBannerIndex]?.image)}
+                src={settings.hero_slides[currentBannerIndex]?.image}
                 alt="Promo Banner"
                 className="w-full h-40 object-cover"
               />
@@ -388,7 +387,7 @@ export const MobileShopPage: React.FC = () => {
           <div className="relative rounded-2xl overflow-hidden">
             <Link to="/products">
               <img 
-                src={sanitizeUrl(settings.hero_images[currentBannerIndex])}
+                src={settings.hero_images[currentBannerIndex]}
                 alt="Promo Banner"
                 className="w-full h-40 object-cover"
               />
@@ -475,7 +474,7 @@ export const MobileShopPage: React.FC = () => {
                   <Link to={`/products/${product.id}`}>
                     <div className="relative aspect-square bg-muted overflow-hidden">
                       <img
-                        src={sanitizeUrl(displayImage)}
+                        src={displayImage}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"

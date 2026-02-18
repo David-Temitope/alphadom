@@ -2,8 +2,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-// Using production-safe logger to prevent information disclosure in production logs
-import { logger } from '@/utils/logger';
 
 export const useNewsletter = () => {
   const [loading, setLoading] = useState(false);
@@ -35,7 +33,7 @@ export const useNewsletter = () => {
           body: { email }
         });
       } catch (emailError) {
-        logger.warn('Email notification failed:', emailError);
+        console.warn('Email notification failed:', emailError);
         // Don't fail the subscription if email fails
       }
 
@@ -46,7 +44,7 @@ export const useNewsletter = () => {
       
       return { success: true, error: null };
     } catch (error) {
-      logger.error('Newsletter subscription error:', error);
+      console.error('Newsletter subscription error:', error);
       toast({
         title: "Error",
         description: "Failed to subscribe. Please try again.",

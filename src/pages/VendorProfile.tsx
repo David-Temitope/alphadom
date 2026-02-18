@@ -13,7 +13,6 @@ import { ProductCardMobile } from '@/components/ProductCardMobile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { VendorProfileSkeleton } from '@/components/skeletons/PageSkeletons';
-import { sanitizeUrl } from '@/utils/security';
 
 interface VendorProfile {
   id: string;
@@ -197,7 +196,7 @@ export const VendorProfile = () => {
                 <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary/20">
                   {vendor.profile?.avatar_url ? (
                     <img 
-                      src={sanitizeUrl(vendor.profile.avatar_url)}
+                      src={vendor.profile.avatar_url}
                       alt={vendor.store_name}
                       className="w-full h-full object-cover"
                     />
@@ -294,7 +293,7 @@ export const VendorProfile = () => {
                 <div className="w-28 h-28 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary/20">
                   {vendor.profile?.avatar_url ? (
                     <img 
-                      src={sanitizeUrl(vendor.profile.avatar_url)}
+                      src={vendor.profile.avatar_url}
                       alt={vendor.store_name}
                       className="w-full h-full object-cover"
                     />

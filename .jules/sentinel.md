@@ -13,17 +13,7 @@
 **Learning:** While server-side headers are preferred, adding a CSP via a meta tag in `index.html` provides a necessary client-side fallback and defense-in-depth for single-page applications.
 **Prevention:** Always include a baseline CSP meta tag in the main `index.html` tailored to the application's external dependencies (Supabase, Paystack, Google Fonts).
 
-## 2026-02-03 - [Public Storage of Sensitive PII]
-**Vulnerability:** Identity verification documents (NIN, Driver's License) were uploaded to the public 'product-images' bucket, making them accessible via static URLs without authentication.
-**Learning:** Defaulting to public storage for ease of implementation can lead to High-severity data leaks of sensitive Personally Identifiable Information (PII).
-**Prevention:** Always use private storage buckets for PII. Implement a secure access layer using signed URLs (e.g., via a 'SecureImage' component) and strictly enforce Row Level Security (RLS) policies for both owners and authorized admins.
-
-## 2025-05-23 - [Information Disclosure via Sensitive Data Logging]
-**Vulnerability:** Admin pages and hooks were logging sensitive data structures (entire order arrays, user profiles) to the browser console using direct `console.log` calls.
-**Learning:** Even if administrative access is restricted, logging full data objects to the client console creates a significant information disclosure risk. Rendering-time logs are particularly leaky as they execute on every state update.
-**Prevention:** Standardize on a production-safe logger utility (like `src/utils/logger.ts`) that conditionally suppresses logs based on the environment (e.g., `import.meta.env.DEV`). Avoid logging full data structures even in development if they contain PII.
-
-## 2026-02-05 - [Secure Handling of Private Storage Assets]
-**Vulnerability:** User identification documents were being uploaded to a public storage bucket and accessed via static public URLs, bypassing access controls for sensitive PII.
-**Learning:** Storing PII in public buckets, even with randomized filenames, is insufficient for security. Private buckets with RLS are required, but they also necessitate a frontend mechanism to handle signed URL generation.
-**Prevention:** Always store PII in private buckets. Use a reusable `useSecureUrl` hook and `SecureImage` component to manage time-limited signed URLs, ensuring that only authorized users (owners and admins) can view the assets. Store relative storage paths (e.g., 'folder/file.ext') in the database to facilitate secure URL generation.
+## 2026-02-02 - [Consistent Password Policy Enforcement]
+**Vulnerability:** Inconsistent password validation between Sign Up and Password Reset flows allowed for weak passwords to be set during reset, bypassing the strong password policy.
+**Learning:** Security policies must be enforced consistently across all entry points that modify sensitive credentials. Decentralized validation logic leads to gaps and weaker defense.
+**Prevention:** Centralize security validation logic into shared utilities and ensure all related flows (creation, reset, update) utilize the same enforcement and UI feedback.

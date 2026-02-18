@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { firecrawlApi } from '@/lib/api/firecrawl';
 import { useToast } from '@/hooks/use-toast';
 import { Search, ExternalLink, RefreshCw, BookOpen, Copy, Check } from 'lucide-react';
-import { sanitizeUrl } from '@/utils/security';
 
 interface ResearchResult {
   title: string;
@@ -177,7 +176,7 @@ export const ContentResearch: React.FC = () => {
                       )}
                     </Button>
                     <a
-                      href={sanitizeUrl(result.url)}
+                      href={result.url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

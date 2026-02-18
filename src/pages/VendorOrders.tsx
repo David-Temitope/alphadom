@@ -8,7 +8,6 @@ import { useVendors } from "@/hooks/useVendors";
 import { useToast } from "@/hooks/use-toast";
 import { Truck, CheckCircle, Clock, Package, User, Phone, MapPin, AlertCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { sanitizeUrl } from "@/utils/security";
 
 interface Order {
   id: string;
@@ -179,7 +178,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           <div className="space-y-3">
             {vendorItems.map((item) => (
               <div key={item.id} className="flex items-center gap-4 p-3 bg-muted rounded-lg">
-                <img src={sanitizeUrl(item.products?.image)} alt={item.products?.name} className="w-16 h-16 object-cover rounded" />
+                <img src={item.products?.image} alt={item.products?.name} className="w-16 h-16 object-cover rounded" />
                 <div className="flex-1">
                   <p className="font-medium">{item.products?.name}</p>
                   <p className="text-sm text-muted-foreground">
@@ -256,10 +255,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           <div>
             <h4 className="font-semibold mb-3">Payment Receipt</h4>
             <img
-              src={sanitizeUrl(order.receipt_image)}
+              src={order.receipt_image}
               alt="Payment receipt"
               className="w-40 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => window.open(sanitizeUrl(order.receipt_image), "_blank", "noopener,noreferrer")}
+              onClick={() => window.open(order.receipt_image, "_blank")}
             />
           </div>
         )}

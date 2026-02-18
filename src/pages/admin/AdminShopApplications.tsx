@@ -8,7 +8,6 @@ import { Loader2, Eye, CheckCircle, XCircle, Clock, Store } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SecureImage } from '@/components/SecureImage';
 
 const AdminShopApplications = () => {
   const { applications, loading, updateApplicationStatus } = useShopApplications();
@@ -201,8 +200,8 @@ const AdminShopApplications = () => {
                           {application.id_image_url && (
                             <div>
                               <Label>ID Image</Label>
-                              <SecureImage
-                                path={application.id_image_url}
+                              <img
+                                src={application.id_image_url}
                                 alt="ID Document" 
                                 className="mt-2 max-w-full h-auto rounded border"
                               />

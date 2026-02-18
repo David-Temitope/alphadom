@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
-import { logger } from '@/utils/logger';
 
 type Profile = Tables<'profiles'>;
 
@@ -25,7 +24,7 @@ export const useUsers = () => {
           table: 'profiles'
         },
         (payload) => {
-          logger.info('Profile change received!', payload);
+          console.log('Profile change received!', payload);
           fetchUsers();
         }
       )
@@ -47,7 +46,7 @@ export const useUsers = () => {
       setUsers(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
-      logger.error('Error fetching users:', err);
+      console.error('Error fetching users:', err);
     } finally {
       setLoading(false);
     }

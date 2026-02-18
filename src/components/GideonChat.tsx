@@ -7,7 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { sanitizeUrl } from '@/utils/security';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -21,7 +20,7 @@ const ProductCard = memo(({ id, name, price, image }: { id: string; name: string
       onClick={() => navigate(`/products/${id}`)}
     >
       <img 
-        src={sanitizeUrl(image || '/placeholder.svg')}
+        src={image || '/placeholder.svg'}
         alt={name}
         className="w-12 h-12 object-cover rounded"
         loading="lazy"
@@ -45,15 +44,8 @@ const VendorCard = memo(({ id, name, image, userId }: { id: string; name: string
     }
   };
   
-  // Use placeholder if image is empty, 'none', undefined, null, or just whitespace
-  const getValidImage = (img?: string): string => {
-    if (!img || img === 'none' || img === 'null' || img === 'undefined' || img.trim() === '') {
-      return '/placeholder.svg';
-    }
-    return img;
-  };
-  
-  const displayImage = getValidImage(image);
+  // Use placeholder if image is empty, 'none', or undefined
+  const displayImage = image && image !== 'none' && image.trim() !== '' ? image : '/placeholder.svg';
   
   return (
     <div 
@@ -61,15 +53,12 @@ const VendorCard = memo(({ id, name, image, userId }: { id: string; name: string
       onClick={handleClick}
     >
       <img 
-        src={sanitizeUrl(displayImage)}
+        src={displayImage}
         alt={name}
-        className="w-12 h-12 object-cover rounded-full bg-muted"
+        className="w-12 h-12 object-cover rounded-full"
         loading="lazy"
         onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          if (target.src !== '/placeholder.svg') {
-            target.src = '/placeholder.svg';
-          }
+          (e.target as HTMLImageElement).src = '/placeholder.svg';
         }}
       />
       <div className="flex flex-col">
@@ -265,7 +254,6 @@ export const GideonChat = () => {
           onClick={() => setIsOpen(true)}
           className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 border-2 border-white z-50 animate-[pulse_6s_ease-in-out_infinite] md:bottom-6"
           size="icon"
-          aria-label="Open Gideon AI assistant"
         >
           <MessageCircle className="h-6 w-6 text-white drop-shadow-lg" />
         </Button>
@@ -278,7 +266,7 @@ export const GideonChat = () => {
               <MessageCircle className="h-5 w-5" />
               <h3 className="font-semibold">Gideon AI Assistant</h3>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close Gideon AI assistant">
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -327,9 +315,8 @@ export const GideonChat = () => {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about products, vendors..."
                 disabled={isLoading}
-                aria-label="Chat input"
               />
-              <Button type="submit" size="icon" disabled={isLoading || !input.trim()} aria-label="Send message">
+              <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
                 <Send className="h-4 w-4" />
               </Button>
             </form>

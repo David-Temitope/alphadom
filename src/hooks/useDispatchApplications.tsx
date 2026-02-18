@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-// Using production-safe logger to prevent PII and system detail disclosure in production logs
-import { logger } from '@/utils/logger';
 
 interface DispatchApplication {
   id: string;
@@ -44,7 +42,7 @@ export const useDispatchApplications = () => {
       if (error) throw error;
       setApplications(data || []);
     } catch (error) {
-      logger.error('Error fetching dispatch applications:', error);
+      console.error('Error fetching dispatch applications:', error);
       // Silent fail - regular users don't need to see this error
     } finally {
       setLoading(false);
@@ -64,7 +62,7 @@ export const useDispatchApplications = () => {
       if (error) throw error;
       setUserApplication(data || null);
     } catch (error) {
-      logger.error('Error fetching user dispatch application:', error);
+      console.error('Error fetching user dispatch application:', error);
     }
   };
 
@@ -93,7 +91,7 @@ export const useDispatchApplications = () => {
 
       return { data, error: null };
     } catch (error: any) {
-      logger.error('Error submitting dispatch application:', error);
+      console.error('Error submitting dispatch application:', error);
       toast({
         title: "Error",
         description: "Failed to submit dispatch application",
@@ -138,7 +136,7 @@ export const useDispatchApplications = () => {
       if (status === 'payment') {
         const application = applications.find(app => app.id === applicationId) || data;
         if (application) {
-          logger.info('Creating dispatcher account for:', application);
+          console.log('Creating dispatcher account for:', application);
           
           // Check if dispatcher already exists to avoid duplicate insertion
           const { data: existingDispatcher } = await supabase
@@ -161,11 +159,11 @@ export const useDispatchApplications = () => {
               .single();
 
             if (dispatcherError) {
-              logger.error('Dispatcher creation error:', dispatcherError);
+              console.error('Dispatcher creation error:', dispatcherError);
               throw dispatcherError;
             }
 
-            logger.debug('Dispatcher account created:', dispatcherData);
+            console.log('Dispatcher account created:', dispatcherData);
           }
 
           // Check if user type already exists
@@ -186,7 +184,7 @@ export const useDispatchApplications = () => {
               });
 
             if (userTypeError) {
-              logger.error('User type creation error:', userTypeError);
+              console.error('User type creation error:', userTypeError);
               throw userTypeError;
             }
           }
@@ -201,7 +199,7 @@ export const useDispatchApplications = () => {
 
       return { data, error: null };
     } catch (error: any) {
-      logger.error('Error updating dispatch application:', error);
+      console.error('Error updating dispatch application:', error);
       toast({
         title: "Error",
         description: "Failed to update dispatch application status",
@@ -229,7 +227,7 @@ export const useDispatchApplications = () => {
 
       return { error: null };
     } catch (error: any) {
-      logger.error('Error deleting dispatch application:', error);
+      console.error('Error deleting dispatch application:', error);
       toast({
         title: "Error",
         description: "Failed to delete application",

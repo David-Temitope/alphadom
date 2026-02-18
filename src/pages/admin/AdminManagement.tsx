@@ -8,8 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-// Using production-safe logger to prevent information disclosure in production logs
-import { logger } from '@/utils/logger';
 import { Loader2, UserCog, Trash2, UserPlus, Shield } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -84,7 +82,7 @@ const AdminManagement: React.FC = () => {
 
       setAdmins(adminsWithProfiles);
     } catch (error) {
-      logger.error('Error fetching admins:', error);
+      console.error('Error fetching admins:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch admin users',
@@ -114,7 +112,7 @@ const AdminManagement: React.FC = () => {
         description: 'Admin access has been revoked successfully',
       });
     } catch (error) {
-      logger.error('Error removing admin:', error);
+      console.error('Error removing admin:', error);
       toast({
         title: 'Error',
         description: 'Failed to remove admin access',
@@ -192,7 +190,7 @@ const AdminManagement: React.FC = () => {
       setNewAdminRole('user_admin');
       fetchAdmins();
     } catch (error) {
-      logger.error('Error adding admin:', error);
+      console.error('Error adding admin:', error);
       toast({
         title: 'Error',
         description: 'Failed to add admin',
@@ -218,7 +216,7 @@ const AdminManagement: React.FC = () => {
         description: 'Admin role has been updated successfully',
       });
     } catch (error) {
-      logger.error('Error updating role:', error);
+      console.error('Error updating role:', error);
       toast({
         title: 'Error',
         description: 'Failed to update admin role',

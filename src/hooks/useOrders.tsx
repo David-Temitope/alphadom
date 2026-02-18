@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tables } from '@/integrations/supabase/types';
-import { logger } from '@/utils/logger';
 
 type Order = Tables<'orders'>;
 type OrderItem = Tables<'order_items'>;
@@ -30,7 +29,7 @@ export const useOrders = () => {
             filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            logger.info('Order change received!', payload);
+            console.log('Order change received!', payload);
             fetchOrders();
           }
         )
@@ -58,7 +57,7 @@ export const useOrders = () => {
       setOrders(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
-      logger.error('Error fetching orders:', err);
+      console.error('Error fetching orders:', err);
     } finally {
       setLoading(false);
     }

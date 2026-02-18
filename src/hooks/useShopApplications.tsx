@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
 
 interface ShopApplication {
   id: string;
@@ -53,7 +52,7 @@ export const useShopApplications = () => {
       if (error) throw error;
       setApplications((data as any[]) || []);
     } catch (error) {
-      logger.error('Error fetching applications:', error);
+      console.error('Error fetching applications:', error);
       // Only show error toast if user is likely an admin viewing all applications
       // Regular users don't need to see this error
     }
@@ -72,7 +71,7 @@ export const useShopApplications = () => {
       if (error && error.code !== 'PGRST116') throw error;
       setUserApplication((data as any) || null);
     } catch (error) {
-      logger.error('Error fetching user application:', error);
+      console.error('Error fetching user application:', error);
     }
   };
 
@@ -99,7 +98,7 @@ export const useShopApplications = () => {
 
       return { data, error: null };
     } catch (error: any) {
-      logger.error('Error submitting application:', error);
+      console.error('Error submitting application:', error);
       toast({
         title: "Error",
         description: "Failed to submit application",
@@ -164,7 +163,7 @@ export const useShopApplications = () => {
 
       return { data, error: null };
     } catch (error: any) {
-      logger.error('Error updating application:', error);
+      console.error('Error updating application:', error);
       toast({
         title: "Error",
         description: "Failed to update application status",
@@ -192,7 +191,7 @@ export const useShopApplications = () => {
 
       return { error: null };
     } catch (error: any) {
-      logger.error('Error deleting shop application:', error);
+      console.error('Error deleting shop application:', error);
       toast({
         title: "Error",
         description: "Failed to delete application",

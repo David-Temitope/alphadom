@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'sha256-VLVEbKOhqSrIzu+ixx91uxMMUSSj+qFhG8Yc55jmgKM=' https://js.paystack.co 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: blob: https://*.supabase.co; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; style-src-elem 'self' https://fonts.googleapis.com 'unsafe-inline'; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; frame-src https://checkout.paystack.com; base-uri 'self'; form-action 'self';"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.paystack.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://checkout.paystack.com; base-uri 'self'; form-action 'self';"
     />
 
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -41,7 +41,19 @@
     <meta name="twitter:image" content="https://alphadom.online/favicon.png" />
 
     <!-- Structured Data -->
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Alphadom","url":"https://alphadom.online","logo":"https://alphadom.online/favicon.png","address":{"@type":"PostalAddress","addressCountry":"NG"}}</script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Alphadom",
+        "url": "https://alphadom.online",
+        "logo": "https://alphadom.online/favicon.png",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "NG"
+        }
+      }
+    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

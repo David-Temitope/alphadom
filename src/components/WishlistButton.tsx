@@ -30,7 +30,6 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
       variant="outline"
       size={size === 'sm' ? 'sm' : 'icon'}
       onClick={handleClick}
-      aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
       className={cn(
         "transition-all duration-200 hover:scale-105",
         inWishlist 

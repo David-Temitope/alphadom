@@ -6,8 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, X, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
-import { sanitizeUrl } from '@/utils/security';
 
 interface ImageUploadProps {
   onImageUploaded: (url: string) => void;
@@ -42,7 +40,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-      logger.info('Uploading file', { fileName, size: file.size, type: file.type });
+      console.log('Uploading file:', fileName, 'Size:', file.size, 'Type:', file.type);
 
       const { error: uploadError } = await supabase.storage
         .from('product-images')
@@ -52,7 +50,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         });
 
       if (uploadError) {
-        logger.error('Upload error:', uploadError);
+        console.error('Upload error:', uploadError);
         throw uploadError;
       }
 
@@ -60,7 +58,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         .from('product-images')
         .getPublicUrl(fileName);
 
-      logger.info('Upload successful', { publicUrl });
+      console.log('Upload successful, public URL:', publicUrl);
 
       setPreview(publicUrl);
       onImageUploaded(publicUrl);
@@ -70,7 +68,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         description: "Image uploaded successfully!",
       });
     } catch (error) {
-      logger.error('Image upload error:', error);
+      console.error('Image upload error:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : 'Error uploading image',
@@ -94,7 +92,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUploaded, curre
         <div className="relative group">
           <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm">
             <img 
-              src={sanitizeUrl(preview)}
+              src={preview}
               alt="Preview" 
               className="w-32 h-32 object-cover"
             />

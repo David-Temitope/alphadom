@@ -35,7 +35,6 @@ import { useAdminProducts } from '@/hooks/useAdminProducts';
 import { useStockAlerts } from '@/hooks/useStockAlerts';
 import { MultiImageUpload } from '@/components/MultiImageUpload';
 import { useToast } from '@/hooks/use-toast';
-import { sanitizeUrl } from '@/utils/security';
 
 const AdminProducts = () => {
   const { products, loading, categories, createProduct, updateProduct, deleteProduct } = useAdminProducts();
@@ -746,7 +745,7 @@ const AdminProducts = () => {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <img
-                          src={sanitizeUrl(product.image || '/placeholder.svg')}
+                          src={product.image || '/placeholder.svg'}
                           alt={product.name}
                           className="w-12 h-12 rounded-lg object-cover"
                         />

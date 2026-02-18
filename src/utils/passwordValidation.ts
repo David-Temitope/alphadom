@@ -1,6 +1,3 @@
-/**
- * Utility for password validation and strength checking
- */
 
 export interface PasswordStrength {
   checks: {
@@ -16,9 +13,7 @@ export interface PasswordStrength {
 }
 
 /**
- * Checks the strength of a password based on common security requirements
- * @param password The password string to check
- * @returns A PasswordStrength object containing detailed results
+ * Checks the strength of a password based on common security criteria.
  */
 export const checkPasswordStrength = (password: string): PasswordStrength => {
   const checks = {
@@ -53,11 +48,18 @@ export const checkPasswordStrength = (password: string): PasswordStrength => {
 };
 
 /**
- * Validates if a password meets the minimum security requirements
- * @param password The password string to validate
- * @returns boolean true if valid, false otherwise
+ * Validates a password against the application's security policy.
+ * Returns an object with isValid boolean and an optional error message.
  */
-export const isPasswordStrong = (password: string): boolean => {
+export const validatePassword = (password: string): { isValid: boolean; message: string | null } => {
   const { checks } = checkPasswordStrength(password);
-  return checks.lowercase && checks.uppercase && checks.digit && checks.symbol && checks.length;
+
+  if (!checks.length) {
+    return { isValid: false, message: 'Password must be at least 8 characters long' };
+  }
+  if (!checks.lowercase || !checks.uppercase || !checks.digit || !checks.symbol) {
+    return { isValid: false, message: 'Include uppercase, lowercase, digit and symbol' };
+  }
+
+  return { isValid: true, message: null };
 };

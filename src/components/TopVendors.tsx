@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Star, ChevronRight, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { sanitizeUrl } from '@/utils/security';
 
 interface Vendor {
   id: string;
@@ -26,83 +25,66 @@ export const TopVendors = () => {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        // Reduced limit to 3 to match the UI requirements and minimize network load
-        const { data: vendorsData, error: vendorsError } = await supabase
+        const { data, error } = await supabase
           .from('approved_vendors')
           .select('*')
           .eq('is_active', true)
           .eq('is_suspended', false)
           .order('created_at', { ascending: false })
-          .limit(3);
+          .limit(6);
 
-        if (vendorsError) throw vendorsError;
-        if (!vendorsData) return;
+        if (error) throw error;
 
-        const userIds = vendorsData.map(v => v.user_id);
-        const vendorIds = vendorsData.map(v => v.id);
+        // Get product counts and calculate ratings for each vendor
+        const vendorsWithStats = await Promise.all(
+          (data || []).map(async (vendor) => {
+            // Count products for this vendor
+            const { count: productsCount } = await supabase
+              .from('products')
+              .select('*', { count: 'exact', head: true })
+              .eq('vendor_id', vendor.id);
 
-        // Batch fetch all required related data to solve N+1 problem
-        const [profilesRes, productsRes, followersCounts] = await Promise.all([
-          // Batch fetch profiles
-          supabase.from('profiles').select('id, avatar_url').in('id', userIds),
-          // Batch fetch products for count and rating calculation
-          supabase.from('products').select('id, vendor_id').in('vendor_id', vendorIds),
-          // Parallel follower counts (N=3 instead of 6)
-          Promise.all(userIds.map(uid =>
-            supabase.from('user_follows').select('*', { count: 'exact', head: true }).eq('following_id', uid)
-          ))
-        ]);
+            // Count followers from user_follows table
+            const { count: followersCount } = await supabase
+              .from('user_follows')
+              .select('*', { count: 'exact', head: true })
+              .eq('following_id', vendor.user_id);
 
-        if (profilesRes.error) throw profilesRes.error;
-        if (productsRes.error) throw productsRes.error;
+            // Get avatar from profiles table
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('avatar_url')
+              .eq('id', vendor.user_id)
+              .single();
 
-        // Batch fetch product ratings for all retrieved products
-        const productIds = productsRes.data?.map(p => p.id) || [];
-        const { data: ratingsData, error: ratingsError } = await supabase
-          .from('product_ratings')
-          .select('stars, product_id')
-          .in('product_id', productIds);
+            // Calculate average rating from product_ratings for vendor's products
+            const { data: vendorProducts } = await supabase
+              .from('products')
+              .select('id')
+              .eq('vendor_id', vendor.id);
 
-        if (ratingsError) throw ratingsError;
+            let avgRating = 0;
+            if (vendorProducts && vendorProducts.length > 0) {
+              const productIds = vendorProducts.map(p => p.id);
+              const { data: ratings } = await supabase
+                .from('product_ratings')
+                .select('stars')
+                .in('product_id', productIds);
 
-        // Create lookups for efficient mapping
-        const profileMap = new Map(profilesRes.data?.map(p => [p.id, p.avatar_url]));
-        const followerMap = new Map(userIds.map((uid, i) => [uid, followersCounts[i].count || 0]));
+              if (ratings && ratings.length > 0) {
+                avgRating = ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length;
+              }
+            }
 
-        const vendorProductsMap = new Map<string, string[]>();
-        productsRes.data?.forEach(p => {
-          if (!vendorProductsMap.has(p.vendor_id!)) vendorProductsMap.set(p.vendor_id!, []);
-          vendorProductsMap.get(p.vendor_id!)?.push(p.id);
-        });
-
-        const productRatingsMap = new Map<string, number[]>();
-        ratingsData?.forEach(r => {
-          if (!productRatingsMap.has(r.product_id)) productRatingsMap.set(r.product_id, []);
-          productRatingsMap.get(r.product_id)?.push(r.stars);
-        });
-
-        // Combine all data into the final vendor objects
-        const vendorsWithStats = vendorsData.map(vendor => {
-          const vendorProductIds = vendorProductsMap.get(vendor.id) || [];
-          const allRatings: number[] = [];
-
-          vendorProductIds.forEach(pid => {
-            const productRatings = productRatingsMap.get(pid) || [];
-            allRatings.push(...productRatings);
-          });
-
-          const avgRating = allRatings.length > 0
-            ? allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length
-            : 0;
-
-          return {
-            ...vendor,
-            products_count: vendorProductIds.length,
-            followers_count: followerMap.get(vendor.user_id) || 0,
-            rating: avgRating,
-            avatar_url: profileMap.get(vendor.user_id) || null,
-          };
-        });
+            return {
+              ...vendor,
+              products_count: productsCount || 0,
+              followers_count: followersCount || 0,
+              rating: avgRating,
+              avatar_url: profileData?.avatar_url || null,
+            };
+          })
+        );
 
         setVendors(vendorsWithStats);
       } catch (error) {
@@ -182,13 +164,13 @@ export const TopVendors = () => {
                   <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
                     {vendor.avatar_url ? (
                       <img
-                        src={sanitizeUrl(vendor.avatar_url)}
+                        src={vendor.avatar_url}
                         alt={vendor.store_name}
                         className="w-full h-full object-cover"
                       />
                     ) : vendor.store_logo ? (
                       <img
-                        src={sanitizeUrl(vendor.store_logo)}
+                        src={vendor.store_logo}
                         alt={vendor.store_name}
                         className="w-full h-full object-cover"
                       />
@@ -207,7 +189,7 @@ export const TopVendors = () => {
                       </h3>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <CheckCircle className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+                      <CheckCircle className="w-3.5 h-3.5 text-primary" />
                       <span className="text-xs text-primary font-medium">
                         {planBadge.label}
                       </span>
