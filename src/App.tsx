@@ -91,8 +91,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const App = () => {
-  console.log('App component rendering');
-  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

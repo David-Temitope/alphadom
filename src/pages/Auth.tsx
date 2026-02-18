@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Mail, Lock, User, ShoppingCart, Shield, Sparkles, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { checkPasswordStrength, validatePassword } from '@/utils/passwordValidation';
+import { checkPasswordStrength, isPasswordStrong } from '@/utils/passwordValidation';
 
 const Auth = () => {
   const { user, signIn, signUp, resetPassword } = useAuth();
@@ -68,9 +68,8 @@ const Auth = () => {
     }
 
     // Strong password validation
-    const { isValid, message } = validatePassword(password);
-    if (!isValid) {
-      setError(message || 'Weak Password');
+    if (!isPasswordStrong(password)) {
+      setError('Weak Password - Include uppercase, lowercase, digit and symbol (min 8 chars)');
       setLoading(false);
       return;
     }

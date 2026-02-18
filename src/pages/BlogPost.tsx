@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { sanitizeUrl } from '@/utils/security';
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
@@ -169,7 +170,7 @@ const BlogPost = () => {
         {post.featured_image_url && (
           <div className="mb-8 rounded-xl overflow-hidden">
             <img
-              src={post.featured_image_url}
+              src={sanitizeUrl(post.featured_image_url)}
               alt={post.title}
               className="w-full h-auto max-h-[500px] object-cover"
             />
@@ -189,7 +190,7 @@ const BlogPost = () => {
               {post.additional_images.map((imageUrl, index) => (
                 <div key={index} className="rounded-lg overflow-hidden">
                   <img
-                    src={imageUrl}
+                    src={sanitizeUrl(imageUrl)}
                     alt={`${post.title} - Image ${index + 1}`}
                     className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
                   />

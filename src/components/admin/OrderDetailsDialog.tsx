@@ -9,6 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { MapPin, Phone, User, Mail, Calendar, DollarSign } from 'lucide-react';
+import { sanitizeUrl } from '@/utils/security';
 
 interface OrderDetailsDialogProps {
   open: boolean;
@@ -93,7 +94,7 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                   <div key={item.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     {item.products?.image && (
                       <img 
-                        src={item.products.image} 
+                        src={sanitizeUrl(item.products.image)}
                         alt={item.products.name}
                         className="w-16 h-16 object-cover rounded"
                       />
@@ -181,7 +182,7 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
               <div>
                 <h3 className="font-semibold mb-3">Payment Receipt</h3>
                 <img
-                  src={order.receipt_image}
+                  src={sanitizeUrl(order.receipt_image)}
                   alt="Payment receipt"
                   className="max-w-full rounded-lg border"
                 />

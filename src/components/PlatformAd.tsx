@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { sanitizeUrl } from '@/utils/security';
 
 interface Ad {
   id: string;
@@ -24,7 +25,7 @@ interface PlatformAdProps {
   className?: string;
 }
 
-const SESSION_KEY = 'alphadom_ads_dismissed';
+const AD_DISMISSAL_SESSION_STORAGE_KEY = 'alphadom_ads_dismissed';
 
 export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = '' }) => {
   const [ad, setAd] = useState<Ad | null>(null);
@@ -35,7 +36,7 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
   useEffect(() => {
     const fetchAd = async () => {
       // Check if ad was already dismissed for this page in this session
-      const dismissed = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+      const dismissed = JSON.parse(sessionStorage.getItem(AD_DISMISSAL_SESSION_STORAGE_KEY) || '{}');
       if (dismissed[targetPage]) {
         return;
       }
@@ -78,14 +79,14 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
     e.stopPropagation();
     setVisible(false);
     // Mark as dismissed for this session
-    const dismissed = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+    const dismissed = JSON.parse(sessionStorage.getItem(AD_DISMISSAL_SESSION_STORAGE_KEY) || '{}');
     dismissed[targetPage] = true;
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(dismissed));
+    sessionStorage.setItem(AD_DISMISSAL_SESSION_STORAGE_KEY, JSON.stringify(dismissed));
   };
 
   const handleClick = () => {
     if (ad?.target_url) {
-      window.open(ad.target_url, '_blank');
+      window.open(sanitizeUrl(ad.target_url), '_blank', 'noopener,noreferrer');
     } else if (ad?.target_product_id) {
       navigate(`/product/${ad.target_product_id}`);
     } else if (ad?.target_vendor_id) {
@@ -117,7 +118,7 @@ export const PlatformAd: React.FC<PlatformAdProps> = ({ targetPage, className = 
             {ad.image_url && (
               <div className="relative">
                 <img 
-                  src={ad.image_url} 
+                  src={sanitizeUrl(ad.image_url)}
                   alt={ad.title}
                   className="w-full h-32 md:h-40 object-cover"
                   loading="lazy"

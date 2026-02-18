@@ -286,7 +286,7 @@ const UserDashboard = () => {
           {/* Welcome Header */}
           <div className="mb-8">
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-              Hello, {firstName}! 👋
+              Hello, {firstName}!
             </h1>
             <p className="text-muted-foreground mt-1">
               Check your latest updates and order status below.

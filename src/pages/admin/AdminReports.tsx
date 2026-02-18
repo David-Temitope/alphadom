@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+// Using production-safe logger to prevent information disclosure in production logs
+import { logger } from '@/utils/logger';
 import { Loader2, MessageSquare, Mail, User, Clock, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -41,7 +43,7 @@ const AdminReports = () => {
       if (error) throw error;
       setMessages(data || []);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      logger.error('Error fetching messages:', error);
       toast({
         title: "Error",
         description: "Failed to fetch contact messages",
@@ -87,7 +89,7 @@ const AdminReports = () => {
       setResponse('');
       await fetchMessages();
     } catch (error) {
-      console.error('Error responding:', error);
+      logger.error('Error responding:', error);
       toast({
         title: "Error",
         description: "Failed to save response",
@@ -106,7 +108,7 @@ const AdminReports = () => {
         .eq('id', messageId);
       await fetchMessages();
     } catch (error) {
-      console.error('Error marking as read:', error);
+      logger.error('Error marking as read:', error);
     }
   };
 
