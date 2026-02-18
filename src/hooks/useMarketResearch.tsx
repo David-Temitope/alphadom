@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { firecrawlApi, MarketResearchResult } from '@/lib/api/firecrawl';
 import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
 
 export interface UseMarketResearchReturn {
   results: MarketResearchResult[];
@@ -56,7 +55,6 @@ export const useMarketResearch = (): UseMarketResearchReturn => {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      logger.error('Market research error:', err);
       setError(errorMessage);
       toast({
         title: "Error",

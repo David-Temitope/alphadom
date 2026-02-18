@@ -13,7 +13,6 @@ import { Save, CreditCard, Building2, Image, Download, Monitor, Smartphone, Tras
 import { exportOrdersToPDF } from '@/utils/pdfExport';
 import { useOrders } from '@/hooks/useOrders';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { sanitizeUrl } from '@/utils/security';
 
 interface HeroSlide {
   image: string;
@@ -599,7 +598,7 @@ const AdminSettings = () => {
                           {slide.image ? (
                             <div className="relative">
                               <img 
-                                src={sanitizeUrl(slide.image)}
+                                src={slide.image}
                                 alt={`Slide ${index + 1}`} 
                                 className="w-full h-32 object-cover rounded-lg"
                               />
@@ -673,7 +672,7 @@ const AdminSettings = () => {
                       {/* Mini Preview */}
                       {slide.image && (
                         <div className="relative rounded-lg overflow-hidden h-24">
-                          <img src={sanitizeUrl(slide.image)} alt="" className="w-full h-full object-cover" />
+                          <img src={slide.image} alt="" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/40" />
                           <div className="absolute bottom-2 left-2 text-white text-xs">
                             <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">{slide.tag}</span>

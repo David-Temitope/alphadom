@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, CheckCircle, Eye, EyeOff, AlertCircle, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { checkPasswordStrength, isPasswordStrong } from '@/utils/passwordValidation';
+import { checkPasswordStrength, validatePassword } from '@/utils/passwordValidation';
 import { Progress } from '@/components/ui/progress';
 
 const ResetPassword = () => {
@@ -57,8 +57,6 @@ const ResetPassword = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const passwordStrength = React.useMemo(() => checkPasswordStrength(password), [password]);
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -68,8 +66,10 @@ const ResetPassword = () => {
       return;
     }
 
-    if (!isPasswordStrong(password)) {
-      setError('Weak Password - Include uppercase, lowercase, digit and symbol (min 8 chars)');
+    // Strong password validation
+    const { isValid, message } = validatePassword(password);
+    if (!isValid) {
+      setError(message || 'Weak Password');
       return;
     }
 
@@ -93,7 +93,8 @@ const ResetPassword = () => {
         navigate('/auth');
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset password');
+      const error = err as Error;
+      setError(error.message || 'Failed to reset password');
       toast.error('Password reset failed');
     } finally {
       setLoading(false);

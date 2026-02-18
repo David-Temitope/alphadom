@@ -2,9 +2,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
-import { logger } from '@/utils/logger';
 
-export type Order = Tables<'orders'> & {
+type Order = Tables<'orders'> & {
   profiles?: {
     id: string;
     full_name: string | null;
@@ -41,7 +40,7 @@ export const useAdminOrders = () => {
           table: 'orders'
         },
         (payload) => {
-          logger.info('Order change received!', payload);
+          console.log('Order change received!', payload);
           fetchOrders();
         }
       )
@@ -54,7 +53,7 @@ export const useAdminOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      logger.info('Fetching orders...');
+      console.log('Fetching orders...');
       setLoading(true);
       setError(null);
       
@@ -82,17 +81,17 @@ export const useAdminOrders = () => {
         .order('created_at', { ascending: false });
 
       if (ordersError) {
-        logger.error('Error fetching orders:', ordersError);
+        console.error('Error fetching orders:', ordersError.message, ordersError);
         throw ordersError;
       }
       
-      logger.info('Orders fetched successfully:', { count: ordersData?.length || 0 });
+      console.log('Orders fetched successfully:', ordersData?.length || 0, 'orders');
       
-      setOrders(ordersData as Order[] || []);
+      setOrders(ordersData as any || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load orders';
       setError(errorMessage);
-      logger.error('Error fetching orders:', err);
+      console.error('Error fetching orders:', err);
     } finally {
       setLoading(false);
     }
@@ -100,7 +99,7 @@ export const useAdminOrders = () => {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      logger.info('Updating order status:', { orderId, status });
+      console.log('Updating order status:', orderId, status);
       
       const { error } = await supabase
         .from('orders')
@@ -109,10 +108,10 @@ export const useAdminOrders = () => {
 
       if (error) throw error;
       
-      logger.info('Order status updated successfully');
+      console.log('Order status updated successfully');
       return { success: true, error: null };
     } catch (err) {
-      logger.error('Error updating order status:', err);
+      console.error('Error updating order status:', err);
       return { success: false, error: err };
     }
   };

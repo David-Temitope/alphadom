@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMarketResearch } from '@/hooks/useMarketResearch';
 import { Search, TrendingUp, ExternalLink, RefreshCw, BarChart3 } from 'lucide-react';
-import { sanitizeUrl } from '@/utils/security';
 
 const CATEGORIES = [
   'Clothing & Fashion',
@@ -192,7 +191,7 @@ export const MarketResearch: React.FC = () => {
                     </p>
                   )}
                   <a
-                    href={sanitizeUrl(result.url)}
+                    href={result.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs text-primary hover:underline flex items-center gap-1"

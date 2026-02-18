@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProducts } from '@/hooks/useProducts';
 import { useAdminSettings, HeroSlide } from '@/hooks/useAdminSettings';
-import { sanitizeUrl } from '@/utils/security';
 
 const categoryIcons: Record<string, React.ComponentType<any>> = {
   electronics: Laptop,
@@ -128,7 +127,7 @@ export const MobileHomepage: React.FC = () => {
           {heroSlides.length > 0 && currentSlideData ? (
             <div className="relative aspect-[16/9]">
               <img
-                src={sanitizeUrl(currentSlideData.image)}
+                src={currentSlideData.image}
                 alt={currentSlideData.title}
                 className="w-full h-full object-cover"
               />
@@ -280,7 +279,7 @@ export const MobileHomepage: React.FC = () => {
                 {/* Product Image */}
                 <div className="relative aspect-square bg-muted overflow-hidden">
                   <img
-                    src={sanitizeUrl(displayImage)}
+                    src={displayImage}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -290,7 +289,7 @@ export const MobileHomepage: React.FC = () => {
                   {/* Vendor Pick Badge */}
                   {isVendorPick && (
                     <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-[9px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                      <BadgeCheck className="w-3 h-3" aria-hidden="true" />
+                      <BadgeCheck className="w-3 h-3" />
                       Vendor Pick
                     </div>
                   )}

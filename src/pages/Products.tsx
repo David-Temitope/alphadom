@@ -432,26 +432,24 @@ const Products = () => {
                         </h3>
                       </Link>
 
-                      {/* Rating - only show if product has been rated */}
-                      {(Number(product.rating) || 0) > 0 && (
-                        <div className="flex items-center gap-1 mb-3">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i}
-                                className={`h-3 w-3 ${
-                                  i < Math.floor(Number(product.rating) || 0) 
-                                    ? 'text-primary fill-primary' 
-                                    : 'text-muted-foreground/30'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            ({product.rating?.toFixed(1)})
-                          </span>
+                      {/* Rating */}
+                      <div className="flex items-center gap-1 mb-3">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${
+                                i < Math.floor(Number(product.rating) || 0)
+                                  ? 'text-primary fill-primary'
+                                  : 'text-muted-foreground/30'
+                              }`}
+                            />
+                          ))}
                         </div>
-                      )}
+                        <span className="text-xs text-muted-foreground">
+                          ({product.reviews || 0})
+                        </span>
+                      </div>
 
                       {/* Price and Wishlist */}
                       <div className="flex items-center justify-between">

@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert } from '@/integrations/supabase/types';
-import { logger } from '@/utils/logger';
 
 type Product = Tables<'products'>;
 type ProductInsert = TablesInsert<'products'>;
@@ -27,7 +26,7 @@ export const useAdminProducts = () => {
           table: 'products'
         },
         (payload) => {
-          logger.info('Product change received!', payload);
+          console.log('Product change received!', payload);
           fetchProducts();
         }
       )
@@ -53,7 +52,7 @@ export const useAdminProducts = () => {
       setCategories(uniqueCategories);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
-      logger.error('Error fetching products:', err);
+      console.error('Error fetching products:', err);
     } finally {
       setLoading(false);
     }
@@ -90,7 +89,7 @@ export const useAdminProducts = () => {
 
   const deleteProduct = async (productId: string) => {
     try {
-      logger.info('Starting product deletion process', { productId });
+      console.log('Starting product deletion process for:', productId);
       
       // First get the product to check if it has an image
       const { data: product, error: fetchError } = await supabase
@@ -100,11 +99,11 @@ export const useAdminProducts = () => {
         .maybeSingle();
 
       if (fetchError) {
-        logger.error('Error fetching product for deletion:', fetchError);
+        console.error('Error fetching product for deletion:', fetchError);
         throw fetchError;
       }
 
-      logger.debug('Product data before deletion:', product);
+      console.log('Product data before deletion:', product);
 
       // Delete the product from database first
       const { error: deleteError } = await supabase
@@ -113,11 +112,11 @@ export const useAdminProducts = () => {
         .eq('id', productId);
 
       if (deleteError) {
-        logger.error('Error deleting product from database:', deleteError);
+        console.error('Error deleting product from database:', deleteError);
         throw deleteError;
       }
 
-      logger.info('Product deleted successfully from database');
+      console.log('Product deleted successfully from database');
 
       // If product had an image, try to delete it from storage
       if (product?.image && !product.image.includes('placeholder.svg')) {
@@ -129,20 +128,20 @@ export const useAdminProducts = () => {
           }
           
           if (imagePath && imagePath.trim() !== '') {
-            logger.info('Attempting to delete image from storage', { imagePath });
+            console.log('Attempting to delete image from storage:', imagePath);
             const { error: storageError } = await supabase.storage
               .from('product-images')
               .remove([imagePath]);
             
             if (storageError) {
-              logger.warn('Failed to delete image from storage:', storageError);
+              console.warn('Failed to delete image from storage:', storageError);
               // Don't throw here, storage deletion is not critical
             } else {
-              logger.info('Image deleted from storage successfully');
+              console.log('Image deleted from storage successfully');
             }
           }
         } catch (storageError) {
-          logger.warn('Storage deletion error (non-critical):', storageError);
+          console.warn('Storage deletion error (non-critical):', storageError);
           // Don't fail the whole operation if image deletion fails
         }
       }
@@ -152,7 +151,7 @@ export const useAdminProducts = () => {
       
       return { success: true, error: null };
     } catch (err) {
-      logger.error('Critical error in deleteProduct:', err);
+      console.error('Critical error in deleteProduct:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete product';
       return { success: false, error: errorMessage };
     }

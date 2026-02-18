@@ -53,11 +53,10 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   if (iconOnly) {
     return (
       <Button
-        onClick={() => window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+        onClick={() => window.open(whatsappUrl, '_blank')}
         size="icon"
         className={`bg-[#25D366] hover:bg-[#128C7E] text-white ${className}`}
         title="Message on WhatsApp"
-        aria-label="Chat on WhatsApp"
       >
         <MessageCircle className="w-4 h-4" />
       </Button>
@@ -66,7 +65,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
 
   return (
     <Button
-      onClick={() => window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+      onClick={() => window.open(whatsappUrl, '_blank')}
       className={`bg-[#25D366] hover:bg-[#128C7E] text-white ${className}`}
     >
       <MessageCircle className="w-5 h-5 mr-2" />

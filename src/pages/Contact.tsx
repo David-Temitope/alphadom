@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+
 const Contact = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);

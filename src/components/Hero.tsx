@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserTypes } from '@/hooks/useUserTypes';
 import { useShopApplications } from '@/hooks/useShopApplications';
 import { useAdminSettings } from '@/hooks/useAdminSettings';
-import { sanitizeUrl } from '@/utils/security';
 import { ArrowRight, CheckCircle, Shield, Truck, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 // Default hero images for fallback
@@ -149,7 +148,7 @@ export const Hero = () => {
                     }`}
                   >
                     <img
-                      src={sanitizeUrl(image)}
+                      src={image}
                       alt={`Hero slide ${index + 1}`}
                       className="w-full h-full object-cover"
                       loading={index === 0 ? "eager" : "lazy"}
@@ -164,14 +163,12 @@ export const Hero = () => {
                   <button
                     onClick={prevSlide}
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/90 hover:bg-background rounded-full flex items-center justify-center shadow-soft transition-colors"
-                    aria-label="Previous slide"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={nextSlide}
                     className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/90 hover:bg-background rounded-full flex items-center justify-center shadow-soft transition-colors"
-                    aria-label="Next slide"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -182,7 +179,6 @@ export const Hero = () => {
                       <button
                         key={index}
                         onClick={() => setCurrentSlide(index)}
-                        aria-label={`Go to slide ${index + 1}`}
                         className={`w-2 h-2 rounded-full transition-all ${
                           index === currentSlide 
                             ? 'bg-primary w-6' 

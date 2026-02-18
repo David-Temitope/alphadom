@@ -87,6 +87,14 @@ const AdminLogin = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
+
+          <div className="mt-6 p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>Demo Credentials:</strong><br />
+              Email: ************<br />
+              Password: *****
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

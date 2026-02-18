@@ -8,7 +8,6 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { sanitizeUrl } from '@/utils/security';
 
 interface Product {
   id: string;
@@ -34,7 +33,7 @@ interface ProductCardMobileProps {
   product: Product;
 }
 
-export const ProductCardMobile = React.memo(({ product }: ProductCardMobileProps) => {
+export const ProductCardMobile: React.FC<ProductCardMobileProps> = ({ product }) => {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -123,7 +122,7 @@ export const ProductCardMobile = React.memo(({ product }: ProductCardMobileProps
       <Link to={`/products/${product.id}`} className="flex-1 flex flex-col">
         <div className="relative bg-muted aspect-square overflow-hidden">
           <img
-            src={sanitizeUrl(displayImage)}
+            src={displayImage}
             alt={product.name}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
@@ -157,11 +156,11 @@ export const ProductCardMobile = React.memo(({ product }: ProductCardMobileProps
             <span className="flex-1">{truncateName(product.name)}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0">
               {product.vendor_subscription_plan === 'first_class' ? (
-                <BadgeCheck className="w-3.5 h-3.5 text-amber-500" title="Verified First Class Vendor" aria-label="Verified First Class Vendor" />
+                <BadgeCheck className="w-3.5 h-3.5 text-amber-500" />
               ) : product.vendor_subscription_plan === 'economy' ? (
-                <BadgeCheck className="w-3.5 h-3.5 text-sky-500" title="Verified Economy Vendor" aria-label="Verified Economy Vendor" />
+                <BadgeCheck className="w-3.5 h-3.5 text-sky-500" />
               ) : product.vendor_is_registered ? (
-                <BadgeCheck className="w-3.5 h-3.5 text-primary" title="Registered Business" aria-label="Registered Business" />
+                <BadgeCheck className="w-3.5 h-3.5 text-primary" />
               ) : null}
             </span>
           </h3>
@@ -204,6 +203,4 @@ export const ProductCardMobile = React.memo(({ product }: ProductCardMobileProps
       </div>
     </Card>
   );
-});
-
-ProductCardMobile.displayName = 'ProductCardMobile';
+};

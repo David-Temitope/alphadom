@@ -30,7 +30,6 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
       variant="outline"
       size={size === 'sm' ? 'sm' : 'icon'}
       onClick={handleClick}
-      aria-label={liked ? "Unlike" : "Like"}
       className={cn(
         "transition-all duration-200 hover:scale-105",
         liked 
