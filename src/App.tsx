@@ -13,59 +13,71 @@ import { Footer } from "@/components/Footer";
 import { GideonChat } from "@/components/GideonChat";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+// Public Pages
 import Index from "./pages/Index";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Orders from "./pages/Orders";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminProducts from "./pages/admin/AdminProducts";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminAnalytics from "./pages/admin/AdminAnalytics";
-import AdminShopApplications from "./pages/admin/AdminShopApplications";
-import AdminDispatchApplications from "./pages/admin/AdminDispatchApplications";
-import AdminDispatchMonitoring from "./pages/admin/AdminDispatchMonitoring";
-import AdminVendorMonitoring from "./pages/admin/AdminVendorMonitoring";
-import AdminManagement from "./pages/admin/AdminManagement";
-import AdminTransactions from "./pages/admin/AdminTransactions";
-import AdminReports from "./pages/admin/AdminReports";
-import AdminAdverts from "./pages/admin/AdminAdverts";
-import AdminNewsletter from "./pages/admin/AdminNewsletter";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import RefundPolicy from "./pages/RefundPolicy";
-import ReturnPolicy from "./pages/ReturnPolicy";
-import DeliveryPolicy from "./pages/DeliveryPolicy";
-import DisputePolicy from "./pages/DisputePolicy";
-import Wishlist from "./pages/Wishlist";
-import Auth from "./pages/Auth";
-import ShopApplicationStatus from "./pages/ShopApplicationStatus";
-import DispatchApplicationStatus from "./pages/DispatchApplicationStatus";
-import VendorDashboard from "./pages/VendorDashboard";
-import UserTypeSelection from "./pages/UserTypeSelection";
-import UserSettings from "./pages/UserSettings";
-import UserDashboard from "./pages/UserDashboard";
-import Pilots from "./pages/Pilots";
-import { VendorProfile } from "./pages/VendorProfile";
-import DispatchDashboard from "./pages/DispatchDashboard";
-import DispatchSelection from "./pages/DispatchSelection";
-import VendorOrders from "./pages/VendorOrders";
-import DispatchProfile from "./pages/DispatchProfile";
-import CategoryProducts from "./pages/CategoryProducts";
-import Sitemap from "./pages/Sitemap";
-import ResetPassword from "./pages/ResetPassword";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import AdminBlog from "./pages/admin/AdminBlog";
-import BecomeAVendor from "./pages/BecomeAVendor";
-import AddressBook from "./pages/AddressBook";
+const Products = lazy(() => import("./pages/Products"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const Orders = lazy(() => import("./pages/Orders"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const ReturnPolicy = lazy(() => import("./pages/ReturnPolicy"));
+const DeliveryPolicy = lazy(() => import("./pages/DeliveryPolicy"));
+const DisputePolicy = lazy(() => import("./pages/DisputePolicy"));
+const CategoryProducts = lazy(() => import("./pages/CategoryProducts"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Sitemap = lazy(() => import("./pages/Sitemap"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+
+// Functional Pages
+const ShopApplicationStatus = lazy(() => import("./pages/ShopApplicationStatus"));
+const DispatchApplicationStatus = lazy(() => import("./pages/DispatchApplicationStatus"));
+const UserTypeSelection = lazy(() => import("./pages/UserTypeSelection"));
+const UserSettings = lazy(() => import("./pages/UserSettings"));
+const UserDashboard = lazy(() => import("./pages/UserDashboard"));
+const AddressBook = lazy(() => import("./pages/AddressBook"));
+const BecomeAVendor = lazy(() => import("./pages/BecomeAVendor"));
+const Pilots = lazy(() => import("./pages/Pilots"));
+
+// Vendor Pages
+const VendorDashboard = lazy(() => import("./pages/VendorDashboard"));
+const VendorOrders = lazy(() => import("./pages/VendorOrders"));
+const VendorProfile = lazy(() => import("./pages/VendorProfile").then(module => ({ default: module.VendorProfile })));
+
+// Dispatch Pages
+const DispatchDashboard = lazy(() => import("./pages/DispatchDashboard"));
+const DispatchSelection = lazy(() => import("./pages/DispatchSelection"));
+const DispatchProfile = lazy(() => import("./pages/DispatchProfile"));
+
+// Admin Pages
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminShopApplications = lazy(() => import("./pages/admin/AdminShopApplications"));
+const AdminDispatchApplications = lazy(() => import("./pages/admin/AdminDispatchApplications"));
+const AdminDispatchMonitoring = lazy(() => import("./pages/admin/AdminDispatchMonitoring"));
+const AdminVendorMonitoring = lazy(() => import("./pages/admin/AdminVendorMonitoring"));
+const AdminManagement = lazy(() => import("./pages/admin/AdminManagement"));
+const AdminTransactions = lazy(() => import("./pages/admin/AdminTransactions"));
+const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
+const AdminAdverts = lazy(() => import("./pages/admin/AdminAdverts"));
+const AdminNewsletter = lazy(() => import("./pages/admin/AdminNewsletter"));
+const AdminBlog = lazy(() => import("./pages/admin/AdminBlog"));
 // Create QueryClient outside of component to prevent recreation
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,6 +102,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  </div>
+);
+
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -103,7 +121,8 @@ const App = () => {
                   <GideonChat />
                   <Toaster />
                   <Sonner />
-                  <Routes>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
                       {/* Auth Routes */}
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
@@ -232,6 +251,7 @@ const App = () => {
                       {/* 404 Route */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                  </Suspense>
                   </div>
                 </BrowserRouter>
               </AdminProvider>
