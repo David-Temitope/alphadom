@@ -255,13 +255,13 @@ const ProductDetail = () => {
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground flex items-center gap-2 flex-wrap">
               {product.name}
               {(product as any).vendor_subscription_plan === 'first_class' && (
-                <BadgeCheck className="w-6 h-6 text-amber-500 flex-shrink-0" title="Verified First Class Vendor" aria-label="Verified First Class Vendor" />
+                <BadgeCheck className="w-6 h-6 text-amber-500 flex-shrink-0" aria-label="Verified First Class Vendor" />
               )}
               {(product as any).vendor_subscription_plan === 'economy' && (
-                <BadgeCheck className="w-6 h-6 text-blue-500 flex-shrink-0" title="Verified Economy Vendor" aria-label="Verified Economy Vendor" />
+                <BadgeCheck className="w-6 h-6 text-blue-500 flex-shrink-0" aria-label="Verified Economy Vendor" />
               )}
               {(product as any).vendor_is_registered && (product as any).vendor_subscription_plan === 'free' && (
-                <BadgeCheck className="w-6 h-6 text-primary flex-shrink-0" title="Registered Business" aria-label="Registered Business" />
+                <BadgeCheck className="w-6 h-6 text-primary flex-shrink-0" aria-label="Registered Business" />
               )}
             </h1>
 

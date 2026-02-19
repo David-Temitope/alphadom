@@ -42,8 +42,9 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-background py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background py-16 md:py-24 overflow-hidden">
+        <img src="/images/hero-about.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-10" aria-hidden="true" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Badge className="bg-primary/10 text-primary border-0 mb-4">About {settings.site_name}</Badge>
             <h1 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
@@ -89,8 +90,8 @@ const About = () => {
             <div className="relative order-1 lg:order-2">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop"
-                  alt="Sustainable workspace"
+                  src="/images/about-workspace.jpg"
+                  alt="Alphadom workspace"
                   className="w-full h-full object-cover"
                 />
               </div>
