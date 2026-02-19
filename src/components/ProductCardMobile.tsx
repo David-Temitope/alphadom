@@ -157,11 +157,11 @@ export const ProductCardMobile = React.memo(({ product }: ProductCardMobileProps
             <span className="flex-1">{truncateName(product.name)}</span>
             <span className="flex items-center gap-0.5 flex-shrink-0">
               {product.vendor_subscription_plan === 'first_class' ? (
-                <BadgeCheck className="w-3.5 h-3.5 text-amber-500" title="Verified First Class Vendor" aria-label="Verified First Class Vendor" />
+                <BadgeCheck className="w-3.5 h-3.5 text-amber-500" aria-label="Verified First Class Vendor" />
               ) : product.vendor_subscription_plan === 'economy' ? (
-                <BadgeCheck className="w-3.5 h-3.5 text-sky-500" title="Verified Economy Vendor" aria-label="Verified Economy Vendor" />
+                <BadgeCheck className="w-3.5 h-3.5 text-sky-500" aria-label="Verified Economy Vendor" />
               ) : product.vendor_is_registered ? (
-                <BadgeCheck className="w-3.5 h-3.5 text-primary" title="Registered Business" aria-label="Registered Business" />
+                <BadgeCheck className="w-3.5 h-3.5 text-primary" aria-label="Registered Business" />
               ) : null}
             </span>
           </h3>

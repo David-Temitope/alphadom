@@ -162,8 +162,9 @@ export const Pilots = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-background py-12">
-        <div className="container mx-auto px-4">
+      <section className="relative bg-gradient-to-br from-primary/10 via-background to-background py-12 overflow-hidden">
+        <img src="/images/hero-vendors.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-10" aria-hidden="true" />
+        <div className="relative container mx-auto px-4">
           <div className="max-w-2xl">
             <Badge variant="secondary" className="mb-4">
               <Store className="w-3 h-3 mr-1" />
