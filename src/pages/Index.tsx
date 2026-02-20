@@ -9,9 +9,16 @@ import { PlatformAd } from "@/components/PlatformAd";
 import { WelcomeCard } from "@/components/WelcomeCard";
 import { MobileHomepage } from "@/components/MobileHomepage";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSEO } from "@/hooks/useSEO";
 
 const Index = () => {
   const isMobile = useIsMobile();
+
+  useSEO({
+    title: "Alphadom - Your #1 Online Marketplace",
+    description: "Buy and sell quality products on Alphadom. From fashion to electronics, find the best deals from trusted vendors nationwide.",
+    url: "/",
+  });
 
   // Render mobile-specific layout
   if (isMobile) {

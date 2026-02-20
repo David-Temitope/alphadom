@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ShopApplicationForm } from "@/components/ShopApplicationForm";
 import { useVendorStats } from "@/hooks/useVendorStats";
 import becomeVendorHero from "@/assets/become-vendor-hero.jpg";
+import { useSEO } from "@/hooks/useSEO";
 import {
   Store,
   TrendingUp,
@@ -24,6 +25,12 @@ import {
 
 const BecomeAVendor = () => {
   const { user } = useAuth();
+
+  useSEO({
+    title: "Become a Vendor",
+    description: "Start selling on Alphadom today! Reach thousands of customers, grow your business, and manage your online store with ease.",
+    url: "/become-a-vendor",
+  });
   const navigate = useNavigate();
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const { stats, loading: statsLoading } = useVendorStats();

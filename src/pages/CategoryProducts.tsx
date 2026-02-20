@@ -12,10 +12,17 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { useSEO } from "@/hooks/useSEO";
 
 const CategoryProducts = () => {
   const { category } = useParams<{ category: string }>();
   const { products, loading, error } = useProducts();
+
+  useSEO({
+    title: category ? `${category} Products` : 'Category Products',
+    description: `Browse our wide selection of ${category} products on Alphadom. Find the best deals and quality items in this category.`,
+    url: `/category/${category}`,
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const isMobile = useIsMobile();

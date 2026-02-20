@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductDetailSkeleton } from '@/components/skeletons/PageSkeletons';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useSEO } from '@/hooks/useSEO';
 import {
   ShoppingCart,
   Star,
@@ -129,7 +130,7 @@ const ProductDetail = () => {
   };
 
   // Parse product images
-  const getImages = (): string[] => {
+  const getImages = useCallback((): string[] => {
     if (!product?.image) return ['/placeholder.svg'];
     try {
       if (product.image.startsWith('[')) {
@@ -139,10 +140,62 @@ const ProductDetail = () => {
     } catch {
       return [product.image];
     }
-  };
+  }, [product?.image]);
 
-  const images = product ? getImages() : [];
+  const images = useMemo(() => product ? getImages() : [], [product, getImages]);
   const currentImage = images[selectedImageIndex] || images[0] || '/placeholder.svg';
+
+  useSEO({
+    title: product?.name,
+    description: product?.description || product?.full_description,
+    image: currentImage,
+    url: `/products/${id}`,
+    type: 'product',
+  });
+
+  // Inject Structured Data
+  useEffect(() => {
+    if (!product) return;
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    const jsonLd = {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": product.name,
+      "image": images,
+      "description": product.description || product.full_description,
+      "sku": product.id,
+      "brand": {
+        "@type": "Brand",
+        "name": vendorName || "Alphadom"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": window.location.href,
+        "priceCurrency": "NGN",
+        "price": product.price,
+        "availability": product.stock_count && product.stock_count > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+        "seller": {
+          "@type": "Organization",
+          "name": vendorName || "Alphadom"
+        }
+      },
+      "aggregateRating": product.reviews && product.reviews > 0 ? {
+        "@type": "AggregateRating",
+        "ratingValue": product.rating || 0,
+        "reviewCount": product.reviews
+      } : undefined
+    };
+    script.text = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, [product, vendorName, images]);
 
   // Calculate rating distribution (simulated from real data)
   const getRatingDistribution = () => {

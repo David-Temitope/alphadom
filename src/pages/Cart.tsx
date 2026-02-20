@@ -9,6 +9,7 @@ import { useVendors } from "@/hooks/useVendors";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductCardMobile } from "@/components/ProductCardMobile";
 import { useState, useEffect, useMemo } from "react";
+import { useSEO } from "@/hooks/useSEO";
 
 // Helper function to extract first image from JSON array or single image
 const getDisplayImage = (image: string | null | undefined): string => {
@@ -35,6 +36,10 @@ const useIsMobile = () => {
 };
 
 const Cart = () => {
+  useSEO({
+    title: "Shopping Cart",
+    noindex: true,
+  });
   const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
   const { products } = useProducts();
   const { vendors } = useVendors();

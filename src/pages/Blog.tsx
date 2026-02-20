@@ -5,9 +5,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { useSEO } from '@/hooks/useSEO';
 
 const Blog = () => {
   const { posts, loading } = useBlogPosts();
+
+  useSEO({
+    title: "Blog",
+    description: "Read the latest news, updates, and shopping guides from Alphadom. Stay informed about the best deals and tips for buying and selling online.",
+    url: "/blog",
+  });
 
   if (loading) {
     return (

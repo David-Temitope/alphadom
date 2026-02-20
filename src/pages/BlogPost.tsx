@@ -8,11 +8,20 @@ import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { sanitizeUrl } from '@/utils/security';
+import { useSEO } from '@/hooks/useSEO';
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostType | null>(null);
+
+  useSEO({
+    title: post?.title,
+    description: post?.subtitle || post?.content?.substring(0, 160),
+    image: post?.featured_image_url,
+    url: `/blog/${id}`,
+    type: 'article',
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -19,6 +19,7 @@ import { useShopApplications } from '@/hooks/useShopApplications';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileAccountPage from '@/components/MobileAccountPage';
+import { useSEO } from '@/hooks/useSEO';
 
 type SidebarItem = {
   id: string;
@@ -29,6 +30,10 @@ type SidebarItem = {
 };
 
 const UserDashboard = () => {
+  useSEO({
+    title: "Account Dashboard",
+    noindex: true,
+  });
   const { user, signOut } = useAuth();
   const { orders, loading: ordersLoading } = useOrders();
   const { wishlistItems } = useWishlist();

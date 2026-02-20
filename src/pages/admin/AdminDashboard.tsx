@@ -26,8 +26,13 @@ import {
 import { useAdminProducts } from '@/hooks/useAdminProducts';
 import { useAdminOrders } from '@/hooks/useAdminOrders';
 import { useUsers } from '@/hooks/useUsers';
+import { useSEO } from '@/hooks/useSEO';
 
 const AdminDashboard = () => {
+  useSEO({
+    title: "Admin Dashboard",
+    noindex: true,
+  });
   const { products, loading: productsLoading } = useAdminProducts();
   const { orders, loading: ordersLoading } = useAdminOrders();
   const { users, loading: usersLoading } = useUsers();

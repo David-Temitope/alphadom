@@ -9,8 +9,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Camera, User, Save } from 'lucide-react';
 import { UserSettingsSkeleton } from '@/components/skeletons/PageSkeletons';
+import { useSEO } from '@/hooks/useSEO';
 
 const UserSettings = () => {
+  useSEO({
+    title: "Account Settings",
+    noindex: true,
+  });
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
