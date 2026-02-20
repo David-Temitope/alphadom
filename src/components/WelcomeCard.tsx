@@ -72,6 +72,8 @@ export const WelcomeCard = () => {
               alt="Welcome to Alphadom"
               className="w-full h-full object-cover"
               loading="lazy"
+              width={400}
+              height={160}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
           </div>

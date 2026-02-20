@@ -1,10 +1,7 @@
-# Alphadom Robots.txt
-# https://alphadom.online
-
 User-agent: *
 Allow: /
 
-# Private / transactional pages
+# Private and internal pages
 Disallow: /cart
 Disallow: /checkout
 Disallow: /auth
@@ -12,8 +9,6 @@ Disallow: /admin
 Disallow: /user-settings
 Disallow: /orders
 Disallow: /wishlist
-
-# Vendor & dispatcher dashboards
 Disallow: /vendor-dashboard
 Disallow: /vendor-orders
 Disallow: /vendor-profile
@@ -23,10 +18,10 @@ Disallow: /dispatch-selection
 Disallow: /shop-application-status
 Disallow: /dispatch-application-status
 
-# Filter & sort parameters (crawl control only)
-Disallow: /*?*sort=
-Disallow: /*?*filter=
-Disallow: /*?*page=
+# Prevent crawling of search and filter results to avoid duplicate content
+Disallow: /*?search=
+Disallow: /*?sort=
+Disallow: /*?filter=
+Disallow: /*?category=
 
-# Sitemap
 Sitemap: https://alphadom.online/sitemap.xml

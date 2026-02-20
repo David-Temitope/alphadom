@@ -25,12 +25,12 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Company Info */}
           <div className="space-y-5">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-                <ShoppingCart className="w-5 h-5 text-primary-foreground" />
+            <Link to="/" className="flex items-center gap-2 w-fit group" aria-label="Alphadom Home">
+              <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/90 transition-colors">
+                <ShoppingCart className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
               </div>
               <span className="text-xl font-bold text-white">Alphadom</span>
-            </div>
+            </Link>
             <p className="text-sm leading-relaxed">
               Your trusted online marketplace. We connect buyers to verified vendors for quality products at great prices.
             </p>
@@ -163,7 +163,7 @@ export const Footer = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  aria-label="Join newsletter"
+                  aria-label={loading ? "Subscribing to newsletter" : "Join newsletter"}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-5"
                 >
                   {loading ? "..." : "Join"}

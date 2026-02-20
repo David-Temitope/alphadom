@@ -162,12 +162,14 @@ export const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo - Use admin uploaded logo on mobile */}
-            <Link to="/" className="flex items-center gap-2 group">
+            <Link to="/" className="flex items-center gap-2 group" aria-label="Alphadom Home">
               {settings.navbar_logo && settings.navbar_logo !== "/favicon.png" ? (
                 <img 
                   src={sanitizeUrl(settings.navbar_logo)}
                   alt="Logo" 
                   className="h-9 w-auto object-contain"
+                  width={150}
+                  height={36}
                 />
               ) : (
                 <>
@@ -219,9 +221,9 @@ export const Navbar = () => {
               {/* Search - Desktop */}
               <form onSubmit={handleSearch} className="hidden lg:flex items-center">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   <Input
-                    type="text"
+                    type="search"
                     placeholder="Search products..."
                     aria-label="Search products"
                     value={searchQuery}

@@ -153,6 +153,8 @@ export const Hero = () => {
                       alt={`Hero slide ${index + 1}`}
                       className="w-full h-full object-cover"
                       loading={index === 0 ? "eager" : "lazy"}
+                      width={600}
+                      height={450}
                     />
                   </div>
                 ))}
