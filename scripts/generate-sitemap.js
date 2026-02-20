@@ -1,12 +1,5 @@
-const fs = require('fs');
-const { createClient } = require('@supabase/supabase-js');
-
-// Load env vars from .env if present (for local testing)
-try {
-  require('dotenv').config();
-} catch (e) {
-  // dotenv not installed, ignore
-}
+import fs from 'fs';
+import { createClient } from '@supabase/supabase-js';
 
 async function generate() {
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
