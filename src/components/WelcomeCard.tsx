@@ -71,6 +71,7 @@ export const WelcomeCard = () => {
               src={welcomeImage}
               alt="Welcome to Alphadom"
               className="w-full h-full object-cover"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
           </div>

@@ -34,7 +34,7 @@ export const Pilots = () => {
 
   const fetchVendors = async () => {
     try {
-      // Fetch approved vendors with cover_image
+      // Step 1: Fetch approved vendors
       const { data: vendorsData, error: vendorsError } = await supabase
         .from('approved_vendors')
         .select('id, user_id, store_name, product_category, subscription_plan, is_active, application_id, cover_image')
@@ -43,70 +43,74 @@ export const Pilots = () => {
         .order('created_at', { ascending: false });
 
       if (vendorsError) throw vendorsError;
+      if (!vendorsData) return;
 
-      // Get additional data for each vendor
-      const vendorsWithStats = await Promise.all(
-        (vendorsData || []).map(async (vendor) => {
-          // Count products
-          const { count: productsCount } = await supabase
-            .from('products')
-            .select('*', { count: 'exact', head: true })
-            .eq('vendor_id', vendor.id);
+      const vendorIds = vendorsData.map(v => v.id);
+      const userIds = vendorsData.map(v => v.user_id);
+      const applicationIds = vendorsData.map(v => v.application_id).filter(Boolean) as string[];
 
-          // Count followers
-          const { count: followersCount } = await supabase
-            .from('user_follows')
-            .select('*', { count: 'exact', head: true })
-            .eq('following_id', vendor.user_id);
+      // Step 2: Batch fetch all related data to resolve N+1 problem
+      const [productsRes, followsRes, appsRes, profilesRes] = await Promise.all([
+        supabase.from('products').select('id, vendor_id').in('vendor_id', vendorIds),
+        supabase.from('user_follows').select('following_id').in('following_id', userIds),
+        supabase.from('shop_applications').select('id, business_address').in('id', applicationIds),
+        supabase.from('profiles').select('id, avatar_url').in('id', userIds)
+      ]);
 
-          // Get business address from application
-          let businessAddress = '';
-          if (vendor.application_id) {
-            const { data: appData } = await supabase
-              .from('shop_applications')
-              .select('business_address')
-              .eq('id', vendor.application_id)
-              .single();
-            businessAddress = appData?.business_address || '';
-          }
+      // Step 3: Batch fetch ratings for all retrieved products
+      const allProductIds = productsRes.data?.map(p => p.id) || [];
+      const { data: ratingsData } = await supabase
+        .from('product_ratings')
+        .select('stars, product_id')
+        .in('product_id', allProductIds);
 
-          // Get avatar from profiles table
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('avatar_url')
-            .eq('id', vendor.user_id)
-            .single();
+      // Step 4: Create lookups for efficient mapping
+      const productsByVendor = new Map<string, string[]>();
+      productsRes.data?.forEach(p => {
+        if (p.vendor_id) {
+          const list = productsByVendor.get(p.vendor_id) || [];
+          list.push(p.id);
+          productsByVendor.set(p.vendor_id, list);
+        }
+      });
 
-          // Calculate average rating from product_ratings
-          const { data: vendorProducts } = await supabase
-            .from('products')
-            .select('id')
-            .eq('vendor_id', vendor.id);
+      const followersByUser = new Map<string, number>();
+      followsRes.data?.forEach(f => {
+        followersByUser.set(f.following_id, (followersByUser.get(f.following_id) || 0) + 1);
+      });
 
-          let avgRating = 0;
-          if (vendorProducts && vendorProducts.length > 0) {
-            const productIds = vendorProducts.map(p => p.id);
-            const { data: ratings } = await supabase
-              .from('product_ratings')
-              .select('stars')
-              .in('product_id', productIds);
+      const appMap = new Map(appsRes.data?.map(a => [a.id, a.business_address]));
+      const profileMap = new Map(profilesRes.data?.map(p => [p.id, p.avatar_url]));
 
-            if (ratings && ratings.length > 0) {
-              avgRating = ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length;
-            }
-          }
+      const ratingsByProduct = new Map<string, number[]>();
+      ratingsData?.forEach(r => {
+        const list = ratingsByProduct.get(r.product_id) || [];
+        list.push(r.stars);
+        ratingsByProduct.set(r.product_id, list);
+      });
 
-          return {
-            ...vendor,
-            products_count: productsCount || 0,
-            followers_count: followersCount || 0,
-            rating: avgRating,
-            business_address: businessAddress,
-            avatar_url: profileData?.avatar_url || null,
-            cover_image: vendor.cover_image || null,
-          };
-        })
-      );
+      // Step 5: Combine data
+      const vendorsWithStats = vendorsData.map(vendor => {
+        const vendorProductIds = productsByVendor.get(vendor.id) || [];
+        const allRatings: number[] = [];
+        vendorProductIds.forEach(pid => {
+          allRatings.push(...(ratingsByProduct.get(pid) || []));
+        });
+
+        const avgRating = allRatings.length > 0
+          ? allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length
+          : 0;
+
+        return {
+          ...vendor,
+          products_count: vendorProductIds.length,
+          followers_count: followersByUser.get(vendor.user_id) || 0,
+          rating: avgRating,
+          business_address: vendor.application_id ? appMap.get(vendor.application_id) || '' : '',
+          avatar_url: profileMap.get(vendor.user_id) || null,
+          cover_image: vendor.cover_image || null,
+        };
+      });
 
       setVendors(vendorsWithStats);
     } catch (error) {

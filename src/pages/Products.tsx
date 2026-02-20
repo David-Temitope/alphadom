@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useProducts } from "@/hooks/useProducts";
+import { useInfiniteProducts, type Product } from "@/hooks/useProducts";
 import { useVendors } from "@/hooks/useVendors";
+import { supabase } from "@/integrations/supabase/client";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,7 +22,28 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileShopPage } from "@/components/MobileShopPage";
 
 const Products = () => {
-  const { products, loading, error } = useProducts();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: loading,
+    error
+  } = useInfiniteProducts({
+    pageSize: 24,
+    searchTerm,
+    sortBy
+  });
+
+  const products = useMemo(() =>
+    data?.pages.flatMap(page => page.products) || [],
+    [data]
+  );
+
   const { vendors } = useVendors();
   const { wishlistItems, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
@@ -29,9 +51,6 @@ const Products = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
-  const [showSearch, setShowSearch] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const [filters, setFilters] = useState({
@@ -41,62 +60,55 @@ const Products = () => {
     priceRange: [0, 500000] as [number, number]
   });
 
+  // Fetch unique categories once
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from('products').select('category');
+      if (data) {
+        const uniqueCategories = [...new Set(data.map(p => p.category))];
+        setCategories(uniqueCategories);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   // Extract unique filter options from products
   const filterOptions = useMemo(() => {
-    const categories = [...new Set(products.map(p => p.category))];
-    const maxPrice = Math.max(...products.map(p => Number(p.price)), 500000);
+    const maxPrice = products.length > 0
+      ? Math.max(...products.map(p => Number(p.price)), 500000)
+      : 500000;
     
-    // Get top vendors from products
+    // Get top vendors from current products
     const vendorIds = [...new Set(products.map(p => p.vendor_id).filter(Boolean))];
     const topVendors = vendors
       .filter(v => vendorIds.includes(v.id))
       .slice(0, 5);
 
     return { categories, topVendors, maxPrice };
-  }, [products, vendors]);
+  }, [products, vendors, categories]);
 
-  // Filter and sort products
+  // Filter products client-side for remaining filters
   const filteredProducts = useMemo(() => {
-    return products
-      .filter(product => {
-        // Search filter
-        const matchesSearch = !searchTerm || 
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    return products.filter(product => {
+      // Category filter (if not handled by server)
+      const matchesCategory = filters.categories.length === 0 ||
+        filters.categories.includes(product.category);
 
-        // Category filter
-        const matchesCategory = filters.categories.length === 0 || 
-          filters.categories.includes(product.category);
+      // Vendor filter
+      const matchesVendor = filters.vendors.length === 0 ||
+        (product.vendor_id && filters.vendors.includes(product.vendor_id));
 
-        // Vendor filter
-        const matchesVendor = filters.vendors.length === 0 || 
-          (product.vendor_id && filters.vendors.includes(product.vendor_id));
+      // Rating filter
+      const matchesRating = filters.rating === 0 ||
+        (Number(product.rating) || 0) >= filters.rating;
 
-        // Rating filter
-        const matchesRating = filters.rating === 0 || 
-          (Number(product.rating) || 0) >= filters.rating;
+      // Price filter
+      const price = Number(product.price);
+      const matchesPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
 
-        // Price filter
-        const price = Number(product.price);
-        const matchesPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
-
-        return matchesSearch && matchesCategory && matchesVendor && matchesRating && matchesPrice;
-      })
-      .sort((a, b) => {
-        switch (sortBy) {
-          case "price-low":
-            return Number(a.price) - Number(b.price);
-          case "price-high":
-            return Number(b.price) - Number(a.price);
-          case "rating":
-            return (Number(b.rating) || 0) - (Number(a.rating) || 0);
-          case "newest":
-            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-          default:
-            return a.name.localeCompare(b.name);
-        }
-      });
-  }, [products, searchTerm, filters, sortBy]);
+      return matchesCategory && matchesVendor && matchesRating && matchesPrice;
+    });
+  }, [products, filters]);
 
   const toggleCategory = (category: string) => {
     setFilters(prev => ({
@@ -134,7 +146,7 @@ const Products = () => {
     }
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     if (!user) {
       toast({
         title: "Please sign in",
@@ -317,10 +329,19 @@ const Products = () => {
 
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-            <div>
+            <div className="space-y-4 w-full max-w-md">
               <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Shop All Products</h1>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 rounded-xl"
+                />
+              </div>
               <p className="text-muted-foreground mt-1">
-                Showing <span className="font-medium text-foreground">1-{Math.min(12, filteredProducts.length)}</span> of {filteredProducts.length} products
+                Showing <span className="font-medium text-foreground">{filteredProducts.length}</span> products
               </p>
             </div>
 
@@ -362,15 +383,16 @@ const Products = () => {
           </div>
 
           {/* Products Grid */}
-          {filteredProducts.length === 0 ? (
+          {filteredProducts.length === 0 && !loading ? (
             <div className="text-center py-16">
               <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground text-lg mb-2">No products found</p>
               <p className="text-muted-foreground text-sm">Try adjusting your filters</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {filteredProducts.map((product) => {
+            <div className="space-y-10">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                {filteredProducts.map((product) => {
                 const isInWishlist = wishlistItems.some(item => item.product_id === product.id);
                 const hasDiscount = product.has_discount && product.discount_percentage;
                 const isNew = product.created_at && 
@@ -476,6 +498,29 @@ const Products = () => {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Load More */}
+            {hasNextPage && (
+              <div className="flex justify-center pt-8">
+                <Button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl min-w-[200px]"
+                >
+                  {isFetchingNextPage ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Load More Products'
+                  )}
+                </Button>
+              </div>
+            )}
             </div>
           )}
         </main>

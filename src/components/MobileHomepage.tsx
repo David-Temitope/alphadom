@@ -8,7 +8,8 @@ import {
   ChevronRight,
   Star,
   BadgeCheck,
-  ChevronLeft
+  ChevronLeft,
+  type LucideIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useAdminSettings, HeroSlide } from '@/hooks/useAdminSettings';
 import { sanitizeUrl } from '@/utils/security';
 
-const categoryIcons: Record<string, React.ComponentType<any>> = {
+const categoryIcons: Record<string, LucideIcon> = {
   electronics: Laptop,
   fashion: Shirt,
   home: HomeIcon,
@@ -131,6 +132,7 @@ export const MobileHomepage: React.FC = () => {
                 src={sanitizeUrl(currentSlideData.image)}
                 alt={currentSlideData.title}
                 className="w-full h-full object-cover"
+                loading={currentSlide === 0 ? "eager" : "lazy"}
               />
               {/* Dark overlay for better text readability */}
               <div className="absolute inset-0 bg-black/40" />

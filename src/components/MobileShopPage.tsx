@@ -9,14 +9,15 @@ import {
   X,
   ChevronDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useProducts } from '@/hooks/useProducts';
+import { useInfiniteProducts, type Product } from '@/hooks/useProducts';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,7 +29,26 @@ import { sanitizeUrl } from '@/utils/security';
 type SortOption = 'all' | 'price' | 'rating' | 'category';
 
 export const MobileShopPage: React.FC = () => {
-  const { products, loading } = useProducts();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeSort, setActiveSort] = useState<SortOption>('all');
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: loading
+  } = useInfiniteProducts({
+    pageSize: 20,
+    searchTerm,
+    sortBy: activeSort === 'price' ? 'price-low' : activeSort === 'rating' ? 'rating' : 'newest'
+  });
+
+  const products = useMemo(() =>
+    data?.pages.flatMap(page => page.products) || [],
+    [data]
+  );
+
   const { wishlistItems, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -36,8 +56,6 @@ export const MobileShopPage: React.FC = () => {
   const { settings } = useAdminSettings();
   const navigate = useNavigate();
   
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeSort, setActiveSort] = useState<SortOption>('all');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
@@ -60,34 +78,14 @@ export const MobileShopPage: React.FC = () => {
     return [...new Set(products.map(p => p.category))];
   }, [products]);
 
-  // Filter and sort products
+  // Filter products client-side for categories
   const filteredProducts = useMemo(() => {
-    let result = products.filter(product => {
-      const matchesSearch = !searchTerm || 
-        product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return products.filter(product => {
       const matchesCategory = selectedCategories.length === 0 || 
         selectedCategories.includes(product.category);
-      return matchesSearch && matchesCategory;
+      return matchesCategory;
     });
-
-    // Sort based on active sort
-    switch (activeSort) {
-      case 'price':
-        result = [...result].sort((a, b) => Number(a.price) - Number(b.price));
-        break;
-      case 'rating':
-        result = [...result].sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
-        break;
-      case 'category':
-        result = [...result].sort((a, b) => a.category.localeCompare(b.category));
-        break;
-      default:
-        // 'all' - keep default order
-        break;
-    }
-
-    return result;
-  }, [products, searchTerm, activeSort, selectedCategories]);
+  }, [products, selectedCategories]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -110,7 +108,7 @@ export const MobileShopPage: React.FC = () => {
     }
   };
 
-  const handleAddToCart = async (e: React.MouseEvent, product: any) => {
+  const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -555,10 +553,32 @@ export const MobileShopPage: React.FC = () => {
           </div>
         )}
 
+        {/* Load More */}
+        {hasNextPage && (
+          <div className="flex justify-center mt-8">
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              variant="outline"
+              size="sm"
+              className="rounded-xl min-w-[140px]"
+            >
+              {isFetchingNextPage ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load More'
+              )}
+            </Button>
+          </div>
+        )}
+
         {/* Explore More */}
-        {filteredProducts.length > 0 && (
+        {!hasNextPage && filteredProducts.length > 0 && (
           <div className="text-center mt-8">
-            <p className="text-sm text-muted-foreground">Explore More</p>
+            <p className="text-sm text-muted-foreground">You've reached the end!</p>
           </div>
         )}
       </div>
