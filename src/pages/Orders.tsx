@@ -10,6 +10,7 @@ import { Loader2, ShoppingBag, Calendar, CreditCard, CheckCircle, MessageCircle 
 import { Link, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSEO } from '@/hooks/useSEO';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +49,10 @@ const OrderSkeleton = () => (
 );
 
 const Orders = () => {
+  useSEO({
+    title: "My Orders",
+    noindex: true,
+  });
   const { user, loading: authLoading } = useAuth();
   const { orders, loading, error, refetch } = useOrders();
   const { toast } = useToast();

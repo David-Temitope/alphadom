@@ -8,8 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Trash2, ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
 import { PlatformAd } from '@/components/PlatformAd';
 import { WishlistSkeleton } from '@/components/skeletons/PageSkeletons';
+import { useSEO } from '@/hooks/useSEO';
 
 const Wishlist = () => {
+  useSEO({
+    title: "My Wishlist",
+    noindex: true,
+  });
   const { wishlistItems, removeFromWishlist, loading } = useWishlist();
   const { addToCart } = useCart();
   const { toast } = useToast();

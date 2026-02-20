@@ -1,7 +1,14 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSEO } from '@/hooks/useSEO';
 
 const Terms = () => {
+  useSEO({
+    title: "Terms and Conditions",
+    description: "Read our terms and conditions for using the Alphadom marketplace. Understand our platform usage, prohibited activities, and legal policies.",
+    url: "/terms",
+  });
+
   return (
     <>
 

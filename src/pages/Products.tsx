@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileShopPage } from "@/components/MobileShopPage";
+import { useSEO } from "@/hooks/useSEO";
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,6 +52,12 @@ const Products = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
+  useSEO({
+    title: "Shop All Products",
+    description: "Explore our full catalog of products. High-quality fashion, electronics, home essentials, and more from verified vendors.",
+    url: "/products",
+  });
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const [filters, setFilters] = useState({

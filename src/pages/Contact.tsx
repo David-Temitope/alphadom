@@ -9,8 +9,16 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { useSEO } from "@/hooks/useSEO";
+
 const Contact = () => {
   const { user } = useAuth();
+
+  useSEO({
+    title: "Contact Us",
+    description: "Have questions or need support? Contact the Alphadom team. We're here to help you with your orders, vendor inquiries, and more.",
+    url: "/contact",
+  });
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',

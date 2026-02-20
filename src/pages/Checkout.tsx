@@ -33,8 +33,13 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShippingInfo, VAT_RATE, VendorGroup } from "@/types/checkout";
+import { useSEO } from "@/hooks/useSEO";
 
 const Checkout: React.FC = () => {
+  useSEO({
+    title: "Secure Checkout",
+    noindex: true,
+  });
   const { user } = useAuth();
   const { items } = useCart();
   const { isBanned } = useBanStatus();

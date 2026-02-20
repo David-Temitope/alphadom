@@ -1,7 +1,14 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSEO } from "@/hooks/useSEO";
 
 const Privacy = () => {
+  useSEO({
+    title: "Privacy Policy",
+    description: "Learn how Alphadom collects, uses, and protects your personal information. Your privacy and data security are our top priorities.",
+    url: "/privacy",
+  });
+
   return (
     <>
 

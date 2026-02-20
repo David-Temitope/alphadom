@@ -12,8 +12,15 @@ import { Mail, Lock, User, ShoppingCart, Shield, Sparkles, Check, X } from 'luci
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { checkPasswordStrength, isPasswordStrong } from '@/utils/passwordValidation';
+import { useSEO } from '@/hooks/useSEO';
 
 const Auth = () => {
+  useSEO({
+    title: "Authentication",
+    description: "Sign in or create an account on Alphadom. Join our marketplace as a buyer or vendor.",
+    url: "/auth",
+    noindex: true,
+  });
   const { user, signIn, signUp, resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

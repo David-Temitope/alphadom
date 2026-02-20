@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Star, Search, Store, Package, Users, MapPin, ChevronRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { useSEO } from '@/hooks/useSEO';
 
 interface Vendor {
   id: string;
@@ -31,6 +32,12 @@ export const Pilots = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { user } = useAuth();
+
+  useSEO({
+    title: "Vendor Directory",
+    description: "Browse our verified vendors on Alphadom. Find trusted sellers across various categories and explore their unique storefronts.",
+    url: "/pilots",
+  });
 
   const fetchVendors = async () => {
     try {

@@ -8,8 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Lock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSEO } from '@/hooks/useSEO';
 
 const AdminLogin = () => {
+  useSEO({
+    title: "Admin Login",
+    description: "Secure access for Alphadom administrators.",
+    noindex: true,
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

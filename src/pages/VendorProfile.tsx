@@ -14,6 +14,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { VendorProfileSkeleton } from '@/components/skeletons/PageSkeletons';
 import { sanitizeUrl } from '@/utils/security';
+import { useSEO } from '@/hooks/useSEO';
 
 interface VendorProfile {
   id: string;
@@ -53,6 +54,13 @@ interface VendorProduct {
 export const VendorProfile = () => {
   const { vendorId } = useParams();
   const [vendor, setVendor] = useState<VendorProfile | null>(null);
+
+  useSEO({
+    title: vendor?.store_name,
+    description: `Shop from ${vendor?.store_name} on Alphadom. ${vendor?.product_category} products available. ${vendor?.business_address ? `Located in ${vendor.business_address}.` : ''}`,
+    image: vendor?.profile?.avatar_url,
+    url: `/vendor/${vendorId}`,
+  });
   const [products, setProducts] = useState<VendorProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();

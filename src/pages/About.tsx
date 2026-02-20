@@ -3,10 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useAboutStats } from "@/hooks/useAboutStats";
+import { useSEO } from "@/hooks/useSEO";
 
 const About = () => {
   const { settings } = useAdminSettings();
   const { stats: liveStats, loading: statsLoading } = useAboutStats();
+
+  useSEO({
+    title: "About Us",
+    description: "Learn about Alphadom's mission to transform e-commerce in Africa. We're connecting buyers and sellers, empowering entrepreneurs, and curating quality products.",
+    url: "/about",
+  });
   
   const stats = [
     { label: "Products Sold", value: statsLoading ? "..." : liveStats.productsSold.toLocaleString(), icon: ShoppingBag },
