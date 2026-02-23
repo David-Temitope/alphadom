@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeUrl } from '@/utils/security';
 
 interface Product {
   id: string;
@@ -51,7 +52,7 @@ export const JumiaProductCard: React.FC<JumiaProductCardProps> = ({ product }) =
         {/* Image Section */}
         <div className="relative overflow-hidden bg-muted/30">
           <img
-            src={product.image || '/placeholder.svg'}
+            src={sanitizeUrl(product.image || '/placeholder.svg')}
             alt={product.name}
             className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"

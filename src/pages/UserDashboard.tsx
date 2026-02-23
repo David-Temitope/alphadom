@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileAccountPage from '@/components/MobileAccountPage';
 import { useSEO } from '@/hooks/useSEO';
+import { sanitizeUrl } from '@/utils/security';
 
 type SidebarItem = {
   id: string;
@@ -408,7 +409,7 @@ const UserDashboard = () => {
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden">
                                   <img
-                                    src={displayProduct ? getDisplayImage(displayProduct.image) : '/placeholder.svg'}
+                                    src={sanitizeUrl(displayProduct ? getDisplayImage(displayProduct.image) : '/placeholder.svg')}
                                     alt={displayProduct?.name || 'Product'}
                                     className="w-full h-full object-cover"
                                   />
@@ -475,7 +476,7 @@ const UserDashboard = () => {
                       <div key={product.id} className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                           <img
-                            src={getDisplayImage(product.image)}
+                            src={sanitizeUrl(getDisplayImage(product.image))}
                             alt={product.name}
                             className="w-full h-full object-cover"
                           />
@@ -498,7 +499,7 @@ const UserDashboard = () => {
                             id: product.id,
                             name: product.name,
                             price: Number(product.price),
-                            image: getDisplayImage(product.image),
+                            image: sanitizeUrl(getDisplayImage(product.image)),
                             quantity: 1
                           })}
                         >

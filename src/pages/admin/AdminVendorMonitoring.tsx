@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { sanitizeUrl } from '@/utils/security';
 
 interface VendorWithStats {
   id: string;
@@ -883,7 +884,7 @@ const VendorProducts = ({ vendorId, onDeleteProduct }: { vendorId: string; onDel
             <div key={product.id} className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center gap-3">
                 <img 
-                  src={getDisplayImage(product.image)} 
+                  src={sanitizeUrl(getDisplayImage(product.image))}
                   alt={product.name}
                   className="w-12 h-12 object-cover rounded"
                 />

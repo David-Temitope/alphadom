@@ -34,6 +34,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ShippingInfo, VAT_RATE, VendorGroup } from "@/types/checkout";
 import { useSEO } from "@/hooks/useSEO";
+import { sanitizeUrl } from "@/utils/security";
 
 const Checkout: React.FC = () => {
   useSEO({
@@ -555,7 +556,7 @@ const Checkout: React.FC = () => {
                               return (
                                 <div key={item.id} className="flex justify-between items-center text-sm">
                                   <div className="flex items-center gap-2">
-                                    <img src={displayImage} alt={item.name} className="w-10 h-10 rounded-lg object-cover" />
+                                    <img src={sanitizeUrl(displayImage)} alt={item.name} className="w-10 h-10 rounded-lg object-cover" />
                                     <span className="truncate max-w-[150px]">{item.name}</span>
                                     <span className="text-muted-foreground">x{item.quantity}</span>
                                   </div>

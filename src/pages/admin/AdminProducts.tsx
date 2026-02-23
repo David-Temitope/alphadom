@@ -71,6 +71,19 @@ const AdminProducts = () => {
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getDisplayImage = (imageField: string | null | undefined): string => {
+    if (!imageField) return '/placeholder.svg';
+    try {
+      if (imageField.startsWith('[')) {
+        const images = JSON.parse(imageField);
+        return images[0] || '/placeholder.svg';
+      }
+      return imageField;
+    } catch {
+      return imageField;
+    }
+  };
+
   const handleAddProduct = async () => {
     if (!newProduct.name || !newProduct.price || !newProduct.category) {
       toast({
@@ -746,7 +759,7 @@ const AdminProducts = () => {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <img
-                          src={sanitizeUrl(product.image || '/placeholder.svg')}
+                          src={sanitizeUrl(getDisplayImage(product.image))}
                           alt={product.name}
                           className="w-12 h-12 rounded-lg object-cover"
                         />

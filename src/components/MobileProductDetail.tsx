@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { StarRating } from '@/components/StarRating';
 import { ProductComments } from '@/components/ProductComments';
+import { sanitizeUrl } from '@/utils/security';
 
 interface Product {
   id: string;
@@ -244,7 +245,7 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
         }}
       >
         <img
-          src={currentImage}
+          src={sanitizeUrl(currentImage)}
           alt={product.name}
           className="w-full h-full object-cover"
         />
@@ -395,7 +396,7 @@ export const MobileProductDetail: React.FC<MobileProductDetailProps> = ({
                   <div className="bg-card rounded-xl overflow-hidden border border-border/50">
                     <div className="aspect-square bg-muted">
                       <img
-                        src={getDisplayImage(p.image)}
+                        src={sanitizeUrl(getDisplayImage(p.image))}
                         alt={p.name}
                         className="w-full h-full object-cover"
                         loading="lazy"

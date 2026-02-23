@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { sanitizeUrl } from '@/utils/security';
 
 interface SEOProps {
   title?: string;
@@ -23,8 +24,12 @@ export const useSEO = ({
     const baseUrl = 'https://alphadom.online';
     const siteName = 'Alphadom';
     const fullTitle = title ? `${title} | ${siteName}` : `${siteName} - Your Online Marketplace`;
-    const fullUrl = url ? (url.startsWith('http') ? url : `${baseUrl}${url}`) : baseUrl;
-    const fullImage = image ? (image.startsWith('http') ? image : `${baseUrl}${image}`) : `${baseUrl}/favicon.png`;
+    const rawUrl = url ? (url.startsWith('http') ? url : `${baseUrl}${url}`) : baseUrl;
+    const rawImage = image ? (image.startsWith('http') ? image : `${baseUrl}${image}`) : `${baseUrl}/favicon.png`;
+
+    // Sanitize URLs to prevent DOMXSS
+    const fullUrl = sanitizeUrl(rawUrl);
+    const fullImage = sanitizeUrl(rawImage);
 
     // Update Title
     document.title = fullTitle;

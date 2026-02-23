@@ -47,6 +47,7 @@ import { VendorProductEditForm } from "@/components/VendorProductEditForm";
 import { VendorSubscription } from "@/components/VendorSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { sanitizeUrl } from "@/utils/security";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { MarketResearch } from "@/components/vendor/MarketResearch";
@@ -718,7 +719,7 @@ const VendorDashboard = () => {
                               <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
                                 {product.image && (
                                   <img 
-                                    src={product.image.startsWith("[") ? JSON.parse(product.image)[0] : product.image} 
+                                    src={sanitizeUrl(product.image.startsWith("[") ? JSON.parse(product.image)[0] : product.image)}
                                     alt={product.name}
                                     className="w-full h-full object-cover"
                                   />
@@ -869,7 +870,7 @@ const VendorDashboard = () => {
                 <CardContent className="space-y-4">
                   <div className="relative w-full h-48 rounded-xl bg-muted overflow-hidden border-2 border-dashed border-border">
                     {coverImage ? (
-                      <img src={coverImage} alt="Store cover" className="w-full h-full object-cover" />
+                      <img src={sanitizeUrl(coverImage)} alt="Store cover" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <div className="text-center">
@@ -901,7 +902,7 @@ const VendorDashboard = () => {
                     <div className="relative">
                       <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center overflow-hidden border-4 border-primary/20">
                         {profileImage ? (
-                          <img src={profileImage} alt={currentVendor.store_name} className="w-full h-full object-cover" />
+                          <img src={sanitizeUrl(profileImage)} alt={currentVendor.store_name} className="w-full h-full object-cover" />
                         ) : (
                           <span className="text-4xl font-bold text-muted-foreground">
                             {currentVendor.store_name.charAt(0).toUpperCase()}

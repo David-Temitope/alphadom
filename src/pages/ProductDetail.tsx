@@ -22,6 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProductDetailSkeleton } from '@/components/skeletons/PageSkeletons';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSEO } from '@/hooks/useSEO';
+import { sanitizeUrl } from '@/utils/security';
 import {
   ShoppingCart,
   Star,
@@ -254,7 +255,7 @@ const ProductDetail = () => {
               onClick={() => setIsImageModalOpen(true)}
             >
               <img
-                src={currentImage}
+                src={sanitizeUrl(currentImage)}
                 alt={product.name}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -273,7 +274,7 @@ const ProductDetail = () => {
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
-                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                    <img src={sanitizeUrl(img)} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -291,7 +292,7 @@ const ProductDetail = () => {
               >
                 <X className="h-4 w-4" />
               </Button>
-              <img src={currentImage} alt={product.name} className="w-full h-auto max-h-[90vh] object-contain rounded-lg" />
+              <img src={sanitizeUrl(currentImage)} alt={product.name} className="w-full h-auto max-h-[90vh] object-contain rounded-lg" />
             </DialogContent>
           </Dialog>
 

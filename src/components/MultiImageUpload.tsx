@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeUrl } from '@/utils/security';
 
 interface MultiImageUploadProps {
   onImagesChanged: (urls: string[]) => void;
@@ -121,7 +122,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
           <div key={index} className="relative group aspect-square">
             <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm h-full">
               <img 
-                src={url} 
+                src={sanitizeUrl(url)}
                 alt={`Product ${index + 1}`} 
                 className="w-full h-full object-cover"
               />

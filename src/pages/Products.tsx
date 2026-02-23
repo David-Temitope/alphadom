@@ -21,6 +21,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileShopPage } from "@/components/MobileShopPage";
 import { useSEO } from "@/hooks/useSEO";
+import { sanitizeUrl } from "@/utils/security";
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -167,7 +168,7 @@ const Products = () => {
       id: product.id,
       name: product.name,
       price: Number(product.price),
-      image: getDisplayImage(product.image),
+      image: sanitizeUrl(getDisplayImage(product.image)),
       quantity: 1
     });
     
@@ -440,7 +441,7 @@ const Products = () => {
 
                       <Link to={`/products/${product.id}`}>
                         <img
-                          src={getDisplayImage(product.image)}
+                          src={sanitizeUrl(getDisplayImage(product.image))}
                           alt={product.name}
                           className="w-full h-full object-contain p-4"
                         />
