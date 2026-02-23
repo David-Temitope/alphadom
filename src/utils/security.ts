@@ -7,17 +7,23 @@
 export const sanitizeUrl = (url: string | null | undefined): string => {
   if (!url) return '';
 
-  const trimmedUrl = url.trim();
+  // Remove control characters and whitespace
+  const sanitizedUrl = url.replace(/[^\x20-\x7E]/g, '').trim();
+
+  // Allow relative URLs
+  if (sanitizedUrl.startsWith('/') || sanitizedUrl.startsWith('./') || sanitizedUrl.startsWith('../')) {
+    return sanitizedUrl;
+  }
 
   // Block dangerous protocols
-  // We block javascript:, vbscript:, file:, and about: (except about:blank)
-  // We also block data: URLs that are not images
+  // We allow http:, https:, mailto:, tel:, and data:image/
+  // We block javascript:, vbscript:, file:, etc.
   const dangerousProtocols = /^(javascript:|vbscript:|data:(?!image\/)|file:|about:(?!blank))/i;
 
-  if (dangerousProtocols.test(trimmedUrl)) {
+  if (dangerousProtocols.test(sanitizedUrl)) {
     // Return a safe fallback
     return 'about:blank';
   }
 
-  return trimmedUrl;
+  return sanitizedUrl;
 };

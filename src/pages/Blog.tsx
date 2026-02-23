@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSEO } from '@/hooks/useSEO';
+import { sanitizeUrl } from '@/utils/security';
 
 const Blog = () => {
   const { posts, loading } = useBlogPosts();
@@ -73,7 +74,7 @@ const Blog = () => {
                   {post.featured_image_url ? (
                     <div className="relative h-48 overflow-hidden">
                       <img
-                        src={post.featured_image_url}
+                        src={sanitizeUrl(post.featured_image_url)}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

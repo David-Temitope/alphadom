@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { sanitizeUrl } from '@/utils/security';
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -61,7 +62,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       
       <img
         ref={imgRef}
-        src={isInView ? (hasError ? placeholder : src) : placeholder}
+        src={sanitizeUrl(isInView ? (hasError ? placeholder : src) : placeholder)}
         alt={alt}
         className={cn(
           'transition-opacity duration-300',

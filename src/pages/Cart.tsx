@@ -10,6 +10,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { ProductCardMobile } from "@/components/ProductCardMobile";
 import { useState, useEffect, useMemo } from "react";
 import { useSEO } from "@/hooks/useSEO";
+import { sanitizeUrl } from "@/utils/security";
 
 // Helper function to extract first image from JSON array or single image
 const getDisplayImage = (image: string | null | undefined): string => {
@@ -169,7 +170,7 @@ const Cart = () => {
                   <div className="flex gap-4">
                     <Link to={`/products/${item.id}`} className="flex-shrink-0">
                       <img
-                        src={getDisplayImage(item.image)}
+                        src={sanitizeUrl(getDisplayImage(item.image))}
                         alt={item.name}
                         className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border"
                       />

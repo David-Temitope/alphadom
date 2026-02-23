@@ -9,6 +9,7 @@ import { Star, Search, Store, Package, Users, MapPin, ChevronRight, CheckCircle 
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { useSEO } from '@/hooks/useSEO';
+import { sanitizeUrl } from '@/utils/security';
 
 interface Vendor {
   id: string;
@@ -249,7 +250,7 @@ export const Pilots = () => {
                       <div className="h-24 relative overflow-hidden">
                         {vendor.cover_image ? (
                           <img 
-                            src={vendor.cover_image} 
+                            src={sanitizeUrl(vendor.cover_image)}
                             alt={`${vendor.store_name} cover`}
                             className="w-full h-full object-cover"
                           />
@@ -269,13 +270,13 @@ export const Pilots = () => {
                       <div className="w-20 h-20 rounded-2xl bg-card border-4 border-background flex items-center justify-center overflow-hidden shadow-md">
                         {vendor.avatar_url ? (
                           <img
-                            src={vendor.avatar_url}
+                            src={sanitizeUrl(vendor.avatar_url)}
                             alt={vendor.store_name}
                             className="w-full h-full object-cover"
                           />
                         ) : vendor.store_logo ? (
                           <img
-                            src={vendor.store_logo}
+                            src={sanitizeUrl(vendor.store_logo)}
                             alt={vendor.store_name}
                             className="w-full h-full object-cover"
                           />

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
+import { sanitizeUrl } from "@/utils/security";
 
 const Contact = () => {
   const { user } = useAuth();
@@ -279,7 +280,7 @@ const Contact = () => {
                   <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
                   {faq.link && (
                     <a 
-                      href={faq.link} 
+                      href={sanitizeUrl(faq.link)}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 mt-4 text-destructive hover:text-destructive/80 font-medium transition-colors"

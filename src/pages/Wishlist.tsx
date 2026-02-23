@@ -9,6 +9,7 @@ import { Trash2, ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
 import { PlatformAd } from '@/components/PlatformAd';
 import { WishlistSkeleton } from '@/components/skeletons/PageSkeletons';
 import { useSEO } from '@/hooks/useSEO';
+import { sanitizeUrl } from '@/utils/security';
 
 const Wishlist = () => {
   useSEO({
@@ -102,7 +103,7 @@ const Wishlist = () => {
                       className="relative mb-3 block overflow-hidden rounded-lg aspect-[3/4]"
                     >
                       <img
-                        src={product.image || '/placeholder.svg'}
+                        src={sanitizeUrl(product.image || '/placeholder.svg')}
                         alt={product.name}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />

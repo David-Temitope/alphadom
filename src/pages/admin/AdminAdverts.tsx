@@ -13,6 +13,7 @@ import { ImageUpload } from '@/components/admin/ImageUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { sanitizeUrl } from '@/utils/security';
 
 interface Ad {
   id: string;
@@ -226,7 +227,7 @@ const AdminAdverts = () => {
                   <Label>Ad Image</Label>
                   {editingAd?.image_url ? (
                     <div className="relative mt-2">
-                      <img src={editingAd.image_url} alt="Ad" className="w-full h-40 object-cover rounded" />
+                      <img src={sanitizeUrl(editingAd.image_url)} alt="Ad" className="w-full h-40 object-cover rounded" />
                       <Button
                         variant="destructive"
                         size="sm"
@@ -343,7 +344,7 @@ const AdminAdverts = () => {
                   <div className="flex items-start gap-4">
                     {ad.image_url && (
                       <img 
-                        src={ad.image_url} 
+                        src={sanitizeUrl(ad.image_url)}
                         alt={ad.title}
                         className="w-24 h-24 object-cover rounded"
                       />
