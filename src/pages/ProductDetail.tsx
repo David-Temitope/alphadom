@@ -147,11 +147,12 @@ const ProductDetail = () => {
   const currentImage = images[selectedImageIndex] || images[0] || '/placeholder.svg';
 
   useSEO({
-    title: product?.name,
-    description: product?.description || product?.full_description,
+    title: product ? `Buy ${product.name} Online in Nigeria` : undefined,
+    description: product ? `${product.description || product.full_description || product.name}. Buy now on Alphadom with fast delivery across Nigeria. ₦${product.price?.toLocaleString()}.` : undefined,
     image: currentImage,
     url: `/products/${id}`,
     type: 'product',
+    keywords: product ? `buy ${product.name}, ${product.category} Nigeria, ${product.name} price Nigeria, buy ${product.category} online, Alphadom` : undefined,
   });
 
   // Inject Structured Data

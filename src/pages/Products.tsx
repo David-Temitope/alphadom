@@ -54,9 +54,18 @@ const Products = () => {
   const isMobile = useIsMobile();
   
   useSEO({
-    title: "Shop All Products",
-    description: "Explore our full catalog of products. High-quality fashion, electronics, home essentials, and more from verified vendors.",
+    title: "Shop Products Online - Fashion, Electronics & More",
+    description: "Browse thousands of affordable products on Alphadom. Buy fashion, electronics, phones, laptops, shoes, bags & more from trusted Nigerian vendors with fast delivery.",
     url: "/products",
+    keywords: "shop online Nigeria, buy fashion online, cheap electronics Nigeria, buy phones online, laptops Nigeria, shoes online, bags Nigeria, affordable products, verified vendors, Alphadom shop",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "Shop All Products - Alphadom",
+      "description": "Browse thousands of affordable products from trusted Nigerian vendors.",
+      "url": "https://alphadom.online/products",
+      "isPartOf": { "@type": "WebSite", "name": "Alphadom", "url": "https://alphadom.online" }
+    },
   });
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -213,7 +222,7 @@ const Products = () => {
         <div className="text-center p-8 rounded-2xl bg-card border border-border/50">
           <X className="w-12 h-12 text-destructive mx-auto mb-4" />
           <p className="text-destructive font-medium mb-2">Error loading products</p>
-          <p className="text-muted-foreground text-sm">{error}</p>
+          <p className="text-muted-foreground text-sm">{error?.message || 'Something went wrong'}</p>
         </div>
       </div>
     );

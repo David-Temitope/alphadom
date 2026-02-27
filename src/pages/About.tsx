@@ -10,9 +10,10 @@ const About = () => {
   const { stats: liveStats, loading: statsLoading } = useAboutStats();
 
   useSEO({
-    title: "About Us",
-    description: "Learn about Alphadom's mission to transform e-commerce in Africa. We're connecting buyers and sellers, empowering entrepreneurs, and curating quality products.",
+    title: "About Alphadom - Nigeria's Trusted Online Marketplace",
+    description: "Learn about Alphadom's mission to transform e-commerce in Nigeria. We connect buyers with verified vendors, offering affordable products with nationwide delivery.",
     url: "/about",
+    keywords: "about Alphadom, Nigeria online marketplace, e-commerce Nigeria, trusted online store, buy and sell Nigeria",
   });
   
   const stats = [

@@ -27,9 +27,10 @@ const BecomeAVendor = () => {
   const { user } = useAuth();
 
   useSEO({
-    title: "Become a Vendor",
-    description: "Start selling on Alphadom today! Reach thousands of customers, grow your business, and manage your online store with ease.",
+    title: "Sell Online in Nigeria - Become a Vendor",
+    description: "Start selling on Alphadom today! Reach thousands of customers across Nigeria, grow your business, and manage your online store with powerful vendor tools.",
     url: "/become-a-vendor",
+    keywords: "sell online Nigeria, become a vendor, start online business Nigeria, sell products online, e-commerce vendor, Alphadom vendor, online store Nigeria",
   });
   const navigate = useNavigate();
   const [showApplicationForm, setShowApplicationForm] = useState(false);
