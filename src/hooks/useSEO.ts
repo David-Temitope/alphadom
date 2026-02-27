@@ -9,6 +9,7 @@ interface SEOProps {
   type?: string;
   keywords?: string;
   noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 export const useSEO = ({
@@ -19,22 +20,20 @@ export const useSEO = ({
   type = 'website',
   keywords,
   noindex = false,
+  jsonLd,
 }: SEOProps = {}) => {
   useEffect(() => {
     const baseUrl = 'https://alphadom.online';
     const siteName = 'Alphadom';
-    const fullTitle = title ? `${title} | ${siteName}` : `${siteName} - Your Online Marketplace`;
+    const fullTitle = title ? `${title} | ${siteName}` : `${siteName} - Buy & Sell Products Online in Nigeria`;
     const rawUrl = url ? (url.startsWith('http') ? url : `${baseUrl}${url}`) : baseUrl;
     const rawImage = image ? (image.startsWith('http') ? image : `${baseUrl}${image}`) : `${baseUrl}/favicon.png`;
 
-    // Sanitize URLs to prevent DOMXSS
     const fullUrl = sanitizeUrl(rawUrl);
     const fullImage = sanitizeUrl(rawImage);
 
-    // Update Title
     document.title = fullTitle;
 
-    // Update Meta Tags
     const updateMetaTag = (name: string, content: string, attr: string = 'name') => {
       if (!content) return;
       let element = document.querySelector(`meta[${attr}="${name}"]`);
@@ -48,23 +47,25 @@ export const useSEO = ({
       }
     };
 
-    updateMetaTag('description', description || 'Alphadom is the #1 online marketplace for affordable fashion, electronics, books, and essentials.');
-    updateMetaTag('keywords', keywords || 'Alphadom, marketplace, online shopping, deals, products');
+    const defaultDescription = 'Alphadom is Nigeria\'s trusted online marketplace. Buy affordable fashion, electronics, phones, laptops, books & essentials from verified vendors with nationwide delivery.';
+    const defaultKeywords = 'Alphadom, buy online Nigeria, online shopping Nigeria, cheap phones Nigeria, buy clothes online, electronics Nigeria, affordable fashion, trusted vendors, nationwide delivery, e-commerce Nigeria, online marketplace';
 
-    // Robots
+    updateMetaTag('description', description || defaultDescription);
+    updateMetaTag('keywords', keywords || defaultKeywords);
     updateMetaTag('robots', noindex ? 'noindex, nofollow' : 'index, follow');
 
     // Open Graph
     updateMetaTag('og:title', fullTitle, 'property');
-    updateMetaTag('og:description', description || 'Affordable products. Trusted vendors. Nationwide delivery.', 'property');
+    updateMetaTag('og:description', description || defaultDescription, 'property');
     updateMetaTag('og:url', fullUrl, 'property');
     updateMetaTag('og:image', fullImage, 'property');
     updateMetaTag('og:type', type, 'property');
     updateMetaTag('og:site_name', siteName, 'property');
+    updateMetaTag('og:locale', 'en_NG', 'property');
 
     // Twitter
     updateMetaTag('twitter:title', fullTitle);
-    updateMetaTag('twitter:description', description || 'Affordable products. Trusted vendors. Nationwide delivery.');
+    updateMetaTag('twitter:description', description || defaultDescription);
     updateMetaTag('twitter:image', fullImage);
     updateMetaTag('twitter:card', 'summary_large_image');
 
@@ -79,5 +80,22 @@ export const useSEO = ({
       document.head.appendChild(canonical);
     }
 
-  }, [title, description, image, url, type, keywords, noindex]);
+    // JSON-LD Structured Data
+    if (jsonLd) {
+      const scriptId = 'alphadom-page-jsonld';
+      let script = document.getElementById(scriptId) as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = scriptId;
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.textContent = JSON.stringify(jsonLd);
+    }
+
+    return () => {
+      const existingScript = document.getElementById('alphadom-page-jsonld');
+      if (existingScript) existingScript.remove();
+    };
+  }, [title, description, image, url, type, keywords, noindex, jsonLd]);
 };

@@ -21,6 +21,20 @@ const BlogPost = () => {
     image: post?.featured_image_url,
     url: `/blog/${id}`,
     type: 'article',
+    jsonLd: post ? {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": post.title,
+      "description": post.subtitle || post.content?.substring(0, 160),
+      "image": post.featured_image_url || "https://alphadom.online/favicon.png",
+      "author": { "@type": "Organization", "name": "Alphadom", "url": "https://alphadom.online" },
+      "publisher": { "@type": "Organization", "name": "Alphadom", "url": "https://alphadom.online", "logo": { "@type": "ImageObject", "url": "https://alphadom.online/favicon.png" } },
+      "datePublished": post.published_at || post.created_at,
+      "dateModified": post.updated_at,
+      "mainEntityOfPage": { "@type": "WebPage", "@id": `https://alphadom.online/blog/${id}` },
+      "inLanguage": "en",
+      "isAccessibleForFree": true
+    } : undefined,
   });
   const [loading, setLoading] = useState(true);
 
